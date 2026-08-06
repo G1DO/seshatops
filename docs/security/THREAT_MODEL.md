@@ -219,7 +219,7 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 - **Consequence:** A valid human decision is reused to authorize a different target, amount, action, tenant, or intent.
 - **Preventive controls:** AUTH-06 keeps approval separate from execution authority; AUTH-07 rechecks approval and authorization at each checkpoint; AUTH-11 invalidates changed intent, approval, or target version; Section 7.2 binds approval to tenant, action, target, important parameters, normalized intent, target version, approver, expiry, and revocation state.
 - **Detective/recovery controls:** Compare approval and command intent at approval and execution; record mismatch and refuse execution.
-- **Future negative test:** Modify each approval-bound field after approval and require rejection, renewed approval, or explicit safe status.
+- **Future negative test:** Modify each approval-bound field after approval and require rejection before any effect or a newly bound approval; an authorization failure must never be represented as permission to proceed.
 - **Residual risk:** The final set of material parameters and normalization rules is intentionally not a schema decision here.
 - **Deferred owner:** Issue #5 conceptual binding; later workflow and policy implementation.
 
