@@ -9,7 +9,7 @@ This document records a documentation review of the SeshatOps threat model and a
 | Reviewer | Codex documentation implementation/review pass; maintainer review remains a recorded follow-up |
 | Date (UTC) | 2026-08-06 |
 | Branch / base | docs/5-threat-authorization-model; base commit 6a0fbf9 |
-| Reviewed tip | 365d23fc29b482a1e862eeb17cb638e37f02ee6e |
+| Reviewed tip | c15ce8096db6798fb106251a66ba93e17b1c01a5 |
 | Scope | Issue #5 threat model, authorization model, review evidence, and README discoverability link |
 | Review type | Documentation pre-commit / pre-PR review |
 | Result | Pass with recorded follow-ups |
@@ -21,7 +21,7 @@ The reviewed tree contains documentation only. No application code, authenticati
 ### GitHub and repository sources
 
 - GitHub Issue #5, M0: Define threat model and authorization assumptions.
-- GitHub PR #15 and reviewed implementation tip `365d23fc29b482a1e862eeb17cb638e37f02ee6e`.
+- GitHub PR #15 and reviewed implementation tip `c15ce8096db6798fb106251a66ba93e17b1c01a5`.
 - GitHub Issues #1 through #4 and merged PRs #11 through #14.
 - README.md, PRODUCT.md, CLEAN_ROOM.md, and ARCHITECTURE.md.
 - docs/architecture/EVENT_MODEL.md and docs/architecture/COMMAND_MODEL.md.
