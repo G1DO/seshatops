@@ -8,7 +8,7 @@ Evidence that an architecture-boundary review **occurred** for SeshatOps Issue #
 | --- | --- |
 | Reviewer | G1DO (maintainer; time-separated self-review planned at PR) |
 | Date (UTC) | 2026-08-06 |
-| Commit / branch reviewed | Branch `docs/3-architecture-boundaries`; base `219160b4ebc65b67978e0f2361d9f85f5faa6a2e` (matches `main` after PR #12). Architecture artifacts in this change set: `ARCHITECTURE.md`, this file, and the README discoverability link. |
+| Commit / branch reviewed | Branch `docs/3-architecture-boundaries`; tip `43be239cc98ead99cdfc0e00d73bd60e77eb1533` (architecture docs); base `219160b4ebc65b67978e0f2361d9f85f5faa6a2e` (`main` after PR #12). Artifacts: `ARCHITECTURE.md`, this file, and the README discoverability link. |
 | Scope | Issue #3 — Define architecture boundaries and language ownership |
 | Result | Pass with recorded follow-ups |
 
