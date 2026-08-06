@@ -30,6 +30,8 @@ See [PRODUCT.md](PRODUCT.md) for users, hero workflow, capability boundaries, th
 
 **Ahoy is not a dependency** and is not a source of public artifacts. No Ahoy code, schema, data, identifiers, screenshots, or business-specific knowledge belongs in this repository.
 
+See [CLEAN_ROOM.md](CLEAN_ROOM.md) for the enforceable policy and [docs/checklists/CLEAN_ROOM_REVIEW.md](docs/checklists/CLEAN_ROOM_REVIEW.md) for the reusable review checklist.
+
 ## License
 
 Licensed under the [Apache License 2.0](LICENSE).
