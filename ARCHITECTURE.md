@@ -8,6 +8,8 @@
 
 Companion review: [docs/reviews/M0_ARCHITECTURE_REVIEW.md](docs/reviews/M0_ARCHITECTURE_REVIEW.md)
 
+Issue #4 correctness model: [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), and [ADRs](docs/adrs/).
+
 ## 1. Purpose
 
 SeshatOps is one public platform. Public demonstration uses the fictional **Northstar Foods** environment and a standalone synthetic ERP. The product must remain understandable and runnable without any private production system.
