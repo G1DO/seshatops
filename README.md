@@ -32,6 +32,10 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for logical system topology, language own
 
 See [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), and the [Issue #4 ADRs](docs/adrs/) for the planned correctness model.
 
+## Security model
+
+See [THREAT_MODEL.md](docs/security/THREAT_MODEL.md) and [AUTHORIZATION_MODEL.md](docs/security/AUTHORIZATION_MODEL.md) for the planned threat, tenant-isolation, authorization, approval, service-identity, retrieval, audit, and receipt boundaries. See the [M0 security-model review](docs/reviews/M0_SECURITY_MODEL_REVIEW.md) for documentation traceability and recorded follow-ups. These documents define future requirements only; they do not claim implemented security controls.
+
 ## Clean-room boundary
 
 **Ahoy is not a dependency** and is not a source of public artifacts. No Ahoy code, schema, data, identifiers, screenshots, or business-specific knowledge belongs in this repository.
