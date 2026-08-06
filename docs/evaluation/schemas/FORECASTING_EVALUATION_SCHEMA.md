@@ -45,6 +45,8 @@
 - Values must be traceable to versioned evidence or remain empty.
 - A missing required lineage field prevents the affected result from being established.
 - Development, validation, and final-evaluation evidence must remain distinguishable.
+- Every non-abstained point forecast must carry an uncertainty representation or an unavailable/unsupported/abstained disposition; uncertainty support cannot be silently omitted.
+- Calibration must be recorded separately from point accuracy and remains `Not evaluated` until supported by evidence.
 - A reviewer disposition does not establish forecasting quality, security, reliability, or production readiness.
 - No field authorizes, approves, or executes a business action.
 

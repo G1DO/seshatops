@@ -12,21 +12,25 @@
 | Case-set identity/version | Version of the evaluated cases and adjudication rules | Planned |
 | Capability name/version | Governed-RAG capability under evaluation | Planned |
 | Query identity | Stable identity for the evaluation query | Planned |
-| Principal context | Authorized principal and relevant context reference | Planned |
-| Tenant context | Tenant boundary for the case | Planned |
+| Principal context | Initiating principal, any delegated actor, and relevant context reference | Planned |
+| Tenant context | Initiating tenant and any explicitly delegated tenant context | Planned |
+| Calling service identity | Service identity making or forwarding the request, distinct from the initiating principal | Planned |
+| Authorization context | Resource type and identity, requested action, scope and constraints, policy or assignment version, and freshness basis | Planned |
 | Authorized corpus identity | Independently determined eligible corpus reference | Planned |
 | Corpus snapshot/version | Versioned corpus and document state | Planned |
 | Document/chunk lineage | Source, version, chunk, owner, classification, and freshness references | Planned |
-| Authorization decision lineage | Policy/context reference proving eligibility | Planned |
+| Authorization decision lineage | Authoritative decision and policy/assignment context proving eligibility | Planned |
 | Retrieval configuration/version | Version of retrieval and ranking behavior | Planned |
+| Cache/index lineage | Tenant or authorization namespace/partition, version, and hit/miss context where applicable | Planned |
 | Retrieved candidates | Returned candidates, ranks, and authorization disposition | Not evaluated |
 | Retrieval checks | Relevance, ranking, empty-result, stale, conflict, and leakage checks | Not evaluated |
+| Category applicability | Per-category evaluated, unavailable, or not-applicable disposition and reason | Planned |
 | Response/refusal/abstention | Generated outcome and availability status | Not evaluated |
 | Claim inventory | Material claims requiring support | Planned |
 | Citation set | Citation references and lineage | Not evaluated |
 | Citation checks | Existence, support, authorization, freshness, and completeness checks | Not evaluated |
 | Prompt-injection checks | Injection category, observed behavior, and disposition | Not evaluated |
-| Leakage checks | Tenant, principal, trace, cache, index, and artifact leakage checks | Not evaluated |
+| Leakage checks | Tenant, principal, trace, cache/index namespace or partition, and artifact leakage checks | Not evaluated |
 | Typed proposal | Advisory proposal fields, if present | Not evaluated |
 | Proposal validation status | Conceptual validity and unavailable/rejected disposition | Planned |
 | Model/evaluator version | Version lineage for generation and evaluation | Planned |
@@ -52,6 +56,7 @@
 - A citation or proposal reference is not authority by itself.
 - A typed proposal is advisory and cannot become an executable command through free-form interpretation.
 - Missing lineage, authorization context, or reproducibility evidence prevents the affected result from being established.
+- Each declared retrieval, answer, citation, refusal, injection, leakage, and proposal category must be recorded as evaluated, unavailable, or not applicable with a reason; omission is not evidence of coverage.
 
 ## Related documents
 

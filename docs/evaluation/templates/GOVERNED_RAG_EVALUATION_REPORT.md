@@ -31,7 +31,8 @@
 | Authorized corpus and snapshot | Planned |
 | Eligible authorized corpus reference | Planned |
 | Document/chunk lineage | Planned |
-| Authorization-context lineage | Planned |
+| Authorization, principal, and service-identity lineage | Planned |
+| Cache/index namespace, partition, version, and hit/miss lineage where applicable | Planned |
 | Retrieval/context/evaluator version | Planned |
 | Model/code version where applicable | Planned |
 | Configuration and environment | Planned |
@@ -39,7 +40,7 @@
 
 ## Methodology
 
-<!-- Describe authorization-before-retrieval, case execution, adjudication, citation revalidation, and safe handling. -->
+<!-- Describe authorization-before-retrieval, delegated service context, case execution, adjudication, citation revalidation, cache/index handling, and safe handling. -->
 
 ## Baselines or comparison conditions
 
@@ -56,6 +57,8 @@
 | Refusal/abstention behavior | Not evaluated | TBD — evidence required | Planned |
 | Prompt-injection behavior | Not evaluated | TBD — evidence required | Planned |
 | Typed-proposal validity | Not evaluated | TBD — evidence required | Planned |
+
+Every applicable category must be marked evaluated, unavailable, or not applicable with a reason. No category may be silently omitted; results and thresholds remain unestablished until repository evidence exists.
 
 ## Slice results
 
@@ -80,7 +83,7 @@
 
 ## Reproduction record
 
-<!-- Record case-set, corpus, authorization context, evaluator, code commit, configuration, environment, and seed where relevant. -->
+<!-- Record case-set, corpus, principal/delegated-service authorization context, cache/index lineage where applicable, evaluator, code commit, configuration, environment, and seed where relevant. -->
 
 ## Limitations
 

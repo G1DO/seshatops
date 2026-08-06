@@ -107,7 +107,7 @@ Reports must include distributions and declared slices, not only one aggregate a
 
 ## 7. Uncertainty, freshness, and abstention
 
-Future forecasting outputs must represent uncertainty explicitly when the capability supports it. The evaluation must distinguish:
+Every future non-abstained forecasting output must represent uncertainty explicitly. If a capability cannot provide a supported uncertainty representation, it must return an unavailable, unsupported, or abstained result; lack of uncertainty support is not an automatic pass condition. The evaluation must distinguish:
 
 - Point accuracy from uncertainty calibration.
 - Low confidence from high confidence.
@@ -115,6 +115,8 @@ Future forecasting outputs must represent uncertainty explicitly when the capabi
 - Out-of-distribution or unsupported conditions from evaluated conditions.
 - Stale inputs or stale forecasts from current evidence.
 - An unavailable or abstained result from a forecasted value.
+
+For any capability that returns an uncertainty representation, calibration must be evaluated separately from point accuracy. Until calibration evidence exists, calibration and related capability claims remain `Not evaluated`.
 
 The evaluator must allow abstention for low-confidence, out-of-distribution, insufficient-history, stale-data, or data-quality conditions. Unsupported precision is not a quality signal. Forecasts must never be presented as guaranteed outcomes, and downstream proposals must retain uncertainty and source lineage.
 

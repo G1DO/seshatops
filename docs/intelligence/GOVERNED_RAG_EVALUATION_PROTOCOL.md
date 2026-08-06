@@ -28,8 +28,10 @@ An evaluation case is a future, versioned record containing the context needed t
 | Element | Meaning | Initial status |
 | --- | --- | --- |
 | User query | The request being evaluated | Planned |
-| Principal context | The requesting principal and relevant decision context | Planned |
-| Tenant context | The tenant boundary to which the case belongs | Planned |
+| Principal context | The initiating principal, any delegated actor, and relevant decision context | Planned |
+| Tenant context | The initiating tenant and any explicitly delegated tenant context | Planned |
+| Calling service identity | The service identity making or forwarding the request, distinct from the initiating principal | Planned |
+| Authorization context | Resource type and identity, requested action, scope and constraints, policy or assignment version, and freshness basis | Planned |
 | Authorized document set | The independently determined documents eligible for this case | Planned |
 | Corpus snapshot | Version of the corpus and document state used for evaluation | Planned |
 | Retrieval result | Candidate documents, chunks, ranks, and lineage | Planned |
@@ -47,16 +49,16 @@ Every future evaluation case must establish authorization before retrieval and b
 
 1. Principal, tenant, resource, action, scope, policy, and freshness context are resolved by the authoritative platform boundary.
 2. The eligible authorized corpus is recorded independently from whatever the retriever returns.
-3. Unauthorized documents must not appear in retrieval candidates, model context, response text, citations, traces, logs, exports, or evaluation artifacts.
+3. Unauthorized documents must not be inserted into or returned from retrieval candidates, model context, response text, citations, traces, logs, exports, evaluation artifacts, caches, or indexes.
 4. Missing or ambiguous authorization context defaults to denial.
 5. Citation authorization is rechecked immediately before display or evidence export because access may change after retrieval.
-6. Cache and index isolation are included in future negative tests; a cache or index hit is not authority.
+6. Any future cache or index used by evaluation must be tenant- and authorization-scoped. Cache/index namespace or partition, version, and hit/miss lineage must be recorded; a cache or index hit is never authority.
 
 Any demonstrated cross-tenant retrieval or citation leakage is a security failure, not a quality trade-off. The evaluation record must preserve enough sanitized lineage to investigate without creating an unrestricted sensitive-data store.
 
 ## 4. Retrieval evaluation categories
 
-The evaluator may assess categories appropriate to the declared case set:
+For every declared case set, each applicable category below must be recorded as evaluated, unavailable, or not applicable with a reason. Categories may be scoped to the case set, but they must not be silently omitted:
 
 | Category | Required question |
 | --- | --- |
@@ -89,6 +91,8 @@ Future cases must evaluate:
 - Correct refusal when evidence is insufficient or unauthorized.
 - Absence of fabricated citations.
 - Absence of hidden or unauthorized evidence in the answer, citation set, trace, or proposal.
+
+Each applicable answer, citation, refusal, and evidence category must be recorded as evaluated, unavailable, or not applicable with a reason. Omission is not evidence of coverage.
 
 A fluent answer without adequate authorized evidence cannot pass the evidence review. A citation that exists but does not support the claim is not adequate support.
 
@@ -124,6 +128,8 @@ Future negative tests must cover:
 - Free-form output revealing inaccessible documents.
 - Typed proposal fields carrying unauthorized content.
 - Tenant, principal, resource, action, or scope substitution.
+
+Future cache/index checks must record the relevant tenant and authorization partition or namespace, cache/index version, and hit/miss behavior without copying unauthorized content into the evaluation record.
 
 The case record must distinguish quality failure, authorization failure, and security failure. Cross-tenant retrieval or citation is always a security failure. Broader availability, capacity, recovery, and security-control evidence remains owned by Issue #7.
 
@@ -186,7 +192,9 @@ Each future evaluation run must identify, where applicable:
 - Capability and version.
 - Corpus, document, and snapshot lineage.
 - Authorization-context and eligible-corpus lineage.
+- Initiating principal, delegated actor, calling service identity, resource, action, scope, policy/assignment version, and authorization-decision lineage.
 - Retrieval, prompt/context assembly, evaluator, and code versions.
+- Cache/index namespace or partition and version where applicable, including hit/miss lineage.
 - Configuration and declared environment.
 - Deterministic seed where relevant.
 - Evaluation timestamp and freshness basis.
@@ -223,6 +231,7 @@ Rollback means withdrawing or reverting a capability, configuration, or claim. D
 8. Every reported result identifies corpus, case-set, evaluator, and version lineage.
 9. No threshold or result is presented as established without repository evidence.
 10. Evaluation or claim rollback is required when evidence becomes invalid.
+11. Any cache or index used by evaluation is tenant- and authorization-scoped, and its namespace or partition, version, and hit/miss lineage are recorded where applicable.
 
 ## 14. Deferred decisions
 

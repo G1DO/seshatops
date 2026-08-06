@@ -38,7 +38,11 @@
 
 ## Methodology
 
-<!-- Describe chronological separation, forecast origins, rolling/expanding evaluation, preprocessing, and leakage review. -->
+<!-- Describe chronological separation, forecast origins, rolling/expanding evaluation, preprocessing, and leakage review. Every non-abstained forecast must carry uncertainty or be recorded unavailable/unsupported/abstained. -->
+
+## Uncertainty and abstention
+
+<!-- Record the uncertainty representation for every non-abstained forecast, separate calibration evidence from point accuracy, and record unavailable/unsupported/abstained outcomes. Results remain Not evaluated until evidenced. -->
 
 ## Baselines or comparison conditions
 

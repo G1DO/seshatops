@@ -45,6 +45,7 @@ The Blueprint's suggested models, case counts, numerical targets, OIDC, vector s
 | Leakage control | Target, temporal, future-derived, revised-data, cross-series, tenant, duplicate, preprocessing, human-label, and external-availability review | Not evaluated | Issue #6 protocol; later implementation |
 | Baseline comparison | Task-appropriate documented baseline categories with applicability and limitations | Not evaluated | Issue #6 protocol; later intelligence implementation |
 | Accuracy and error reporting | Metric categories, distributions, horizons, segments, and operationally material error categories without invented thresholds | Not evaluated | Issue #6 protocol; later evidence run |
+| Target and series edge cases | Zero, near-zero, intermittent, sparse, skewed, low-volume, new, discontinued, and insufficient-history handling | Not evaluated | Issue #6 protocol; later evidence run |
 | Uncertainty and calibration | Point accuracy separated from interval coverage, width, calibration, and confidence behavior | Not evaluated | Issue #6 protocol; later intelligence implementation |
 | Abstention and freshness | Low-confidence, stale, insufficient-history, data-quality, and out-of-distribution unavailable behavior | Not evaluated | Issue #6 protocol; later intelligence implementation |
 | Reproducibility | Dataset, split, feature, model/baseline, evaluator, code, configuration, environment, seed, timestamp, and artifact lineage | Not evaluated | Issue #6 protocol; later evidence run |
@@ -69,8 +70,8 @@ The protocols and schema catalogs cover:
 
 - Temporal, target, future-derived, revised-data, cross-series, duplicate, preprocessing, and post-origin-label leakage for forecasting.
 - Tenant and principal leakage before retrieval and model access.
-- Unauthorized documents in candidates, context, responses, citations, traces, logs, exports, and evaluation artifacts.
-- Cache and index contamination as future negative-test categories.
+- Unauthorized documents in candidates, context, responses, citations, traces, logs, exports, evaluation artifacts, caches, and indexes.
+- Cache/index no-entry and no-cross-tenant-serve boundaries, with namespace/partition/version and hit/miss lineage required for future negative tests.
 - Hidden instruction disclosure and inaccessible-document disclosure.
 - Unauthorized content carried in typed proposal fields.
 - Sanitized lineage requirements that avoid creating an unrestricted sensitive-data store.
@@ -87,8 +88,8 @@ The Issue #6 documents preserve the Issue #5 model:
 | AUTH-02: no tenant can read or affect another tenant | Forecast and RAG tenant-safe lineage plus cross-tenant leakage cases |
 | AUTH-08: Python cannot own or override authorization | Advisory-output and typed-proposal boundaries |
 | AUTH-09: retrieved content cannot become executable instruction | Prompt-injection and untrusted-content evaluation |
-| AUTH-12: delegated service calls preserve initiating context | Principal, tenant, authorization, and lineage fields |
-| AUTH-13: service identities have least privilege | No model or retrieval result is treated as authority; implementation remains deferred |
+| AUTH-12: delegated service calls preserve initiating context | Initiating principal, delegated actor, calling service identity, tenant, resource, action, scope, authorization decision, and lineage fields |
+| AUTH-13: service identities have least privilege | Explicit service-identity and authorization context fields; no model or retrieval result is treated as authority; implementation remains deferred |
 | T-09: Python gaining authority | Typed-proposal and direct-command negative-test categories |
 | T-10: prompt injection | Synthetic injection categories and refusal/containment evaluation |
 | T-11: cross-tenant retrieval leakage | Permission filtering, eligible corpus, cache/index, and leakage cases |
@@ -111,7 +112,7 @@ Typed-proposal runtime validation was not executed.
 ## 8. Schema and report-template review
 
 - Both schemas include identity, capability/version, lineage, evaluator/version, configuration, metrics/checks, slices/categories, failures, artifacts, reviewer, claim status, disposition, limitations, and reproduction information.
-- The governed-RAG schema additionally preserves principal/tenant context, eligible authorized corpus, retrieval, citation, refusal, injection, leakage, and typed-proposal fields.
+- The governed-RAG schema additionally preserves principal/tenant/delegation context, calling service identity, resource/action/scope authorization context, eligible authorized corpus, retrieval, citation, refusal, injection, cache/index, leakage, and typed-proposal fields.
 - Both report templates include purpose, scope, methodology, lineage, comparisons, metrics/checks, slices, security/leakage, failures, abstentions, reproduction, limitations, reviewer decision, claim changes, rollback/follow-up, and evidence links.
 - Result, threshold, and claim fields remain `Planned`, `Not evaluated`, or `TBD — evidence required`.
 - No example result, target, benchmark value, model name, vendor name, dataset, prompt, or production claim was added.
@@ -170,13 +171,13 @@ The documentation-review disposition is separate from runtime evaluation status.
 
 | Check | Result |
 | --- | --- |
-| Changed-path allowlist | Planned for Phase B verification |
-| `git diff --check` | Planned for Phase B verification |
-| Repository-relative Markdown links | Planned for Phase B verification |
-| Required heading and invariant searches | Planned for Phase B verification |
-| Unsupported result/threshold/model/vendor/infrastructure search | Planned for Phase B verification |
-| Clean-room category search | Planned for Phase B verification |
-| Cross-document consistency review | Completed conceptually; runtime controls not claimed |
+| Changed-path allowlist | Passed: `git diff --name-only main...HEAD` returned only the eight Issue #6 documentation paths |
+| `git diff --check` | Passed: no whitespace errors |
+| Repository-relative Markdown links | Passed: no broken repository-relative Markdown links found |
+| Required heading and invariant searches | Passed: required headings and invariants present |
+| Unsupported result/threshold/model/vendor/infrastructure search | Passed: no fabricated runtime results, thresholds, model/vendor choices, or infrastructure decisions adopted; deferred Blueprint considerations remain marked as planning context |
+| Clean-room category search | Passed: no private Ahoy material, private datasets, prompts, documents, identifiers, metrics, or outputs added |
+| Cross-document consistency review | Completed: canonical architecture, event, command, threat, authorization, and Notion boundaries retained; runtime controls not claimed |
 | Runtime evaluation, model, security-control, and production tests | Not evaluated / not run |
 
 No runtime evaluation case is represented as having passed.
