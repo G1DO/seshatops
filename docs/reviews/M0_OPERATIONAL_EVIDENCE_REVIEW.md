@@ -10,6 +10,7 @@ This document records a documentation-only review of the Issue #7 operational ev
 | Date (UTC) | 2026-08-07 |
 | Branch | `docs/7-operational-evidence` |
 | Reviewed state | PR #17 pre-fix head `0e634a458b4ebf2c4786c4ee795ac3b1d92f9833`; working tree clean at review |
+| Post-fix verification state | Commit `67cf5cf`; protocol fixes verified before this review-record update |
 | Scope | Issue #7 evidence vocabulary, protocols, matrix, experiment template, review evidence, and README discoverability |
 | Review type | Documentation implementation and static verification review |
 | Documentation disposition | Pass with recorded follow-ups |
@@ -165,6 +166,10 @@ No runtime, security, fault, recovery, backup/restore, SLO, load, or performance
 | Repository-relative Markdown links | Pass; all checked targets resolve |
 | Exact claim-status vocabulary | Pass; five definitions are present and no sixth claim status is introduced |
 | Required security/failure/matrix/template coverage | Pass; required categories and fields are present |
+| Reproducibility timing/operator/duration fields | Pass; the reusable experiment template records operator, timestamps, clock/time-zone assumptions, and duration |
+| Matrix audit/safety/uncertainty fields | Pass; every planned row carries expected artifacts, termination/safety conditions, and residual uncertainty |
+| Stable claim-ID execution/promotion gate | Pass; execution and promotion are blocked until the evidence ledger assigns a stable identifier |
+| Review-state commit pinning | Pass; the pre-fix review and post-fix verification commits are identified above |
 | Fabricated metrics, targets, thresholds, products, and runtime claims search | Pass; no fabricated operational values or runtime results found |
 | Private-context leakage search | Pass; no private Ahoy material, identifiers, artifacts, or denylist added |
 | Runtime, load, security, fault, recovery, backup/restore, SLO, and performance tests | Not run by design |
