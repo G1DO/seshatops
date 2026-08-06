@@ -15,6 +15,16 @@ This is an empty reusable template. Replace placeholders only with evidence from
 | Prior claim status | Planned |
 | Report status | Planned |
 
+## Operator and run timing
+
+| Field | Value/status |
+| --- | --- |
+| Operator or operator role | Planned |
+| Run start timestamp | Planned |
+| Run end timestamp | Planned |
+| Clock and time-zone assumptions | Planned |
+| Experiment duration | Planned |
+
 ## Objective and hypothesis
 
 <!-- State the decision or claim question and the hypothesis. Do not write an observed result here. -->
@@ -57,7 +67,7 @@ This is an empty reusable template. Replace placeholders only with evidence from
 
 ## Method
 
-<!-- Describe the procedure, conditions, sampling, fault boundary where applicable, and analysis method. -->
+<!-- Describe the procedure, conditions, sampling, fault boundary where applicable, duration, and analysis method. -->
 
 ## Exact commands or automation entry points
 

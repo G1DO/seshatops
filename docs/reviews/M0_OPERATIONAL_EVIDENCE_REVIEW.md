@@ -9,7 +9,7 @@ This document records a documentation-only review of the Issue #7 operational ev
 | Reviewer | Codex implementation/review pass; maintainer review remains a recorded follow-up |
 | Date (UTC) | 2026-08-07 |
 | Branch | `docs/7-operational-evidence` |
-| Reviewed state | Working tree after Issue #7 documentation implementation; uncommitted |
+| Reviewed state | PR #17 pre-fix head `0e634a458b4ebf2c4786c4ee795ac3b1d92f9833`; working tree clean at review |
 | Scope | Issue #7 evidence vocabulary, protocols, matrix, experiment template, review evidence, and README discoverability |
 | Review type | Documentation implementation and static verification review |
 | Documentation disposition | Pass with recorded follow-ups |

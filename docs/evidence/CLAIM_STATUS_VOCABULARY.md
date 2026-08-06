@@ -27,6 +27,7 @@ The vocabulary below is the complete claim-status vocabulary for SeshatOps. Do n
 - **Observed** requires a named experiment, a complete reproducibility record, raw or machine-readable artifacts where practical, a result summary, failures and anomalies, limitations, and a reviewer decision.
 - **Reproduced** requires the prior observation, documented reproduction instructions, independent-execution details, whether the environment was rebuilt, operator identity or role, equivalence criteria, tolerances when already approved elsewhere, and remaining differences. M0 does not invent numerical tolerances.
 - Missing environment, configuration, commit, workload, dataset, artifact, or limitation details prevent promotion to **Observed** or **Reproduced**.
+- A stable claim identifier must be assigned before an experiment executes or a claim is promoted to **Observed** or **Reproduced**. A `Planned` claim-ID placeholder is not an assigned identifier; evidence-ledger integration may be deferred to Issue #8, but execution and promotion may not proceed without it.
 - Stale, invalidated, corrupted, contradicted, leaked, or non-reproducible evidence requires withdrawal of the affected claim or transition to **Superseded**, with a link to the replacing decision or evidence.
 - A claim must never be promoted because a screenshot exists, because an average looks favorable, because a control is designed, or because a dependency reports success.
 - A claim status change records both the prior and new status and links the decision to the supporting evidence.
@@ -45,13 +46,13 @@ An experiment may evaluate multiple claim IDs. A claim may reference multiple ex
 
 ## Evidence record requirements
 
-Every evidence record must identify, where applicable:
+Every evidence record must identify:
 
 - claim IDs and status before and after the experiment;
 - repository and commit, branch or tag, and dirty-working-tree state;
 - environment class, topology, operating system, runtime, tools, dependencies, and configuration;
 - dataset, fixture, corpus, or workload provenance;
-- seed, exact commands or automation entry point, timestamps, clock and time-zone assumptions;
+- seed or a reason it is not applicable, exact commands or automation entry point, timestamps, clock and time-zone assumptions;
 - operator, reviewer, raw artifacts, checksums where applicable, results, failures, anomalies, and limitations; and
 - reproduction instructions and the decision about claim status.
 
