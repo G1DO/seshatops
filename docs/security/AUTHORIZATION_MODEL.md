@@ -168,7 +168,7 @@ Immediately before the Go-owned transactional boundary performs a state-changing
 - separation-of-duty or dual-control requirements; and
 - the ability to record the decision and resulting receipt safely.
 
-A role, scope, tenant membership, policy, approval, target state, target version, or intent change during the workflow can invalidate execution. The command must be rejected, renewed, or made explicitly uncertain according to the future workflow design; it must not silently proceed.
+A role, scope, tenant membership, policy, approval, target state, target version, or intent change during the workflow invalidates that execution attempt. Go must fail closed and reject the command before any state-changing or external effect. A renewed authorization or approval may create a new valid attempt. An already-authorized downstream effect may remain explicitly uncertain until reconciled, but authorization failure itself is never an uncertain permission to proceed.
 
 ## 8. Service identities and delegated actions
 
@@ -263,6 +263,7 @@ Detailed storage, retention, redaction, immutability, and cryptographic implemen
 | AUTH-10 | Audit records and receipts cannot be trusted solely because an untrusted caller supplied them |
 | AUTH-11 | Changed intent, target state, approval, role, scope, session, or policy can invalidate later execution |
 | AUTH-12 | Service identity does not erase initiating tenant and principal context |
+| AUTH-13 | Service identities have explicitly granted least-privilege capabilities and cannot expand, replace, or erase initiating principal or tenant authority |
 
 These invariants complement, rather than replace, Issue #4 invariants CM-02 through CM-09 and EM-06 through EM-09.
 
@@ -273,10 +274,13 @@ Future implementation tests must include at least:
 - cross-tenant access with colliding resource IDs;
 - missing and ambiguous tenant context;
 - identifier substitution for resources, approvals, receipts, events, citations, and exports;
+- invoke an action directly against Go when the browser hides or disables it, and require server-side denial;
 - role, scope, policy, session, approval, and target-version changes between display, approval, and execution;
 - replayed and concurrent commands or approvals;
 - altered material parameters under a reused approval or idempotency key;
 - compromised or over-privileged service identities;
+- forged, stale, swapped, or contradictory identity-provider assertions and tenant context;
+- tenant-administrator, platform-operator, recovery, audit, replay, and privileged-service actions outside their assigned boundary;
 - Python attempts to write, authorize, command, or cross tenants;
 - prompt injection and malicious retrieved instructions;
 - unauthorized, stale, conflicting, or misleading citations;
