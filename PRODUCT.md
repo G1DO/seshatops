@@ -128,6 +128,8 @@ Until those proofs exist, every capability above remains **Planned**.
 | --- | --- |
 | `PRODUCT.md` | Product thesis, users, workflows, boundaries, non-goals |
 | `README.md` | Short public summary and honest status |
-| Later M0 documents | Clean-room policy, architecture, threat model, roadmap, evidence ledger |
+| `CLEAN_ROOM.md` | Public/private boundary and review policy |
+| `ARCHITECTURE.md` | Logical topology, language ownership, trust and storage boundaries |
+| Later M0 documents | Threat model, roadmap, evidence ledger, repository instructions |
 
 Notion may hold planning intent. This repository owns publishable product truth for SeshatOps.

@@ -6,18 +6,30 @@ Evidence that an architecture-boundary review **occurred** for SeshatOps Issue #
 
 | Field | Value |
 | --- | --- |
-| Reviewer | G1DO (maintainer; time-separated self-review planned at PR) |
+| Reviewer | G1DO (maintainer; time-separated self-review completed) |
 | Date (UTC) | 2026-08-06 |
-| Commit / branch reviewed | Branch `docs/3-architecture-boundaries`; tip `43be239cc98ead99cdfc0e00d73bd60e77eb1533` (architecture docs); base `219160b4ebc65b67978e0f2361d9f85f5faa6a2e` (`main` after PR #12). Artifacts: `ARCHITECTURE.md`, this file, and the README discoverability link. |
-| Scope | Issue #3 — Define architecture boundaries and language ownership |
+| First-pass tip | Architecture docs at `43be239cc98ead99cdfc0e00d73bd60e77eb1533`; review tip record at `4228ea91343c39cc59e4e5b12dd9f3559d5ab6fb` |
+| Commit / branch reviewed | Branch `docs/3-architecture-boundaries`; tip updated after PR-review remediation (see tip SHA below). Base `219160b4ebc65b67978e0f2361d9f85f5faa6a2e` (`main` after PR #12). |
+| Tip SHA (this remediation) | _Set to the commit that lands these review fixes before merge._ |
+| Scope | Issue #3 — Define architecture boundaries and language ownership; PR #13 review remediation |
 | Result | Pass with recorded follow-ups |
+
+### Time-separated self-review
+
+| Pass | When (UTC) | What was reviewed |
+| --- | --- | --- |
+| 1 | 2026-08-06 (authoring) | Initial `ARCHITECTURE.md`, review matrix, README link against Issue #3, PRODUCT, CLEAN_ROOM, and Notion M0/Blueprint |
+| 2 | 2026-08-06 (PR review remediation) | Separate pass after PR feedback: approve/validate order vs PRODUCT hero steps 9–11; Go→Python one-way edges; Redpanda produce wording; Issue #4 vocabulary softening; naming; matrix and clean-room record |
+
+Pass 2 was performed after a break from Pass 1 authoring and incorporates external PR review findings. Result below applies only after Pass 2 remediation is in the tip commit.
 
 ## Reviewed sources
 
 | Source | Role |
 | --- | --- |
 | GitHub Issue #3 brief (architecture boundaries and language ownership) | Acceptance criteria and required content |
-| [PRODUCT.md](../../PRODUCT.md) | Product thesis, users, loop, non-goals (Issue #1 / PR #11) |
+| GitHub PR #13 review feedback | Remediation items for this pass |
+| [PRODUCT.md](../../PRODUCT.md) | Product thesis, users, loop, non-goals (Issue #1 / PR #11); hero steps 9–11 |
 | [CLEAN_ROOM.md](../../CLEAN_ROOM.md) | Clean-room policy (Issue #2 / PR #12) |
 | [docs/checklists/CLEAN_ROOM_REVIEW.md](../checklists/CLEAN_ROOM_REVIEW.md) | Review checklist pattern; baseline CRR-0001 |
 | [README.md](../../README.md) | Public summary and status |
@@ -39,8 +51,10 @@ No Ahoy repository, private source, schema, migration, log, screenshot, configur
 | C3 | PRODUCT.md language-agnostic hero steps vs Blueprint language-tagged steps | Different document layers, not conflicting requirements | **No conflict.** PRODUCT owns product narrative; ARCHITECTURE owns language tagging. |
 | C4 | Blueprint progress tracker vs repository and M0 page | Blueprint still showed constitution “Not started” while Issues #1–#2 were merged | **Out of ARCHITECTURE scope.** Notion blueprint freshness only; no repository contradiction. |
 | C5 | Blueprint SOP-001…010 vs GitHub Issues #1–#10 | Parallel numbering schemes | **Resolved:** GitHub Issues are the execution source of truth per Workflow. Follow #3–#10. |
+| C6 | PRODUCT.md hero steps 9–11 vs ARCHITECTURE sequence diagram | First-pass diagram showed human approve before Go validate/authorize; PRODUCT requires platform validation then human approval then execute (with recheck before command) | **Fixed:** Sequence and prose now validate/authorize → human approve → short recheck → ERP command. |
 | A1 | Blueprint Python→PostgreSQL read-only feature views vs Issue #3 “no broad transactional-database credentials” | Ambiguity on whether Python may read PostgreSQL at all | **Decided:** Narrow, non-transactional read of approved feature/read surfaces is allowed. Broad write/workflow credentials are prohibited. Exact database-role design belongs to Issue #5. |
 | A2 | PRODUCT synthetic ERP capability vs architecture component detail | How much ERP detail belongs in ARCHITECTURE | **Decided:** Synthetic ERP is a Go-owned logical component and the public operational boundary. No schemas or endpoints in Issue #3. |
+| A3 | ARCHITECTURE allowed paths vs Go credential “consume/produce” | Topology and allowed paths showed ERP→Redpanda→Go consume only; credentials still mentioned produce | **Fixed:** Removed produce from Go credentials until Issue #4 defines publication ownership. |
 | — | Northstar Foods public scenario | Aligned across PRODUCT, CLEAN_ROOM, Blueprint, M0 | **None found** |
 | — | Ahoy excluded from public dependencies | Aligned across PRODUCT, CLEAN_ROOM, Blueprint, M0 | **None found** |
 | — | Human approval before execution; UI not authoritative for authorization | Aligned across PRODUCT and Blueprint | **None found** |
@@ -56,12 +70,16 @@ No additional contradictions were invented to populate this table.
 - [x] PostgreSQL, Redpanda, and object-storage responsibilities are clear at a logical level
 - [x] Required prohibited paths are explicit (browser→Python/DB/broker; Python→business writes and operational commands; UI-owned authorization; private adapter as required public dependency)
 - [x] Allowed paths are documented without locking endpoint paths or schemas
+- [x] Go→Python edges are one-way initiation (Go initiates; Python responds on that invocation)
+- [x] Proposal flow order matches PRODUCT hero steps 9–11 (validate/authorize → approve → recheck → execute)
+- [x] Redpanda path and credential wording are consistent (consume only until Issue #4)
 - [x] Product languages are TypeScript, Go, and Python only; C is permanently excluded; Rust is not used unless a later measured ADR gate justifies one isolated component
 - [x] Python failure is isolated from core transactional operations
 - [x] Ahoy is absent from the public topology (named only as excluded)
 - [x] Logical Mermaid diagrams cover topology, proposal-to-execution, and trust boundaries
 - [x] High-level credential table does not claim to be the full authorization model
 - [x] Logical architecture is distinguished from deployment architecture
+- [x] Outbox/inbox/dedup protocol details are not frozen; pointed at Issue #4
 - [x] No application code, package layouts, API routes, database schemas, event schemas, topic names, or dependency versions introduced
 
 ## Clean-room confirmation
@@ -72,11 +90,63 @@ No additional contradictions were invented to populate this table.
 - [x] Content is safe for eventual public release
 - [x] Uncertain private provenance excluded by construction (SeshatOps-only sources)
 
+### CRR-0002 — Architecture boundaries clean-room record (Issue #3)
+
+| Field | Value |
+| --- | --- |
+| Reviewer | G1DO (maintainer; time-separated self-review) |
+| Date (UTC) | 2026-08-06 |
+| Commit / tip | First-pass architecture at `43be239cc98ead99cdfc0e00d73bd60e77eb1533`; remediation tip to be set to the commit landing these PR-review fixes |
+| Scope (paths / PR) | `ARCHITECTURE.md`, `docs/reviews/M0_ARCHITECTURE_REVIEW.md`, `README.md`, `PRODUCT.md` (§10 ownership link); PR #13 |
+| Review type | pre-PR |
+| Result | Pass with remediation |
+
+#### Checks
+
+- [x] No Ahoy or other private code, schemas, migrations, data, logs, traces, or production config
+- [x] No private screenshots, recordings, or exports
+- [x] No production identifiers, hostnames, internal URLs, or private account/tenant IDs
+- [x] No private business-specific rules, recipes, prices, customers, suppliers, or process knowledge
+- [x] No secrets, credentials, tokens, or private environment files
+- [x] No raw AI conversations or prompt histories containing private context
+- [x] All new material has a permitted source or recorded synthetic provenance
+- [x] Synthetic data (if any) records origin, generation method, license, reproducibility, and independence
+- [x] AI-assisted work (if any) used clean-room inputs only; output human-reviewed
+- [x] Screenshots, examples, fixtures, names, schemas, and terminology are fictional/generic and independently explainable
+- [x] Uncertain provenance excluded (not sanitized and kept)
+- [x] Category repository search run over scope for exclusion terms and secret-like strings
+- [x] Public artifacts remain independently explainable and reproducible without private systems
+- [x] No private denylist of real identifiers was added
+
+#### Findings
+
+1. Sequence diagram order disagreed with PRODUCT hero steps 9–11 (approve before validate).
+2. Topology/trust diagrams used bidirectional Go↔Python edges while prose said Go initiates.
+3. Go credentials mentioned Redpanda produce without an allowed produce path.
+4. Some wording foreshadowed outbox/inbox/dedup as if already decided (Issue #4).
+
+No private Ahoy material, secrets, or application code found. `Ahoy` appears only as an excluded private system.
+
+#### Remediation
+
+1. Reordered sequence and prose: validate/authorize → human approve → recheck → ERP command.
+2. Changed Go→Python edges to one-way initiation in both Mermaid diagrams and the allowed-path table.
+3. Removed Redpanda produce from Go credentials until Issue #4 defines publication ownership.
+4. Softened outbox/inbox/dedup vocabulary; pointed protocols at Issue #4.
+5. Renamed policy-engine credentials → policy credentials; IntelligenceServices → Intelligence.
+6. Updated PRODUCT.md §10 to point at `ARCHITECTURE.md` and `CLEAN_ROOM.md`.
+
+#### Notes
+
+- Category search covered the scoped files for `Ahoy`, secret-like patterns, and confirmation that customer/supplier language remains fictional/generic.
+- No Ahoy repository or private Ahoy artifact was inspected or used for this review.
+- Checked boxes record that this review occurred; they do not prove absence of undiscovered issues.
+
 ## Deferred decisions and owning issues
 
 | Decision | Owning issue |
 | --- | --- |
-| Event envelope, commands, compatibility, inbox/deduplication, consistency, replay semantics, retries | #4 |
+| Event envelope, commands, compatibility, consumption/idempotency mechanisms, consistency, replay semantics, retries, broker produce/publication ownership | #4 |
 | Threat model, identity integration choice, authorization matrix, data classification, database-role detail | #5 |
 | Forecast and governed-RAG evaluation protocols, promotion gates, adversarial corpora | #6 |
 | Security, reliability, recovery, and performance evidence protocols; SLO and fault-campaign detail | #7 |
@@ -89,14 +159,14 @@ No additional contradictions were invented to populate this table.
 
 ## Findings
 
-None that block Issue #3 acceptance. Follow-ups are the deferred decisions above.
+PR-review findings (C6, A3, diagram direction, Issue #4 vocabulary) are remediated in this change set. Remaining follow-ups are the deferred decisions above.
 
 ## Remediation
 
-None required for this review scope.
+See CRR-0002 remediation list. Tip SHA field above must be filled with the commit that contains these fixes before merge.
 
 ## Final result
 
 **Pass with recorded follow-ups**
 
-Follow-ups are explicitly owned by Issues #4–#10 and later ADRs. They do not leave Issue #3 architecture ownership ambiguous.
+Follow-ups are explicitly owned by Issues #4–#10 and later ADRs. They do not leave Issue #3 architecture ownership ambiguous. Pass applies to the tip that includes Pass 2 remediation.

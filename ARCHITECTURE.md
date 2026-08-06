@@ -49,7 +49,7 @@ flowchart TB
   UI <--> GO
   ERP -->|versionedEvents| BUS
   BUS --> GO
-  GO <--> PY
+  GO --> PY
   GO --> PG
   PY -.->|narrowReadFeaturesOnly| PG
   GO --> OBJ
@@ -64,7 +64,7 @@ flowchart TB
 | Operations console | TypeScript | Browser UI; presentation and interaction state; generated API clients; user-facing rendering of proposals, evidence, approvals, receipts, and audit history | Authorization decisions; business-state transitions; business invariants; direct database access; direct broker access; direct calls to Python intelligence |
 | Modular platform | Go | Transactional platform behavior; business-state transitions and invariants; authentication integration and authorization enforcement; tenant isolation; workflow and approval orchestration; command validation and execution; idempotency and durable receipts; audit records; replay coordination; public platform APIs; integration boundaries to external operational systems | Model training; unrestricted LLM execution; UI presentation ownership |
 | Intelligence | Python | Forecasting; retrieval; evidence citation; explanation generation; typed proposals; model and evaluation workflows | Business-state writes; authorization; operational command execution; ERP or other operational mutation; receiving browser traffic; broad transactional-database credentials; turning free-form model output into executable actions |
-| Synthetic ERP | Go | Synthetic operational transactions, inventory/batch behavior for the public demo, outbox intent, and command receipts | Platform projections; private production behavior; SeshatOps authorization policy |
+| Synthetic ERP | Go | Synthetic operational transactions, inventory/batch behavior for the public demo, and command receipts | Platform projections; private production behavior; SeshatOps authorization policy |
 | PostgreSQL | — | Authoritative transactional and governance state | Event transport |
 | Redpanda | — | Durable asynchronous event transport and replay input | Authoritative transactional database; business authorization |
 | Object storage | — | Immutable or versioned evidence artifacts, evaluation outputs, documents, exports, and larger binary artifacts | Mutable transactional truth |
@@ -107,11 +107,11 @@ The product implementation languages are **TypeScript**, **Go**, and **Python** 
 
 | Store | Responsibility |
 | --- | --- |
-| PostgreSQL | Authoritative transactional and governance state (workflows, projections as committed state, audit records, inbox/idempotency state as designed later) |
+| PostgreSQL | Authoritative transactional and governance state (workflows, projections as committed state, and audit records). Event-consumption and idempotency mechanisms are Issue #4 |
 | Redpanda | Durable asynchronous event transport and replay **input**. Not the authoritative transactional database |
 | Object storage | Immutable or versioned evidence artifacts, evaluation outputs, documents, exports, and larger binary artifacts |
 
-This document does not define tables, topics, buckets, retention periods, partition counts, vendors, deployment sizes, or exact schemas.
+This document does not define tables, topics, buckets, retention periods, partition counts, vendors, deployment sizes, or exact schemas. Publication, consumption, and related broker protocols are Issue #4.
 
 ## 6. Communication boundaries
 
@@ -124,7 +124,7 @@ Concrete transports (for example request/response shapes, streaming mechanisms, 
 | Browser ↔ Go platform | Only public platform APIs. Generated clients may be used in the UI |
 | Synthetic ERP → Redpanda | Versioned business events for platform consumption |
 | Redpanda → Go platform | Event consumption for reconstruction, workflows, and replay coordination |
-| Go platform ↔ Python intelligence | Go initiates intelligence requests; Python returns predictions, explanations, and typed proposals |
+| Go platform → Python intelligence | Go initiates intelligence requests; Python returns predictions, explanations, and typed proposals on that invocation |
 | Go platform → PostgreSQL | Transactional reads and writes for authoritative state |
 | Python → PostgreSQL | Narrow, non-transactional read of approved feature or read surfaces only; no workflow or business-state writes |
 | Go platform → object storage | Persist or retrieve governance and operational artifacts as needed |
@@ -154,7 +154,7 @@ flowchart LR
     GO[ModularGoPlatform]
   end
   subgraph pyZone [PythonIntelligenceZone]
-    PY[IntelligenceServices]
+    PY[Intelligence]
   end
   subgraph storeZone [DataStores]
     PG[PostgreSQL]
@@ -167,7 +167,7 @@ flowchart LR
   UI <-->|"allowed"| GO
   ERP -->|"events"| BUS
   BUS -->|"consume"| GO
-  GO <-->|"allowed"| PY
+  GO -->|"allowed"| PY
   GO -->|"readWrite"| PG
   PY -.->|"narrowReadOnly"| PG
   GO --> OBJ
@@ -181,7 +181,7 @@ flowchart LR
 
 ## 7. Primary governed proposal-to-execution flow
 
-Capability-level path for the primary demo story. Not an implementation claim and not a protocol specification.
+Capability-level path for the primary demo story. Aligns with [PRODUCT.md](PRODUCT.md) hero steps 9–11. Not an implementation claim and not a protocol specification.
 
 ```mermaid
 sequenceDiagram
@@ -192,18 +192,19 @@ sequenceDiagram
   participant UI as OperatorConsole
   ERP->>BUS: Versioned business event
   BUS->>GO: Consume event
-  GO->>GO: Deduplicate and update projections
+  GO->>GO: Update live projections
   GO->>PY: Features and permitted context
   PY-->>GO: Forecast and typed proposal
-  GO-->>UI: Risk explanation evidence
+  GO->>GO: Validate policy and authorize proposal
+  GO-->>UI: Risk explanation and evidence
   UI->>GO: Human approve or reject
-  GO->>GO: Validate authorize and recheck policy
+  GO->>GO: Recheck authorization limits freshness and state
   GO->>ERP: Idempotent command
   ERP-->>GO: Durable receipt
   GO->>GO: Audit and lineage records
 ```
 
-Python proposals remain advisory until Go validates them, enforces authorization, obtains human approval, and executes.
+Python proposals remain advisory until Go validates policy and authorizes them, an authorized human approves, Go rechecks authorization, limits, freshness, and current state, and Go executes the command. Detailed event-consumption, consistency, and retry protocols are Issue #4.
 
 ## 8. Failure isolation
 
@@ -221,9 +222,9 @@ This table is not the complete authorization model. Issue #5 owns threat modelin
 | Principal | May hold | Must not hold |
 | --- | --- | --- |
 | Browser / UI | End-user session credentials for Go platform APIs | Database credentials; broker credentials; Python service credentials; ERP mutation credentials |
-| Go platform | Credentials needed for PostgreSQL transactional access, Redpanda consume/produce as designed, object storage, Python invocation, and approved ERP command APIs | Unscoped “do anything” secrets that bypass tenant and policy checks |
+| Go platform | Credentials needed for PostgreSQL transactional access, Redpanda consume access, object storage, Python invocation, and approved ERP command APIs | Unscoped “do anything” secrets that bypass tenant and policy checks; Redpanda produce credentials (publication ownership is Issue #4) |
 | Python intelligence | Narrow read credentials for approved feature or read surfaces; object-storage credentials for intelligence artifacts | Broad transactional-database write credentials; ERP mutation credentials; authority to approve or execute workflows |
-| Synthetic ERP | Its own operational datastore credentials | Platform projection write access; SeshatOps policy-engine credentials |
+| Synthetic ERP | Its own operational datastore credentials | Platform projection write access; SeshatOps policy credentials |
 | Private adapters | Out of public topology | Any requirement that public SeshatOps cannot run without them |
 
 ## 10. Document ownership
