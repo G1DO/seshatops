@@ -143,12 +143,13 @@ Before making the repository or a release public:
 If forbidden or sensitive material may have entered the repository:
 
 1. **Contain** — Stop further commits, pushes, merges, and distribution of the affected artifacts.
-2. **Assess** — Identify what was exposed, where (working tree, commit, PR, issue, CI log), and who could have accessed it.
-3. **Remove** — Delete from the working tree and open changes immediately.
+2. **Assess** — Identify what was exposed, where (working tree, commit, PR, issue, comment, CI log, cache, or release artifact), and who could have accessed it.
+3. **Remove from working tree** — Delete from the working tree and open changes immediately.
 4. **Remediate history** — If committed or pushed, rewrite or otherwise remove the content from git history using maintainer-approved history remediation; treat force-push as an explicit maintainer decision.
-5. **Rotate credentials** — If secrets or credentials were exposed, rotate them and revoke old credentials before considering the incident closed.
-6. **Record** — Document findings, remediation steps, commits, and rotations in the review or incident record.
-7. **Re-review** — Complete a clean-room checklist on the remediated scope before continuing work or release.
+5. **Remediate hosted artifacts** — Delete or redact the material from issues, pull-request discussion, CI logs, caches, packages, and release artifacts. Where the platform does not allow direct removal, escalate to the host provider and record the request.
+6. **Rotate credentials** — If secrets or credentials were exposed, rotate them and revoke old credentials before considering the incident closed.
+7. **Record** — Document findings, remediation steps, commits, rotations, and hosted-artifact actions in the review or incident record.
+8. **Re-review** — Complete a clean-room checklist on the remediated scope before continuing work or release.
 
 ## 11. Evidence of review
 

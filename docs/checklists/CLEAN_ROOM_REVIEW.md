@@ -74,10 +74,10 @@ Completed reviews against repository artifacts. Newest first.
 | --- | --- |
 | Reviewer | G1DO (maintainer; time-separated self-review) |
 | Date (UTC) | 2026-08-06 |
-| Commit / tip | Constitution at `3fe3763`; clean-room docs on branch `docs/2-clean-room-policy` (Issue #2) |
+| Commit / tip | Constitution at `3fe3763`; clean-room policy docs reviewed at `8419c86811dba5df4e1f0af43db0ed7e0167b522` (Issue #2) |
 | Scope (paths / PR) | `README.md`, `PRODUCT.md`, `LICENSE`, `CLEAN_ROOM.md`, `docs/checklists/CLEAN_ROOM_REVIEW.md` |
 | Review type | pre-PR |
-| Result | Pass |
+| Result | Pass with remediation |
 
 #### Checks
 
@@ -98,14 +98,19 @@ Completed reviews against repository artifacts. Newest first.
 
 #### Findings
 
-None. `Ahoy` appears only as an excluded private system. `Northstar Foods` is framed as fictional. `LICENSE` is the standard Apache-2.0 text. No synthetic datasets, screenshots, or application code are present yet.
+1. Disclosure procedure assessed issue/PR/CI exposure but did not require removal of hosted artifacts outside git.
+2. Baseline review recorded a mutable branch name instead of an immutable commit SHA for the new clean-room docs.
+
+No private Ahoy material, secrets, or application code found. `Ahoy` appears only as an excluded private system. `Northstar Foods` is framed as fictional. `LICENSE` is the standard Apache-2.0 text.
 
 #### Remediation
 
-None required.
+1. Extended `CLEAN_ROOM.md` §10 with an explicit hosted-artifact remediation step (issues, PR discussion, CI logs, caches, packages, release artifacts, provider escalation).
+2. Replaced the mutable branch tip with immutable commit `8419c86811dba5df4e1f0af43db0ed7e0167b522` for the reviewed clean-room docs.
 
 #### Notes
 
 - Category search covered the scoped files for `Ahoy`, secret-like patterns, and confirmation that customer/supplier language is generic product narrative only.
 - No Ahoy repository or private Ahoy artifact was inspected or used for this review.
 - Checked boxes record that this review occurred; they do not prove absence of undiscovered issues.
+- Remediation for the findings above is included in this pull request after the reviewed tip `8419c86811`.
