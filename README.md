@@ -20,11 +20,15 @@ All public narrative and demos use **Northstar Foods**, a fictional manufacturer
 
 **Implementation has not started.**
 
-This repository currently holds product constitution documents only (Issue #1 / Milestone M0). No application code, services, databases, brokers, or runtime scaffolding are present. Planned capabilities must not be read as completed or measured results.
+This repository currently holds Milestone M0 documentation (product constitution, clean-room policy, and logical architecture boundaries). No application code, services, databases, brokers, or runtime scaffolding are present. Planned capabilities must not be read as completed or measured results.
 
 ## Product constitution
 
 See [PRODUCT.md](PRODUCT.md) for users, hero workflow, capability boundaries, the full product loop, success criteria, and explicit non-goals.
+
+## Architecture
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for logical system topology, language ownership, trust boundaries, and storage responsibilities. Planned boundaries only — not an implementation or deployment claim.
 
 ## Clean-room boundary
 
