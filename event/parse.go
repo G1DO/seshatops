@@ -31,6 +31,9 @@ func Parse(raw []byte) (Envelope, error) {
 }
 
 func decodeStrict(raw []byte) (any, error) {
+	if err := ensureJCSCompatibleJSON(raw); err != nil {
+		return nil, err
+	}
 	dec := json.NewDecoder(bytes.NewReader(raw))
 	dec.UseNumber()
 	v, err := decodeValue(dec)

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 	"unicode"
+	"unicode/utf8"
 )
 
 // M1 fixed contract values from CONTRACTS.md.
@@ -54,6 +55,41 @@ type QuantityDecremented struct {
 
 // Validate checks envelope and payload invariants without parsing JSON.
 func Validate(env Envelope) error {
+	if err := requireUTF8(env.EventID, "event_id"); err != nil {
+		return err
+	}
+	if err := requireUTF8(env.TenantID, "tenant_id"); err != nil {
+		return err
+	}
+	if err := requireUTF8(env.EventType, "event_type"); err != nil {
+		return err
+	}
+	if err := requireUTF8(env.AggregateType, "aggregate_type"); err != nil {
+		return err
+	}
+	if err := requireUTF8(env.AggregateID, "aggregate_id"); err != nil {
+		return err
+	}
+	if err := requireUTF8(env.OccurredAt, "occurred_at"); err != nil {
+		return err
+	}
+	if err := requireUTF8(env.RecordedAt, "recorded_at"); err != nil {
+		return err
+	}
+	if err := requireUTF8(env.Producer, "producer"); err != nil {
+		return err
+	}
+	if err := requireUTF8(env.CorrelationID, "correlation_id"); err != nil {
+		return err
+	}
+	if env.CausationID != nil {
+		if err := requireUTF8(*env.CausationID, "causation_id"); err != nil {
+			return err
+		}
+	}
+	if err := requireUTF8(env.TraceID, "trace_id"); err != nil {
+		return err
+	}
 	if err := requireUUID(env.EventID, "event_id"); err != nil {
 		return err
 	}
@@ -100,6 +136,12 @@ func Validate(env Envelope) error {
 
 func validatePayload(env Envelope) error {
 	p := env.Payload
+	if err := requireUTF8(p.OrderID, "payload.order_id"); err != nil {
+		return err
+	}
+	if err := requireUTF8(p.ItemID, "payload.item_id"); err != nil {
+		return err
+	}
 	if err := requireUUID(p.OrderID, "payload.order_id"); err != nil {
 		return err
 	}
@@ -120,6 +162,13 @@ func validatePayload(env Envelope) error {
 	}
 	if p.QuantityBefore-p.QuantityDecremented != p.QuantityAfter {
 		return fmt.Errorf("%w: quantity arithmetic invariant failed", ErrMalformed)
+	}
+	return nil
+}
+
+func requireUTF8(v, field string) error {
+	if !utf8.ValidString(v) {
+		return fmt.Errorf("%w: %s is not valid UTF-8", ErrMalformed, field)
 	}
 	return nil
 }

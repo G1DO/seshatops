@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode/utf16"
+	"unicode/utf8"
 )
 
 // CanonicalBytes returns the RFC 8785 JCS UTF-8 serialization of a validated envelope.
@@ -15,7 +16,11 @@ func CanonicalBytes(env Envelope) ([]byte, error) {
 	if err := Validate(env); err != nil {
 		return nil, err
 	}
-	return []byte(jcsObject(envelopeMap(env))), nil
+	s, err := jcsObject(envelopeMap(env))
+	if err != nil {
+		return nil, err
+	}
+	return []byte(s), nil
 }
 
 // ContentHash returns the lowercase hex SHA-256 of CanonicalBytes(env).
@@ -79,22 +84,22 @@ func envelopeMap(env Envelope) map[string]any {
 	}
 }
 
-func jcsValue(v any) string {
+func jcsValue(v any) (string, error) {
 	switch t := v.(type) {
 	case nil:
-		return "null"
+		return "null", nil
 	case string:
 		return jcsString(t)
 	case int64:
-		return strconv.FormatInt(t, 10)
+		return strconv.FormatInt(t, 10), nil
 	case map[string]any:
 		return jcsObject(t)
 	default:
-		panic(fmt.Sprintf("event: unsupported JCS value %T", v))
+		return "", fmt.Errorf("%w: unsupported JCS value %T", ErrMalformed, v)
 	}
 }
 
-func jcsObject(obj map[string]any) string {
+func jcsObject(obj map[string]any) (string, error) {
 	keys := make([]string, 0, len(obj))
 	for k := range obj {
 		keys = append(keys, k)
@@ -108,12 +113,20 @@ func jcsObject(obj map[string]any) string {
 		if i > 0 {
 			b.WriteByte(',')
 		}
-		b.WriteString(jcsString(k))
+		ks, err := jcsString(k)
+		if err != nil {
+			return "", err
+		}
+		b.WriteString(ks)
 		b.WriteByte(':')
-		b.WriteString(jcsValue(obj[k]))
+		vs, err := jcsValue(obj[k])
+		if err != nil {
+			return "", err
+		}
+		b.WriteString(vs)
 	}
 	b.WriteByte('}')
-	return b.String()
+	return b.String(), nil
 }
 
 func lessUTF16(a, b string) bool {
@@ -131,7 +144,10 @@ func lessUTF16(a, b string) bool {
 	return len(aa) < len(bb)
 }
 
-func jcsString(s string) string {
+func jcsString(s string) (string, error) {
+	if !utf8.ValidString(s) {
+		return "", fmt.Errorf("%w: string is not valid UTF-8", ErrMalformed)
+	}
 	var b strings.Builder
 	b.WriteByte('"')
 	for _, r := range s {
@@ -156,5 +172,5 @@ func jcsString(s string) string {
 		}
 	}
 	b.WriteByte('"')
-	return b.String()
+	return b.String(), nil
 }

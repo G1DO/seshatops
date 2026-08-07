@@ -196,6 +196,107 @@ func TestRetryCanonicalStable(t *testing.T) {
 	}
 }
 
+func TestUnicodeJCSRejects(t *testing.T) {
+	cases := []struct {
+		name      string
+		traceJSON []byte
+	}{
+		{
+			name:      "invalid_utf8_byte",
+			traceJSON: []byte{'"', 0xff, '"'},
+		},
+		{
+			name:      "invalid_utf8_fe",
+			traceJSON: []byte{'"', 0xfe, '"'},
+		},
+		{
+			name:      "unpaired_high_surrogate",
+			traceJSON: []byte(`"\ud800"`),
+		},
+		{
+			name:      "unpaired_low_surrogate",
+			traceJSON: []byte(`"\udc00"`),
+		},
+		{
+			name:      "high_surrogate_not_followed_by_low",
+			traceJSON: []byte(`"\ud800\u0041"`),
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := event.Parse(envelopeWithTraceJSON(tc.traceJSON))
+			if !errors.Is(err, event.ErrMalformed) {
+				t.Fatalf("err=%v, want %v", err, event.ErrMalformed)
+			}
+		})
+	}
+}
+
+func TestUnicodeJCSAccepts(t *testing.T) {
+	cases := []struct {
+		name      string
+		traceJSON []byte
+		wantTrace string
+	}{
+		{
+			name:      "valid_surrogate_pair",
+			traceJSON: []byte(`"\ud83d\ude00"`),
+			wantTrace: "😀",
+		},
+		{
+			name:      "normal_unicode",
+			traceJSON: []byte("\"caf\u00e9\""),
+			wantTrace: "café",
+		},
+		{
+			name:      "literal_fffd",
+			traceJSON: []byte(`"\ufffd"`),
+			wantTrace: "\uFFFD",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			env, err := event.Parse(envelopeWithTraceJSON(tc.traceJSON))
+			if err != nil {
+				t.Fatalf("Parse: %v", err)
+			}
+			if env.TraceID != tc.wantTrace {
+				t.Fatalf("trace_id=%q, want %q", env.TraceID, tc.wantTrace)
+			}
+			if _, err := event.ContentHash(env); err != nil {
+				t.Fatalf("ContentHash: %v", err)
+			}
+		})
+	}
+}
+
+func TestUnicodeMalformedDoNotCollapse(t *testing.T) {
+	a := envelopeWithTraceJSON([]byte{'"', 0xff, '"'})
+	b := envelopeWithTraceJSON([]byte{'"', 0xfe, '"'})
+	c := envelopeWithTraceJSON([]byte(`"\ud800"`))
+	d := envelopeWithTraceJSON([]byte(`"\udfff"`))
+	for i, raw := range [][]byte{a, b, c, d} {
+		_, err := event.Parse(raw)
+		if !errors.Is(err, event.ErrMalformed) {
+			t.Fatalf("case %d: err=%v, want ErrMalformed", i, err)
+		}
+	}
+}
+
+func TestValidateRejectsInvalidUTF8TraceID(t *testing.T) {
+	env, err := event.Parse(readTestdata(t, "valid_v1.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	env.TraceID = string([]byte{0xff})
+	if err := event.Validate(env); !errors.Is(err, event.ErrMalformed) {
+		t.Fatalf("Validate err=%v, want ErrMalformed", err)
+	}
+	if _, err := event.CanonicalBytes(env); !errors.Is(err, event.ErrMalformed) {
+		t.Fatalf("CanonicalBytes err=%v, want ErrMalformed", err)
+	}
+}
+
 func readTestdata(t *testing.T, name string) []byte {
 	t.Helper()
 	b, err := os.ReadFile(filepath.Join("testdata", name))
@@ -207,4 +308,16 @@ func readTestdata(t *testing.T, name string) []byte {
 
 func removeJSONField(raw, field string) string {
 	return strings.Replace(raw, field, "", 1)
+}
+
+// envelopeWithTraceJSON builds a valid v1 envelope with the given JSON string
+// token (including quotes) spliced into trace_id.
+func envelopeWithTraceJSON(traceJSON []byte) []byte {
+	prefix := []byte(`{"event_id":"018f5d78-6e64-4f5f-bd16-8e9f7c4a20a1","tenant_id":"11111111-1111-4111-8111-111111111111","event_type":"inventory.quantity_decremented","event_schema_version":1,"aggregate_type":"inventory_item","aggregate_id":"item-flour-001","aggregate_version":1,"occurred_at":"2026-08-07T09:00:00Z","recorded_at":"2026-08-07T09:00:00Z","producer":"synthetic-erp","correlation_id":"018f5d78-6e64-4f5f-bd16-8e9f7c4a20a2","causation_id":null,"trace_id":`)
+	suffix := []byte(`,"payload":{"order_id":"018f5d78-6e64-4f5f-bd16-8e9f7c4a20a4","item_id":"item-flour-001","quantity_decremented":2,"quantity_before":10,"quantity_after":8}}`)
+	out := make([]byte, 0, len(prefix)+len(traceJSON)+len(suffix))
+	out = append(out, prefix...)
+	out = append(out, traceJSON...)
+	out = append(out, suffix...)
+	return out
 }
