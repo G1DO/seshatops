@@ -40,7 +40,7 @@ Closes #123
 
 | Command or check | Actual outcome |
 | ---------------- | -------------- |
-|                  |                 |
+|                  |                |
 
 ## Checks not run
 
