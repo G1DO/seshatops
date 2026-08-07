@@ -167,6 +167,6 @@ See CRR-0002 remediation list. Tip SHA recorded as `4324f77d896df45dff7c8952ca81
 
 ## Final result
 
-**Pass with recorded follow-ups**
+> Pass with recorded follow-ups
 
 Follow-ups are explicitly owned by Issues #4â€“#10 and later ADRs. They do not leave Issue #3 architecture ownership ambiguous. Pass applies to the tip that includes Pass 2 remediation.

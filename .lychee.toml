@@ -1,0 +1,9 @@
+timeout = 20
+max_retries = 2
+retry_wait_time = 2
+
+# These are private Notion pages referenced as planning-source records.
+# Do not broaden this exclusion to GitHub or to public documentation URLs.
+exclude = [
+  '^https://app\.notion\.com/p/',
+]
