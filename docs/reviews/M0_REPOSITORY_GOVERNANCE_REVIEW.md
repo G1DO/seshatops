@@ -10,11 +10,11 @@ This document records the documentation-only implementation and static review fo
 | Date (UTC) | 2026-08-07 |
 | Branch | `chore/9-repository-governance` |
 | Base commit | `c7408ee` |
-| Reviewed state | PR #19 at head `0978d82b837eba8b6cadfbeacebd37a0561d73b6`; visible hosted run `31149653082` passed all four jobs after remediation |
+| Reviewed state | PR #19 governance changes after remediation; visible hosted run `31149874303` passed all four jobs |
 | Scope | Repository instructions, contribution workflow, documentation CI, and surgical status corrections |
 | Review type | Documentation implementation and static governance review |
 | Documentation result | Pass with recorded follow-ups |
-| Hosted CI result | Run `31149653082` passed: Markdown lint, link check, YAML lint, and secret scan |
+| Hosted CI result | Run `31149874303` passed: Markdown lint, link check, YAML lint, and secret scan |
 | Runtime result | Not run by design; no runtime project exists and runtime work is out of scope |
 
 The change remains documentation/governance-only. No application code, package manifest, lockfile, runtime configuration, infrastructure, schema, dashboard, model, dataset, deployment configuration, dependency bot, or GitHub settings mutation was introduced. PR #19 is open for review; no merge or settings mutation was performed.
@@ -49,10 +49,10 @@ No private Ahoy repository or private Ahoy artifact was accessed.
 | Pull-request workflow is defined | `.github/pull_request_template.md` requires linked issue, scope, evidence, verification, skipped checks, clean-room review, residual risks, and follow-up work. | Covered |
 | Canonical ownership is explicit | `AGENTS.md` and the existing roadmap distinguish Notion intent, GitHub execution state, repository technical truth, and PR/evidence proof. | Covered |
 | Read-before-edit and honest verification are required | `AGENTS.md` requires inspection, assumptions, actual commands, skipped-check reasons, and no fabricated runtime or hosted-CI claims. | Covered |
-| Documentation CI covers Markdown | Markdown lint runs over `**/*.md` with the existing intentional wide-table exception and narrowly scoped duplicate-heading handling documented in `.markdownlint.yaml`; hosted run `31149653082` passed. | Covered |
+| Documentation CI covers Markdown | Markdown lint runs over `**/*.md` with the existing intentional wide-table exception and narrowly scoped duplicate-heading handling documented in `.markdownlint.yaml`; hosted run `31149874303` passed. | Covered |
 | Documentation CI covers links | Lychee checks Markdown links with a read-only GitHub token and only private Notion planning URLs excluded. | Covered |
-| Documentation CI covers YAML | Yamllint checks repository YAML, including the workflow and its configuration; hosted run `31149653082` passed. | Covered |
-| Documentation CI covers secrets | Gitleaks scans full history with comments, artifacts, and summaries disabled; the pinned action source invokes the scanner with `--redact`; hosted run `31149653082` passed. | Covered |
+| Documentation CI covers YAML | Yamllint checks repository YAML, including the workflow and its configuration; hosted run `31149874303` passed. | Covered |
+| Documentation CI covers secrets | Gitleaks scans full history with comments, artifacts, and summaries disabled; the pinned action source invokes the scanner with `--redact`; hosted run `31149874303` passed. | Covered |
 | CI is least privilege and supply-chain constrained | Workflow permissions are `contents: read` globally with `pull-requests: read` only on the secret job; actions are pinned to reviewed full commit SHAs and Gitleaks is fixed to version `8.24.3`; no unsafe trigger or deployment capability exists. | Covered |
 | Main remains documentation-only | No runtime files, packages, services, containers, deployment settings, or dependency bots were added. | Covered |
 
@@ -180,10 +180,10 @@ The following checks are required for the implementation review and are recorded
 | --- | --- |
 | `git diff --check` | Passed with exit code 0 |
 | Repository-relative Markdown link scan | Passed after implementation; no broken repository-relative links found |
-| Markdownlint | Not available locally; visible hosted run `31149653082` passed after the template and narrow rule-scope remediation |
-| Lychee | Not available locally; visible hosted run `31149785987` passed |
-| Yamllint | Not available locally; visible hosted run `31149653082` passed after inline-comment spacing remediation |
-| Gitleaks | Not available locally; visible hosted run `31149653082` passed after the secret job received `pull-requests: read`; no real secret used |
+| Markdownlint | Not available locally; visible hosted run `31149874303` passed after the template and narrow rule-scope remediation |
+| Lychee | Not available locally; visible hosted run `31149874303` passed |
+| Yamllint | Not available locally; visible hosted run `31149874303` passed after inline-comment spacing remediation |
+| Gitleaks | Not available locally; visible hosted run `31149874303` passed after the secret job received `pull-requests: read`; no real secret used |
 | Pinned Gitleaks action source | Passed: the pinned action supports the configured comment/artifact/summary controls and invokes Gitleaks with `--redact` |
 | TOML parse | Passed with Python `tomllib` for `.lychee.toml` |
 | YAML parser | Not available locally because PyYAML is not installed; hosted yamllint required |
@@ -192,7 +192,7 @@ The following checks are required for the implementation review and are recorded
 | Local credential-pattern heuristic | Passed; no common credential-pattern matches found |
 | Runtime tests/typecheck/build/application lint | Not run; no runtime project exists and Issue #9 excludes runtime work |
 
-Hosted CI evidence is **green for the reviewed commit**: visible run [31149653082](https://github.com/G1DO/seshatops/actions/runs/31149653082) passed Markdown lint, link checking, YAML lint, and secret scanning. The earlier run [31149587946](https://github.com/G1DO/seshatops/actions/runs/31149587946) exposed the permission and lint findings that this commit remediated.
+Hosted CI evidence is **green for the reviewed governance changes**: visible run [31149874303](https://github.com/G1DO/seshatops/actions/runs/31149874303) passed Markdown lint, link checking, YAML lint, and secret scanning. The earlier run [31149587946](https://github.com/G1DO/seshatops/actions/runs/31149587946) exposed the permission and lint findings that this change set remediated.
 
 ## 12. Assumptions and unresolved items
 
@@ -203,12 +203,12 @@ Hosted CI evidence is **green for the reviewed commit**: visible run [3114965308
 | Private Notion links | Narrowly excluded because they are planning-source links and require authenticated access. |
 | Private GitHub links | Remain in scope and are checked with the read-only workflow token. |
 | Gitleaks organization licensing | The current repository owner is a personal GitHub account; no license was added. A future organization transfer may require an explicit license decision. |
-| Hosted CI | Run `31149653082` is visibly green for the reviewed commit; future workflow changes require a new hosted verification. |
+| Hosted CI | Run `31149874303` is visibly green for the reviewed governance changes; future workflow changes require a new hosted verification. |
 | Issue #10 integrated review | Remains the owning follow-up for final M0 integration and milestone exit. |
 
 ## 13. Residual risk and deferred work
 
-- The local environment lacks the four hosted documentation tools; hosted run `31149653082` supplies the visible result for this reviewed commit.
+- The local environment lacks the four hosted documentation tools; hosted run `31149874303` supplies the visible result for the reviewed governance changes.
 - Network availability, private GitHub-token access, and the upstream action implementations are not proven by local static inspection.
 - Gitleaks output safety was verified for the pinned action source: it supports the configured output controls and passes `--redact`; the binary version is now fixed but release checksum verification remains a residual supply-chain risk.
 - Documentation CI does not prove application correctness, runtime security, authorization, reliability, recovery, performance, deployment, production readiness, or final clean-room independence.
@@ -216,4 +216,4 @@ Hosted CI evidence is **green for the reviewed commit**: visible run [3114965308
 
 ## 14. Result
 
-**Pass with recorded follow-ups.** The repository-governance implementation remains within the Issue #9 documentation and CI scope without introducing runtime work. Hosted run `31149653082` passed all four jobs for the reviewed commit. PR review/merge and the integrated M0 review remain follow-ups.
+**Pass with recorded follow-ups.** The repository-governance implementation remains within the Issue #9 documentation and CI scope without introducing runtime work. Hosted run `31149874303` passed all four jobs. PR review/merge and the integrated M0 review remain follow-ups.
