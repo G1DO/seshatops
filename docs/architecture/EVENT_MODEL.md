@@ -1,10 +1,16 @@
 # Event Model — SeshatOps Correctness Principles
 
-**Status:** Planned conceptual contract for Issue #4. This document defines principles that future implementations must preserve. It is not a wire schema, database schema, topic catalogue, runtime implementation, or production evidence.
+**Status:** Planned conceptual contract from Issue #4. This document defines
+principles that future implementations must preserve. The concrete M1 contract
+is in [`CONTRACTS.md`](../../CONTRACTS.md). Neither document is runtime
+implementation or production evidence.
 
 **Owns:** Event meaning, authority boundaries, identity, aggregate ordering, publication and consumption guarantees, quarantine, replay, and event-related degraded behavior.
 
-**Does not own:** Concrete event schemas, Protobuf/Avro/JSON definitions, topics, partitions, retention, worker algorithms, dependency choices, deployment topology, the full threat model, or measured reliability targets.
+**Does not own:** Later event schemas, topics, partitions, retention, worker
+algorithms, dependency choices, deployment topology, the full threat model, or
+measured reliability targets. M1's first JSON event, topic, key, persistence,
+retry, failure, and checksum decisions are owned by [`CONTRACTS.md`](../../CONTRACTS.md).
 
 ## 1. Purpose and scope
 
@@ -161,4 +167,13 @@ Replay of projections must not repeat irreversible external commands, notificati
 
 ## 10. Deferred implementation choices
 
-The following remain deliberately open: concrete serialization and schema tooling; compatibility policy details; table and index design; topic and partition design; retention and archival; buffering and retry algorithms; publisher and consumer process layout; metrics, alerts, and thresholds; and deployment-specific credentials. Those choices belong to later implementation and repository issues, subject to these invariants.
+Issue #21 resolves the first M1 event serialization, schema compatibility,
+topic/key policy, source/outbox boundary, inbox/projection transaction, retry
+and acknowledgement contract, failure record, and checksum canonicalization in
+[`CONTRACTS.md`](../../CONTRACTS.md).
+
+The following remain deliberately open: later event families, retention and
+archival, partition sizing, publisher and consumer process layout, metrics,
+alerts and thresholds, deployment-specific credentials, HTTP routes, and
+operator recovery controls. Those choices remain subject to the invariants in
+this document and the M1 contract.

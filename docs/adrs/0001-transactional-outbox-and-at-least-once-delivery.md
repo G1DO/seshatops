@@ -1,6 +1,6 @@
 # ADR-0001: Transactional Outbox and At-Least-Once Delivery
 
-- **Status:** Accepted design principle; implementation pending
+- **Status:** Accepted design principle with accepted M1 amendment; implementation pending
 - **Date:** 2026-08-06
 - **Scope:** Issue #4 event publication, consumption, quarantine, and replay correctness
 
@@ -23,6 +23,28 @@ The system must also remain a clean-room public platform. This ADR therefore rec
 9. The platform makes no unsupported claim of exactly-once delivery or exactly-once business effects.
 
 The full conceptual contract is in [EVENT_MODEL.md](../architecture/EVENT_MODEL.md).
+The concrete M1 contract is in [CONTRACTS.md](../../CONTRACTS.md).
+
+## M1 concrete amendment from ADR-Q-002
+
+For the first M1 event family, the source-owned relay publishes to the
+`seshatops.m1.events` topic using the canonical aggregate key
+`tenant_id/aggregate_type/aggregate_id`. It publishes the exact immutable JSON
+bytes recorded in the `erp` outbox and marks the row `published` only after a
+broker acknowledgement.
+
+Outbox states are `pending`, `publishing`, `published`, and `quarantined`.
+Transient publication failures use a 1-second exponential backoff capped at 60
+seconds. A crash after broker acknowledgement and before the PostgreSQL update
+may publish a duplicate with the same event identity and content.
+An expired `publishing` lease returns the row to `pending` for retry; a live lease
+is not claimed by another relay worker.
+
+The Go consumer uses manual offset commits and acknowledges only after the
+required `platform` inbox, projection, or quarantine transaction commits.
+Deterministic poison, schema, tenant, content-conflict, and version-gap cases
+become durable quarantine decisions rather than silent skips. These choices do
+not change the at-least-once delivery model or introduce an exactly-once claim.
 
 ## Consequences
 
@@ -83,4 +105,8 @@ These risks require later operational evidence and implementation-specific contr
 
 ## Deferred implementation choices
 
-Concrete event serialization, schema compatibility rules, tables and indexes, topics and partitions, retention and archival, publisher/consumer process layout, retry and buffering algorithms, alerting, credentials, libraries, and deployment topology remain open. Issue #7 owns reliability evidence; completed Issue #9 established repository workflow and documentation CI; M1 and later milestones own the corresponding runtime choices.
+Retention and archival, partition sizing, publisher/consumer process layout,
+alerting, credentials, libraries, deployment topology, and later event families
+remain open. Issue #7 owns reliability evidence; completed Issue #9 established
+repository workflow and documentation CI; M1 and later milestones own the
+corresponding runtime choices.

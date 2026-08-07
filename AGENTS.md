@@ -8,9 +8,18 @@ Behavioral and project guidance for the SeshatOps repository.
 
 SeshatOps is a clean-room, multi-tenant operations-intelligence platform concept for the fictional Northstar Foods scenario. It is intended to consume ERP events, reconstruct replayable operational state, produce evidence-backed intelligence, and execute only authorized, human-approved actions.
 
-The repository is in Milestone M0. Issues #1 through #8 established the product, clean-room, architecture, correctness, security, intelligence-evaluation, operational-evidence, roadmap, and evidence-ledger documentation. Issue #9 establishes repository governance and documentation CI. Issue #10 owns the integrated M0 review.
+The repository is in Milestone M1, Event Spine, contract/planning phase. M0
+was completed by the merged Issue #10 integration review and PR #20. Issues
+#1 through #9 established the product, clean-room, architecture, correctness,
+security, intelligence-evaluation, operational-evidence, roadmap, and
+repository-governance documentation. Issue #21 owns the concrete M1 event-spine
+contract.
 
-M0 remains documentation-only. No application code, runtime, service, database, broker, deployment, model, dataset, or production environment exists here. Planned behavior must not be described as implemented, observed, reproduced, secure, reliable, performant, or production-ready.
+M0 was documentation-only, and Issue #21 remains documentation-only. No
+application code, runtime, service, database, broker, deployment, model,
+dataset, or production environment exists here. Planned behavior must not be
+described as implemented, observed, reproduced, secure, reliable, performant,
+or production-ready.
 
 ## 2. Source-of-truth hierarchy
 
@@ -80,10 +89,12 @@ Future implementation must preserve these boundaries:
 | TypeScript | UI, browser, and user-facing interaction surfaces | Authoritative transactional or authorization state |
 | Go | Transactional platform, event processing, authorization, and durable state boundaries | Unreviewed intelligence authority |
 | Python | Evaluated or advisory intelligence and read-only analysis | Authentication, authorization, business writes, or command authority |
-| Rust | Measurement-gated performance or specialized components only after evidence justifies it | Speculative M0 scaffolding |
-| C | Excluded unless a later reviewed milestone explicitly changes the boundary | Any M0 implementation |
+| Rust | Measurement-gated performance or specialized components only after evidence justifies it | Speculative M1 scaffolding |
+| C | Excluded unless a later reviewed milestone explicitly changes the boundary | Any M1 implementation |
 
-There is no language workspace to scaffold during M0. A later milestone must establish its own package, build, test, and dependency decisions through a bounded issue.
+There is no language workspace to scaffold during M1 contract planning. A later
+bounded implementation issue must establish package, build, test, and
+dependency decisions.
 
 ## 8. Evidence and claim governance
 
@@ -129,4 +140,4 @@ Issue #9 is complete only when:
 - Private Notion links are narrowly excluded and private GitHub links are attempted with a read-only token.
 - No secrets, Ahoy material, runtime scaffolding, deployment configuration, or speculative dependencies are introduced.
 - The generated M0 governance review records actual local verification, hosted-CI evidence status, assumptions, limitations, and residual risk.
-- The repository remains documentation-only; Issue #10 remains the integrated M0 review owner.
+- The repository remains documentation-only; Issue #10 completed the integrated M0 review and M1 owns the event-spine contract.

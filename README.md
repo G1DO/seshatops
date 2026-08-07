@@ -18,9 +18,12 @@ All public narrative and demos use **Northstar Foods**, a fictional manufacturer
 
 ## Status
 
-**M0 documentation and repository-governance scope is complete in this reviewed branch, pending the normal Issue #10 review and merge workflow. Implementation has not started.**
+**M0 is complete and M1 Event Spine contract planning is active. Implementation has not started.**
 
-This repository currently holds the Milestone M0 documentation and repository-governance artifacts (product constitution, clean-room policy, logical architecture boundaries, evidence protocols, workflow instructions, and documentation CI). No application code, services, databases, brokers, or runtime scaffolding are present. Planned capabilities must not be read as completed or measured results.
+This repository holds the completed M0 documentation and governance artifacts plus
+the reviewed M1 event-spine contract. No application code, services, databases,
+brokers, or runtime scaffolding are present. Planned capabilities must not be
+read as completed or measured results.
 
 Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), and documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml). The [M0 repository-governance review](docs/reviews/M0_REPOSITORY_GOVERNANCE_REVIEW.md), [integrated constitution review](docs/reviews/M0_INTEGRATED_CONSTITUTION_REVIEW.md), and [M0 completion summary](docs/reviews/M0_COMPLETION_SUMMARY.md) record the reviewed state, evidence boundaries, limitations, and follow-ups.
 
@@ -32,7 +35,7 @@ See [PRODUCT.md](PRODUCT.md) for users, hero workflow, capability boundaries, th
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for logical system topology, language ownership, trust boundaries, and storage responsibilities. Planned boundaries only — not an implementation or deployment claim.
 
-See [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), and the [Issue #4 ADRs](docs/adrs/) for the planned correctness model.
+See [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), [CONTRACTS.md](CONTRACTS.md), and the [ADRs](docs/adrs/) for the planned correctness model and concrete M1 contract.
 
 ## Security model
 
