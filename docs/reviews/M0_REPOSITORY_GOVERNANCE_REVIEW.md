@@ -181,7 +181,7 @@ The following checks are required for the implementation review and are recorded
 | `git diff --check` | Passed with exit code 0 |
 | Repository-relative Markdown link scan | Passed after implementation; no broken repository-relative links found |
 | Markdownlint | Not available locally; visible hosted run `31149653082` passed after the template and narrow rule-scope remediation |
-| Lychee | Not available locally; hosted CI required |
+| Lychee | Not available locally; visible hosted run `31149785987` passed |
 | Yamllint | Not available locally; visible hosted run `31149653082` passed after inline-comment spacing remediation |
 | Gitleaks | Not available locally; visible hosted run `31149653082` passed after the secret job received `pull-requests: read`; no real secret used |
 | Pinned Gitleaks action source | Passed: the pinned action supports the configured comment/artifact/summary controls and invokes Gitleaks with `--redact` |
