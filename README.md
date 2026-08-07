@@ -20,7 +20,9 @@ All public narrative and demos use **Northstar Foods**, a fictional manufacturer
 
 **Implementation has not started.**
 
-This repository currently holds Milestone M0 documentation (product constitution, clean-room policy, and logical architecture boundaries). No application code, services, databases, brokers, or runtime scaffolding are present. Planned capabilities must not be read as completed or measured results.
+This repository currently holds the Milestone M0 documentation and repository-governance artifacts (product constitution, clean-room policy, logical architecture boundaries, evidence protocols, workflow instructions, and documentation CI). No application code, services, databases, brokers, or runtime scaffolding are present. Planned capabilities must not be read as completed or measured results.
+
+Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), and documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml). The [M0 repository-governance review](docs/reviews/M0_REPOSITORY_GOVERNANCE_REVIEW.md) records the current review state and limitations.
 
 ## Product constitution
 

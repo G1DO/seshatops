@@ -16,7 +16,7 @@ This roadmap covers the planned sequence from the M0 constitution through the M8
 
 | Milestone | Status | Repository state |
 | --- | --- | --- |
-| M0 — Project Constitution | Active; GitHub/Notion currently “In Progress” | Issues #1–#7 and PRs #11–#17 are complete; Issue #8 is the current deliverable; Issue #9 and Issue #10 remain. |
+| M0 — Project Constitution | Active; GitHub/Notion currently “In Progress” | Issues #1–#8 and PRs #11–#18 are complete; Issue #9 is the current repository-governance deliverable; Issue #10 remains. |
 | M1–M8 | Planned | Outcome-and-exit-gate placeholders only; no detailed future implementation backlog is maintained here. |
 
 No application code, service, database, broker, runtime scaffolding, model, dataset, experiment, deployment, or production environment exists in this repository. Existing M0 documents define intent and reviewed documentation truth; they do not prove implementation, observed behavior, reproduced behavior, performance, or production readiness.
@@ -123,7 +123,7 @@ Dependencies are recorded only where supported by the product constitution, arch
 
 ## Active-milestone decomposition rule
 
-M0 is the only active milestone during Issue #8. Detailed GitHub issues are created only for the active milestone. M1–M8 remain outcome-and-exit-gate placeholders and must not accumulate speculative implementation backlogs.
+M0 is the only active milestone during Issues #8 and #9. Detailed GitHub issues are created only for the active milestone. M1–M8 remain outcome-and-exit-gate placeholders and must not accumulate speculative implementation backlogs.
 
 When a milestone begins:
 

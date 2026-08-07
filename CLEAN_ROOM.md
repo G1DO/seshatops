@@ -108,7 +108,7 @@ Doubt favors exclusion.
 
 ## 9. Review procedures
 
-Use [docs/checklists/CLEAN_ROOM_REVIEW.md](docs/checklists/CLEAN_ROOM_REVIEW.md). Reviews are manual in this milestone; automated DLP or secret-scanning workflows are out of scope here.
+Use [docs/checklists/CLEAN_ROOM_REVIEW.md](docs/checklists/CLEAN_ROOM_REVIEW.md). Reviews remain manual in this milestone. Repository secret scanning is a narrow hygiene gate for accidental credential leakage; it is not automated DLP and does not replace manual clean-room review.
 
 ### Pre-commit
 
