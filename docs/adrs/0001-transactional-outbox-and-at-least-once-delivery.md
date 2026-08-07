@@ -83,4 +83,4 @@ These risks require later operational evidence and implementation-specific contr
 
 ## Deferred implementation choices
 
-Concrete event serialization, schema compatibility rules, tables and indexes, topics and partitions, retention and archival, publisher/consumer process layout, retry and buffering algorithms, alerting, credentials, libraries, and deployment topology remain open. Issue #7 owns reliability evidence; Issue #9 owns repository and concrete implementation workflow.
+Concrete event serialization, schema compatibility rules, tables and indexes, topics and partitions, retention and archival, publisher/consumer process layout, retry and buffering algorithms, alerting, credentials, libraries, and deployment topology remain open. Issue #7 owns reliability evidence; completed Issue #9 established repository workflow and documentation CI; M1 and later milestones own the corresponding runtime choices.

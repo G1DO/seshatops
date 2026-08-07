@@ -114,3 +114,61 @@ No private Ahoy material, secrets, or application code found. `Ahoy` appears onl
 - No Ahoy repository or private Ahoy artifact was inspected or used for this review.
 - Checked boxes record that this review occurred; they do not prove absence of undiscovered issues.
 - Remediation for the findings above is included in this pull request after the reviewed tip `8419c86811`.
+
+### CRR-0003 — Final M0 constitution review (Issue #10)
+
+| Field | Value |
+| --- | --- |
+| Reviewer | Codex implementation/review pass; maintainer review remains a follow-up |
+| Date (UTC) | 2026-08-07 |
+| Commit / tip | Baseline `7c1d59a`; PR #20 pushed diff, with the exact current head recorded in PR metadata |
+| Scope (paths / PR) | Full tracked M0 repository, reviewed Issues #1–#10 and PRs #11–#19, and PR #20's pushed diff |
+| Review type | Final M0 integration and PR clean-room review |
+| Result | Pass with recorded follow-ups |
+
+#### Checks
+
+- [x] No Ahoy or other private code, schemas, migrations, data, logs, traces, or production config
+- [x] No private screenshots, recordings, or exports
+- [x] No production identifiers, hostnames, internal URLs, or private account/tenant IDs
+- [x] No private business-specific rules, recipes, prices, customers, suppliers, or process knowledge
+- [x] No secrets, credentials, tokens, or private environment files
+- [x] No raw AI conversations or prompt histories containing private context
+- [x] All new material has a permitted source or recorded synthetic provenance
+- [x] Synthetic data (if any) records origin, generation method, license, reproducibility, and independence
+- [x] AI-assisted work (if any) used clean-room inputs only; output human-reviewed
+- [x] Screenshots, examples, fixtures, names, schemas, and terminology are fictional/generic and independently explainable
+- [x] Uncertain provenance excluded (not sanitized and kept)
+- [x] Category repository search run over scope for exclusion terms and secret-like strings
+- [x] Public artifacts remain independently explainable and reproducible without private systems
+- [x] No private denylist of real identifiers was added
+
+#### Findings
+
+1. The requested final record identifier conflicted with the existing
+   architecture record `CRR-0002`.
+2. The Issue #9 governance review contained pre-merge statements about PR #19;
+   those statements were preserved as historical context and clarified with
+   the later merge disposition.
+3. Notion M0 remains `In Progress`, and its M1 planning page contains concrete
+   future suggestions. Neither external state was changed or promoted to a
+   repository implementation decision.
+
+No private Ahoy material, secrets, runtime implementation, or private
+production context was found in the reviewed scope.
+
+#### Remediation
+
+1. Assigned `CRR-0003` to this final record and preserved the historical
+   architecture `CRR-0002`.
+2. Added the integrated M0 review, completion summary, and deferred ADR queue.
+3. Reconciled roadmap, claim-ledger guidance, fault-matrix guidance, README,
+   and the historical governance review without changing claim statuses.
+
+#### Notes
+
+- Category searches covered Ahoy/private-context categories, secret-like
+  strings, runtime-like files, unsupported claims, and exactly-once wording.
+- No Ahoy repository or private Ahoy artifact was inspected or used.
+- Checked boxes record that this review occurred; they do not prove absence of
+  undiscovered issues.

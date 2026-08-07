@@ -33,7 +33,7 @@ This matrix records what a future campaign must define before an experiment is r
 - Every row is a reusable Planned scenario definition, not an executed test.
 - `Observed result` remains `Not executed` until a future experiment supplies evidence.
 - `Required repetitions` remains `Planned - not selected`; M0 invents no repetition count.
-- Claim IDs are stable identifiers, not placeholders: the evidence ledger must assign them before an experiment executes or a claim is promoted. This M0 matrix leaves them `Planned` because Issue #8 owns ledger integration.
+- Claim IDs are stable identifiers, not placeholders: the evidence ledger must assign them before an experiment executes or a claim is promoted. Issue #8 established the repository ledger; this M0 matrix leaves scenario results and claim statuses `Planned` because no campaign has executed and no scenario-specific evidence record exists.
 - A future run must complete the fields in [EXPERIMENT_REPORT.md](templates/EXPERIMENT_REPORT.md) and the applicable protocol.
 - Failure, integrity, safety, uncertainty, and limitation artifacts must be retained even when the scenario does not support the intended claim.
 
