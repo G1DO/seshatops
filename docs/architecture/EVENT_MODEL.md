@@ -1,9 +1,10 @@
 # Event Model — SeshatOps Correctness Principles
 
 **Status:** Planned conceptual contract from Issue #4. This document defines
-principles that future implementations must preserve. The concrete M1 contract
-is in [`CONTRACTS.md`](../../CONTRACTS.md). Neither document is runtime
-implementation or production evidence.
+principles that future implementations must preserve. The concrete M1 contract is in [`CONTRACTS.md`](../../CONTRACTS.md).
+Executable parse, validation, JCS canonicalization, and content-hash helpers
+for that contract live in the Go package `event`. Neither the documents nor the
+library prove transport, projection, or production readiness.
 
 **Owns:** Event meaning, authority boundaries, identity, aggregate ordering, publication and consumption guarantees, quarantine, replay, and event-related degraded behavior.
 

@@ -24,3 +24,10 @@ temp/
 coverage/
 dist/
 build/
+
+# Local Go build output
+*.exe
+*.test
+*.out
+vendor/
+

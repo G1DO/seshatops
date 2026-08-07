@@ -8,18 +8,19 @@ Behavioral and project guidance for the SeshatOps repository.
 
 SeshatOps is a clean-room, multi-tenant operations-intelligence platform concept for the fictional Northstar Foods scenario. It is intended to consume ERP events, reconstruct replayable operational state, produce evidence-backed intelligence, and execute only authorized, human-approved actions.
 
-The repository is in Milestone M1, Event Spine, contract/planning phase. M0
-was completed by the merged Issue #10 integration review and PR #20. Issues #1
-through #9 established the product, clean-room, architecture, correctness,
-security, intelligence-evaluation, operational-evidence, roadmap, and
+The repository is in Milestone M1, Event Spine. M0 was completed by the merged
+Issue #10 integration review and PR #20. Issues #1 through #9 established the
+product, clean-room, architecture, correctness, security,
+intelligence-evaluation, operational-evidence, roadmap, and
 repository-governance documentation. Issue #21 owns the concrete M1 event-spine
-contract.
+contract. Issue #22 owns the executable JSON event package and deterministic
+Northstar Foods fixture.
 
-M0 was documentation-only, and Issue #21 remains documentation-only. No
-application code, runtime, service, database, broker, deployment, model,
-dataset, or production environment exists here. Planned behavior must not be
-described as implemented, observed, reproduced, secure, reliable, performant,
-or production-ready.
+Issue #21 remains documentation-only. Issue #22 introduces the first Go library
+code under `event/` and `northstar/` only. No service, database, broker,
+deployment, model, or production environment exists here yet. Planned behavior
+must not be described as observed, reproduced, secure, reliable, performant, or
+production-ready without the required evidence.
 
 ## 2. Source-of-truth hierarchy
 
@@ -92,9 +93,9 @@ Future implementation must preserve these boundaries:
 | Rust | Measurement-gated performance or specialized components only after evidence justifies it | Speculative M1 scaffolding |
 | C | Excluded unless a later reviewed milestone explicitly changes the boundary | Any M1 implementation |
 
-There is no language workspace to scaffold during M1 contract planning. A later
-bounded implementation issue must establish package, build, test, and
-dependency decisions.
+Issue #22 establishes the root Go module (`github.com/G1DO/seshatops`, Go
+`1.25.0`) with the `event` and `northstar` packages. Later M1 issues may add
+platform packages without inventing a second module or a general ERP schema.
 
 ## 8. Evidence and claim governance
 

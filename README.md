@@ -18,14 +18,15 @@ All public narrative and demos use **Northstar Foods**, a fictional manufacturer
 
 ## Status
 
-**M0 is complete and M1 Event Spine contract planning is active. Implementation has not started.**
+**M0 is complete. M1 Event Spine is active: the reviewed contract exists, and Issue #22 adds the executable JSON event library and deterministic Northstar Foods fixture.**
 
-This repository holds the completed M0 documentation and governance artifacts plus
-the reviewed M1 event-spine contract. No application code, services, databases,
-brokers, or runtime scaffolding are present. Planned capabilities must not be
+This repository holds the completed M0 documentation, the reviewed M1
+event-spine contract in [CONTRACTS.md](CONTRACTS.md), and the first Go packages
+under `event/` and `northstar/`. No outbox, broker, database, projection
+consumer, or service runtime is present yet. Planned capabilities must not be
 read as completed or measured results.
 
-Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), and documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml). The [M0 repository-governance review](docs/reviews/M0_REPOSITORY_GOVERNANCE_REVIEW.md), [integrated constitution review](docs/reviews/M0_INTEGRATED_CONSTITUTION_REVIEW.md), and [M0 completion summary](docs/reviews/M0_COMPLETION_SUMMARY.md) record the reviewed state, evidence boundaries, limitations, and follow-ups.
+Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml), and Go package tests are checked by [Go CI](.github/workflows/go-ci.yml). The [M0 repository-governance review](docs/reviews/M0_REPOSITORY_GOVERNANCE_REVIEW.md), [integrated constitution review](docs/reviews/M0_INTEGRATED_CONSTITUTION_REVIEW.md), [M0 completion summary](docs/reviews/M0_COMPLETION_SUMMARY.md), and [M1 event-contract fixture review](docs/reviews/M1_EVENT_CONTRACT_FIXTURE_REVIEW.md) record reviewed state, evidence boundaries, limitations, and follow-ups.
 
 ## Product constitution
 

@@ -1,6 +1,8 @@
 # M1 Event Spine Contracts
 
-**Status:** Accepted M1 implementation contract; implementation has not started.
+**Status:** Accepted M1 implementation contract. Issue #22 provides the
+executable JSON/JCS library and Northstar fixture; outbox, broker, and
+projection runtime remain later M1 issues.
 
 **Owns:** The concrete M1 event envelope, first event family, JSON compatibility
 rules, PostgreSQL ownership boundaries, Redpanda topic and key policy, outbox
@@ -13,8 +15,10 @@ retention policy, or later event families.
 
 This contract implements the M0 principles in [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md)
 and [ADR-0001](docs/adrs/0001-transactional-outbox-and-at-least-once-delivery.md).
-It is documentation truth for M1 only. It does not prove runtime implementation,
-correctness, security, reliability, performance, or production readiness.
+Executable JSON/JCS helpers are in the Go `event` package; the deterministic
+fixture is in `northstar`. This document remains documentation truth for M1
+behavior. Library tests do not prove broker delivery, projection correctness,
+security, reliability, performance, or production readiness.
 
 ## 1. M1 vertical slice
 
