@@ -13,7 +13,8 @@ reliability, performance, recovery, deployment, or production readiness exists.
 | Date (UTC) | 2026-08-07 |
 | Branch | `docs/10-integrated-m0-review` |
 | Base tip | `7c1d59a` (`main` and `origin/main`) |
-| Scope | Full tracked M0 repository, Issues #1-#10 and PRs #11-#19 as reviewed history, and the Issue #10 working-tree diff |
+| Pull request | [PR #20](https://github.com/G1DO/seshatops/pull/20), final pushed diff |
+| Scope | Full tracked M0 repository, Issues #1-#10 and PRs #11-#19 as reviewed history, and PR #20's pushed diff |
 | Review type | Final M0 constitution, clean-room, evidence, and documentation review |
 | Documentation disposition | Pass with recorded follow-ups |
 | Runtime disposition | Not applicable; no runtime project exists and M0 remains documentation-only |
@@ -54,17 +55,20 @@ not silently promoted by changing the Notion status.
 | Record intentionally deferred decisions | `docs/adrs/README.md` and `ADR-Q-001` through `ADR-Q-011` | Queue ID, owner, trigger, and constraint review | Satisfied; no queue item resolves an implementation choice |
 | Preserve documentation-only scope | Repository tree and language-boundary rules | Runtime-like file, manifest, dependency, deployment, and source scan | Satisfied; no runtime implementation exists |
 | Publish an M0 completion summary | `M0_COMPLETION_SUMMARY.md` | Link and content review | Satisfied for the local reviewed state; final merge remains a maintainer action |
-| Maintain green documentation checks | Existing hosted run `31150125333` on baseline `7c1d59a` | Local checks below; hosted CI required for any later pushed/merged diff | Baseline green; no hosted run exists for this unpushed diff |
+| Maintain green documentation checks | PR #20 hosted Documentation CI; prior head run `31152243708` passed all four jobs | Re-run and confirm the hosted workflow for the final pushed head before merge | Follow-up required after this correction; no runtime check is implied |
 
 ## 4. Constitution consistency audit
 
 ### Product loop and terminology
 
-The product loop is consistently described as observation, reconstruction,
-replay, intelligence, proposal, authorization/approval, execution, and
-verification/audit. Existing documents use more detailed synonyms such as
-predict/explain and audit/replay; those are treated as product-specific
-expansions, not competing loops.
+The canonical product loop is:
+
+> Observe → Reconstruct → Predict → Explain → Propose → Authorize → Approve → Execute → Audit → Replay
+
+`Predict` and `Explain` are the intelligence stages. `Replay` is the final
+controlled projection/history operation and a cross-cutting recovery capability;
+it is not reordered ahead of intelligence. Other documents may describe the
+same stages with explanatory prose, but they must preserve this order.
 
 The review found no unsupported exactly-once claim. The correctness model,
 ADR-0001, ADR-0002, roadmap, command model, and fault matrix distinguish
@@ -132,7 +136,7 @@ execution or claim promotion.
 ## 7. Clean-room result
 
 The completed record is `CRR-0003`. It covers the full tracked M0 repository,
-reviewed history, and the final Issue #10 working-tree diff. The existing
+reviewed history, and PR #20's pushed diff. The existing
 architecture record `CRR-0002` is preserved; the final record uses `CRR-0003`
 because the requested identifier was already occupied.
 
@@ -172,9 +176,9 @@ detailed issue decomposition. M1 implementation has not started.
 
 | Check | Result |
 | --- | --- |
-| Worktree and branch inspection | Passed; clean baseline on `docs/10-integrated-m0-review` at `7c1d59a` |
-| `git diff --check` before implementation | Passed |
-| Repository-relative Markdown link scan before implementation | Passed; zero broken links |
+| Branch and PR-head inspection | Passed; PR #20 targets `main` from `docs/10-integrated-m0-review` |
+| `git diff --check` for the reviewed changes | Passed |
+| Repository-relative Markdown link scan for the reviewed changes | Passed; zero broken links |
 | Capability count and uniqueness | Passed; 40 unique rows |
 | Claim count and uniqueness | Passed; 35 unique rows |
 | Claim status scan | Passed; all 35 are `Planned` |
@@ -182,16 +186,15 @@ detailed issue decomposition. M1 implementation has not started.
 | Workflow safety scan | Passed; all action references use full SHA pins and no unsafe trigger/write pattern was found |
 | Secret-like scan | Passed; no credential-like value found |
 | Exactly-once overclaim scan | Passed; references are caveats or explicit rejections |
-| Baseline hosted Documentation CI | Passed in run `31150125333`; Markdown, links, secrets, and YAML jobs succeeded |
+| Hosted Documentation CI | Prior PR #20 head passed in run `31152243708`; Markdown, links, secrets, and YAML jobs all succeeded |
 
-### Checks required after this diff
+### Final PR-head check status
 
-Phase B verification must rerun `git diff --check`, Markdown links, capability
-and claim counts, clean-room category scans, unsupported-claim scans, hidden
-implementation scans, workflow safety checks, and any locally available
-Markdown/YAML/secret tools. No typecheck, build, runtime, or application test
-is applicable. Because this diff is not pushed, no hosted CI result is claimed
-for it.
+The correction in this PR requires a fresh hosted Documentation CI run for the
+new final head before merge. The prior PR-head run `31152243708` passed
+Markdown lint, link checking, YAML lint, and secret scanning. Local Markdown,
+YAML, link, and secret tools remain unavailable. No typecheck, build, runtime,
+or application test is applicable because M0 has no runtime project.
 
 ## 10. Disposition, limitations, and follow-ups
 
@@ -200,7 +203,8 @@ is internally reconciled within the repository scope. The following remain
 explicit:
 
 - maintainer review and merge of the Issue #10 change;
-- a fresh hosted Documentation CI run for the merged change;
+- a fresh hosted Documentation CI run for the corrected final PR head and the
+  subsequent merged `main` commit;
 - external Notion M0 status synchronization, if the maintainer chooses to do
   so through the normal workflow;
 - all runtime, security, reliability, performance, recovery, deployment, and

@@ -36,7 +36,7 @@ The change remains documentation/governance-only. No application code, package m
 - [SeshatOps - Master Project Blueprint](https://app.notion.com/p/3b40a821b3cc813081f0ea44fd72692a).
 - [Workflow - Notion -> GitHub -> Evidence](https://app.notion.com/p/3b40a821b3cc810eadebc2fc9a067000).
 - [M0 - Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee).
-- Live GitHub Issue #9 and repository branch history are authoritative for current execution status.
+- At the time of this Issue #9 review, live GitHub Issue #9 and repository branch history were authoritative for current execution status. The final M0 execution owner is Issue #10 and PR #20.
 
 No private Ahoy repository or private Ahoy artifact was accessed.
 

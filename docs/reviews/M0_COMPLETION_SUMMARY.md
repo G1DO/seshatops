@@ -60,13 +60,12 @@ speculative dependency was added.
 - The repository contains 40 unique capability IDs and 35 unique claim IDs.
 - All 35 claim statuses remain `Planned`; no evidence fields or claim meanings
   were promoted.
-- The baseline hosted Documentation CI run [31150125333](https://github.com/G1DO/seshatops/actions/runs/31150125333)
-  passed Markdown lint, link checking, secret scanning, and YAML lint on the
-  pre-review main tip.
-- Local static review passed the pre-change diff, link, count, claim-status,
+- The prior PR #20 head's hosted Documentation CI run [31152243708](https://github.com/G1DO/seshatops/actions/runs/31152243708)
+  passed Markdown lint, link checking, secret scanning, and YAML lint.
+- Local static review passed the prior head's diff, link, count, claim-status,
   runtime-file, workflow-safety, secret-like, and exactly-once scans.
-- Final local Phase B checks must be recorded against the completed working-tree
-  diff. No hosted result for this unpushed diff is claimed.
+- This correction requires a fresh hosted Documentation CI run for the new PR
+  head before merge; no runtime result is implied.
 
 No runtime, typecheck, build, application test, performance, recovery,
 security-enforcement, or deployment check was run because no runtime project

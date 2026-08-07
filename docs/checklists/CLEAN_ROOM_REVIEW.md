@@ -121,9 +121,9 @@ No private Ahoy material, secrets, or application code found. `Ahoy` appears onl
 | --- | --- |
 | Reviewer | Codex implementation/review pass; maintainer review remains a follow-up |
 | Date (UTC) | 2026-08-07 |
-| Commit / tip | Baseline `7c1d59a`; final Issue #10 working-tree diff reviewed without a new commit |
-| Scope (paths / PR) | Full tracked M0 repository, reviewed Issues #1–#10 and PRs #11–#19, and the Issue #10 working-tree diff |
-| Review type | Final M0 integration and pre-PR clean-room review |
+| Commit / tip | Baseline `7c1d59a`; PR #20 pushed diff, with the exact current head recorded in PR metadata |
+| Scope (paths / PR) | Full tracked M0 repository, reviewed Issues #1–#10 and PRs #11–#19, and PR #20's pushed diff |
+| Review type | Final M0 integration and PR clean-room review |
 | Result | Pass with recorded follow-ups |
 
 #### Checks
