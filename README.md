@@ -18,11 +18,11 @@ All public narrative and demos use **Northstar Foods**, a fictional manufacturer
 
 ## Status
 
-**Implementation has not started.**
+**M0 documentation and repository-governance scope is complete in this reviewed branch, pending the normal Issue #10 review and merge workflow. Implementation has not started.**
 
 This repository currently holds the Milestone M0 documentation and repository-governance artifacts (product constitution, clean-room policy, logical architecture boundaries, evidence protocols, workflow instructions, and documentation CI). No application code, services, databases, brokers, or runtime scaffolding are present. Planned capabilities must not be read as completed or measured results.
 
-Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), and documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml). The [M0 repository-governance review](docs/reviews/M0_REPOSITORY_GOVERNANCE_REVIEW.md) records the current review state and limitations.
+Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), and documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml). The [M0 repository-governance review](docs/reviews/M0_REPOSITORY_GOVERNANCE_REVIEW.md), [integrated constitution review](docs/reviews/M0_INTEGRATED_CONSTITUTION_REVIEW.md), and [M0 completion summary](docs/reviews/M0_COMPLETION_SUMMARY.md) record the reviewed state, evidence boundaries, limitations, and follow-ups.
 
 ## Product constitution
 

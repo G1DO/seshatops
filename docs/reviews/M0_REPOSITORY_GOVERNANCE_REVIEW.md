@@ -17,7 +17,7 @@ This document records the documentation-only implementation and static review fo
 | Hosted CI result | Run `31149874303` passed: Markdown lint, link check, YAML lint, and secret scan |
 | Runtime result | Not run by design; no runtime project exists and runtime work is out of scope |
 
-The change remains documentation/governance-only. No application code, package manifest, lockfile, runtime configuration, infrastructure, schema, dashboard, model, dataset, deployment configuration, dependency bot, or GitHub settings mutation was introduced. PR #19 is open for review; no merge or settings mutation was performed.
+The change remains documentation/governance-only. No application code, package manifest, lockfile, runtime configuration, infrastructure, schema, dashboard, model, dataset, deployment configuration, dependency bot, or GitHub settings mutation was introduced. At the time of this Issue #9 review, PR #19 was open for review and no merge or settings mutation had been performed. PR #19 subsequently merged as commit `7c1d59a`; the final integrated M0 review is recorded by Issue #10.
 
 ## 2. Sources reviewed
 
@@ -85,7 +85,7 @@ The repository preserves the existing boundary:
 | Pull requests, CI, tests, evaluations, and artifacts | Actual change, review, verification, limitations, and claim support |
 | `EVIDENCE.md` | Repository-owned claim ledger and status vocabulary route |
 
-`ROADMAP.md` remains a stable milestone sequence rather than a second task tracker. Its stale Issue #8/current-deliverable statements were corrected to reflect Issues #1 through #8 complete, Issue #9 active, and Issue #10 remaining. `EVIDENCE.md` required no correction.
+`ROADMAP.md` remains a stable milestone sequence rather than a second task tracker. Its stale Issue #8/current-deliverable statements were corrected during the Issue #9 work; the final Issue #10 review now reconciles the subsequent PR #19 merge and M0 status. `EVIDENCE.md` required no correction.
 
 ## 6. Clean-room and secret handling
 
@@ -115,7 +115,7 @@ No language workspace was created by Issue #9.
 
 The repository now requires one focused issue/branch/PR, explicit scope and non-goals, a linked closing issue, fresh final-diff review, clean-room review, actual verification evidence, and preferred squash merging. It prohibits unrequested commits, pushes, merges, pull requests, GitHub settings changes, and destructive Git operations.
 
-The current working branch is `chore/9-repository-governance`, and PR #19 is the focused pull request for Issue #9. No merge or GitHub settings mutation was performed.
+The review was performed on the historical `chore/9-repository-governance` branch, and PR #19 was the focused pull request for Issue #9. That PR subsequently merged as `7c1d59a`; this paragraph preserves the Issue #9 review context rather than claiming that the merge occurred during that review.
 
 ## 9. Pull-request template review
 
@@ -216,4 +216,4 @@ Hosted CI evidence is **green for the reviewed governance changes**: visible run
 
 ## 14. Result
 
-**Pass with recorded follow-ups.** The repository-governance implementation remains within the Issue #9 documentation and CI scope without introducing runtime work. Hosted run `31149874303` passed all four jobs. PR review/merge and the integrated M0 review remain follow-ups.
+**Pass with recorded follow-ups.** The repository-governance implementation remains within the Issue #9 documentation and CI scope without introducing runtime work. Hosted run `31149874303` passed all four jobs. PR #19 subsequently merged as `7c1d59a`; Issue #10 owns the final integrated M0 review and completion summary.
