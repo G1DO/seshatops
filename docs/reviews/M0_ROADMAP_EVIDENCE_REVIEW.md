@@ -216,7 +216,7 @@ The roadmap assigns Notion to intent and milestone summaries, GitHub to executio
 | Finding | Disposition |
 | --- | --- |
 | Notion mentions M0–M8 GitHub milestones while Issue #8 forbids milestone mutation. | Existing state was treated as read-only; the repository roadmap is the canonical map for this change. |
-| Deterministic rebuild/replay appears in M1 and M3. | M1 owns the initial projection invariant; M3 owns recovery replay and checksum evidence. |
+| `CLM-006` initially crossed deterministic rebuild and recovery replay. | `CLM-006` now maps to `CAP-007`/M1 for the initial projection rebuild claim; M3 recovery replay and checksum reconstruction require a separate future claim. |
 | Quarantine/replay spans M2, M3, and M7. | M2 owns controls, M3 owns recovery behavior, and M7 owns evidence campaigns. |
 | M5’s exactly-one wording can be misread as exactly-once delivery. | Roadmap wording is bounded to one durable business effect for equivalent intent under retries. |
 | Notion M0 lists `AGENTS.md`, but Issue #8 allows only the expected files and Issue #9 owns repository instructions. | No `AGENTS.md` was added; defer to Issue #9. |
