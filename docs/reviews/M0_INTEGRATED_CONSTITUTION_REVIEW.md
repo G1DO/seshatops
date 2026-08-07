@@ -39,10 +39,14 @@ The source-of-truth boundary remains:
 | Pull requests, CI, tests, evaluations, and artifacts | Actual changes, verification performed, limitations, and claim support |
 | `EVIDENCE.md` | Repository-owned claim identifiers, evidence routes, and claim status records |
 
-Issues #1-#9 are closed through merged PRs #11-#19. Issue #10 remains the
-integrated M0 review owner on this branch. Notion's M0 page still reports
-`In Progress`; it was not mutated, and GitHub/repository execution truth is
-not silently promoted by changing the Notion status.
+Issues #1-#9 are closed through merged PRs #11-#19. Issue #10 remained the
+integrated M0 review owner when this review record was written. Notion's M0
+page still reports `In Progress`; it was not mutated, and GitHub/repository
+execution truth is not silently promoted by changing the Notion status.
+
+Subsequent repository status: Issue #10 was closed as completed and PR #20 was
+merged into `main`. Issue #21 owns M1 activation and concrete event-spine
+contract planning. This note does not alter the historical review record.
 
 ## 3. Issue #10 acceptance matrix
 

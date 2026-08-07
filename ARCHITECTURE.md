@@ -4,11 +4,16 @@
 
 **Owns:** Logical system topology, language ownership, trust and communication boundaries, storage responsibilities, and high-level credential access boundaries.
 
-**Does not own:** Event or command schemas, consistency and replay protocols (Issue #4), authorization matrix and threat model (Issue #5), evaluation protocols (Issue #6), reliability evidence protocols (Issue #7), roadmap and evidence ledger (Issue #8), repository layout and CI (Issue #9), or integrated constitution review (Issue #10).
+**Does not own:** Event or command schemas, consistency and replay protocols
+(M0 principles and the concrete M1 contract are owned by the architecture
+documents and `CONTRACTS.md`), authorization matrix and threat model (Issue #5),
+evaluation protocols (Issue #6), reliability evidence protocols (Issue #7),
+roadmap and evidence ledger (Issue #8), repository layout and CI (Issue #9), or
+integrated constitution review (Issue #10).
 
 Companion review: [docs/reviews/M0_ARCHITECTURE_REVIEW.md](docs/reviews/M0_ARCHITECTURE_REVIEW.md)
 
-Issue #4 correctness model: [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), and [ADRs](docs/adrs/).
+M0 correctness model and M1 contract: [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), [CONTRACTS.md](CONTRACTS.md), and [ADRs](docs/adrs/).
 
 ## 1. Purpose
 
@@ -27,7 +32,7 @@ Logical architecture is distinct from future deployment architecture. One modula
 | Operations manager | Uses the operations console to see risk, understand impact, and approve within assigned scope |
 | Inventory / production planner | Uses the console to investigate stockout risk and prepare replenishment proposals |
 | Platform / security operator | Uses the console for health, quarantine/replay controls, and audit access |
-| Synthetic ERP | External operational system boundary for the public product: emits versioned business events and accepts authorized idempotent commands |
+| Synthetic ERP | External operational system boundary for the public product: records accepted transactions and outbox intent, publishes versioned events through the source-owned relay, and accepts authorized idempotent commands |
 
 Authorization is default-deny. The UI may hide unavailable actions; server-side policy owned by Go is authoritative. Product narrative lives in [PRODUCT.md](PRODUCT.md).
 
@@ -49,7 +54,8 @@ flowchart TB
   PG[PostgreSQL]
   OBJ[ObjectStorage]
   UI <--> GO
-  ERP -->|versionedEvents| BUS
+  ERP -->|atomic source state + outbox intent| PG
+  PG -->|source-owned relay publishes exact outbox bytes| BUS
   BUS --> GO
   GO --> PY
   GO --> PG
@@ -109,11 +115,13 @@ The product implementation languages are **TypeScript**, **Go**, and **Python** 
 
 | Store | Responsibility |
 | --- | --- |
-| PostgreSQL | Authoritative transactional and governance state (workflows, projections as committed state, and audit records). Event-consumption and idempotency mechanisms are Issue #4 |
+| PostgreSQL | Authoritative transactional and governance state (workflows, projections as committed state, and audit records). M1 event-consumption and idempotency details are in `CONTRACTS.md` |
 | Redpanda | Durable asynchronous event transport and replay **input**. Not the authoritative transactional database |
 | Object storage | Immutable or versioned evidence artifacts, evaluation outputs, documents, exports, and larger binary artifacts |
 
-This document does not define tables, topics, buckets, retention periods, partition counts, vendors, deployment sizes, or exact schemas. Publication, consumption, and related broker protocols are Issue #4.
+This document does not define deployment tables, buckets, retention periods,
+partition sizing, vendors, deployment sizes, or future schemas. M1 publication,
+consumption, and related broker protocols are defined in `CONTRACTS.md`.
 
 ## 6. Communication boundaries
 
@@ -124,7 +132,7 @@ Concrete transports (for example request/response shapes, streaming mechanisms, 
 | Path | Rule |
 | --- | --- |
 | Browser ↔ Go platform | Only public platform APIs. Generated clients may be used in the UI |
-| Synthetic ERP → Redpanda | Versioned business events for platform consumption |
+| Synthetic ERP → Redpanda | Source-owned outbox relay publishes exact stored event bytes after the `erp` transaction commits |
 | Redpanda → Go platform | Event consumption for reconstruction, workflows, and replay coordination |
 | Go platform → Python intelligence | Go initiates intelligence requests; Python returns predictions, explanations, and typed proposals on that invocation |
 | Go platform → PostgreSQL | Transactional reads and writes for authoritative state |
@@ -206,11 +214,11 @@ sequenceDiagram
   GO->>GO: Audit and lineage records
 ```
 
-Python proposals remain advisory until Go validates policy and authorizes them, an authorized human approves, Go rechecks authorization, limits, freshness, and current state, and Go executes the command. Detailed event-consumption, consistency, and retry protocols are Issue #4.
+Python proposals remain advisory until Go validates policy and authorizes them, an authorized human approves, Go rechecks authorization, limits, freshness, and current state, and Go executes the command. Detailed M1 event-consumption, consistency, and retry protocols are in `CONTRACTS.md`.
 
 ## 8. Failure isolation
 
-At the boundary level only (retry algorithms, envelopes, and consistency protocols belong to Issue #4):
+At the boundary level only (M0 principles and the concrete M1 contract govern retry algorithms, envelopes, and consistency protocols):
 
 - Python unavailability must not stop core transactional operations owned by Go.
 - Intelligence features may degrade or become unavailable independently.
@@ -224,9 +232,9 @@ This table is not the complete authorization model. Issue #5 owns threat modelin
 | Principal | May hold | Must not hold |
 | --- | --- | --- |
 | Browser / UI | End-user session credentials for Go platform APIs | Database credentials; broker credentials; Python service credentials; ERP mutation credentials |
-| Go platform | Credentials needed for PostgreSQL transactional access, Redpanda consume access, object storage, Python invocation, and approved ERP command APIs | Unscoped “do anything” secrets that bypass tenant and policy checks; Redpanda produce credentials (publication ownership is Issue #4) |
+| Go platform | Credentials needed for PostgreSQL platform access, Redpanda consume access, object storage, Python invocation, and approved ERP command APIs | Unscoped authority that bypasses tenant and policy checks; source-owned outbox publication credentials |
 | Python intelligence | Narrow read credentials for approved feature or read surfaces; object-storage credentials for intelligence artifacts | Broad transactional-database write credentials; ERP mutation credentials; authority to approve or execute workflows |
-| Synthetic ERP | Its own operational datastore credentials | Platform projection write access; SeshatOps policy credentials |
+| Synthetic ERP | Its own operational datastore credentials and the narrowly scoped source-owned outbox publication capability defined by `CONTRACTS.md` | Platform projection write access; SeshatOps policy credentials |
 | Private adapters | Out of public topology | Any requirement that public SeshatOps cannot run without them |
 
 ## 10. Document ownership
@@ -236,6 +244,7 @@ This table is not the complete authorization model. Issue #5 owns threat modelin
 | [PRODUCT.md](PRODUCT.md) | Product thesis, users, workflows, capability boundaries, non-goals |
 | [CLEAN_ROOM.md](CLEAN_ROOM.md) | Public/private boundary and review policy |
 | `ARCHITECTURE.md` | Logical topology, language ownership, trust and communication paths, storage and high-level access boundaries |
+| `CONTRACTS.md` | Concrete M1 event-spine, storage-boundary, transport, failure, checksum, and toolchain contract |
 | Later M0 documents | Event/command principles, threat model, evaluation and reliability protocols, roadmap, evidence ledger, repository instructions |
 
 Notion may hold planning intent. This repository owns publishable architectural truth for SeshatOps.

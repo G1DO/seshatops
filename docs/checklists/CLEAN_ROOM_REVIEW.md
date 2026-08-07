@@ -172,3 +172,45 @@ production context was found in the reviewed scope.
 - No Ahoy repository or private Ahoy artifact was inspected or used.
 - Checked boxes record that this review occurred; they do not prove absence of
   undiscovered issues.
+
+### CRR-0004 - M1 event-spine contract review (Issue #21)
+
+| Field | Value |
+| --- | --- |
+| Reviewer | Codex implementation/review pass; maintainer review remains a follow-up |
+| Date (UTC) | 2026-08-07 |
+| Commit / tip | Working tree based on `5bc9e65`; final commit to be recorded by the implementation PR |
+| Scope (paths / PR) | Issue #21 M1 contract, ADR-0003, ADR-0004, amended ADR-0001, status reconciliation, and M1 review |
+| Review type | M1 documentation, contract, security, and clean-room review |
+| Result | Pass with recorded follow-ups |
+
+#### Checks
+
+- [x] No Ahoy or other private code, schemas, migrations, data, logs, traces, or production config
+- [x] No private screenshots, recordings, or exports
+- [x] No production identifiers, hostnames, internal URLs, or private account/tenant IDs
+- [x] No private business-specific rules, recipes, prices, customers, suppliers, or process knowledge
+- [x] No secrets, credentials, tokens, or private environment files
+- [x] No raw AI conversations or prompt histories containing private context
+- [x] All new material has a permitted source or recorded synthetic provenance
+- [x] Synthetic example values are fictional and independently explainable
+- [x] Uncertain provenance excluded rather than sanitized and retained
+- [x] Category repository search run over the Issue #21 scope
+- [x] Public artifacts remain independently explainable without private systems
+- [x] No private denylist of real identifiers was added
+
+#### Findings and disposition
+
+1. The M1 contract is limited to one synthetic order line and one event family;
+   broader ERP and event-domain design remains deferred.
+2. The event contract, topic/key policy, transaction boundaries, failure rules,
+   checksum, and toolchain are documented without adding runtime infrastructure.
+3. EVIDENCE.md remains unchanged; no runtime claim was promoted.
+4. Hosted documentation CI and final diff verification remain required before
+   the implementation PR is reported complete.
+
+#### Notes
+
+- No Ahoy repository or private Ahoy artifact was inspected or used.
+- Checked boxes record that this review occurred; they do not prove absence of
+  undiscovered issues.

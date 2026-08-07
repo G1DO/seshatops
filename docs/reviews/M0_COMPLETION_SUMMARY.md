@@ -28,8 +28,14 @@ production readiness, or observed intelligence behavior.
 | Repository governance and documentation CI | Issue #9 / PR #19 |
 | Integrated M0 constitution review | Issue #10 / this reviewed change |
 
-PRs #11-#19 are merged. Issue #10 remains the final integrated review owner
-until its normal review and merge workflow is completed.
+PRs #11-#19 were merged when this summary was recorded. Issue #10 remained the
+final integrated review owner at that time.
+
+## Subsequent repository status
+
+Issue #10 was subsequently closed as completed and PR #20 was merged into
+`main` at the M0 review head. Issue #21 activates M1 contract planning. This
+status note preserves the historical review facts above without rewriting them.
 
 History links: [Issue #10](https://github.com/G1DO/seshatops/issues/10),
 [PR #11](https://github.com/G1DO/seshatops/pull/11),

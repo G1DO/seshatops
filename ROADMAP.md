@@ -1,6 +1,6 @@
 # SeshatOps Roadmap
 
-**Status:** M0 final integrated review in progress; M1–M8 are Planned. Application implementation has not started.
+**Status:** M0 is complete; M1 Event Spine contract planning is active; M2–M8 are Planned. Application implementation has not started.
 
 This document is the concise, repository-owned implementation sequence for SeshatOps. It maps each major capability to exactly one primary milestone, records supported dependencies, and defines the governance rules for activating and completing milestones. It is a roadmap, not a task board and not evidence that future capabilities exist.
 
@@ -16,8 +16,9 @@ This roadmap covers the planned sequence from the M0 constitution through the M8
 
 | Milestone | Status | Repository state |
 | --- | --- | --- |
-| M0 — Project Constitution | Final Issue #10 integration review; repository scope complete pending review and merge | Issues #1–#9 and PRs #11–#19 are complete; Issue #10 owns the final integrated M0 review. Notion remains `In Progress` until its normal workflow is updated. |
-| M1–M8 | Planned | Outcome-and-exit-gate placeholders only; no detailed future implementation backlog is maintained here. |
+| M0 — Project Constitution | Complete | Issues #1–#10 and PRs #11–#20 are complete. Notion remains `In Progress` until its normal workflow is updated; that external state is not silently changed here. |
+| M1 — Event Spine | Active contract/planning phase | Issue #21 defines the implementation contract. Runtime implementation has not started. |
+| M2–M8 | Planned | Outcome-and-exit-gate placeholders only; no detailed future implementation backlog is maintained here. |
 
 No application code, service, database, broker, runtime scaffolding, model, dataset, experiment, deployment, or production environment exists in this repository. Existing M0 documents define intent and reviewed documentation truth; they do not prove implementation, observed behavior, reproduced behavior, performance, or production readiness.
 
@@ -36,8 +37,8 @@ Ordinary issue status remains owned by GitHub. `ROADMAP.md` records milestone in
 
 | Milestone | Outcome | Primary capability ownership | Supported or prerequisite capabilities | Dependencies | Exit gate | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| **M0 — Project Constitution** | A reviewer understands what SeshatOps is, what it excludes, how it will be built, and what evidence is required before application code begins. | `CAP-001`–`CAP-003` | Supports governance, evidence, and clean-room review for every later milestone. | Master Project Blueprint and Issues #1–#10; no code or external service dependency. | Reviewed documentation is merged; boundaries, ownership, and exit gates are explicit; the M1 backlog can be created without inventing a new architecture. | **Final integration review** |
-| **M1 — Event Spine** | A synthetic-ERP transaction travels through the transactional outbox, versioned event transport, Go projection, and TypeScript view. | `CAP-004`–`CAP-008` | Provides the event history, projections, and live view used by M2–M5 and the public demo. | M0 architecture, correctness, security, and evidence boundaries. | The vertical slice is duplicate-safe and unchanged event history reconstructs the expected projection deterministically. | **Planned** |
+| **M0 — Project Constitution** | A reviewer understands what SeshatOps is, what it excludes, how it will be built, and what evidence is required before application code begins. | `CAP-001`–`CAP-003` | Supports governance, evidence, and clean-room review for every later milestone. | Master Project Blueprint and Issues #1–#10; no code or external service dependency. | Reviewed documentation is merged; boundaries, ownership, and exit gates are explicit; the M1 backlog can be created without inventing a new architecture. | **Complete** |
+| **M1 — Event Spine** | A synthetic-ERP transaction travels through the transactional outbox, versioned event transport, Go projection, and TypeScript view. | `CAP-004`–`CAP-008` | Provides the event history, projections, and live view used by M2–M5 and the public demo. | M0 architecture, correctness, security, and evidence boundaries. | The vertical slice is duplicate-safe and unchanged event history reconstructs the expected projection deterministically. | **Active — contract planning** |
 | **M2 — Identity & Operations** | Users and service identities operate through default-deny tenant-aware boundaries with visibility into processing health and failures. | `CAP-009`–`CAP-013` | Extends M1 surfaces with identity, authorization, operational visibility, quarantine, and controlled replay. | M1 event and projection surfaces; M0 security model. | The future cross-tenant negative suite passes and privileged operations remain default-deny. | **Planned** |
 | **M3 — Traceability & Recovery** | An authorized operator traces fictional operational lineage and demonstrates controlled reconstruction and recovery. | `CAP-014`–`CAP-017` | Reuses M1 event history/projections and M2 authorization and recovery controls. | M1 event spine; M2 operational authorization and controls. | The traceability query, deterministic projection checksum, and documented restore experiment succeed with reproducible evidence. | **Planned** |
 | **M4 — Stockout Intelligence** | The platform produces evaluated stockout-risk intelligence with uncertainty and honest abstention. | `CAP-018`–`CAP-021` | Uses M1 reconstructed state and M2 tenant boundaries; supplies intelligence to M5 and M8. | M1 replayable operational state; M2 tenant-safe access; M0 evaluation protocols. | A frozen temporal evaluation is reproducible and every prediction is traceable to versioned inputs and evaluation artifacts. | **Planned** |
@@ -123,7 +124,10 @@ Dependencies are recorded only where supported by the product constitution, arch
 
 ## Active-milestone decomposition rule
 
-M0 is the only active milestone during final M0 integration and Issue #10. Detailed GitHub issues are created only for the active milestone. M1–M8 remain outcome-and-exit-gate placeholders and must not accumulate speculative implementation backlogs.
+M1 is the active milestone for Issue #21 contract planning. Detailed GitHub
+issues are created only for the active milestone. M2–M8 remain outcome-and-
+exit-gate placeholders and must not accumulate speculative implementation
+backlogs.
 
 When a milestone begins:
 
@@ -186,6 +190,7 @@ Deferred decisions are owned by the relevant milestone: completed Issue #9 estab
 - [CLEAN_ROOM.md](CLEAN_ROOM.md)
 - [ARCHITECTURE.md](ARCHITECTURE.md)
 - [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md)
+- [CONTRACTS.md](CONTRACTS.md)
 - [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md)
 - [CLAIM_STATUS_VOCABULARY.md](docs/evidence/CLAIM_STATUS_VOCABULARY.md)
 - [EVIDENCE.md](EVIDENCE.md)
