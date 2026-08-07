@@ -2,7 +2,7 @@
 
 ## Linked issue
 
-Closes #<number>
+Closes #123
 
 ## Summary
 
@@ -21,6 +21,7 @@ Closes #<number>
 
 - [ ] Each requested acceptance criterion is addressed or explicitly deferred.
 - [ ] No unrelated cleanup or scope expansion was introduced.
+- [ ] Hosted check results are reported from GitHub for the reviewed commit.
 
 ## Correctness, security, and clean-room impact
 
@@ -38,8 +39,8 @@ Closes #<number>
 ## Verification performed
 
 | Command or check | Actual outcome |
-| --- | --- |
-|  |  |
+| ---------------- | -------------- |
+|                  |                 |
 
 ## Checks not run
 

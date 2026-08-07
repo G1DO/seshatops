@@ -10,14 +10,14 @@ This document records the documentation-only implementation and static review fo
 | Date (UTC) | 2026-08-07 |
 | Branch | `chore/9-repository-governance` |
 | Base commit | `c7408ee` |
-| Reviewed state | Issue #9 working tree after documentation implementation; hosted CI evidence remains pending |
+| Reviewed state | PR #19 at head `cb41a67e2b5eb391083fe8011cd708aa6f90e27b`; visible hosted run `31148062878` failed before this remediation |
 | Scope | Repository instructions, contribution workflow, documentation CI, and surgical status corrections |
 | Review type | Documentation implementation and static governance review |
-| Documentation result | Pass with recorded follow-ups |
-| Hosted CI result | Pending; no hosted run was fabricated |
+| Documentation result | Blocked pending remediation and a successful hosted rerun |
+| Hosted CI result | Run `31148062878` failed: Markdown lint, YAML lint, and secret scan; link check passed |
 | Runtime result | Not run by design; no runtime project exists and runtime work is out of scope |
 
-The change remains documentation/governance-only. No application code, package manifest, lockfile, runtime configuration, infrastructure, schema, dashboard, model, dataset, deployment configuration, dependency bot, or GitHub settings mutation was introduced.
+The change remains documentation/governance-only. No application code, package manifest, lockfile, runtime configuration, infrastructure, schema, dashboard, model, dataset, deployment configuration, dependency bot, or GitHub settings mutation was introduced. PR #19 is open for review; no merge or settings mutation was performed.
 
 ## 2. Sources reviewed
 
@@ -49,11 +49,11 @@ No private Ahoy repository or private Ahoy artifact was accessed.
 | Pull-request workflow is defined | `.github/pull_request_template.md` requires linked issue, scope, evidence, verification, skipped checks, clean-room review, residual risks, and follow-up work. | Covered |
 | Canonical ownership is explicit | `AGENTS.md` and the existing roadmap distinguish Notion intent, GitHub execution state, repository technical truth, and PR/evidence proof. | Covered |
 | Read-before-edit and honest verification are required | `AGENTS.md` requires inspection, assumptions, actual commands, skipped-check reasons, and no fabricated runtime or hosted-CI claims. | Covered |
-| Documentation CI covers Markdown | Markdown lint runs over `**/*.md` with the existing intentional wide-table exception documented in `.markdownlint.yaml`. | Covered |
+| Documentation CI covers Markdown | Markdown lint runs over `**/*.md` with the existing intentional wide-table exception and narrowly scoped duplicate-heading handling documented in `.markdownlint.yaml`; the first hosted run failed on pre-existing emphasis/table-style findings and the template placeholder. | Remediation applied; hosted rerun required |
 | Documentation CI covers links | Lychee checks Markdown links with a read-only GitHub token and only private Notion planning URLs excluded. | Covered |
-| Documentation CI covers YAML | Yamllint checks repository YAML, including the workflow and its configuration. | Covered |
-| Documentation CI covers secrets | Gitleaks scans full history with comments, artifacts, and summaries disabled; the pinned action source invokes the scanner with `--redact`. | Covered |
-| CI is least privilege and supply-chain constrained | Workflow permissions are `contents: read`; actions are pinned to reviewed full commit SHAs; no unsafe trigger or deployment capability exists. | Covered |
+| Documentation CI covers YAML | Yamllint checks repository YAML, including the workflow and its configuration; the first hosted run failed on inline-comment spacing. | Remediation applied; hosted rerun required |
+| Documentation CI covers secrets | Gitleaks scans full history with comments, artifacts, and summaries disabled; the pinned action source invokes the scanner with `--redact`; the first hosted run stopped before scanning on a missing pull-request read permission. | Remediation applied; hosted rerun required |
+| CI is least privilege and supply-chain constrained | Workflow permissions are `contents: read` globally with `pull-requests: read` only on the secret job; actions are pinned to reviewed full commit SHAs and Gitleaks is fixed to version `8.24.3`; no unsafe trigger or deployment capability exists. | Remediation applied; hosted rerun required |
 | Main remains documentation-only | No runtime files, packages, services, containers, deployment settings, or dependency bots were added. | Covered |
 
 ## 4. AGENTS.md review
@@ -115,7 +115,7 @@ No language workspace was created by Issue #9.
 
 The repository now requires one focused issue/branch/PR, explicit scope and non-goals, a linked closing issue, fresh final-diff review, clean-room review, actual verification evidence, and preferred squash merging. It prohibits unrequested commits, pushes, merges, pull requests, GitHub settings changes, and destructive Git operations.
 
-The current working branch is `chore/9-repository-governance`. No commit, push, merge, pull request, or GitHub settings mutation was performed by this implementation.
+The current working branch is `chore/9-repository-governance`, and PR #19 is the focused pull request for Issue #9. No merge or GitHub settings mutation was performed.
 
 ## 9. Pull-request template review
 
@@ -143,6 +143,7 @@ It contains no assertion that unexecuted tests, CI, or runtime checks passed.
 - Manual dispatch.
 - Top-level `permissions: contents: read`.
 - No `pull_request_target`, write permission, deployment step, artifact upload, cache, cloud credential, or PR-text execution.
+- The secret job has only `contents: read` and `pull-requests: read`; no repository secret is exposed to untrusted pull-request code.
 - Each job uses a ten-minute timeout and checks out with `persist-credentials: false`.
 
 ### Action pinning
@@ -159,13 +160,15 @@ All third-party actions use full immutable commit SHAs with adjacent release com
 
 Pins were recorded from the reviewed upstream release references. Future action updates require a fresh pin review.
 
+The Gitleaks action is configured with `GITLEAKS_VERSION: '8.24.3'` so it does not resolve the latest binary at runtime. The action source was inspected for this environment variable and for the redacted/output-disabled behavior.
+
 ### Tool coverage and exclusions
 
 - Markdown lint: all Markdown files, with only `MD013` disabled because existing evidence tables contain intentional wide rows.
 - Link checking: all Markdown files, with a 20-second timeout and two retries.
 - Link exclusions: only `https://app.notion.com/p/` planning pages that require private access. GitHub links remain in scope and receive the read-only `GITHUB_TOKEN`.
 - YAML lint: repository YAML with explicit handling for GitHub Actions `on` keys, document-start conventions, and immutable action-SHA line length.
-- Secret scan: full Git history, with comments, artifacts, and summaries disabled.
+- Secret scan: full Git history, with comments, artifacts, and summaries disabled; Gitleaks version fixed at `8.24.3`.
 
 The configuration intentionally does not add broad URL exclusions, a secret allowlist, a Gitleaks license, dependency automation, package installation, or runtime-specific checks.
 
@@ -177,19 +180,19 @@ The following checks are required for the implementation review and are recorded
 | --- | --- |
 | `git diff --check` | Passed with exit code 0 |
 | Repository-relative Markdown link scan | Passed after implementation; no broken repository-relative links found |
-| Markdownlint | Not available locally; hosted CI required |
+| Markdownlint | Not available locally; visible hosted run `31148062878` failed on MD033/MD060 plus existing MD024/MD036 findings; remediation applied and rerun required |
 | Lychee | Not available locally; hosted CI required |
-| Yamllint | Not available locally; hosted CI required |
-| Gitleaks | Not available locally; hosted CI required; no real secret used |
+| Yamllint | Not available locally; visible hosted run `31148062878` failed on eight inline-comment spacing warnings; remediation applied and rerun required |
+| Gitleaks | Not available locally; visible hosted run `31148062878` failed before scanning with HTTP 403 because `pull-requests: read` was missing; remediation applied; no real secret used |
 | Pinned Gitleaks action source | Passed: the pinned action supports the configured comment/artifact/summary controls and invokes Gitleaks with `--redact` |
 | TOML parse | Passed with Python `tomllib` for `.lychee.toml` |
 | YAML parser | Not available locally because PyYAML is not installed; hosted yamllint required |
-| Static workflow review | Passed: eight action references use full 40-character SHAs; no `pull_request_target`, write permission, external secret reference, runtime manifest, or container manifest found |
+| Static workflow review | Passed after remediation: all action references use full 40-character SHAs; Gitleaks version is fixed at `8.24.3`; secret-job permissions are read-only; no `pull_request_target`, write permission, external secret reference, runtime manifest, or container manifest found |
 | `git ls-files --eol` | Touched tracked files are LF; 25 unrelated pre-existing tracked Markdown files remain CRLF and were not reformatted |
 | Local credential-pattern heuristic | Passed; no common credential-pattern matches found |
 | Runtime tests/typecheck/build/application lint | Not run; no runtime project exists and Issue #9 excludes runtime work |
 
-Hosted CI evidence remains **Pending** until a real GitHub Actions run verifies all four jobs, private-link behavior, and secret-scanner behavior. No run ID or URL is claimed here.
+Hosted CI evidence is **not green**: visible run [31148062878](https://github.com/G1DO/seshatops/actions/runs/31148062878) passed link checking but failed Markdown lint, YAML lint, and the secret job before scanning. A new hosted run for the remediation commit is required before this review can be marked complete.
 
 ## 12. Assumptions and unresolved items
 
@@ -200,17 +203,17 @@ Hosted CI evidence remains **Pending** until a real GitHub Actions run verifies 
 | Private Notion links | Narrowly excluded because they are planning-source links and require authenticated access. |
 | Private GitHub links | Remain in scope and are checked with the read-only workflow token. |
 | Gitleaks organization licensing | The current repository owner is a personal GitHub account; no license was added. A future organization transfer may require an explicit license decision. |
-| Hosted CI | Pending and must not be represented as green until an actual run exists. |
+| Hosted CI | The prior run is visibly failed; the remediation commit must produce a new visible run before CI can be represented as green. |
 | Issue #10 integrated review | Remains the owning follow-up for final M0 integration and milestone exit. |
 
 ## 13. Residual risk and deferred work
 
-- The local environment lacks the four hosted documentation tools, so their real outputs remain unverified until GitHub Actions runs.
+- The local environment lacks the four hosted documentation tools; the first hosted run exposed three failures, and the remediation still requires a new hosted run.
 - Network availability, private GitHub-token access, and the upstream action implementations are not proven by local static inspection.
-- Gitleaks output safety was verified for the pinned action source: it supports the configured output controls and passes `--redact`; future action updates require the same source/output review.
+- Gitleaks output safety was verified for the pinned action source: it supports the configured output controls and passes `--redact`; the binary version is now fixed but release checksum verification remains a residual supply-chain risk.
 - Documentation CI does not prove application correctness, runtime security, authorization, reliability, recovery, performance, deployment, production readiness, or final clean-room independence.
 - Issue #10 owns the integrated M0 review and any cross-document contradictions that remain after the hosted checks.
 
 ## 14. Result
 
-**Pass with recorded follow-ups.** The repository-governance implementation covers the Issue #9 documentation and CI scope without introducing runtime work. Hosted CI evidence and the final integrated M0 review remain pending.
+**Blocked pending hosted rerun.** The repository-governance implementation remains within the Issue #9 documentation and CI scope without introducing runtime work. The visible initial hosted run failed; the remediation must be pushed and verified by a new hosted run before Issue #9 can be called complete.

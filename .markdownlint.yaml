@@ -2,3 +2,5 @@
 # Preserve their readable layout instead of mass-wrapping the documentation.
 default: true
 MD013: false
+MD024:
+  siblings_only: true

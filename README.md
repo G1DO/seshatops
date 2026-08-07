@@ -1,6 +1,6 @@
 # SeshatOps
 
-**Secure Operations Intelligence and Action Control Plane**
+> Secure Operations Intelligence and Action Control Plane
 
 From business events to evidence-backed decisions and human-approved actions.
 
@@ -10,7 +10,7 @@ SeshatOps is a clean-room, multi-tenant operations-intelligence platform that co
 
 The complete product loop is:
 
-**Observe → Reconstruct → Predict → Explain → Propose → Authorize → Approve → Execute → Audit → Replay**
+> Observe → Reconstruct → Predict → Explain → Propose → Authorize → Approve → Execute → Audit → Replay
 
 ## Public scenario
 

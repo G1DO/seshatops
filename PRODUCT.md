@@ -4,7 +4,7 @@
 
 ## 1. Product thesis
 
-**SeshatOps — Secure Operations Intelligence and Action Control Plane**
+> SeshatOps — Secure Operations Intelligence and Action Control Plane
 
 SeshatOps is a clean-room, multi-tenant operations-intelligence platform that:
 
@@ -59,7 +59,7 @@ An operator selects a finished batch and traces ingredients, suppliers, producti
 
 Every end-to-end journey follows:
 
-**Observe → Reconstruct → Predict → Explain → Propose → Authorize → Approve → Execute → Audit → Replay**
+> Observe → Reconstruct → Predict → Explain → Propose → Authorize → Approve → Execute → Audit → Replay
 
 | Stage | Meaning |
 | --- | --- |

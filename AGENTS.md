@@ -95,7 +95,7 @@ Use the vocabulary in `docs/evidence/CLAIM_STATUS_VOCABULARY.md` and the fields 
 - `Reproduced` means the observation was independently repeated under declared conditions.
 - A claim may not be promoted without the required artifact, environment, commit or release, date, reviewer, and limitations.
 - Documentation review proves documentation coverage only. It does not prove runtime correctness, security enforcement, reliability, performance, recovery, deployment, or production readiness.
-- Never invent test output, CI run IDs, URLs, evidence artifacts, thresholds, schedules, vendors, or production behavior.
+- Never invent test output, CI run IDs, URLs, evidence artifacts, thresholds, schedules, vendors, or production behavior. A hosted check is passing only when GitHub shows a successful run for the reviewed commit or pull request.
 
 ## 9. Verification contract
 
@@ -113,7 +113,7 @@ Do not claim a hosted GitHub workflow passed until an actual hosted run exists. 
 
 - Start from an updated `main` when the task permits and use one issue, one focused branch, and one focused pull request.
 - Use a neutral branch name that includes the issue number and short purpose, such as `chore/9-repository-governance`, unless an existing task branch is already specified.
-- Use a meaningful PR title, link the issue with `Closes #<number>`, and keep scope and non-goals explicit.
+- Use a meaningful PR title, link the issue with `Closes #123`, and keep scope and non-goals explicit.
 - Require fresh review of the final diff, a green required-check set, and a clean-room/security review appropriate to the change.
 - Prefer squash merging to keep the main history focused.
 - Complete the PR template with real verification evidence, skipped checks, claim-status changes, residual risks, and follow-up work.

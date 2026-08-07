@@ -8,7 +8,7 @@ This document is the concise, repository-owned implementation sequence for Sesha
 
 SeshatOps is a clean-room, multi-tenant operations-intelligence platform built around the fictional Northstar Foods scenario. The intended product loop is:
 
-**Observe → Reconstruct → Predict → Explain → Propose → Authorize → Approve → Execute → Audit → Replay**
+> Observe → Reconstruct → Predict → Explain → Propose → Authorize → Approve → Execute → Audit → Replay
 
 This roadmap covers the planned sequence from the M0 constitution through the M8 portfolio release. It does not select implementation packages, APIs, schemas, infrastructure products, model vendors, numerical targets, schedules, or staffing assumptions.
 
