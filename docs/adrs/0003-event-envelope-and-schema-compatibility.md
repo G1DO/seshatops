@@ -1,6 +1,6 @@
 # ADR-0003: M1 Event Envelope and Schema Compatibility
 
-- **Status:** Accepted M1 decision; implementation pending
+- **Status:** Accepted M1 decision; JSON/JCS envelope library implemented in Issue #22 (`event`, `northstar`); outbox/broker/projection runtime remains pending
 - **Date:** 2026-08-07
 - **Scope:** Issue #21 event identity, first event family, JSON representation, and schema compatibility
 

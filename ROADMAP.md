@@ -124,11 +124,11 @@ Dependencies are recorded only where supported by the product constitution, arch
 
 ## Active-milestone decomposition rule
 
-M1 is the active milestone. Issue #21 accepted the event-spine contract; Issue
-#22 adds the executable event and Northstar fixture libraries. Detailed GitHub
-issues remain bounded to the active milestone. M2–M8 remain outcome-and-
-exit-gate placeholders and must not accumulate speculative implementation
-backlogs.
+M1 is the active milestone. Issue #21 accepted the event-spine contract, and
+Issue #22 adds the executable event and Northstar fixture libraries. Detailed
+GitHub issues remain bounded to the active milestone. M2–M8 remain
+outcome-and-exit-gate placeholders and must not accumulate speculative
+implementation backlogs.
 
 When a milestone begins:
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -18,8 +19,9 @@ const (
 const maxSafeInt = int64(9007199254740991) // 2^53 - 1
 
 var (
-	uuidRegexp  = regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
-	timeZRegexp = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$`)
+	// UUIDv4 with RFC 4122 variant bits (CONTRACTS.md event_id rule).
+	uuidV4Regexp = regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
+	timeZRegexp  = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$`)
 )
 
 // Envelope is the M1 v1 event envelope. Timestamps keep their exact source
@@ -123,7 +125,7 @@ func validatePayload(env Envelope) error {
 }
 
 func requireUUID(v, field string) error {
-	if !uuidRegexp.MatchString(v) {
+	if !uuidV4Regexp.MatchString(v) {
 		return fmt.Errorf("%w: invalid %s", ErrMalformed, field)
 	}
 	return nil
@@ -156,6 +158,9 @@ func requireCanonicalID(v, field string) error {
 
 func requireTimeZ(v, field string) error {
 	if !timeZRegexp.MatchString(v) {
+		return fmt.Errorf("%w: invalid %s", ErrMalformed, field)
+	}
+	if _, err := time.Parse(time.RFC3339Nano, v); err != nil {
 		return fmt.Errorf("%w: invalid %s", ErrMalformed, field)
 	}
 	return nil

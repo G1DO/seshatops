@@ -56,6 +56,18 @@ added.
 - No Ahoy code, schemas, data, identifiers, logs, screenshots, or business rules were used.
 - Provenance records origin, generation method, license, reproducibility, and independence.
 
+## Remediation note
+
+A follow-up review pass requested:
+
+1. Restore documentation-tooling `.gitignore` entries while keeping Go build ignores.
+2. Enforce UUIDv4 (RFC 4122 variant) and calendar-valid RFC 3339 `Z` timestamps.
+3. Reject empty Northstar seeds instead of aliasing them to `DefaultSeed`.
+4. Update ADR-0003 status to reflect the Issue #22 library without claiming runtime.
+
+Those fixes are included on this branch. Hosted CI success is still not claimed
+until GitHub shows a green run for the reviewed commit.
+
 ## Residual risk and follow-ups
 
 - Update Notion M1 / Issue #22 wording from Protobuf to JSON when convenient.

@@ -18,6 +18,13 @@ Thumbs.db
 tmp/
 temp/
 
+# Local tooling output
+.cache/
+.lychee-cache/
+coverage/
+dist/
+build/
+
 # Local Go build output
 *.exe
 *.test

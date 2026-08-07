@@ -17,11 +17,8 @@ type Fixture struct {
 }
 
 // Generate returns the fixed Northstar Foods M1 fixture for the declared seed.
-// Only DefaultSeed is supported in this slice.
+// Only DefaultSeed is supported in this slice; empty seed is rejected.
 func Generate(seed string) (Fixture, error) {
-	if seed == "" {
-		seed = DefaultSeed
-	}
 	if seed != DefaultSeed {
 		return Fixture{}, errUnsupportedSeed(seed)
 	}

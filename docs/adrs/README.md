@@ -11,7 +11,7 @@ an implementation.
 | --- | --- | --- | --- |
 | [ADR-0001](0001-transactional-outbox-and-at-least-once-delivery.md) | Transactional outbox and at-least-once delivery | Accepted design principle; implementation pending | M1 / M7 evidence |
 | [ADR-0002](0002-idempotent-command-execution.md) | Idempotent command execution and durable receipts | Accepted design principle; implementation pending | M5 / M7 evidence |
-| [ADR-0003](0003-event-envelope-and-schema-compatibility.md) | M1 event envelope and schema compatibility | Accepted M1 decision; implementation pending | M1 / M7 evidence |
+| [ADR-0003](0003-event-envelope-and-schema-compatibility.md) | M1 event envelope and schema compatibility | Accepted M1 decision; Issue #22 library implemented; runtime pending | M1 / M7 evidence |
 | [ADR-0004](0004-postgresql-inbox-and-projection-consistency.md) | M1 PostgreSQL inbox and projection consistency | Accepted M1 decision; implementation pending | M1 / M7 evidence |
 
 Accepted ADRs preserve the M0 boundaries: PostgreSQL remains transactional

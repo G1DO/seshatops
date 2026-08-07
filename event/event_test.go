@@ -130,6 +130,21 @@ func TestCompatibilityRejects(t *testing.T) {
 			raw:     strings.Replace(base, `"2026-08-07T09:00:00Z"`, `"2026-08-07T09:00:00+00:00"`, 1),
 			wantErr: event.ErrMalformed,
 		},
+		{
+			name:    "non_uuid_v4_event_id",
+			raw:     strings.Replace(base, `"event_id": "018f5d78-6e64-4f5f-bd16-8e9f7c4a20a1"`, `"event_id": "018f5d78-6e64-1f5f-bd16-8e9f7c4a20a1"`, 1),
+			wantErr: event.ErrMalformed,
+		},
+		{
+			name:    "invalid_uuid_variant",
+			raw:     strings.Replace(base, `"event_id": "018f5d78-6e64-4f5f-bd16-8e9f7c4a20a1"`, `"event_id": "018f5d78-6e64-4f5f-cd16-8e9f7c4a20a1"`, 1),
+			wantErr: event.ErrMalformed,
+		},
+		{
+			name:    "invalid_calendar_timestamp",
+			raw:     strings.Replace(base, `"occurred_at": "2026-08-07T09:00:00Z"`, `"occurred_at": "2026-13-40T99:00:00Z"`, 1),
+			wantErr: event.ErrMalformed,
+		},
 	}
 
 	for _, tc := range cases {

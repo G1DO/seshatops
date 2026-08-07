@@ -19,13 +19,14 @@ production readiness.
 1. Use Go `1.25.0` as pinned in `go.mod` / [CONTRACTS.md](../../CONTRACTS.md) §9.
 2. From the repository root, run:
 
-```text
-go test ./event ./northstar
-```
+   ```text
+   go test ./event ./northstar
+   ```
 
 3. Expected results:
    - `event` package accepts the valid v1 envelope and rejects declared incompatible cases.
    - `northstar.Generate(northstar.DefaultSeed)` twice yields the same logical event and content hash.
+   - Empty or other seeds are rejected; only the declared default seed is supported.
    - Golden files under `event/testdata/` and `northstar/testdata/` remain byte-stable.
 
 Do not regenerate goldens by capturing wall-clock time or random IDs. The M1

@@ -74,9 +74,10 @@ func TestGenerateMatchesGolden(t *testing.T) {
 }
 
 func TestGenerateUnsupportedSeed(t *testing.T) {
-	_, err := northstar.Generate("other-seed")
-	if err == nil {
-		t.Fatal("expected error")
+	for _, seed := range []string{"", "other-seed"} {
+		if _, err := northstar.Generate(seed); err == nil {
+			t.Fatalf("expected error for seed %q", seed)
+		}
 	}
 }
 
