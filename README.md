@@ -44,6 +44,10 @@ See the [forecasting evaluation protocol](docs/intelligence/FORECASTING_EVALUATI
 
 See the [claim-status vocabulary](docs/evidence/CLAIM_STATUS_VOCABULARY.md), [security evidence protocol](docs/evaluation/SECURITY_EVIDENCE_PROTOCOL.md), [reliability and recovery evidence protocol](docs/evaluation/RELIABILITY_RECOVERY_EVIDENCE_PROTOCOL.md), [performance evidence protocol](docs/evaluation/PERFORMANCE_EVIDENCE_PROTOCOL.md), [fault campaign matrix](docs/evaluation/FAULT_CAMPAIGN_MATRIX.md), [experiment report template](docs/evaluation/templates/EXPERIMENT_REPORT.md), and [M0 operational evidence review](docs/reviews/M0_OPERATIONAL_EVIDENCE_REVIEW.md). These define future evidence requirements; no runtime experiment or operational claim is made.
 
+## Roadmap and evidence ledger
+
+See the [canonical roadmap](ROADMAP.md), [evidence ledger](EVIDENCE.md), and [M0 roadmap/evidence review](docs/reviews/M0_ROADMAP_EVIDENCE_REVIEW.md). These define milestone ownership and future claim governance; they do not prove implementation or measured results.
+
 ## Clean-room boundary
 
 **Ahoy is not a dependency** and is not a source of public artifacts. No Ahoy code, schema, data, identifiers, screenshots, or business-specific knowledge belongs in this repository.
