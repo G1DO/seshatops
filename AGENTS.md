@@ -9,8 +9,8 @@ Behavioral and project guidance for the SeshatOps repository.
 SeshatOps is a clean-room, multi-tenant operations-intelligence platform concept for the fictional Northstar Foods scenario. It is intended to consume ERP events, reconstruct replayable operational state, produce evidence-backed intelligence, and execute only authorized, human-approved actions.
 
 The repository is in Milestone M1, Event Spine, contract/planning phase. M0
-was completed by the merged Issue #10 integration review and PR #20. Issues
-#1 through #9 established the product, clean-room, architecture, correctness,
+was completed by the merged Issue #10 integration review and PR #20. Issues #1
+through #9 established the product, clean-room, architecture, correctness,
 security, intelligence-evaluation, operational-evidence, roadmap, and
 repository-governance documentation. Issue #21 owns the concrete M1 event-spine
 contract.
