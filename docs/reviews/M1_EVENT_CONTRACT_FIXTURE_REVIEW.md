@@ -68,6 +68,12 @@ A follow-up review pass requested:
 Those fixes are included on this branch. Hosted CI success is still not claimed
 until GitHub shows a green run for the reviewed commit.
 
+A later pass added a pre-decode Unicode/JCS gate: invalid UTF-8 bytes and
+unpaired JSON `\u` surrogate escapes are rejected as `ErrMalformed` before
+`encoding/json` can rewrite them to U+FFFD. Literal U+FFFD (`"\ufffd"`) remains
+accepted. `Validate` and JCS serialization also require `utf8.ValidString` on
+envelope string fields.
+
 ## Residual risk and follow-ups
 
 - Update Notion M1 / Issue #22 wording from Protobuf to JSON when convenient.
