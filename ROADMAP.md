@@ -1,9 +1,9 @@
 # SeshatOps Roadmap
 
 **Status:** M0 is complete; M1 Event Spine is active with an executable event
-contract, Northstar fixture (Issue #22), and source/outbox persistence (Issue
-#23); Redpanda publication and projection runtime remain later M1 work; M2–M8
-are Planned.
+contract, Northstar fixture (Issue #22), and source/outbox persistence
+(Issue #23); Redpanda publication and projection runtime remain later M1 work;
+M2–M8 are Planned.
 
 This document is the concise, repository-owned implementation sequence for SeshatOps. It maps each major capability to exactly one primary milestone, records supported dependencies, and defines the governance rules for activating and completing milestones. It is a roadmap, not a task board and not evidence that future capabilities exist.
 

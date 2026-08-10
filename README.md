@@ -18,9 +18,9 @@ All public narrative and demos use **Northstar Foods**, a fictional manufacturer
 
 ## Status
 
-**M0 is complete. M1 Event Spine is active: the reviewed contract exists, Issue
-#22 adds the executable JSON event library and deterministic Northstar Foods
-fixture, and Issue #23 adds the synthetic ERP source transaction with a
+**M0 is complete. M1 Event Spine is active: the reviewed contract exists,
+Issue #22 adds the executable JSON event library and deterministic Northstar
+Foods fixture, and Issue #23 adds the synthetic ERP source transaction with a
 pending transactional outbox.**
 
 This repository holds the completed M0 documentation, the reviewed M1
