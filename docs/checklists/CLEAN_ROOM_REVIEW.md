@@ -214,3 +214,45 @@ production context was found in the reviewed scope.
 - No Ahoy repository or private Ahoy artifact was inspected or used.
 - Checked boxes record that this review occurred; they do not prove absence of
   undiscovered issues.
+
+### CRR-0005 - M1 source transaction and outbox review (Issue #23)
+
+| Field | Value |
+| --- | --- |
+| Reviewer | Implementation pass on branch `feat/23-transactional-outbox`; maintainer review remains a follow-up |
+| Date (UTC) | 2026-08-10 |
+| Commit / tip | `feat/23-transactional-outbox` implementation commit for Issue #23 |
+| Scope (paths / PR) | Issue #23 `erp` package, migrations, integration tests, source/outbox persistence docs, and status updates |
+| Review type | M1 source persistence, clean-room, and verification honesty review |
+| Result | Pass with recorded follow-ups |
+
+#### Checks
+
+- [x] No Ahoy or other private code, schemas, migrations, data, logs, traces, or production config
+- [x] No private screenshots, recordings, or exports
+- [x] No production identifiers, hostnames, internal URLs, or private account/tenant IDs
+- [x] No private business-specific rules, recipes, prices, customers, suppliers, or process knowledge
+- [x] No secrets, credentials, tokens, or private environment files
+- [x] No raw AI conversations or prompt histories containing private context
+- [x] All new material has a permitted source or recorded synthetic provenance
+- [x] Synthetic example values are fictional and independently explainable
+- [x] Uncertain provenance excluded rather than sanitized and retained
+- [x] Category repository search run over the Issue #23 scope
+- [x] Public artifacts remain independently explainable without private systems
+- [x] No private denylist of real identifiers was added
+
+#### Findings and disposition
+
+1. Schema and seed identifiers reuse the fictional Northstar Foods / CONTRACTS.md
+   material from Issue #22.
+2. The source transaction persists pending outbox intent without introducing a
+   broker dependency or exactly-once claim.
+3. `EVIDENCE.md` remains unchanged; `CLM-003` stays Planned.
+4. Hosted Go CI and Documentation CI remain required before the implementation
+   PR is reported complete.
+
+#### Notes
+
+- No Ahoy repository or private Ahoy artifact was inspected or used.
+- Checked boxes record that this review occurred; they do not prove absence of
+  undiscovered issues.

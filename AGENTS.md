@@ -14,13 +14,15 @@ product, clean-room, architecture, correctness, security,
 intelligence-evaluation, operational-evidence, roadmap, and
 repository-governance documentation. Issue #21 owns the concrete M1 event-spine
 contract. Issue #22 owns the executable JSON event package and deterministic
-Northstar Foods fixture.
+Northstar Foods fixture. Issue #23 owns the synthetic ERP source transaction
+and pending transactional outbox persistence.
 
 Issue #21 remains documentation-only. Issue #22 introduces the first Go library
-code under `event/` and `northstar/` only. No service, database, broker,
-deployment, model, or production environment exists here yet. Planned behavior
-must not be described as observed, reproduced, secure, reliable, performant, or
-production-ready without the required evidence.
+code under `event/` and `northstar/`. Issue #23 adds `erp/` PostgreSQL source
+persistence. No broker relay, projection consumer, deployment, model, or
+production environment exists here yet. Planned behavior must not be described
+as observed, reproduced, secure, reliable, performant, or production-ready
+without the required evidence.
 
 ## 2. Source-of-truth hierarchy
 
@@ -94,8 +96,10 @@ Future implementation must preserve these boundaries:
 | C | Excluded unless a later reviewed milestone explicitly changes the boundary | Any M1 implementation |
 
 Issue #22 establishes the root Go module (`github.com/G1DO/seshatops`, Go
-`1.25.0`) with the `event` and `northstar` packages. Later M1 issues may add
-platform packages without inventing a second module or a general ERP schema.
+`1.25.0`) with the `event` and `northstar` packages. Issue #23 adds the `erp`
+package for the synthetic source transaction and pending outbox. Later M1
+issues may add platform packages without inventing a second module or a
+general ERP schema.
 
 ## 8. Evidence and claim governance
 

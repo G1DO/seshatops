@@ -1,6 +1,6 @@
 # ADR-0001: Transactional Outbox and At-Least-Once Delivery
 
-- **Status:** Accepted design principle with accepted M1 amendment; implementation pending
+- **Status:** Accepted design principle with accepted M1 amendment; source/outbox persistence implemented in Issue #23; relay publication pending
 - **Date:** 2026-08-06
 - **Scope:** Issue #4 event publication, consumption, quarantine, and replay correctness
 

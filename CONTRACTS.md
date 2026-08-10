@@ -1,8 +1,9 @@
 # M1 Event Spine Contracts
 
 **Status:** Accepted M1 implementation contract. Issue #22 provides the
-executable JSON/JCS library and Northstar fixture; outbox, broker, and
-projection runtime remain later M1 issues.
+executable JSON/JCS library and Northstar fixture. Issue #23 implements the
+`erp` source transaction and pending outbox persistence. Broker publication
+and projection runtime remain later M1 issues.
 
 **Owns:** The concrete M1 event envelope, first event family, JSON compatibility
 rules, PostgreSQL ownership boundaries, Redpanda topic and key policy, outbox
@@ -151,6 +152,10 @@ and its authoritative inventory row, records the accepted order, and inserts the
 immutable outbox event and content hash. These changes commit or roll back
 together. No Redpanda call occurs inside this transaction.
 
+The Issue #23 persistence contract, migration, seed, and PostgreSQL image pin
+are recorded in
+[SOURCE_OUTBOX_PERSISTENCE.md](docs/architecture/SOURCE_OUTBOX_PERSISTENCE.md).
+
 ### Outbox relay
 
 The source-owned relay claims due outbox rows with a lease, publishes the exact
@@ -285,8 +290,11 @@ resolved to immutable digests before runtime implementation begins.
 - Node.js `24.14.0`
 - npm `11.9.0`
 - TypeScript `6.0.3`
-- PostgreSQL `16.14`
-- Redpanda `v25.2.1`
+- PostgreSQL `16.14` pinned as
+  `postgres@sha256:95206741a5b214807675e14165369d05b93a9cf692223b616d07cca227e74b0b`
+  (`erp.PostgresImage`; see
+  [SOURCE_OUTBOX_PERSISTENCE.md](docs/architecture/SOURCE_OUTBOX_PERSISTENCE.md))
+- Redpanda `v25.2.1` (digest pin required before Issue #24 runtime work)
 
 Reference release records: [PostgreSQL 16.14](https://www.postgresql.org/docs/release/16.14/),
 [Redpanda 25.2 upgrade documentation](https://docs.redpanda.com/streaming/25.2/upgrade/rolling-upgrade/),
