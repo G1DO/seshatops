@@ -19,10 +19,11 @@ and pending transactional outbox persistence.
 
 Issue #21 remains documentation-only. Issue #22 introduces the first Go library
 code under `event/` and `northstar/`. Issue #23 adds `erp/` PostgreSQL source
-persistence. No broker relay, projection consumer, deployment, model, or
-production environment exists here yet. Planned behavior must not be described
-as observed, reproduced, secure, reliable, performant, or production-ready
-without the required evidence.
+persistence. Issue #24 adds the source-owned outbox relay under `relay/` that
+publishes exact stored outbox bytes to Redpanda at least once. No projection
+consumer, deployment, model, or production environment exists here yet. Planned
+behavior must not be described as observed, reproduced, secure, reliable,
+performant, or production-ready without the required evidence.
 
 ## 2. Source-of-truth hierarchy
 
@@ -97,9 +98,9 @@ Future implementation must preserve these boundaries:
 
 Issue #22 establishes the root Go module (`github.com/G1DO/seshatops`, Go
 `1.25.0`) with the `event` and `northstar` packages. Issue #23 adds the `erp`
-package for the synthetic source transaction and pending outbox. Later M1
-issues may add platform packages without inventing a second module or a
-general ERP schema.
+package for the synthetic source transaction and pending outbox. Issue #24 adds
+the `relay` package for source-owned Redpanda publication. Later M1 issues may
+add platform packages without inventing a second module or a general ERP schema.
 
 ## 8. Evidence and claim governance
 

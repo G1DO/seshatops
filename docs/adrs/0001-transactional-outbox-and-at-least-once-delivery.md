@@ -1,6 +1,6 @@
 # ADR-0001: Transactional Outbox and At-Least-Once Delivery
 
-- **Status:** Accepted design principle with accepted M1 amendment; source/outbox persistence implemented in Issue #23; relay publication pending
+- **Status:** Accepted design principle with accepted M1 amendment; source/outbox persistence implemented in Issue #23; source-owned relay publication implemented for M1 library/integration scope in Issue #24; projection consumer pending
 - **Date:** 2026-08-06
 - **Scope:** Issue #4 event publication, consumption, quarantine, and replay correctness
 
@@ -37,7 +37,7 @@ Outbox states are `pending`, `publishing`, `published`, and `quarantined`.
 Transient publication failures use a 1-second exponential backoff capped at 60
 seconds. A crash after broker acknowledgement and before the PostgreSQL update
 may publish a duplicate with the same event identity and content.
-An expired `publishing` lease returns the row to `pending` for retry; a live lease
+An expired `publishing` lease is reclaimable for retry; a live lease
 is not claimed by another relay worker.
 
 The Go consumer uses manual offset commits and acknowledges only after the

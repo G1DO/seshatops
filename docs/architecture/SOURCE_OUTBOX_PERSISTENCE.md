@@ -1,7 +1,7 @@
 # M1 Source Transaction and Outbox Persistence
 
-**Status:** Implemented for Issue #23 library/integration scope. Outbox relay,
-Redpanda publication, and platform projection remain later M1 issues.
+**Status:** Implemented for Issue #23 library/integration scope. Issue #24
+implements the source-owned outbox relay; projection remains later M1 work.
 
 **Owns:** The minimum `erp` PostgreSQL schema, synthetic one-line order
 acceptance transaction, immutable outbox insert, Northstar inventory seed, and

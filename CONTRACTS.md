@@ -155,6 +155,9 @@ together. No Redpanda call occurs inside this transaction.
 The Issue #23 persistence contract, migration, seed, and PostgreSQL image pin
 are recorded in
 [SOURCE_OUTBOX_PERSISTENCE.md](docs/architecture/SOURCE_OUTBOX_PERSISTENCE.md).
+The Issue #24 relay behavior, Redpanda pin, lease/backoff, and backlog
+visibility are recorded in
+[OUTBOX_RELAY.md](docs/architecture/OUTBOX_RELAY.md).
 
 ### Outbox relay
 
@@ -162,8 +165,9 @@ The source-owned relay claims due outbox rows with a lease, publishes the exact
 stored event bytes, and marks the row `published` only after broker acknowledgement.
 A crash after broker acknowledgement and before the PostgreSQL update may
 publish a duplicate with the same identity and content.
-An expired `publishing` lease returns the row to `pending` for retry; a live lease
-is not claimed by another relay worker.
+An expired `publishing` lease is reclaimable for retry (claimed again as
+`publishing` under a new lease); a live lease is not claimed by another relay
+worker.
 
 Outbox states are `pending`, `publishing`, `published`, and `quarantined`.
 Transient publication failures use a 1-second exponential backoff capped at
@@ -294,7 +298,10 @@ resolved to immutable digests before runtime implementation begins.
   `postgres@sha256:95206741a5b214807675e14165369d05b93a9cf692223b616d07cca227e74b0b`
   (`erp.PostgresImage`; see
   [SOURCE_OUTBOX_PERSISTENCE.md](docs/architecture/SOURCE_OUTBOX_PERSISTENCE.md))
-- Redpanda `v25.2.1` (digest pin required before Issue #24 runtime work)
+- Redpanda `v25.2.1` pinned as
+  `docker.redpanda.com/redpandadata/redpanda@sha256:218469e5d088757bb2c3ff4c5e272f7eebdc4e94c933e6e15aff10b845cbcd07`
+  (`relay.RedpandaImage`; see
+  [OUTBOX_RELAY.md](docs/architecture/OUTBOX_RELAY.md))
 
 Reference release records: [PostgreSQL 16.14](https://www.postgresql.org/docs/release/16.14/),
 [Redpanda 25.2 upgrade documentation](https://docs.redpanda.com/streaming/25.2/upgrade/rolling-upgrade/),
