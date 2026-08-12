@@ -295,10 +295,18 @@ The full test inventory and evidence ownership are recorded in the Issue #5 revi
 
 ## 14. Deferred implementation decisions
 
-The following are deliberately not selected here:
+[ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) and
+[IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md) resolve the OIDC protocol
+profile (Authorization Code + PKCE; no custom IdP), Go-owned principal/session
+model, tenant visibility via platform membership and tenant-scoped allow-list,
+explicit allow-list policy representation, and service-identity delegation
+boundaries for Identity & Operations design. Vendor selection, routes, schemas,
+and runtime enforcement remain deferred.
 
-- identity provider, authentication protocol, session/token format, and revocation mechanism;
-- policy language, policy engine, role catalog, assignment schema, and scope syntax;
+The following remain deliberately not selected here:
+
+- identity-provider vendor/product, concrete token storage format, and revocation mechanism implementation;
+- policy-engine product, role catalog content, assignment schema, and scope syntax;
 - API routes, request/response schemas, middleware, and generated clients;
 - database tables, indexes, database roles, row-level mechanisms, caches, and storage layout;
 - cryptographic receipt or audit protocols;
