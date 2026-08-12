@@ -31,3 +31,8 @@ build/
 *.out
 vendor/
 
+# Node / TypeScript
+node_modules/
+web/dist/
+*.tsbuildinfo
+
