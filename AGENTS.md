@@ -25,7 +25,10 @@ the `platform/` consumer that commits inbox and inventory-projection state
 atomically and acknowledges Redpanda offsets only after that commit. Issue #26
 adds handler-poison escalation and bounded consumer failure/backlog inspection
 on that consumer. Issue #27 adds the read-only `api/` REST and SSE surface over
-committed projection state. No deployment, model, or production environment
+committed projection state, with post-commit notifications from `platform`.
+Issue #28 adds the TypeScript `web/` operations view over that API. Issue #29
+adds platform-only derived-state reset, retained-history rebuild, and local
+duplicate/checksum proofs. No deployment, model, or production environment
 exists here yet. Planned behavior
 must not be described as observed, reproduced, secure, reliable, performant, or
 production-ready without the required evidence.
@@ -109,6 +112,9 @@ the `relay` package for source-owned Redpanda publication. Issue #25 adds the
 Issue #26 extends `platform` with poison escalation and `InspectProcessing`.
 Issue #27 adds the read-only `api` package (REST snapshot + SSE) over committed
 projection state, with post-commit notifications from `platform`.
+Issue #28 adds the TypeScript `web/` operations view. Issue #29 extends
+`platform` with `ResetDerivedState` and `RebuildFromHistory` for local
+duplicate/rebuild checksum proofs.
 Later M1 issues may extend platform packages without inventing a second module
 or a general ERP schema.
 
