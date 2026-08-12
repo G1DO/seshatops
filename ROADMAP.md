@@ -21,9 +21,9 @@ This roadmap covers the planned sequence from the M0 constitution through the M8
 
 | Milestone | Status | Repository state |
 | --- | --- | --- |
-| M0 — Project Constitution | Complete | Issues #1–#10 and PRs #11–#20 are complete. Notion remains `In Progress` until its normal workflow is updated; that external state is not silently changed here. |
-| M1 — Event Spine | Complete (test-environment exit gate) | Issues #21–#29 delivered the stack. Issue #30 recorded the integrated exit-gate campaign and Observed decisions for `CLM-003`–`CLM-006`. No production deployment. |
-| M2–M8 | Planned | Outcome-and-exit-gate placeholders only; no detailed future implementation backlog is maintained here. |
+| M0 — Project Constitution | Complete | Issues #1–#10 and PRs #11–#20 are complete. GitHub [milestone/1](https://github.com/G1DO/seshatops/milestone/1) and the Notion M0 page are closed/Complete as of 2026-08-12. |
+| M1 — Event Spine | Complete (test-environment exit gate) | Issues #21–#30 delivered the stack and exit-gate campaign (`CLM-003`–`CLM-006` Observed). GitHub [milestone/2](https://github.com/G1DO/seshatops/milestone/2) and the Notion M1 page are closed/Complete as of 2026-08-12. No production deployment. |
+| M2–M8 | Planned | Outcome-and-exit-gate placeholders only; no detailed future implementation backlog is maintained here. Next activation: M2 Identity & Operations. |
 
 The repository now includes Go packages for the event contract, Northstar
 fixture, `erp` source/outbox, `relay` publication, `platform` projection
