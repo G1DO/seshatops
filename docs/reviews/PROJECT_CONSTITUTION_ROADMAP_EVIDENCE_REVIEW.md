@@ -1,4 +1,4 @@
-# M0 Roadmap and Evidence Review — Issue #8
+# Project Constitution Roadmap and Evidence Review — Issue #8
 
 This document records a documentation-only review of the Issue #8 roadmap, capability ownership map, and evidence ledger. It does not claim application implementation, runtime correctness, security enforcement, performance, reliability, recovery, production readiness, or completed future experiments.
 
@@ -30,57 +30,57 @@ The change remains documentation-only. No application code, runtime configuratio
 - `docs/evidence/CLAIM_STATUS_VOCABULARY.md`.
 - All files under `docs/evaluation/`, including evidence protocols, schemas, templates, and the fault campaign matrix.
 - Both ADRs under `docs/adrs/`.
-- All existing M0 review documents under `docs/reviews/` and the clean-room checklist under `docs/checklists/`.
+- All existing Constitution review documents under `docs/reviews/` and the clean-room checklist under `docs/checklists/`.
 
 ### Canonical planning sources
 
 - [SeshatOps — Master Project Blueprint](https://app.notion.com/p/3b40a821b3cc813081f0ea44fd72692a).
 - [Workflow — Notion → GitHub → Evidence](https://app.notion.com/p/3b40a821b3cc810eadebc2fc9a067000).
-- [M0 — Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee).
-- The `SeshatOps Milestones` database and its M0–M8 rows.
+- [Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee).
+- The `SeshatOps Milestones` database and its Project Constitution through Portfolio Release rows.
 
-The live GitHub repository metadata confirmed that the repository is private and `main` is the default branch. The connected GitHub issue data confirmed Issue #8’s M0 association. A direct anonymous GitHub API request could not enumerate the private milestone collection, so no complete live milestone inventory is claimed here; no milestone was created or modified.
+The live GitHub repository metadata confirmed that the repository is private and `main` is the default branch. The connected GitHub issue data confirmed Issue #8’s Constitution association. A direct anonymous GitHub API request could not enumerate the private milestone collection, so no complete live milestone inventory is claimed here; no milestone was created or modified.
 
 ## 3. Issue #8 acceptance-criteria coverage
 
 | Criterion | Coverage | Result |
 | --- | --- | --- |
 | Create `ROADMAP.md` and `EVIDENCE.md` | Both files exist with the required sections and content. | Covered |
-| Define M0–M8 outcomes and testable exit gates | The roadmap contains all nine canonical names, outcomes, gates, and statuses. | Covered |
-| Keep detailed implementation issues limited to the active milestone | M0 is the only active milestone; M1–M8 contain only outcome, dependency, capability, and exit-gate placeholders. | Covered |
-| Map every major capability to exactly one primary milestone | `CAP-001`–`CAP-040` are unique and each appears once as a primary owner. | Covered |
+| Define Project Constitution through Portfolio Release outcomes and testable exit gates | The roadmap contains all nine canonical names, outcomes, gates, and statuses. | Covered |
+| Keep detailed implementation issues limited to the active milestone | Project Constitution is the only active capability sequence at review time; Event Spine through Portfolio Release contain only outcome, dependency, capability, and exit-gate placeholders. | Covered |
+| Map every major capability to exactly one primary capability owner | `CAP-001`–`CAP-040` are unique and each appears once as a primary owner. | Covered |
 | Define required evidence-ledger fields | The field-definition section and ledger identify claim, status, owner, verification, artifact, environment, commit/release, date, reviewer, and limitations. | Covered |
 | Mark every initial claim Planned | `CLM-001`–`CLM-035` all have exactly `Planned` status. | Covered |
 | State source-of-truth boundaries | Notion, GitHub, repository documents, pull requests, and evidence artifacts are explicitly separated. | Covered |
 | Preserve the invariants | No orphan capability, no duplicate primary owner, no unsupported promotion, no invented schedule/target, and no Ahoy dependency are documented. | Covered |
 
-## 4. M0–M8 milestone-name review
+## 4. Project Constitution through Portfolio Release milestone-name review
 
 | ID | Canonical name | Roadmap status |
 | --- | --- | --- |
-| M0 | Project Constitution | Active |
-| M1 | Event Spine | Planned |
-| M2 | Identity & Operations | Planned |
-| M3 | Traceability & Recovery | Planned |
-| M4 | Stockout Intelligence | Planned |
-| M5 | Approved Actions | Planned |
-| M6 | Governed RAG | Planned |
-| M7 | Reliability & Cloud | Planned |
-| M8 | Portfolio Release | Planned |
+| Constitution | Project Constitution | Active |
+| Event Spine | Event Spine | Planned |
+| Identity | Identity & Operations | Planned |
+| Traceability | Traceability & Recovery | Planned |
+| Stockout | Stockout Intelligence | Planned |
+| Approvals | Approved Actions | Planned |
+| Governed RAG | Governed RAG | Planned |
+| Reliability | Reliability & Cloud | Planned |
+| Portfolio | Portfolio Release | Planned |
 
-All nine names match the canonical map. M5 wording is intentionally expressed as one durable business effect for equivalent intent under retries, not exactly-once network or broker delivery. M6 thresholds remain Planned and no numerical target is introduced.
+All nine names match the canonical map. Approvals wording is intentionally expressed as one durable business effect for equivalent intent under retries, not exactly-once network or broker delivery. Governed RAG thresholds remain Planned and no numerical target is introduced.
 
 ## 5. Milestone outcome and exit-gate review
 
-- M0 describes the integrated documentation outcome and the gate required before M1 issue creation.
-- M1 covers the synthetic-ERP-to-live-view vertical slice, duplicate safety, and deterministic reconstruction.
-- M2 covers identity, tenant authorization, service identities, operational visibility, quarantine, and controlled replay.
-- M3 covers lineage, deterministic recovery replay, checksum comparison, backup/restore, and integrity verification.
-- M4 covers temporal forecasting evaluation, uncertainty, abstention, and lineage.
-- M5 preserves the proposal → policy → human approval → execution-time recheck → idempotent command → receipt boundary.
-- M6 preserves permission-first retrieval, citations, refusals, conflicting evidence, prompt-injection resistance, and evaluation.
-- M7 preserves telemetry, SLO, performance, fault, restore, deployment, and cost evidence without targets.
-- M8 reconciles the deterministic demo, public release, evidence index, clean-room independence, and portfolio claims.
+- Constitution describes the integrated documentation outcome and the gate required before Event Spine issue creation.
+- Event Spine covers the synthetic-ERP-to-live-view vertical slice, duplicate safety, and deterministic reconstruction.
+- Identity covers identity, tenant authorization, service identities, operational visibility, quarantine, and controlled replay.
+- Traceability covers lineage, deterministic recovery replay, checksum comparison, backup/restore, and integrity verification.
+- Stockout covers temporal forecasting evaluation, uncertainty, abstention, and lineage.
+- Approvals preserves the proposal → policy → human approval → execution-time recheck → idempotent command → receipt boundary.
+- Governed RAG preserves permission-first retrieval, citations, refusals, conflicting evidence, prompt-injection resistance, and evaluation.
+- Reliability preserves telemetry, SLO, performance, fault, restore, deployment, and cost evidence without targets.
+- Portfolio reconciles the deterministic demo, public release, evidence index, clean-room independence, and portfolio claims.
 
 Every milestone has an observable outcome and a testable exit gate. No milestone has a calendar date, duration, staffing assumption, or invented threshold.
 
@@ -88,25 +88,25 @@ Every milestone has an observable outcome and a testable exit gate. No milestone
 
 The roadmap contains exactly 40 stable capability IDs, `CAP-001` through `CAP-040`:
 
-| Milestone | Capability IDs | Coverage |
+| Capability sequence | Capability IDs | Coverage |
 | --- | --- | --- |
-| M0 | `CAP-001`–`CAP-003` | Constitution/clean room; architecture/correctness/security; evidence/claims |
-| M1 | `CAP-004`–`CAP-008` | Synthetic ERP/workload; outbox; event contracts/transport; projections; live view |
-| M2 | `CAP-009`–`CAP-013` | Identity; tenant authorization; service identities; visibility; quarantine/replay |
-| M3 | `CAP-014`–`CAP-017` | Traceability; deterministic replay/checksum; backup/restore; recovery/integrity |
-| M4 | `CAP-018`–`CAP-021` | Forecast data/features; prediction; uncertainty/abstention; evaluation/lineage |
-| M5 | `CAP-022`–`CAP-026` | Typed proposals; approval; execution rechecks; idempotency; receipts/reconciliation |
-| M6 | `CAP-027`–`CAP-030` | Permission-aware retrieval; citations/refusals; injection/leakage defense; evaluation |
-| M7 | `CAP-031`–`CAP-037` | Telemetry; SLO; performance; fault; restore/recovery evidence; deployment; cost |
-| M8 | `CAP-038`–`CAP-040` | Deterministic demo; release/evidence index; public claim bounds |
+| Constitution | `CAP-001`–`CAP-003` | Constitution/clean room; architecture/correctness/security; evidence/claims |
+| Event Spine | `CAP-004`–`CAP-008` | Synthetic ERP/workload; outbox; event contracts/transport; projections; live view |
+| Identity | `CAP-009`–`CAP-013` | Identity; tenant authorization; service identities; visibility; quarantine/replay |
+| Traceability | `CAP-014`–`CAP-017` | Traceability; deterministic replay/checksum; backup/restore; recovery/integrity |
+| Stockout | `CAP-018`–`CAP-021` | Forecast data/features; prediction; uncertainty/abstention; evaluation/lineage |
+| Approvals | `CAP-022`–`CAP-026` | Typed proposals; approval; execution rechecks; idempotency; receipts/reconciliation |
+| Governed RAG | `CAP-027`–`CAP-030` | Permission-aware retrieval; citations/refusals; injection/leakage defense; evaluation |
+| Reliability | `CAP-031`–`CAP-037` | Telemetry; SLO; performance; fault; restore/recovery evidence; deployment; cost |
+| Portfolio | `CAP-038`–`CAP-040` | Deterministic demo; release/evidence index; public claim bounds |
 
 The primary-ownership check is satisfied:
 
 - No capability is orphaned.
-- No capability has two primary milestones.
-- Supporting milestones are explicitly separate from primary ownership.
-- M1’s initial projection rebuild and M3’s authorized recovery replay/checksum evidence are intentionally distinct capability boundaries.
-- M2 owns quarantine/replay operations; M3 owns reconstruction/recovery behavior; M7 owns campaign evidence.
+- No capability has two primary capability owners.
+- Supporting owners are explicitly separate from primary ownership.
+- Event Spine’s initial projection rebuild and Traceability’s authorized recovery replay/checksum evidence are intentionally distinct capability boundaries.
+- Identity owns quarantine/replay operations; Traceability owns reconstruction/recovery behavior; Reliability owns campaign evidence.
 
 ## 7. Capability-to-evidence-route check
 
@@ -114,23 +114,23 @@ Every capability row includes a future verification route. The routes are limite
 
 No route is represented as already executed. No planned filename is presented as an evidence artifact.
 
-## 8. Milestone dependency review
+## 8. Capability-sequence dependency review
 
 The roadmap differentiates hard implementation dependencies, sequencing preferences, and cross-cutting evidence dependencies.
 
-- M0 precedes the event spine and all later milestone planning.
-- M1 supplies the operational history and projections used by M2–M5.
-- M2 supplies authorization and permission context used by M3, M5, and M6.
-- M3 supplies recovery behavior required before M7 restore/recovery campaigns.
-- M4 supplies intelligence output for the M5 proposal flow.
-- M7 supplies operational evidence for earlier capabilities without becoming their primary owner.
-- M8 consumes completed capability evidence and reconciles public claims.
+- Project Constitution precedes the event spine and all later capability-sequence planning.
+- Event Spine supplies the operational history and projections used by Identity & Operations through Approved Actions.
+- Identity & Operations supplies authorization and permission context used by Traceability & Recovery, Approved Actions, and Governed RAG.
+- Traceability & Recovery supplies recovery behavior required before Reliability & Cloud restore/recovery campaigns.
+- Stockout Intelligence supplies intelligence output for the Approved Actions proposal flow.
+- Reliability & Cloud supplies operational evidence for earlier capabilities without becoming their primary owner.
+- Portfolio Release consumes completed capability evidence and reconciles public claims.
 
 No dependency introduces a vendor, schema, target, schedule, or staffing assumption.
 
-## 9. Active-milestone decomposition review
+## 9. Active capability-sequence decomposition review
 
-M0 is the only active milestone. The roadmap explicitly requires Notion review, dependency and evidence confirmation, and bounded GitHub issues before a milestone begins. M1–M8 remain placeholders and have no speculative issue backlog. GitHub remains the execution-status owner.
+Project Constitution is the only active capability sequence at review time. The roadmap explicitly requires Notion review, dependency and evidence confirmation, and bounded GitHub issues before a capability sequence begins. Event Spine through Portfolio Release remain placeholders and have no speculative issue backlog. GitHub remains the execution-status owner.
 
 ## 10. Evidence-ledger field review
 
@@ -140,7 +140,7 @@ M0 is the only active milestone. The roadmap explicitly requires Notion review, 
 - Claim
 - Status
 - Capability ID
-- Owning milestone
+- Owning capability sequence
 - Verification method
 - Required artifact / Artifact
 - Evidence artifact
@@ -157,13 +157,13 @@ The required Issue #8 fields remain directly identifiable in the ledger. Initial
 
 ## 11. Stable claim-ID review
 
-The initial ledger contains exactly 35 unique stable IDs, `CLM-001` through `CLM-035`. Each claim has one capability ID, one owning milestone, one future verification method, and one required artifact category. No evidence artifact link is fabricated.
+The initial ledger contains exactly 35 unique stable IDs, `CLM-001` through `CLM-035`. Each claim has one capability ID, one owning capability sequence, one future verification method, and one required artifact category. No evidence artifact link is fabricated.
 
 ## 12. Initial claim coverage
 
 The initial claims cover:
 
-- M0 constitution and clean-room independence.
+- Project Constitution and clean-room independence.
 - Outbox durability, duplicate-safe processing, event compatibility, and deterministic rebuild.
 - Tenant isolation, default-deny operations, operational visibility, and controlled replay.
 - Traceability, backup/restore, recovery, and integrity.
@@ -189,7 +189,7 @@ The implementation does not introduce:
 
 ## 15. Source-of-truth boundary review
 
-The roadmap assigns Notion to intent and milestone summaries, GitHub to execution state, repository documents to reviewed technical truth, and pull requests/evidence artifacts to actual changes and claim support. The ledger does not duplicate daily issue state or redefine the canonical claim vocabulary.
+The roadmap assigns Notion to intent and capability-sequence summaries, GitHub to execution state, repository documents to reviewed technical truth, and pull requests/evidence artifacts to actual changes and claim support. The ledger does not duplicate daily issue state or redefine the canonical claim vocabulary.
 
 ## 16. Consistency with Issues #1–#7
 
@@ -215,11 +215,11 @@ The roadmap assigns Notion to intent and milestone summaries, GitHub to executio
 
 | Finding | Disposition |
 | --- | --- |
-| Notion mentions M0–M8 GitHub milestones while Issue #8 forbids milestone mutation. | Existing state was treated as read-only; the repository roadmap is the canonical map for this change. |
-| `CLM-006` initially crossed deterministic rebuild and recovery replay. | `CLM-006` now maps to `CAP-007`/M1 for the initial projection rebuild claim; M3 recovery replay and checksum reconstruction require a separate future claim. |
-| Quarantine/replay spans M2, M3, and M7. | M2 owns controls, M3 owns recovery behavior, and M7 owns evidence campaigns. |
-| M5’s exactly-one wording can be misread as exactly-once delivery. | Roadmap wording is bounded to one durable business effect for equivalent intent under retries. |
-| Notion M0 lists `AGENTS.md`, but Issue #8 allows only the expected files and Issue #9 owns repository instructions. | No `AGENTS.md` was added; defer to Issue #9. |
+| Notion mentions Project Constitution through Portfolio Release GitHub milestones while Issue #8 forbids milestone mutation. | Existing state was treated as read-only; the repository roadmap is the canonical map for this change. |
+| `CLM-006` initially crossed deterministic rebuild and recovery replay. | `CLM-006` now maps to `CAP-007`/Event Spine for the initial projection rebuild claim; Traceability & Recovery replay and checksum reconstruction require a separate future claim. |
+| Quarantine/replay spans Identity, Traceability, and Reliability. | Identity owns controls, Traceability owns recovery behavior, and Reliability owns evidence campaigns. |
+| Approvals’s exactly-one wording can be misread as exactly-once delivery. | Roadmap wording is bounded to one durable business effect for equivalent intent under retries. |
+| Notion Constitution lists `AGENTS.md`, but Issue #8 allows only the expected files and Issue #9 owns repository instructions. | No `AGENTS.md` was added; defer to Issue #9. |
 | The private GitHub milestone collection could not be enumerated anonymously. | Record as an inspection limitation; no milestone mutation was attempted. |
 
 ## 19. Deferred work and owners
@@ -227,20 +227,20 @@ The roadmap assigns Notion to intent and milestone summaries, GitHub to executio
 | Work | Owner |
 | --- | --- |
 | Repository instructions, PR workflow, documentation CI | Issue #9 |
-| Integrated adversarial M0 review | Issue #10 |
-| Runtime event spine implementation | M1 |
-| Identity/session and operational enforcement | M2 |
-| Recovery implementation and restore behavior | M3 |
-| Forecast evaluation decisions and thresholds | M4 |
-| Command execution and reconciliation implementation | M5 |
-| Retrieval implementation and governed-RAG thresholds | M6 |
-| Deployment, operational evidence, and cost methodology | M7 |
-| Public release and final claim reconciliation | M8 |
+| Integrated adversarial Constitution review | Issue #10 |
+| Runtime event spine implementation | Event Spine |
+| Identity/session and operational enforcement | Identity |
+| Recovery implementation and restore behavior | Traceability |
+| Forecast evaluation decisions and thresholds | Stockout |
+| Command execution and reconciliation implementation | Approvals |
+| Retrieval implementation and governed-RAG thresholds | Governed RAG |
+| Deployment, operational evidence, and cost methodology | Reliability |
+| Public release and final claim reconciliation | Portfolio |
 
 ## 20. Residual risks
 
 - The roadmap and ledger are governance artifacts and do not prove future implementation.
-- Capability grouping and evidence routes may require controlled revision as active milestones make implementation decisions.
+- Capability grouping and evidence routes may require controlled revision as active capability sequences make implementation decisions.
 - No runtime test harness, identity system, retrieval system, telemetry pipeline, backup system, deployment environment, or production environment exists.
 - Future evidence may be incomplete, non-reproducible, invalidated, or too broadly interpreted; withdrawal and supersession must remain available.
 - Maintainer review and the integrated Issue #10 constitution review remain follow-ups.

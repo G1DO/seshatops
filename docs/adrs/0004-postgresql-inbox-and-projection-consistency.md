@@ -1,20 +1,20 @@
-# ADR-0004: M1 PostgreSQL Inbox and Projection Consistency
+# ADR-0004: Event Spine PostgreSQL Inbox and Projection Consistency
 
-- **Status:** Accepted M1 decision; source/outbox persistence implemented in Issue #23; inbox/projection consumer implemented in Issue #25; bounded failure/backlog inspection and poison escalation in Issue #26
+- **Status:** Accepted Event Spine decision; source/outbox persistence implemented in Issue #23; inbox/projection consumer implemented in Issue #25; bounded failure/backlog inspection and poison escalation in Issue #26
 - **Date:** 2026-08-07
 - **Scope:** Issue #21 source/outbox ownership, inbox identity, projection transactions, gaps, and failure records
 
 ## Context
 
-M0 requires PostgreSQL authority, atomic source/outbox recording, at-least-once
+Constitution requires PostgreSQL authority, atomic source/outbox recording, at-least-once
 delivery, stable identity, transactional deduplication, per-aggregate version
-checks, quarantine, and deterministic replay. M1 needs concrete persistence
+checks, quarantine, and deterministic replay. Event Spine needs concrete persistence
 boundaries without introducing another database or implying a distributed
 transaction with Redpanda.
 
 ## Decision
 
-1. M1 uses one PostgreSQL database with logical erp and platform schemas and separate responsibilities.
+1. Event Spine uses one PostgreSQL database with logical erp and platform schemas and separate responsibilities.
 2. The source transaction updates the accepted order, authoritative inventory, and immutable outbox row atomically.
 3. The source-owned outbox relay publishes after commit and records published only after broker acknowledgement.
 4. The relay preserves event bytes, event ID, content, and aggregate key across retries.
@@ -36,7 +36,7 @@ defined in CONTRACTS.md.
 - Duplicate and conflicting identities become explicit durable decisions.
 - A partition may experience bounded delay during transient failures, while
   deterministic poison and gap cases become durable quarantine decisions.
-- M1 does not provide an operator recovery UI or claim exactly-once behavior.
+- Event Spine does not provide an operator recovery UI or claim exactly-once behavior.
 
 ## Alternatives rejected
 
@@ -47,7 +47,7 @@ commit without a distributed transaction.
 
 ### Separate database for source and platform state
 
-Rejected for M1 because one PostgreSQL database with logical schemas and scoped
+Rejected for Event Spine because one PostgreSQL database with logical schemas and scoped
 credentials is sufficient to demonstrate separate ownership without adding an
 extra database dependency.
 
@@ -68,7 +68,7 @@ produce an unsafe projection and breaks deterministic reconstruction.
 
 ## Verification route and limitations
 
-The M1 contract review must verify transaction-boundary wording, uniqueness,
+The Event Spine contract review must verify transaction-boundary wording, uniqueness,
 acknowledgement order, failure dispositions, checksum scope, and no extra
 runtime infrastructure. Runtime integration and fault tests belong to later
-M1 implementation issues.
+Event Spine implementation issues.

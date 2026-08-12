@@ -5,21 +5,21 @@
 **Owns:** Logical system topology, language ownership, trust and communication boundaries, storage responsibilities, and high-level credential access boundaries.
 
 **Does not own:** Event or command schemas, consistency and replay protocols
-(M0 principles and the concrete M1 contract are owned by the architecture
+(Project Constitution principles and the concrete Event Spine contract are owned by the architecture
 documents and `CONTRACTS.md`), authorization matrix and threat model (Issue #5),
 evaluation protocols (Issue #6), reliability evidence protocols (Issue #7),
 roadmap and evidence ledger (Issue #8), repository layout and CI (Issue #9), or
 integrated constitution review (Issue #10).
 
-Companion review: [docs/reviews/M0_ARCHITECTURE_REVIEW.md](docs/reviews/M0_ARCHITECTURE_REVIEW.md)
+Companion review: [docs/reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md](docs/reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md)
 
-M0 correctness model and M1 contract: [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), [CONTRACTS.md](CONTRACTS.md), and [ADRs](docs/adrs/).
+Project Constitution correctness model and Event Spine contract: [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), [CONTRACTS.md](CONTRACTS.md), and [ADRs](docs/adrs/).
 
 ## 1. Purpose
 
 SeshatOps is one public platform. Public demonstration uses the fictional **Northstar Foods** environment and a standalone synthetic ERP. The product must remain understandable and runnable without any private production system.
 
-This document freezes **who owns what** and **who may talk to whom** so later milestones can implement without inventing a new architecture.
+This document freezes **who owns what** and **who may talk to whom** so later capability sequences can implement without inventing a new architecture.
 
 Logical architecture is distinct from future deployment architecture. One modular Go codebase may later run as multiple processes; process counts, hosts, and cloud topology are not specified here.
 
@@ -115,12 +115,12 @@ The product implementation languages are **TypeScript**, **Go**, and **Python** 
 
 | Store | Responsibility |
 | --- | --- |
-| PostgreSQL | Authoritative transactional and governance state (workflows, projections as committed state, and audit records). M1 event-consumption and idempotency details are in `CONTRACTS.md` |
+| PostgreSQL | Authoritative transactional and governance state (workflows, projections as committed state, and audit records). Event Spine event-consumption and idempotency details are in `CONTRACTS.md` |
 | Redpanda | Durable asynchronous event transport and replay **input**. Not the authoritative transactional database |
 | Object storage | Immutable or versioned evidence artifacts, evaluation outputs, documents, exports, and larger binary artifacts |
 
 This document does not define deployment tables, buckets, retention periods,
-partition sizing, vendors, deployment sizes, or future schemas. M1 publication,
+partition sizing, vendors, deployment sizes, or future schemas. Event Spine publication,
 consumption, and related broker protocols are defined in `CONTRACTS.md`.
 
 ## 6. Communication boundaries
@@ -214,11 +214,11 @@ sequenceDiagram
   GO->>GO: Audit and lineage records
 ```
 
-Python proposals remain advisory until Go validates policy and authorizes them, an authorized human approves, Go rechecks authorization, limits, freshness, and current state, and Go executes the command. Detailed M1 event-consumption, consistency, and retry protocols are in `CONTRACTS.md`.
+Python proposals remain advisory until Go validates policy and authorizes them, an authorized human approves, Go rechecks authorization, limits, freshness, and current state, and Go executes the command. Detailed Event Spine event-consumption, consistency, and retry protocols are in `CONTRACTS.md`.
 
 ## 8. Failure isolation
 
-At the boundary level only (M0 principles and the concrete M1 contract govern retry algorithms, envelopes, and consistency protocols):
+At the boundary level only (Project Constitution principles and the concrete Event Spine contract govern retry algorithms, envelopes, and consistency protocols):
 
 - Python unavailability must not stop core transactional operations owned by Go.
 - Intelligence features may degrade or become unavailable independently.
@@ -244,7 +244,7 @@ This table is not the complete authorization model. Issue #5 owns threat modelin
 | [PRODUCT.md](PRODUCT.md) | Product thesis, users, workflows, capability boundaries, non-goals |
 | [CLEAN_ROOM.md](CLEAN_ROOM.md) | Public/private boundary and review policy |
 | `ARCHITECTURE.md` | Logical topology, language ownership, trust and communication paths, storage and high-level access boundaries |
-| `CONTRACTS.md` | Concrete M1 event-spine, storage-boundary, transport, failure, checksum, and toolchain contract |
-| Later M0 documents | Event/command principles, threat model, evaluation and reliability protocols, roadmap, evidence ledger, repository instructions |
+| `CONTRACTS.md` | Concrete event-spine, storage-boundary, transport, failure, checksum, and toolchain contract |
+| Later Project Constitution documents | Event/command principles, threat model, evaluation and reliability protocols, roadmap, evidence ledger, repository instructions |
 
 Notion may hold planning intent. This repository owns publishable architectural truth for SeshatOps.

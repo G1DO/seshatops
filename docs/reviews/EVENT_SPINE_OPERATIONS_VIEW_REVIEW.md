@@ -1,4 +1,4 @@
-# M1 Operations View Review - Issue #28
+# Event Spine Operations View Review - Issue #28
 
 This document records the Issue #28 implementation review for the minimal
 TypeScript operations view over the Issue #27 Go REST/SSE projection surface.
@@ -66,7 +66,7 @@ recorded GitHub Actions run.
 - No long-running deployment binary is provided; local demo requires wiring
   `api.NewServer` on `:8080` and using the Vite `/v1` proxy (default empty
   `VITE_API_BASE_URL`).
-- Authentication and tenant authorization enforcement remain M2.
+- Authentication and tenant authorization enforcement remain Identity.
 - Security/identity/recovery UX is explicitly deferred.
 - Hosted Web CI must be observed green before citing CI success.
 - Issue #30 owns broader UI/runtime integration that consumes this view.

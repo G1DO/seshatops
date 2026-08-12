@@ -1,4 +1,4 @@
-# M1 Exit-Gate Campaign Procedure
+# Event-Spine Exit-Gate Campaign Procedure
 
 **Status:** Executable procedure for Issue #30. This document maps each required
 exit-gate scenario to existing package tests. It does not introduce a new
@@ -8,12 +8,12 @@ runtime architecture, compose stack, or demo binary.
 Vitest for the TypeScript view).
 
 **Non-claims:** This procedure does not claim production readiness, staging
-parity, exactly-once delivery, hosted multi-node topology, M2 operator recovery,
-or M3 backup/restore.
+parity, exactly-once delivery, hosted multi-node topology, Identity & Operations operator recovery,
+or Traceability & Recovery backup/restore.
 
 ## Preconditions
 
-1. Clean checkout of the candidate M1 commit on a focused branch.
+1. Clean checkout of the candidate Event Spine commit on a focused branch.
 2. Docker available for Testcontainers.
 3. Go `1.25.0` or compatible toolchain used by repository CI; Node.js for `web/`.
 4. No secrets or private Ahoy material in the working tree.
@@ -70,9 +70,9 @@ reviewed PR head before hosted-green claims are recorded.
 
 After execution, record results in:
 
-- [M1_EXIT_GATE_EXPERIMENT_REPORT.md](M1_EXIT_GATE_EXPERIMENT_REPORT.md)
-- [M1_EXIT_GATE_CAMPAIGN_REVIEW.md](../reviews/M1_EXIT_GATE_CAMPAIGN_REVIEW.md)
-- [FAULT_CAMPAIGN_MATRIX.md](FAULT_CAMPAIGN_MATRIX.md) (M1 rows only)
+- [EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md](EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md)
+- [EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md](../reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md)
+- [FAULT_CAMPAIGN_MATRIX.md](FAULT_CAMPAIGN_MATRIX.md) (Event Spine rows only)
 - [EVIDENCE.md](../../EVIDENCE.md) (`CLM-003`–`CLM-006` only when evidence supports promotion)
 
 ## Optional live UI walkthrough

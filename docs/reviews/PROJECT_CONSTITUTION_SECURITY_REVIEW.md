@@ -1,4 +1,4 @@
-# M0 Security Model Review - Issue #5
+# Project Constitution Security Model Review - Issue #5
 
 This document records a documentation review of the SeshatOps threat model and authorization model. It records that the review occurred; it does not claim runtime security, verified tenant isolation, completed authentication, a working policy engine, or successful penetration testing.
 
@@ -20,7 +20,7 @@ The reviewed tree contains documentation only. No application code, authenticati
 
 ### GitHub and repository sources
 
-- GitHub Issue #5, M0: Define threat model and authorization assumptions.
+- GitHub Issue #5, Constitution: Define threat model and authorization assumptions.
 - GitHub PR #15 and reviewed implementation tip `c15ce8096db6798fb106251a66ba93e17b1c01a5`.
 - GitHub Issues #1 through #4 and merged PRs #11 through #14.
 - README.md, PRODUCT.md, CLEAN_ROOM.md, and ARCHITECTURE.md.
@@ -28,14 +28,14 @@ The reviewed tree contains documentation only. No application code, authenticati
 - docs/adrs/0001-transactional-outbox-and-at-least-once-delivery.md.
 - docs/adrs/0002-idempotent-command-execution.md.
 - docs/checklists/CLEAN_ROOM_REVIEW.md.
-- docs/reviews/M0_ARCHITECTURE_REVIEW.md.
-- docs/reviews/M0_CORRECTNESS_MODEL_REVIEW.md.
+- docs/reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md.
+- docs/reviews/PROJECT_CONSTITUTION_CORRECTNESS_REVIEW.md.
 
 ### Canonical planning sources
 
 - SeshatOps - Master Project Blueprint.
 - Workflow - Notion -> GitHub -> Evidence.
-- M0 - Project Constitution.
+- Project Constitution.
 
 No Ahoy repository or private Ahoy artifact was inspected or used.
 
@@ -161,7 +161,7 @@ No test in this inventory is represented as having passed.
 | C-03 | Existing event/command documents already mention tenant context, approvals, receipts, and execution rechecks | Cross-reference and extend security semantics; do not duplicate or redefine Issue #4 correctness |
 | C-04 | Tenant administrator, platform operator, approver, and service authority are not an exhaustive role catalog | Define separation and scope principles only; defer the final role/assignment catalog |
 | C-05 | Identity provider, session lifecycle, revocation, policy representation, cache invalidation, and cryptographic protection are unspecified | Record as unresolved implementation decisions for later identity/operations and governance milestones |
-| C-06 | The older Blueprint progress snapshot can lag the repository and current M0 page | Treat GitHub/repository documents as current technical execution truth per the Workflow page; record as freshness risk, not a security contradiction |
+| C-06 | The older Blueprint progress snapshot can lag the repository and current Constitution page | Treat GitHub/repository documents as current technical execution truth per the Workflow page; record as freshness risk, not a security contradiction |
 
 ## 9. Assumptions and unresolved decisions
 
@@ -181,8 +181,8 @@ No test in this inventory is represented as having passed.
 | Forecast/RAG evaluation protocol, injection corpus, citation scoring, and refusal evaluation | Issue #6 |
 | Security/reliability evidence protocols, availability campaigns, recovery evidence, and measurable assurance | Issue #7 |
 | Integrated constitution and adversarial cross-document review | Issue #10 |
-| Identity provider, session/token lifecycle, policy engine, role catalog, concrete service/database credentials, adapter authority, audit/receipt protection, and runtime enforcement | Later identity/operations and implementation milestones |
-| API routes, schemas, middleware, caches, database structures, cryptographic details, deployment topology, and runtime configuration | Later implementation milestones |
+| Identity provider, session/token lifecycle, policy engine, role catalog, concrete service/database credentials, adapter authority, audit/receipt protection, and runtime enforcement | Later identity/operations and implementation capability sequences |
+| API routes, schemas, middleware, caches, database structures, cryptographic details, deployment topology, and runtime configuration | Later implementation capability sequences |
 
 ## 11. Residual risks
 

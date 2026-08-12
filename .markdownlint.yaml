@@ -1,4 +1,4 @@
-# Existing M0 documents intentionally contain wide tables and evidence rows.
+# Existing Project Constitution documents intentionally contain wide tables and evidence rows.
 # Preserve their readable layout instead of mass-wrapping the documentation.
 default: true
 MD013: false

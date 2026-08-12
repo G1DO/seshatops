@@ -1,4 +1,4 @@
-# M1 Source Transaction and Outbox Review - Issue #23
+# Event Spine Source Transaction and Outbox Review - Issue #23
 
 This document records the Issue #23 implementation review for the synthetic ERP
 source transaction and transactional outbox persistence. It does not claim

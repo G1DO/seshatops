@@ -18,15 +18,15 @@ All public narrative and demos use **Northstar Foods**, a fictional manufacturer
 
 ## Status
 
-**M0 is complete. M1 Event Spine exit-gate evidence is recorded (Issue #30):
+**Project Constitution is complete. Event Spine exit-gate evidence is recorded (Issue #30):
 Issues #21–#29 delivered the contract, JSON event library and Northstar
 fixture, synthetic ERP source/outbox, Redpanda relay, inventory projection
 consumer with failure/restart safety, read-only REST/SSE API, TypeScript
 operations view, and duplicate/rebuild checksum proofs. `CLM-003`–`CLM-006`
 are Observed for the declared test environment only.**
 
-This repository holds the completed M0 documentation, the reviewed M1
-event-spine contract in [CONTRACTS.md](CONTRACTS.md), Go packages under
+This repository holds the completed Project Constitution documentation, the reviewed
+Event Spine contract in [CONTRACTS.md](CONTRACTS.md), Go packages under
 `event/`, `northstar/`, `erp/`, `relay/`, `platform/`, and `api/`, the TypeScript
 `web/` operations view, the source/outbox
 persistence note in
@@ -41,12 +41,12 @@ the operations view note in
 proof note in
 [PROJECTION_REBUILD.md](docs/architecture/PROJECTION_REBUILD.md), and the
 exit-gate campaign artifacts under
-[M1_EXIT_GATE_PROCEDURE.md](docs/evaluation/M1_EXIT_GATE_PROCEDURE.md) and
-[M1_EXIT_GATE_EXPERIMENT_REPORT.md](docs/evaluation/M1_EXIT_GATE_EXPERIMENT_REPORT.md).
+[EVENT_SPINE_EXIT_GATE_PROCEDURE.md](docs/evaluation/EVENT_SPINE_EXIT_GATE_PROCEDURE.md) and
+[EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md](docs/evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md).
 A long-running deployment service is not present yet. Planned capabilities must
 not be read as completed or measured results beyond the linked evidence.
 
-Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml), and Go package tests are checked by [Go CI](.github/workflows/go-ci.yml). The [M0 repository-governance review](docs/reviews/M0_REPOSITORY_GOVERNANCE_REVIEW.md), [integrated constitution review](docs/reviews/M0_INTEGRATED_CONSTITUTION_REVIEW.md), [M0 completion summary](docs/reviews/M0_COMPLETION_SUMMARY.md), [M1 event-contract fixture review](docs/reviews/M1_EVENT_CONTRACT_FIXTURE_REVIEW.md), [M1 source/outbox review](docs/reviews/M1_SOURCE_OUTBOX_REVIEW.md), [M1 outbox relay review](docs/reviews/M1_OUTBOX_RELAY_REVIEW.md), [M1 inventory projection review](docs/reviews/M1_INVENTORY_PROJECTION_REVIEW.md), [M1 consumer failure safety review](docs/reviews/M1_CONSUMER_FAILURE_SAFETY_REVIEW.md), [M1 projection read API review](docs/reviews/M1_PROJECTION_READ_API_REVIEW.md), [M1 operations view review](docs/reviews/M1_OPERATIONS_VIEW_REVIEW.md), [M1 projection rebuild review](docs/reviews/M1_PROJECTION_REBUILD_REVIEW.md), [M1 exit-gate campaign review](docs/reviews/M1_EXIT_GATE_CAMPAIGN_REVIEW.md), and [M1 completion summary](docs/reviews/M1_COMPLETION_SUMMARY.md) record reviewed state, evidence boundaries, limitations, and residual risk.
+Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml), and Go package tests are checked by [Go CI](.github/workflows/go-ci.yml). The [Project Constitution governance review](docs/reviews/PROJECT_CONSTITUTION_GOVERNANCE_REVIEW.md), [integrated constitution review](docs/reviews/PROJECT_CONSTITUTION_INTEGRATED_REVIEW.md), [Project Constitution completion summary](docs/reviews/PROJECT_CONSTITUTION_COMPLETION_SUMMARY.md), [Event Spine event-contract fixture review](docs/reviews/EVENT_SPINE_EVENT_CONTRACT_FIXTURE_REVIEW.md), [Event Spine source/outbox review](docs/reviews/EVENT_SPINE_SOURCE_OUTBOX_REVIEW.md), [Event Spine outbox relay review](docs/reviews/EVENT_SPINE_OUTBOX_RELAY_REVIEW.md), [Event Spine inventory projection review](docs/reviews/EVENT_SPINE_INVENTORY_PROJECTION_REVIEW.md), [Event Spine consumer failure safety review](docs/reviews/EVENT_SPINE_CONSUMER_FAILURE_SAFETY_REVIEW.md), [Event Spine projection read API review](docs/reviews/EVENT_SPINE_PROJECTION_READ_API_REVIEW.md), [Event Spine operations view review](docs/reviews/EVENT_SPINE_OPERATIONS_VIEW_REVIEW.md), [Event Spine projection rebuild review](docs/reviews/EVENT_SPINE_PROJECTION_REBUILD_REVIEW.md), [event-spine exit-gate campaign review](docs/reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md), and [Event Spine completion summary](docs/reviews/EVENT_SPINE_COMPLETION_SUMMARY.md) record reviewed state, evidence boundaries, limitations, and residual risk.
 
 ## Product constitution
 
@@ -56,23 +56,23 @@ See [PRODUCT.md](PRODUCT.md) for users, hero workflow, capability boundaries, th
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for logical system topology, language ownership, trust boundaries, and storage responsibilities. Planned boundaries only — not an implementation or deployment claim.
 
-See [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), [CONTRACTS.md](CONTRACTS.md), and the [ADRs](docs/adrs/) for the planned correctness model and concrete M1 contract.
+See [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), [CONTRACTS.md](CONTRACTS.md), and the [ADRs](docs/adrs/) for the planned correctness model and concrete Event Spine contract.
 
 ## Security model
 
-See [THREAT_MODEL.md](docs/security/THREAT_MODEL.md) and [AUTHORIZATION_MODEL.md](docs/security/AUTHORIZATION_MODEL.md) for the planned threat, tenant-isolation, authorization, approval, service-identity, retrieval, audit, and receipt boundaries. See the [M0 security-model review](docs/reviews/M0_SECURITY_MODEL_REVIEW.md) for documentation traceability and recorded follow-ups. These documents define future requirements only; they do not claim implemented security controls.
+See [THREAT_MODEL.md](docs/security/THREAT_MODEL.md) and [AUTHORIZATION_MODEL.md](docs/security/AUTHORIZATION_MODEL.md) for the planned threat, tenant-isolation, authorization, approval, service-identity, retrieval, audit, and receipt boundaries. See the [Project Constitution security-model review](docs/reviews/PROJECT_CONSTITUTION_SECURITY_REVIEW.md) for documentation traceability and recorded follow-ups. These documents define future requirements only; they do not claim implemented security controls.
 
 ## Intelligence evaluation
 
-See the [forecasting evaluation protocol](docs/intelligence/FORECASTING_EVALUATION_PROTOCOL.md), [governed-RAG evaluation protocol](docs/intelligence/GOVERNED_RAG_EVALUATION_PROTOCOL.md), and [M0 intelligence-evaluation review](docs/reviews/M0_INTELLIGENCE_EVALUATION_REVIEW.md). These are planned evaluation requirements; no runtime evaluation result is claimed.
+See the [forecasting evaluation protocol](docs/intelligence/FORECASTING_EVALUATION_PROTOCOL.md), [governed-RAG evaluation protocol](docs/intelligence/GOVERNED_RAG_EVALUATION_PROTOCOL.md), and [Project Constitution intelligence-evaluation review](docs/reviews/PROJECT_CONSTITUTION_INTELLIGENCE_EVAL_REVIEW.md). These are planned evaluation requirements; no runtime evaluation result is claimed.
 
 ## Operational evidence
 
-See the [claim-status vocabulary](docs/evidence/CLAIM_STATUS_VOCABULARY.md), [security evidence protocol](docs/evaluation/SECURITY_EVIDENCE_PROTOCOL.md), [reliability and recovery evidence protocol](docs/evaluation/RELIABILITY_RECOVERY_EVIDENCE_PROTOCOL.md), [performance evidence protocol](docs/evaluation/PERFORMANCE_EVIDENCE_PROTOCOL.md), [fault campaign matrix](docs/evaluation/FAULT_CAMPAIGN_MATRIX.md), [M1 exit-gate procedure](docs/evaluation/M1_EXIT_GATE_PROCEDURE.md), [M1 exit-gate experiment report](docs/evaluation/M1_EXIT_GATE_EXPERIMENT_REPORT.md), [experiment report template](docs/evaluation/templates/EXPERIMENT_REPORT.md), and [M0 operational evidence review](docs/reviews/M0_OPERATIONAL_EVIDENCE_REVIEW.md). Protocols define evidence requirements; only linked experiment records support Observed claims.
+See the [claim-status vocabulary](docs/evidence/CLAIM_STATUS_VOCABULARY.md), [security evidence protocol](docs/evaluation/SECURITY_EVIDENCE_PROTOCOL.md), [reliability and recovery evidence protocol](docs/evaluation/RELIABILITY_RECOVERY_EVIDENCE_PROTOCOL.md), [performance evidence protocol](docs/evaluation/PERFORMANCE_EVIDENCE_PROTOCOL.md), [fault campaign matrix](docs/evaluation/FAULT_CAMPAIGN_MATRIX.md), [event-spine exit-gate procedure](docs/evaluation/EVENT_SPINE_EXIT_GATE_PROCEDURE.md), [event-spine exit-gate experiment report](docs/evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md), [experiment report template](docs/evaluation/templates/EXPERIMENT_REPORT.md), and [Project Constitution operational evidence review](docs/reviews/PROJECT_CONSTITUTION_OPERATIONAL_EVIDENCE_REVIEW.md). Protocols define evidence requirements; only linked experiment records support Observed claims.
 
 ## Roadmap and evidence ledger
 
-See the [canonical roadmap](ROADMAP.md), [evidence ledger](EVIDENCE.md), and [M0 roadmap/evidence review](docs/reviews/M0_ROADMAP_EVIDENCE_REVIEW.md). These define milestone ownership and future claim governance; they do not prove implementation or measured results.
+See the [canonical roadmap](ROADMAP.md), [evidence ledger](EVIDENCE.md), and [Project Constitution roadmap/evidence review](docs/reviews/PROJECT_CONSTITUTION_ROADMAP_EVIDENCE_REVIEW.md). These define capability-sequence ownership and future claim governance; they do not prove implementation or measured results.
 
 ## Clean-room boundary
 

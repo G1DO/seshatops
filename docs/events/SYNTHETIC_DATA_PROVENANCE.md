@@ -1,6 +1,6 @@
-# Synthetic Data Provenance — Northstar Foods M1 Order Line
+# Synthetic Data Provenance — Northstar Foods Event Spine Order Line
 
-This record covers the deterministic M1 fixture and golden event vectors
+This record covers the deterministic Event Spine fixture and golden event vectors
 introduced for Issue #22, and the Issue #23 inventory seed that consumes the
 same fixture. It does not claim broker transport, projection, or production
 readiness.
@@ -31,7 +31,7 @@ readiness.
    - Golden files under `event/testdata/` and `northstar/testdata/` remain byte-stable.
    - `erp` accepts the fixture order against seeded inventory and stores matching outbox bytes.
 
-Do not regenerate goldens by capturing wall-clock time or random IDs. The M1
+Do not regenerate goldens by capturing wall-clock time or random IDs. The Event Spine
 fixture is intentionally fixed to the declared seed and CONTRACTS.md example
 values.
 

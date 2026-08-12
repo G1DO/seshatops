@@ -33,7 +33,7 @@ Every future load or performance experiment must record:
 - dependency behavior; and
 - failure injection when included.
 
-Values must come from the recorded workload, not from invented M0 targets. A workload generator must be isolated from the system under test or its resource impact must be measured and reported.
+Values must come from the recorded workload, not from invented constitution-phase targets. A workload generator must be isolated from the system under test or its resource impact must be measured and reported.
 
 ## 3. Required measurements
 
@@ -63,7 +63,7 @@ Each experiment must address:
 3. The distinction between client-side and server-side measurements.
 4. Warm-up exclusion only with a recorded justification.
 5. Inclusion and classification of errors in latency and throughput reporting.
-6. Test duration and repetition rationale without inventing repetition counts in M0.
+6. Test duration and repetition rationale without inventing repetition counts in Project Constitution.
 7. Environment contention and background activity.
 8. Scaling or configuration changes as separate comparable runs.
 9. Retention of raw results and machine-readable artifacts.
@@ -84,7 +84,7 @@ Each experiment must address:
 
 ## 6. Claim status and unselected values
 
-Use the exact five claim statuses in [CLAIM_STATUS_VOCABULARY.md](../evidence/CLAIM_STATUS_VOCABULARY.md). Performance scenarios in this M0 protocol remain **Planned** and no run result exists.
+Use the exact five claim statuses in [CLAIM_STATUS_VOCABULARY.md](../evidence/CLAIM_STATUS_VOCABULARY.md). Performance scenarios in this Constitution protocol remain **Planned** and no run result exists.
 
 This protocol does not select pass thresholds, latency targets, throughput targets, availability targets, repetition counts, hardware, infrastructure sizes, monitoring products, load-testing products, or fault-injection products.
 

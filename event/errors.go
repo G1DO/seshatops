@@ -2,7 +2,7 @@ package event
 
 import "errors"
 
-// Sentinel validation and identity errors for the M1 contract.
+// Sentinel validation and identity errors for the Event Spine contract.
 var (
 	// ErrMalformed is returned for incomplete envelopes, invalid types/values,
 	// duplicate object members, or non-JCS-compatible JSON.

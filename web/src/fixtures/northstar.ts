@@ -4,7 +4,7 @@ export const NORTHSTAR_TENANT_ID = "11111111-1111-4111-8111-111111111111";
 export const NORTHSTAR_ITEM_ID = "item-flour-001";
 export const NORTHSTAR_EVENT_ID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20a1";
 
-/** Demo-only expected quantities from the deterministic M1 fixture narrative. */
+/** Demo-only expected quantities from the deterministic Event Spine fixture narrative. */
 export const NORTHSTAR_QUANTITY_BEFORE = 10;
 export const NORTHSTAR_QUANTITY_AFTER = 8;
 

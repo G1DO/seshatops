@@ -18,7 +18,7 @@ export function OperationsView(props: OperationsViewProps) {
         <p className="ops__brand">SeshatOps</p>
         <h1 className="ops__title">Northstar inventory projection</h1>
         <p className="ops__subtitle">
-          Read-only view of committed Go projection state (M1).
+          Read-only view of committed Go projection state (Event Spine).
         </p>
       </header>
 

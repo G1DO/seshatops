@@ -84,4 +84,4 @@ Rejected without evidence across the Go boundary, retries, external systems, and
 
 ## Deferred implementation choices
 
-Concrete API shapes, storage schema, uniqueness constraints, locking or claim algorithms, receipt retention, approval policy details, identity integration, external adapter protocols, reconciliation queries, retry schedules, and operational thresholds remain open. Issue #5 owns the detailed authorization model; Issue #7 owns reliability evidence; completed Issue #9 established repository workflow and documentation CI; M5 and later milestones own the corresponding runtime choices.
+Concrete API shapes, storage schema, uniqueness constraints, locking or claim algorithms, receipt retention, approval policy details, identity integration, external adapter protocols, reconciliation queries, retry schedules, and operational thresholds remain open. Issue #5 owns the detailed authorization model; Issue #7 owns reliability evidence; completed Issue #9 established repository workflow and documentation CI; Approvals and later capability sequences own the corresponding runtime choices.

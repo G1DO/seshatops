@@ -1,4 +1,4 @@
-# M1 Operations View (TypeScript)
+# Event Spine Operations View (TypeScript)
 
 **Status:** Implemented for Issue #28 package/test scope. No authentication,
 recovery controls, deployment service binary, or `CAP-008` claim promotion is
@@ -67,11 +67,11 @@ Rendered without business reinterpretation:
 See [web/README.md](../../web/README.md). Serve `api.NewServer(...).Handler()` on
 `http://127.0.0.1:8080` and run `npm run dev` with the default empty
 `VITE_API_BASE_URL` so Vite proxies `/v1` same-origin (no CORS required).
-Security/identity/recovery UX remains deferred to later milestones.
+Security/identity/recovery UX remains deferred to later capability sequences.
 
 ## Non-claims
 
 This document does not claim production readiness, hosted CI success without a
-recorded GitHub Actions run, exactly-once SSE delivery, M2 authentication, or
+recorded GitHub Actions run, exactly-once SSE delivery, Identity authentication, or
 promotion of `CAP-008` beyond Planned without the authorized live-view evidence
 route.

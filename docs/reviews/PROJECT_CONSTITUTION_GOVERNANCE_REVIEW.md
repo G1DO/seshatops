@@ -1,6 +1,6 @@
-# M0 Repository Governance Review - Issue #9
+# Project Constitution Repository Governance Review - Issue #9
 
-This document records the documentation-only implementation and static review for Issue #9, “M0: Establish repository instructions, PR workflow, and documentation CI.” It does not claim application implementation, runtime correctness, security enforcement, performance, reliability, deployment readiness, or clean-room perfection.
+This document records the documentation-only implementation and static review for Issue #9, “Constitution: Establish repository instructions, PR workflow, and documentation CI.” It does not claim application implementation, runtime correctness, security enforcement, performance, reliability, deployment readiness, or clean-room perfection.
 
 ## 1. Review record
 
@@ -17,7 +17,7 @@ This document records the documentation-only implementation and static review fo
 | Hosted CI result | Run `31149874303` passed: Markdown lint, link check, YAML lint, and secret scan |
 | Runtime result | Not run by design; no runtime project exists and runtime work is out of scope |
 
-The change remains documentation/governance-only. No application code, package manifest, lockfile, runtime configuration, infrastructure, schema, dashboard, model, dataset, deployment configuration, dependency bot, or GitHub settings mutation was introduced. At the time of this Issue #9 review, PR #19 was open for review and no merge or settings mutation had been performed. PR #19 subsequently merged as commit `7c1d59a`; the final integrated M0 review is recorded by Issue #10.
+The change remains documentation/governance-only. No application code, package manifest, lockfile, runtime configuration, infrastructure, schema, dashboard, model, dataset, deployment configuration, dependency bot, or GitHub settings mutation was introduced. At the time of this Issue #9 review, PR #19 was open for review and no merge or settings mutation had been performed. PR #19 subsequently merged as commit `7c1d59a`; the final integrated Project Constitution review is recorded by Issue #10.
 
 ## 2. Sources reviewed
 
@@ -28,15 +28,15 @@ The change remains documentation/governance-only. No application code, package m
 - `README.md`, `PRODUCT.md`, `CLEAN_ROOM.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `EVIDENCE.md`, and `LICENSE`.
 - `docs/architecture/EVENT_MODEL.md` and `docs/architecture/COMMAND_MODEL.md`.
 - `docs/security/THREAT_MODEL.md` and `docs/security/AUTHORIZATION_MODEL.md`.
-- `docs/intelligence/`, `docs/evaluation/`, `docs/adrs/`, `docs/checklists/`, and all existing M0 review documents.
+- `docs/intelligence/`, `docs/evaluation/`, `docs/adrs/`, `docs/checklists/`, and all existing Constitution review documents.
 - The current working tree and history at base commit `c7408ee`.
 
 ### Canonical planning sources
 
 - [SeshatOps - Master Project Blueprint](https://app.notion.com/p/3b40a821b3cc813081f0ea44fd72692a).
 - [Workflow - Notion -> GitHub -> Evidence](https://app.notion.com/p/3b40a821b3cc810eadebc2fc9a067000).
-- [M0 - Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee).
-- At the time of this Issue #9 review, live GitHub Issue #9 and repository branch history were authoritative for current execution status. The final M0 execution owner is Issue #10 and PR #20.
+- [Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee).
+- At the time of this Issue #9 review, live GitHub Issue #9 and repository branch history were authoritative for current execution status. The final Constitution execution owner is Issue #10 and PR #20.
 
 No private Ahoy repository or private Ahoy artifact was accessed.
 
@@ -44,7 +44,7 @@ No private Ahoy repository or private Ahoy artifact was accessed.
 
 | Criterion | Coverage | Result |
 | --- | --- | --- |
-| Repository instructions exist | Root `AGENTS.md` defines project purpose, source ownership, clean-room rules, language boundaries, evidence governance, verification, and M0 invariants. | Covered |
+| Repository instructions exist | Root `AGENTS.md` defines project purpose, source ownership, clean-room rules, language boundaries, evidence governance, verification, and Constitution invariants. | Covered |
 | Editor and repository hygiene are defined | `.editorconfig`, `.gitattributes`, and `.gitignore` define text encoding, line endings, binary handling, local-only files, and secret-file behavior. | Covered |
 | Pull-request workflow is defined | `.github/pull_request_template.md` requires linked issue, scope, evidence, verification, skipped checks, clean-room review, residual risks, and follow-up work. | Covered |
 | Canonical ownership is explicit | `AGENTS.md` and the existing roadmap distinguish Notion intent, GitHub execution state, repository technical truth, and PR/evidence proof. | Covered |
@@ -60,7 +60,7 @@ No private Ahoy repository or private Ahoy artifact was accessed.
 
 `AGENTS.md` now records:
 
-- The M0 documentation-only state and Issue #9/Issue #10 ownership.
+- The Project Constitution documentation-only state and Issue #9/Issue #10 ownership.
 - Notion, GitHub, repository, PR/CI/evidence, and `EVIDENCE.md` boundaries.
 - Canonical document ownership and contradiction handling.
 - Read-before-edit, surgical-change, non-destructive Git, and scope rules.
@@ -69,7 +69,7 @@ No private Ahoy repository or private Ahoy artifact was accessed.
 - Planned, implemented, observed, and reproduced claim distinctions.
 - The verification contract and hosted-CI evidence rule.
 - Branch, PR, review, and squash-merge conventions.
-- The Issue #9 M0 definition of done.
+- The Issue #9 Project Constitution definition of done.
 
 The existing user-provided default guidance was retained in substance and made repository-specific rather than left as placeholder project metadata.
 
@@ -79,13 +79,13 @@ The repository preserves the existing boundary:
 
 | Source | Ownership recorded |
 | --- | --- |
-| Notion | Product and architecture intent, milestone purpose, high-level risks, exit gates, and summaries |
+| Notion | Product and architecture intent, capability-sequence purpose, high-level risks, exit gates, and summaries |
 | GitHub | Active issue and milestone execution state, dependencies, and progress |
 | Repository documents and ADRs | Reviewed technical truth, contracts, invariants, roadmap, and evidence rules |
 | Pull requests, CI, tests, evaluations, and artifacts | Actual change, review, verification, limitations, and claim support |
 | `EVIDENCE.md` | Repository-owned claim ledger and status vocabulary route |
 
-`ROADMAP.md` remains a stable milestone sequence rather than a second task tracker. Its stale Issue #8/current-deliverable statements were corrected during the Issue #9 work; the final Issue #10 review now reconciles the subsequent PR #19 merge and M0 status. `EVIDENCE.md` required no correction.
+`ROADMAP.md` remains a stable capability sequence rather than a second task tracker. Its stale Issue #8/current-deliverable statements were corrected during the Issue #9 work; the final Issue #10 review now reconciles the subsequent PR #19 merge and Constitution status. `EVIDENCE.md` required no correction.
 
 ## 6. Clean-room and secret handling
 
@@ -106,8 +106,8 @@ The governance file preserves the architecture boundary:
 | TypeScript | UI, browser, and user-facing interaction | Not authoritative for transactional or authorization state |
 | Go | Transactional platform, event processing, authorization, and durable state | Not an unreviewed intelligence authority |
 | Python | Evaluated/advisory intelligence and read-only analysis | Never authentication, authorization, business writes, or command authority |
-| Rust | Measurement-gated specialized or performance components | No speculative M0 scaffolding |
-| C | Excluded unless a later reviewed milestone changes the boundary | No M0 implementation |
+| Rust | Measurement-gated specialized or performance components | No speculative Constitution scaffolding |
+| C | Excluded unless a later reviewed milestone changes the boundary | No Constitution implementation |
 
 No language workspace was created by Issue #9.
 
@@ -204,7 +204,7 @@ Hosted CI evidence is **green for the reviewed governance changes**: visible run
 | Private GitHub links | Remain in scope and are checked with the read-only workflow token. |
 | Gitleaks organization licensing | The current repository owner is a personal GitHub account; no license was added. A future organization transfer may require an explicit license decision. |
 | Hosted CI | Run `31149874303` is visibly green for the reviewed governance changes; future workflow changes require a new hosted verification. |
-| Issue #10 integrated review | Remains the owning follow-up for final M0 integration and milestone exit. |
+| Issue #10 integrated review | Remains the owning follow-up for final Constitution integration and milestone exit. |
 
 ## 13. Residual risk and deferred work
 
@@ -212,8 +212,8 @@ Hosted CI evidence is **green for the reviewed governance changes**: visible run
 - Network availability, private GitHub-token access, and the upstream action implementations are not proven by local static inspection.
 - Gitleaks output safety was verified for the pinned action source: it supports the configured output controls and passes `--redact`; the binary version is now fixed but release checksum verification remains a residual supply-chain risk.
 - Documentation CI does not prove application correctness, runtime security, authorization, reliability, recovery, performance, deployment, production readiness, or final clean-room independence.
-- Issue #10 owns the integrated M0 review and any cross-document contradictions that remain after the hosted checks.
+- Issue #10 owns the integrated Project Constitution review and any cross-document contradictions that remain after the hosted checks.
 
 ## 14. Result
 
-**Pass with recorded follow-ups.** The repository-governance implementation remains within the Issue #9 documentation and CI scope without introducing runtime work. Hosted run `31149874303` passed all four jobs. PR #19 subsequently merged as `7c1d59a`; Issue #10 owns the final integrated M0 review and completion summary.
+**Pass with recorded follow-ups.** The repository-governance implementation remains within the Issue #9 documentation and CI scope without introducing runtime work. Hosted run `31149874303` passed all four jobs. PR #19 subsequently merged as `7c1d59a`; Issue #10 owns the final integrated Project Constitution review and completion summary.

@@ -15,7 +15,7 @@ import (
 // EventProjectionUpdated is the SSE event name for committed projection changes.
 const EventProjectionUpdated = "inventory_projection.updated"
 
-// Server is the M1 read-only projection HTTP surface.
+// Server is the Event Spine read-only projection HTTP surface.
 type Server struct {
 	db  *sql.DB
 	hub *Hub
@@ -39,7 +39,7 @@ func NewServer(db *sql.DB, hub *Hub) *Server {
 // Hub returns the notification hub used for SSE fanout.
 func (s *Server) Hub() *Hub { return s.hub }
 
-// Handler returns the HTTP handler for the M1 projection routes.
+// Handler returns the HTTP handler for the Event Spine projection routes.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/tenants/", s.serveTenant)

@@ -1,6 +1,6 @@
-# M1 Event Contract and Fixture Review - Issue #22
+# Event Spine Event Contract and Fixture Review - Issue #22
 
-This document records the Issue #22 implementation review for the executable M1
+This document records the Issue #22 implementation review for the executable Event Spine
 event contract and deterministic Northstar Foods fixture. It does not claim
 outbox, broker, projection, security enforcement, or production readiness.
 
@@ -17,21 +17,21 @@ outbox, broker, projection, security enforcement, or production readiness.
 
 ## Wire-format disposition
 
-Notion M1 deliverables and GitHub Issue #22 still mention a “Protobuf” event
+Notion Event Spine deliverables and GitHub Issue #22 still mention a “Protobuf” event
 contract. Issue #21 accepted [CONTRACTS.md](../../CONTRACTS.md) and
 [ADR-0003](../adrs/0003-event-envelope-and-schema-compatibility.md), which
-reject Protobuf/Avro for M1 and require strict UTF-8 JSON with RFC 8785 JCS
+reject Protobuf/Avro for Event Spine and require strict UTF-8 JSON with RFC 8785 JCS
 content identity.
 
 **Disposition:** Implement JSON + JCS. Treat the Protobuf wording as stale
-relative to the accepted M1 contract. No `.proto` files or schema registry were
+relative to the accepted Event Spine contract. No `.proto` files or schema registry were
 added.
 
 ## Acceptance matrix
 
 | Issue #22 criterion | Evidence | Disposition |
 | --- | --- | --- |
-| Concrete M1 event contains all #21 envelope fields | `event.Envelope` / `event.Parse` and tests | Covered (JSON, not Protobuf) |
+| Concrete Event Spine event contains all #21 envelope fields | `event.Envelope` / `event.Parse` and tests | Covered (JSON, not Protobuf) |
 | `event_id`, aggregate identity, aggregate-version semantics documented and testable | Package docs + validation tests | Covered |
 | Same declared seed generates equivalent fixtures and logical event history | `northstar` tests + goldens | Covered |
 | Tenant/aggregate/event/schema/time/producer/lineage/trace per #21 | Parse/validate field coverage | Covered |
@@ -76,8 +76,8 @@ envelope string fields.
 
 ## Residual risk and follow-ups
 
-- Update Notion M1 / Issue #22 wording from Protobuf to JSON when convenient.
+- Update Notion Event Spine / Issue #22 wording from Protobuf to JSON when convenient.
 - Hosted Go CI must be observed green before citing CI success.
 - Contract unit tests do not prove transport ordering or projection enforcement;
-  `CLM-005` stays Planned until later M1 evidence exists.
+  `CLM-005` stays Planned until later Event Spine evidence exists.
 - Issue #23 may consume `event` and `northstar` without inventing a new envelope.

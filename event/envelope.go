@@ -9,7 +9,7 @@ import (
 	"unicode/utf8"
 )
 
-// M1 fixed contract values from CONTRACTS.md.
+// Event Spine fixed contract values from CONTRACTS.md.
 const (
 	EventTypeQuantityDecremented = "inventory.quantity_decremented"
 	AggregateTypeInventoryItem   = "inventory_item"
@@ -25,7 +25,7 @@ var (
 	timeZRegexp  = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$`)
 )
 
-// Envelope is the M1 v1 event envelope. Timestamps keep their exact source
+// Envelope is the Event Spine v1 event envelope. Timestamps keep their exact source
 // strings. CausationID is nil when the JSON value is null.
 type Envelope struct {
 	EventID            string

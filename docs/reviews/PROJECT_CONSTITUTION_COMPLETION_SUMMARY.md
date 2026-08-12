@@ -1,8 +1,8 @@
-# M0 Completion Summary
+# Project Constitution Completion Summary
 
 ## Outcome
 
-Milestone M0 established the SeshatOps product constitution, clean-room
+Project Constitution established the SeshatOps product constitution, clean-room
 boundary, logical architecture, correctness model, security model,
 intelligence-evaluation protocols, operational-evidence protocols, roadmap,
 claim ledger, repository governance, and documentation CI. The final Issue #10
@@ -13,7 +13,7 @@ This summary does not claim application implementation, runtime correctness,
 security enforcement, reliability, recovery, performance, deployment,
 production readiness, or observed intelligence behavior.
 
-## M0 delivery history
+## Project Constitution delivery history
 
 | Area | Delivered through |
 | --- | --- |
@@ -26,7 +26,7 @@ production readiness, or observed intelligence behavior.
 | Operational evidence protocols | Issue #7 / PR #17 |
 | Roadmap and evidence ledger | Issue #8 / PR #18 |
 | Repository governance and documentation CI | Issue #9 / PR #19 |
-| Integrated M0 constitution review | Issue #10 / this reviewed change |
+| Integrated Project Constitution review | Issue #10 / this reviewed change |
 
 PRs #11-#19 were merged when this summary was recorded. Issue #10 remained the
 final integrated review owner at that time.
@@ -34,7 +34,7 @@ final integrated review owner at that time.
 ## Subsequent repository status
 
 Issue #10 was subsequently closed as completed and PR #20 was merged into
-`main` at the M0 review head. Issue #21 activates M1 contract planning. This
+`main` at Project Constitution review head. Issue #21 activates Event Spine contract planning. This
 status note preserves the historical review facts above without rewriting them.
 
 History links: [Issue #10](https://github.com/G1DO/seshatops/issues/10),
@@ -50,12 +50,12 @@ History links: [Issue #10](https://github.com/G1DO/seshatops/issues/10),
 
 ## Final artifacts
 
-- [Integrated constitution review](M0_INTEGRATED_CONSTITUTION_REVIEW.md)
+- [Integrated constitution review](PROJECT_CONSTITUTION_INTEGRATED_REVIEW.md)
 - [Clean-room checklist and CRR-0003](../checklists/CLEAN_ROOM_REVIEW.md)
 - [ADR index and deferred queue](../adrs/README.md)
 - [Roadmap](../../ROADMAP.md)
 - [Evidence ledger](../../EVIDENCE.md)
-- [Repository governance review](M0_REPOSITORY_GOVERNANCE_REVIEW.md)
+- [Repository governance review](PROJECT_CONSTITUTION_GOVERNANCE_REVIEW.md)
 
 The repository remains documentation-only. No implementation package,
 runtime, service, database, broker, deployment setting, model, dataset, or
@@ -75,7 +75,7 @@ speculative dependency was added.
 
 No runtime, typecheck, build, application test, performance, recovery,
 security-enforcement, or deployment check was run because no runtime project
-exists and M0 excludes implementation.
+exists and Constitution excludes implementation.
 
 ## Deviations and dispositions
 
@@ -83,10 +83,10 @@ exists and M0 excludes implementation.
   `CRR-0002` is already the historical architecture review record.
 - The Issue #9 governance review retains its historical pre-merge facts and
   now clarifies that PR #19 subsequently merged at `7c1d59a`.
-- Notion was not mutated. Its M0 status remains an external workflow state and
+- Notion was not mutated. Its Constitution status remains an external workflow state and
   is not silently treated as repository technical truth.
-- The concrete technology suggestions on the Notion M1 page were not adopted
-  as M0 decisions; unresolved choices are listed in the ADR queue.
+- The concrete technology suggestions on the Notion Event Spine page were not adopted
+  as Constitution decisions; unresolved choices are listed in the ADR queue.
 
 ## Residual risks and lessons
 
@@ -96,21 +96,21 @@ claim. Documentation CI proves documentation checks for the hosted commit; it
 does not prove runtime behavior or clean-room independence beyond the recorded
 review scope.
 
-The M0 process established useful sequencing: define authority and failure
+The Constitution process established useful sequencing: define authority and failure
 boundaries before implementation, give every future claim a verification route,
 keep implementation choices in milestone-owned ADRs, and treat clean-room
 review as a recurring evidence obligation rather than a one-time assertion.
 
-## M1 readiness
+## Event Spine readiness
 
-M1 can be planned without inventing new architecture. Its outcome is the
+Event Spine can be planned without inventing new architecture. Its outcome is the
 duplicate-safe synthetic order-to-outbox-to-event-to-Go-projection-to-
 TypeScript-view path. Event identity/versioning, at-least-once delivery,
 replay, tenant/default-deny, language ownership, and evidence requirements are
-fixed by M0.
+fixed by Constitution.
 
 Concrete schemas, APIs, topic/key/partition policy, persistence indexes,
 retry/backoff behavior, package/toolchain choices, deployment topology,
-observability targets, and detailed M1 issue decomposition remain deferred.
-M1 implementation has not started, and no detailed M1 backlog is created by
+observability targets, and detailed Event Spine issue decomposition remain deferred.
+Event Spine implementation has not started, and no detailed Event Spine backlog is created by
 this summary.

@@ -1,4 +1,4 @@
-// Package erp implements the M1 synthetic-ERP source transaction: one-line
+// Package erp implements the Event Spine synthetic-ERP source transaction: one-line
 // order acceptance, authoritative inventory update, and immutable outbox
 // insert in a single PostgreSQL transaction (CONTRACTS.md §4).
 //

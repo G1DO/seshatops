@@ -9,7 +9,7 @@ import (
 )
 
 // SeedNorthstarInventory inserts the authoritative inventory row for the
-// declared Northstar M1 fixture. Aggregate version starts at 0 so the first
+// declared Northstar Event Spine fixture. Aggregate version starts at 0 so the first
 // accepted order emits aggregate_version 1.
 func SeedNorthstarInventory(ctx context.Context, db *sql.DB, fx northstar.Fixture) error {
 	_, err := db.ExecContext(ctx, `

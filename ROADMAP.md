@@ -1,13 +1,13 @@
 # SeshatOps Roadmap
 
-**Status:** M0 is complete; M1 Event Spine exit-gate evidence is recorded for
+**Status:** Project Constitution is complete; Event Spine exit-gate evidence is recorded for
 the Issue #30 test-environment campaign (`CLM-003`–`CLM-006` Observed).
 Issues #21–#29 delivered the contract, Northstar fixture, source/outbox,
 Redpanda relay, inventory projection consumer, failure/restart safety,
 projection read API, TypeScript operations view, and duplicate/rebuild proofs.
-M2–M8 are Planned.
+Identity & Operations through Portfolio Release remain Planned.
 
-This document is the concise, repository-owned implementation sequence for SeshatOps. It maps each major capability to exactly one primary milestone, records supported dependencies, and defines the governance rules for activating and completing milestones. It is a roadmap, not a task board and not evidence that future capabilities exist.
+This document is the concise, repository-owned implementation sequence for SeshatOps. It maps each major capability to exactly one primary capability owner, records supported dependencies, and defines the governance rules for activating and completing capability sequences. It is a roadmap, not a task board and not evidence that future capabilities exist.
 
 ## Purpose and scope
 
@@ -15,15 +15,15 @@ SeshatOps is a clean-room, multi-tenant operations-intelligence platform built a
 
 > Observe → Reconstruct → Predict → Explain → Propose → Authorize → Approve → Execute → Audit → Replay
 
-This roadmap covers the planned sequence from the M0 constitution through the M8 portfolio release. It does not select implementation packages, APIs, schemas, infrastructure products, model vendors, numerical targets, schedules, or staffing assumptions.
+This roadmap covers the planned sequence from the Project Constitution through Portfolio Release. It does not select implementation packages, APIs, schemas, infrastructure products, model vendors, numerical targets, schedules, or staffing assumptions.
 
 ## Current state
 
-| Milestone | Status | Repository state |
+| Capability sequence | Status | Repository state |
 | --- | --- | --- |
-| M0 — Project Constitution | Complete | Issues #1–#10 and PRs #11–#20 are complete. GitHub [milestone/1](https://github.com/G1DO/seshatops/milestone/1) and the Notion M0 page are closed/Complete as of 2026-08-12. |
-| M1 — Event Spine | Complete (test-environment exit gate) | Issues #21–#30 delivered the stack and exit-gate campaign (`CLM-003`–`CLM-006` Observed). GitHub [milestone/2](https://github.com/G1DO/seshatops/milestone/2) and the Notion M1 page are closed/Complete as of 2026-08-12. No production deployment. |
-| M2–M8 | Planned | Outcome-and-exit-gate placeholders only; no detailed future implementation backlog is maintained here. Next activation: M2 Identity & Operations. |
+| Project Constitution | Complete | Issues #1–#10 and PRs #11–#20 are complete. GitHub [milestone/1](https://github.com/G1DO/seshatops/milestone/1) and the Notion Project Constitution page are closed/Complete as of 2026-08-12. |
+| Event Spine | Complete (test-environment exit gate) | Issues #21–#30 delivered the stack and exit-gate campaign (`CLM-003`–`CLM-006` Observed). GitHub [milestone/2](https://github.com/G1DO/seshatops/milestone/2) and the Notion Event Spine page are closed/Complete as of 2026-08-12. No production deployment. |
+| Identity & Operations through Portfolio Release | Planned | Outcome-and-exit-gate placeholders only; no detailed future implementation backlog is maintained here. Next activation: Identity & Operations. |
 
 The repository now includes Go packages for the event contract, Northstar
 fixture, `erp` source/outbox, `relay` publication, `platform` projection
@@ -38,73 +38,73 @@ production readiness.
 
 | System | Owns | Does not own |
 | --- | --- | --- |
-| Notion | Vision, product and architecture intent, milestone purpose, high-level risks, exit gates, and milestone summaries | Daily task state, duplicated GitHub checklists, or repository technical truth |
+| Notion | Vision, product and architecture intent, capability-sequence purpose, high-level risks, exit gates, and capability-sequence summaries | Daily task state, duplicated GitHub checklists, or repository technical truth |
 | GitHub milestones and issues | Active execution state, bounded deliverables, acceptance criteria, dependencies, and implementation progress | Long-form product strategy or repository evidence |
 | Repository documents | Current reviewed technical truth, contracts, invariants, ADRs, runbooks, roadmap, and evidence ledger | Unreviewed brainstorming or duplicated daily task state |
 | Pull requests and evidence artifacts | Actual changes, review discussion, verification performed, test/experiment artifacts, limitations, and claim support | Future-scope ideas or unsupported claims |
 
-Ordinary issue status remains owned by GitHub. `ROADMAP.md` records milestone intent and sequencing; it must not become a second task tracker.
+Ordinary issue status remains owned by GitHub. `ROADMAP.md` records capability-sequence intent and sequencing; it must not become a second task tracker.
 
-## Milestone sequence
+## Capability sequence
 
-| Milestone | Outcome | Primary capability ownership | Supported or prerequisite capabilities | Dependencies | Exit gate | Status |
+| Capability sequence | Outcome | Primary capability ownership | Supported or prerequisite capabilities | Dependencies | Exit gate | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| **M0 — Project Constitution** | A reviewer understands what SeshatOps is, what it excludes, how it will be built, and what evidence is required before application code begins. | `CAP-001`–`CAP-003` | Supports governance, evidence, and clean-room review for every later milestone. | Master Project Blueprint and Issues #1–#10; no code or external service dependency. | Reviewed documentation is merged; boundaries, ownership, and exit gates are explicit; the M1 backlog can be created without inventing a new architecture. | **Complete** |
-| **M1 — Event Spine** | A synthetic-ERP transaction travels through the transactional outbox, versioned event transport, Go projection, and TypeScript view. | `CAP-004`–`CAP-008` | Provides the event history, projections, and live view used by M2–M5 and the public demo. | M0 architecture, correctness, security, and evidence boundaries. | The vertical slice is duplicate-safe and unchanged event history reconstructs the expected projection deterministically. | **Complete — test-environment exit gate (Issue #30)** |
-| **M2 — Identity & Operations** | Users and service identities operate through default-deny tenant-aware boundaries with visibility into processing health and failures. | `CAP-009`–`CAP-013` | Extends M1 surfaces with identity, authorization, operational visibility, quarantine, and controlled replay. | M1 event and projection surfaces; M0 security model. | The future cross-tenant negative suite passes and privileged operations remain default-deny. | **Planned** |
-| **M3 — Traceability & Recovery** | An authorized operator traces fictional operational lineage and demonstrates controlled reconstruction and recovery. | `CAP-014`–`CAP-017` | Reuses M1 event history/projections and M2 authorization and recovery controls. | M1 event spine; M2 operational authorization and controls. | The traceability query, deterministic projection checksum, and documented restore experiment succeed with reproducible evidence. | **Planned** |
-| **M4 — Stockout Intelligence** | The platform produces evaluated stockout-risk intelligence with uncertainty and honest abstention. | `CAP-018`–`CAP-021` | Uses M1 reconstructed state and M2 tenant boundaries; supplies intelligence to M5 and M8. | M1 replayable operational state; M2 tenant-safe access; M0 evaluation protocols. | A frozen temporal evaluation is reproducible and every prediction is traceable to versioned inputs and evaluation artifacts. | **Planned** |
-| **M5 — Approved Actions** | An authorized human approves a typed recommendation and retries produce one durable business effect with traceable receipts. | `CAP-022`–`CAP-026` | Uses M1 current state, M2 authorization, M4 recommendations, and M3 lineage/recovery context. | M1 operational state; M2 authorization; sequencing preference for M4 proposal output. | Authorized approval and repeated command delivery produce one durable business effect with traceable evidence. This is not an exactly-once network or broker-delivery claim. | **Planned** |
-| **M6 — Governed RAG** | Authorized users receive evidence-backed explanations from fictional documents without cross-tenant leakage or model-owned authority. | `CAP-027`–`CAP-030` | Supports M4 explanations and M5 typed proposals; uses M2 identity and tenant boundaries. | M2 permission context; M0 governed-RAG protocol; sequencing preference for M4 outputs. | A frozen governed-RAG security and evaluation suite meets thresholds declared and justified during M6. Threshold values remain Planned in M0. | **Planned** |
-| **M7 — Reliability & Cloud** | The platform is reproducibly deployed and reliability, recovery, performance, and cost claims are supported by repeatable artifacts. | `CAP-031`–`CAP-037` | Provides cross-cutting operational evidence for M1–M6 and release evidence for M8. | Implemented surfaces requiring telemetry, recovery, and deployment evidence; M3 recovery behavior is a prerequisite for restore campaigns. | Deployment is reproducible and repeated reliability evidence reports exist for the declared environment and conditions. | **Planned** |
-| **M8 — Portfolio Release** | A reviewer can run the public project, understand its design, follow the demonstration, and verify every major public claim. | `CAP-038`–`CAP-040` | Integrates the supported product loop, evidence index, clean-room review, and public claim reconciliation. | Completed implementation milestones and applicable M7 evidence; all public dependencies remain fictional or public. | Every public claim links to evidence and the released repository runs without Ahoy or another private dependency. | **Planned** |
+| **Project Constitution** | A reviewer understands what SeshatOps is, what it excludes, how it will be built, and what evidence is required before application code begins. | `CAP-001`–`CAP-003` | Supports governance, evidence, and clean-room review for every later capability sequence. | Master Project Blueprint and Issues #1–#10; no code or external service dependency. | Reviewed documentation is merged; boundaries, ownership, and exit gates are explicit; the Event Spine backlog can be created without inventing a new architecture. | **Complete** |
+| **Event Spine** | A synthetic-ERP transaction travels through the transactional outbox, versioned event transport, Go projection, and TypeScript view. | `CAP-004`–`CAP-008` | Provides the event history, projections, and live view used by Identity & Operations through Approved Actions and the public demo. | Project Constitution architecture, correctness, security, and evidence boundaries. | The vertical slice is duplicate-safe and unchanged event history reconstructs the expected projection deterministically. | **Complete — test-environment exit gate (Issue #30)** |
+| **Identity & Operations** | Users and service identities operate through default-deny tenant-aware boundaries with visibility into processing health and failures. | `CAP-009`–`CAP-013` | Extends Event Spine surfaces with identity, authorization, operational visibility, quarantine, and controlled replay. | Event Spine event and projection surfaces; Project Constitution security model. | The future cross-tenant negative suite passes and privileged operations remain default-deny. | **Planned** |
+| **Traceability & Recovery** | An authorized operator traces fictional operational lineage and demonstrates controlled reconstruction and recovery. | `CAP-014`–`CAP-017` | Reuses Event Spine event history/projections and Identity & Operations authorization and recovery controls. | Event Spine; Identity & Operations authorization and controls. | The traceability query, deterministic projection checksum, and documented restore experiment succeed with reproducible evidence. | **Planned** |
+| **Stockout Intelligence** | The platform produces evaluated stockout-risk intelligence with uncertainty and honest abstention. | `CAP-018`–`CAP-021` | Uses Event Spine reconstructed state and Identity & Operations tenant boundaries; supplies intelligence to Approved Actions and Portfolio Release. | Event Spine replayable operational state; Identity & Operations tenant-safe access; Project Constitution evaluation protocols. | A frozen temporal evaluation is reproducible and every prediction is traceable to versioned inputs and evaluation artifacts. | **Planned** |
+| **Approved Actions** | An authorized human approves a typed recommendation and retries produce one durable business effect with traceable receipts. | `CAP-022`–`CAP-026` | Uses Event Spine current state, Identity & Operations authorization, Stockout Intelligence recommendations, and Traceability & Recovery lineage/recovery context. | Event Spine operational state; Identity & Operations authorization; sequencing preference for Stockout Intelligence proposal output. | Authorized approval and repeated command delivery produce one durable business effect with traceable evidence. This is not an exactly-once network or broker-delivery claim. | **Planned** |
+| **Governed RAG** | Authorized users receive evidence-backed explanations from fictional documents without cross-tenant leakage or model-owned authority. | `CAP-027`–`CAP-030` | Supports Stockout Intelligence explanations and Approved Actions typed proposals; uses Identity & Operations and tenant boundaries. | Identity & Operations permission context; Project Constitution governed-RAG protocol; sequencing preference for Stockout Intelligence outputs. | A frozen governed-RAG security and evaluation suite meets thresholds declared and justified during Governed RAG. Threshold values remain Planned from Project Constitution. | **Planned** |
+| **Reliability & Cloud** | The platform is reproducibly deployed and reliability, recovery, performance, and cost claims are supported by repeatable artifacts. | `CAP-031`–`CAP-037` | Provides cross-cutting operational evidence for Event Spine through Governed RAG and release evidence for Portfolio Release. | Implemented surfaces requiring telemetry, recovery, and deployment evidence; Traceability & Recovery behavior is a prerequisite for restore campaigns. | Deployment is reproducible and repeated reliability evidence reports exist for the declared environment and conditions. | **Planned** |
+| **Portfolio Release** | A reviewer can run the public project, understand its design, follow the demonstration, and verify every major public claim. | `CAP-038`–`CAP-040` | Integrates the supported product loop, evidence index, clean-room review, and public claim reconciliation. | Completed implementation capability sequences and applicable Reliability & Cloud evidence; all public dependencies remain fictional or public. | Every public claim links to evidence and the released repository runs without Ahoy or another private dependency. | **Planned** |
 
-## Capability-to-primary-milestone matrix
+## Capability-to-primary-owner matrix
 
-Each capability has exactly one primary milestone. A supporting milestone may extend, consume, or verify the capability, but it never becomes a second primary owner. Capability status is `Planned` until later implementation and evidence justify a change.
+Each capability has exactly one primary capability owner. A supporting owner may extend, consume, or verify the capability, but it never becomes a second primary owner. Capability status is `Planned` until later implementation and evidence justify a change.
 
-| Capability ID | Capability | Primary milestone | Supporting milestones | Required evidence route | Status |
+| Capability ID | Capability | Primary capability owner | Supporting owners | Required evidence route | Status |
 | --- | --- | --- | --- | --- | --- |
-| `CAP-001` | Project constitution and clean-room governance | M0 | M8 | Constitution and clean-room review | Planned |
-| `CAP-002` | Architecture, correctness, and security models | M0 | M1–M7 | Reviewed contracts, invariants, ADRs, and model reviews | Planned |
-| `CAP-003` | Evidence and claim governance | M0 | M1–M8 | Roadmap/evidence review and claim-ledger records | Planned |
-| `CAP-004` | Synthetic ERP and deterministic workload foundation | M1 | M3–M5, M8 | Deterministic workload and integration evidence | Observed (test env; via CLM-003–006 campaign) |
-| `CAP-005` | Transactional outbox | M1 | M7 | Contract/integration test and outage evidence | Observed (test env; CLM-003) |
-| `CAP-006` | Versioned event contracts and transport | M1 | M3, M7 | Compatibility test and delivery trace | Observed (test env; CLM-005) |
-| `CAP-007` | Deduplicated operational projections | M1 | M3, M7 | Duplicate-delivery test and projection artifact | Observed (test env; CLM-004/006) |
-| `CAP-008` | TypeScript live operations view | M1 | M8 | Authorized live-view demonstration and test evidence | Planned (implemented UI + Vitest/API reconnect evidence in Issue #30; authorized live-view claim route remains open) |
-| `CAP-009` | Identity and sessions | M2 | M5–M8 | Identity/session integration and negative tests | Planned |
-| `CAP-010` | Tenant-aware authorization | M2 | M3, M5, M6, M7 | Cross-tenant negative suite | Planned |
-| `CAP-011` | Service identities and least privilege | M2 | M5–M7 | Service-identity authorization tests and audit evidence | Planned |
-| `CAP-012` | Operational visibility | M2 | M7 | Health, lag, failure, quarantine, and replay evidence | Planned |
-| `CAP-013` | Quarantine and controlled replay operations | M2 | M3, M7 | Authorized fault/replay campaign | Planned |
-| `CAP-014` | Traceability and recall | M3 | M5, M8 | Lineage query and recall report | Planned |
-| `CAP-015` | Deterministic projection replay and checksum reconstruction | M3 | M1, M7 | Deterministic checksum comparison | Planned |
-| `CAP-016` | Backup and restore | M3 | M7 | Restore experiment with application-readable and integrity checks | Planned |
-| `CAP-017` | Recovery and integrity verification | M3 | M7 | Recovery report and integrity verification artifacts | Planned |
-| `CAP-018` | Forecast datasets and features | M4 | M8 | Versioned dataset/feature manifest | Planned |
-| `CAP-019` | Stockout prediction | M4 | M5, M8 | Temporal evaluation report | Planned |
-| `CAP-020` | Uncertainty and abstention | M4 | M5, M6, M8 | Uncertainty/calibration and abstention evaluation | Planned |
-| `CAP-021` | Forecast evaluation and model/data lineage | M4 | M7, M8 | Reproducible evaluation and lineage artifacts | Planned |
-| `CAP-022` | Typed proposals and authority boundary | M5 | M4, M6, M8 | Proposal contract/security test | Planned |
-| `CAP-023` | Policy and human approval workflow | M5 | M2, M6, M8 | Approval workflow and audit evidence | Planned |
-| `CAP-024` | Execution-time authorization and approval freshness | M5 | M2, M7 | Negative/integration tests across display, approval, and execution | Planned |
-| `CAP-025` | Idempotent command execution | M5 | M7 | Retry/concurrency fault campaign | Planned |
-| `CAP-026` | Durable receipts and uncertain-outcome reconciliation | M5 | M3, M7 | Receipt and reconciliation report | Planned |
-| `CAP-027` | Permission-aware retrieval | M6 | M2, M8 | Governed retrieval evaluation | Planned |
-| `CAP-028` | Citations, refusals, and conflicting evidence | M6 | M4, M5, M8 | Citation/refusal/conflict evaluation report | Planned |
-| `CAP-029` | Prompt-injection and retrieval-leakage defense | M6 | M2, M7, M8 | Adversarial and cross-tenant negative suite | Planned |
-| `CAP-030` | Retrieval and answer evaluation | M6 | M7, M8 | Frozen governed-RAG evaluation report | Planned |
-| `CAP-031` | Correlated telemetry and distributed tracing | M7 | M1–M6 | Trace bundle with correlated metrics and logs | Planned |
-| `CAP-032` | SLI and SLO evidence | M7 | M1–M6 | Environment-scoped SLO evidence report | Planned |
-| `CAP-033` | Load and performance evidence | M7 | M1–M6 | Distribution-aware performance report | Planned |
-| `CAP-034` | Fault and degraded-mode campaigns | M7 | M1–M6 | Fault-campaign report and raw artifacts | Planned |
-| `CAP-035` | Restore and recovery evidence campaigns | M7 | M3 | Restore/recovery campaign report | Planned |
-| `CAP-036` | Reproducible cloud deployment | M7 | M8 | Deployment reproduction record | Planned |
-| `CAP-037` | Cost evidence | M7 | M8 | Declared-environment cost report | Planned |
-| `CAP-038` | Deterministic public demo | M8 | M1–M7 | Demonstration script and release artifact | Planned |
-| `CAP-039` | Public release and evidence index | M8 | M0, M7 | Release review and evidence index | Planned |
-| `CAP-040` | Evidence-bounded README, CV, and portfolio claims | M8 | M0, M7 | Public-claim reconciliation review | Planned |
+| `CAP-001` | Project constitution and clean-room governance | Constitution | Portfolio | Constitution and clean-room review | Planned |
+| `CAP-002` | Architecture, correctness, and security models | Constitution | Event Spine through Reliability & Cloud | Reviewed contracts, invariants, ADRs, and model reviews | Planned |
+| `CAP-003` | Evidence and claim governance | Constitution | Event Spine through Portfolio Release | Roadmap/evidence review and claim-ledger records | Planned |
+| `CAP-004` | Synthetic ERP and deterministic workload foundation | Event Spine | Traceability & Recovery through Approved Actions, Portfolio | Deterministic workload and integration evidence | Observed (test env; via CLM-003–006 campaign) |
+| `CAP-005` | Transactional outbox | Event Spine | Reliability | Contract/integration test and outage evidence | Observed (test env; CLM-003) |
+| `CAP-006` | Versioned event contracts and transport | Event Spine | Traceability, Reliability | Compatibility test and delivery trace | Observed (test env; CLM-005) |
+| `CAP-007` | Deduplicated operational projections | Event Spine | Traceability, Reliability | Duplicate-delivery test and projection artifact | Observed (test env; CLM-004/006) |
+| `CAP-008` | TypeScript live operations view | Event Spine | Portfolio | Authorized live-view demonstration and test evidence | Planned (implemented UI + Vitest/API reconnect evidence in Issue #30; authorized live-view claim route remains open) |
+| `CAP-009` | Identity and sessions | Identity | Approved Actions through Portfolio Release | Identity/session integration and negative tests | Planned |
+| `CAP-010` | Tenant-aware authorization | Identity | Traceability, Approvals, Governed RAG, Reliability | Cross-tenant negative suite | Planned |
+| `CAP-011` | Service identities and least privilege | Identity | Approved Actions through Reliability & Cloud | Service-identity authorization tests and audit evidence | Planned |
+| `CAP-012` | Operational visibility | Identity | Reliability | Health, lag, failure, quarantine, and replay evidence | Planned |
+| `CAP-013` | Quarantine and controlled replay operations | Identity | Traceability, Reliability | Authorized fault/replay campaign | Planned |
+| `CAP-014` | Traceability and recall | Traceability | Approvals, Portfolio | Lineage query and recall report | Planned |
+| `CAP-015` | Deterministic projection replay and checksum reconstruction | Traceability | Event Spine, Reliability | Deterministic checksum comparison | Planned |
+| `CAP-016` | Backup and restore | Traceability | Reliability | Restore experiment with application-readable and integrity checks | Planned |
+| `CAP-017` | Recovery and integrity verification | Traceability | Reliability | Recovery report and integrity verification artifacts | Planned |
+| `CAP-018` | Forecast datasets and features | Stockout | Portfolio | Versioned dataset/feature manifest | Planned |
+| `CAP-019` | Stockout prediction | Stockout | Approvals, Portfolio | Temporal evaluation report | Planned |
+| `CAP-020` | Uncertainty and abstention | Stockout | Approvals, Governed RAG, Portfolio | Uncertainty/calibration and abstention evaluation | Planned |
+| `CAP-021` | Forecast evaluation and model/data lineage | Stockout | Reliability, Portfolio | Reproducible evaluation and lineage artifacts | Planned |
+| `CAP-022` | Typed proposals and authority boundary | Approvals | Stockout, Governed RAG, Portfolio | Proposal contract/security test | Planned |
+| `CAP-023` | Policy and human approval workflow | Approvals | Identity, Governed RAG, Portfolio | Approval workflow and audit evidence | Planned |
+| `CAP-024` | Execution-time authorization and approval freshness | Approvals | Identity, Reliability | Negative/integration tests across display, approval, and execution | Planned |
+| `CAP-025` | Idempotent command execution | Approvals | Reliability | Retry/concurrency fault campaign | Planned |
+| `CAP-026` | Durable receipts and uncertain-outcome reconciliation | Approvals | Traceability, Reliability | Receipt and reconciliation report | Planned |
+| `CAP-027` | Permission-aware retrieval | Governed RAG | Identity, Portfolio | Governed retrieval evaluation | Planned |
+| `CAP-028` | Citations, refusals, and conflicting evidence | Governed RAG | Stockout, Approvals, Portfolio | Citation/refusal/conflict evaluation report | Planned |
+| `CAP-029` | Prompt-injection and retrieval-leakage defense | Governed RAG | Identity, Reliability, Portfolio | Adversarial and cross-tenant negative suite | Planned |
+| `CAP-030` | Retrieval and answer evaluation | Governed RAG | Reliability, Portfolio | Frozen governed-RAG evaluation report | Planned |
+| `CAP-031` | Correlated telemetry and distributed tracing | Reliability | Event Spine through Governed RAG | Trace bundle with correlated metrics and logs | Planned |
+| `CAP-032` | SLI and SLO evidence | Reliability | Event Spine through Governed RAG | Environment-scoped SLO evidence report | Planned |
+| `CAP-033` | Load and performance evidence | Reliability | Event Spine through Governed RAG | Distribution-aware performance report | Planned |
+| `CAP-034` | Fault and degraded-mode campaigns | Reliability | Event Spine through Governed RAG | Fault-campaign report and raw artifacts | Planned |
+| `CAP-035` | Restore and recovery evidence campaigns | Reliability | Traceability | Restore/recovery campaign report | Planned |
+| `CAP-036` | Reproducible cloud deployment | Reliability | Portfolio | Deployment reproduction record | Planned |
+| `CAP-037` | Cost evidence | Reliability | Portfolio | Declared-environment cost report | Planned |
+| `CAP-038` | Deterministic public demo | Portfolio | Event Spine through Reliability & Cloud | Demonstration script and release artifact | Planned |
+| `CAP-039` | Public release and evidence index | Portfolio | Constitution, Reliability | Release review and evidence index | Planned |
+| `CAP-040` | Evidence-bounded README, CV, and portfolio claims | Portfolio | Constitution, Reliability | Public-claim reconciliation review | Planned |
 
 ## Dependencies and sequencing
 
@@ -112,54 +112,54 @@ Dependencies are recorded only where supported by the product constitution, arch
 
 ### Hard implementation dependencies
 
-- M0 precedes M1 because the event spine must follow the reviewed architecture, correctness, security, and evidence boundaries.
-- M1 precedes M2 because identity and operations govern event-processing and projection surfaces.
-- M1 precedes M3 because traceability and recovery reuse the event history and projections.
-- M1 precedes M4 because forecasting features derive from replayable operational state.
-- M1 and M2 precede M5 because approved actions require current state and tenant-aware authorization.
-- M2 precedes M6 because retrieval and citation must receive an authoritative permission context.
-- M3 precedes the M7 restore/recovery campaign because recovery behavior must exist before it can be evidenced.
-- Applicable implementation and M7 evidence precede M8 release claims.
+- Project Constitution precedes Event Spine because the event spine must follow the reviewed architecture, correctness, security, and evidence boundaries.
+- Event Spine precedes Identity & Operations because identity and operations govern event-processing and projection surfaces.
+- Event Spine precedes Traceability & Recovery because traceability and recovery reuse the event history and projections.
+- Event Spine precedes Stockout Intelligence because forecasting features derive from replayable operational state.
+- Event Spine and Identity & Operations precede Approved Actions because approved actions require current state and tenant-aware authorization.
+- Identity & Operations precedes Governed RAG because retrieval and citation must receive an authoritative permission context.
+- Traceability & Recovery precedes the Reliability & Cloud restore/recovery campaign because recovery behavior must exist before it can be evidenced.
+- Applicable implementation and Reliability & Cloud evidence precede Portfolio Release claims.
 
 ### Sequencing preferences
 
-- M4 output should be available before the complete M5 proposal workflow is demonstrated.
-- M5 and M6 should be integrated into the M8 demonstration only after their authority and evidence boundaries are reviewed.
-- M2 operational controls should be available before M3 recovery workflows are exposed to operators.
+- Stockout Intelligence output should be available before the complete Approved Actions proposal workflow is demonstrated.
+- Approved Actions and Governed RAG should be integrated into the Portfolio Release demonstration only after their authority and evidence boundaries are reviewed.
+- Identity & Operations controls should be available before Traceability & Recovery workflows are exposed to operators.
 
 ### Cross-cutting evidence dependencies
 
-- M0 defines the status, clean-room, source-of-truth, and claim-promotion rules used by every later evidence record.
-- M2 authorization evidence supports tenant and privileged-operation claims in M3–M6.
-- M7 supplies operational, restore, performance, deployment, and cost evidence for earlier capabilities; this does not change their primary ownership.
-- M8 reconciles public wording against `EVIDENCE.md` and retains superseded claims and evidence.
+- Project Constitution defines the status, clean-room, source-of-truth, and claim-promotion rules used by every later evidence record.
+- Identity & Operations authorization evidence supports tenant and privileged-operation claims in Traceability & Recovery through Governed RAG.
+- Reliability & Cloud supplies operational, restore, performance, deployment, and cost evidence for earlier capabilities; this does not change their primary ownership.
+- Portfolio Release reconciles public wording against `EVIDENCE.md` and retains superseded claims and evidence.
 
-## Active-milestone decomposition rule
+## Active capability-sequence decomposition rule
 
-M1 exit-gate evidence is recorded (Issue #30). M2 is the next Planned
-milestone for identity and operations. Detailed GitHub issues remain bounded to
-the active milestone. M3–M8 remain outcome-and-exit-gate placeholders and must
+Event Spine exit-gate evidence is recorded (Issue #30). Identity & Operations is the next Planned
+capability sequence. Detailed GitHub issues remain bounded to
+the active capability sequence. Traceability & Recovery through Portfolio Release remain outcome-and-exit-gate placeholders and must
 not accumulate speculative implementation backlogs.
 
-When a milestone begins:
+When a capability sequence begins:
 
 1. Review its Notion page and the current repository truth.
 2. Confirm purpose, user-visible outcome, invariants, trust boundaries, non-goals, dependencies, and required exit evidence.
-3. Create only bounded GitHub issues for that active milestone.
+3. Create only bounded GitHub issues for that active capability sequence.
 4. Give each issue one observable outcome, acceptance criteria, failure/security cases, dependencies, evidence requirements, and non-goals.
-5. Link the milestone-level intent to the repository plan without duplicating daily issue status.
+5. Link the capability-sequence intent to the repository plan without duplicating daily issue status.
 
-## Milestone activation rules
+## Capability-sequence activation rules
 
-- A milestone remains Planned until its dependencies, outcome, exit gate, and evidence route are reviewed.
-- The Notion milestone page is reviewed before GitHub issues are created.
-- A milestone becomes active only when its first bounded issue begins in GitHub.
-- Future milestones may have only placeholder purpose, outcome, dependencies, and exit-gate information before activation.
+- A capability sequence remains Planned until its dependencies, outcome, exit gate, and evidence route are reviewed.
+- The Notion capability-sequence page is reviewed before GitHub issues are created.
+- A capability sequence becomes active only when its first bounded issue begins in GitHub.
+- Future capability sequences may have only placeholder purpose, outcome, dependencies, and exit-gate information before activation.
 - GitHub owns issue and milestone execution state; this file records the stable sequence and governance rules.
 
-## Milestone completion rules
+## Capability-sequence completion rules
 
-A milestone may be marked complete only when:
+A capability sequence may be marked complete only when:
 
 - Its user-visible outcome works end to end where applicable.
 - Required acceptance criteria and relevant correctness, failure, and security cases pass.
@@ -167,19 +167,19 @@ A milestone may be marked complete only when:
 - Required evidence artifacts exist, are linked to stable claim IDs, and include limitations.
 - No README, CV, demo, or portfolio claim exceeds the ledger.
 - Important decisions have ADRs where required.
-- The deterministic demonstration path and repository checks applicable to the milestone are available.
+- The deterministic demonstration path and repository checks applicable to the capability sequence are available.
 - Residual risks and deferred work are recorded.
-- The milestone summary is published through the Notion/GitHub workflow.
+- The capability-sequence summary is published through the Notion/GitHub workflow.
 
-Documentation existence alone cannot satisfy a future runtime milestone exit gate.
+Documentation existence alone cannot satisfy a future runtime capability-sequence exit gate.
 
 ## Scope-change and contradiction handling
 
-- A scope change must identify the affected capability IDs, primary milestone, supporting milestones, claims, dependencies, and evidence routes.
+- A scope change must identify the affected capability IDs, primary capability owner, supporting owners, claims, dependencies, and evidence routes.
 - A capability may have only one primary owner. If ownership changes, the roadmap records the old and new owner and preserves claim traceability.
 - Contradictions are recorded with the sources, impact, disposition, and owner before implementation scope changes.
 - A later implementation detail must not silently rewrite a product, security, correctness, or evidence invariant.
-- Scope changes that introduce a schedule, target, vendor, model, infrastructure product, or production claim require the owning milestone’s explicit decision and evidence route.
+- Scope changes that introduce a schedule, target, vendor, model, infrastructure product, or production claim require the owning capability sequence’s explicit decision and evidence route.
 - Superseded claims and evidence remain in the ledger; they are never silently deleted or reused.
 
 ## Non-goals and deferred decisions
@@ -187,14 +187,14 @@ Documentation existence alone cannot satisfy a future runtime milestone exit gat
 This roadmap does not:
 
 - Create or modify GitHub milestones.
-- Create detailed M1–M8 issues.
+- Create detailed Event Spine through Portfolio Release issues.
 - Add application code, runtime scaffolding, infrastructure, CI, schemas, dashboards, or scripts.
 - Select identity providers, policy engines, databases, brokers, model vendors, vector stores, cloud products, or deployment sizes.
 - Invent schedules, throughput, latency, accuracy, availability, SLO, RPO, RTO, cost, security, or evaluation targets.
 - Claim exactly-once network or broker delivery, production readiness, or measured performance.
 - Use Ahoy or any private system as a dependency, evidence source, or design input.
 
-Deferred decisions are owned by the relevant milestone: completed Issue #9 established repository workflow and documentation CI; Issue #10 owns integrated M0 review; M1 owns runtime event implementation; M2 owns identity and operational enforcement; M3 owns restore behavior; M4 owns forecasting evaluation decisions; M5 owns command and reconciliation implementation; M6 owns retrieval/evaluation implementation; M7 owns deployment and operational evidence decisions; and M8 owns public release and final claim reconciliation.
+Deferred decisions are owned by the relevant capability sequence: completed Issue #9 established repository workflow and documentation CI; Issue #10 owns integrated Project Constitution review; Event Spine owns runtime event implementation; Identity & Operations owns identity and operational enforcement; Traceability & Recovery owns restore behavior; Stockout Intelligence owns forecasting evaluation decisions; Approved Actions owns command and reconciliation implementation; Governed RAG owns retrieval/evaluation implementation; Reliability & Cloud owns deployment and operational evidence decisions; and Portfolio Release owns public release and final claim reconciliation.
 
 ## Related documents
 

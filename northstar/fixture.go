@@ -2,10 +2,10 @@ package northstar
 
 import "github.com/G1DO/seshatops/event"
 
-// DefaultSeed is the declared M1 Northstar Foods order-line workload seed.
+// DefaultSeed is the declared Event Spine Northstar Foods order-line workload seed.
 const DefaultSeed = "northstar-m1-order-line-v1"
 
-// Fixture is the deterministic synthetic order/item/inventory workload for M1.
+// Fixture is the deterministic synthetic order/item/inventory workload for Event Spine.
 type Fixture struct {
 	Seed           string
 	TenantID       string
@@ -16,7 +16,7 @@ type Fixture struct {
 	Event          event.Envelope
 }
 
-// Generate returns the fixed Northstar Foods M1 fixture for the declared seed.
+// Generate returns the fixed Northstar Foods Event Spine fixture for the declared seed.
 // Only DefaultSeed is supported in this slice; empty seed is rejected.
 func Generate(seed string) (Fixture, error) {
 	if seed != DefaultSeed {

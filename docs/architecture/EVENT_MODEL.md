@@ -1,7 +1,7 @@
 # Event Model — SeshatOps Correctness Principles
 
 **Status:** Planned conceptual contract from Issue #4. This document defines
-principles that future implementations must preserve. The concrete M1 contract is in [`CONTRACTS.md`](../../CONTRACTS.md).
+principles that future implementations must preserve. The concrete Event Spine contract is in [`CONTRACTS.md`](../../CONTRACTS.md).
 Executable parse, validation, JCS canonicalization, and content-hash helpers
 for that contract live in the Go package `event`. Neither the documents nor the
 library prove transport, projection, or production readiness.
@@ -10,7 +10,7 @@ library prove transport, projection, or production readiness.
 
 **Does not own:** Later event schemas, topics, partitions, retention, worker
 algorithms, dependency choices, deployment topology, the full threat model, or
-measured reliability targets. M1's first JSON event, topic, key, persistence,
+measured reliability targets. Event Spine's first JSON event, topic, key, persistence,
 retry, failure, and checksum decisions are owned by [`CONTRACTS.md`](../../CONTRACTS.md).
 
 ## 1. Purpose and scope
@@ -168,7 +168,7 @@ Replay of projections must not repeat irreversible external commands, notificati
 
 ## 10. Deferred implementation choices
 
-Issue #21 resolves the first M1 event serialization, schema compatibility,
+Issue #21 resolves the first Event Spine event serialization, schema compatibility,
 topic/key policy, source/outbox boundary, inbox/projection transaction, retry
 and acknowledgement contract, failure record, and checksum canonicalization in
 [`CONTRACTS.md`](../../CONTRACTS.md).
@@ -177,4 +177,4 @@ The following remain deliberately open: later event families, retention and
 archival, partition sizing, publisher and consumer process layout, metrics,
 alerts and thresholds, deployment-specific credentials, HTTP routes, and
 operator recovery controls. Those choices remain subject to the invariants in
-this document and the M1 contract.
+this document and the Event Spine contract.

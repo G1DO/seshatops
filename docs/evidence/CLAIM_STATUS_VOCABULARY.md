@@ -25,7 +25,7 @@ The vocabulary below is the complete claim-status vocabulary for SeshatOps. Do n
 - A new claim starts as **Planned**.
 - **Implemented** may be assigned only when the relevant implementation or control is present in a reviewed repository state.
 - **Observed** requires a named experiment, a complete reproducibility record, raw or machine-readable artifacts where practical, a result summary, failures and anomalies, limitations, and a reviewer decision.
-- **Reproduced** requires the prior observation, documented reproduction instructions, independent-execution details, whether the environment was rebuilt, operator identity or role, equivalence criteria, tolerances when already approved elsewhere, and remaining differences. M0 does not invent numerical tolerances.
+- **Reproduced** requires the prior observation, documented reproduction instructions, independent-execution details, whether the environment was rebuilt, operator identity or role, equivalence criteria, tolerances when already approved elsewhere, and remaining differences. Constitution does not invent numerical tolerances.
 - Missing environment, configuration, commit, workload, dataset, artifact, or limitation details prevent promotion to **Observed** or **Reproduced**.
 - A stable claim identifier must be assigned before an experiment executes or a claim is promoted to **Observed** or **Reproduced**. A `Planned` claim-ID placeholder is not an assigned identifier. Issue #8 established the repository evidence ledger; future execution and promotion may not proceed without a stable ledger assignment and the required evidence record.
 - Stale, invalidated, corrupted, contradicted, leaked, or non-reproducible evidence requires withdrawal of the affected claim or transition to **Superseded**, with a link to the replacing decision or evidence.
@@ -77,7 +77,7 @@ No environment may be described as more realistic than its documented configurat
 - Absence of observed failure is not proof that failure is impossible.
 - Screenshots alone are not sufficient evidence.
 - Local demonstrations cannot support production claims.
-- Planned targets remain Planned until a later milestone approves and measures them.
+- Planned targets remain Planned until a later capability sequence approves and measures them.
 - The vocabulary does not select SLO targets, RPO/RTO targets, infrastructure sizes, products, repetition counts, or pass thresholds.
 
 ## Related documents

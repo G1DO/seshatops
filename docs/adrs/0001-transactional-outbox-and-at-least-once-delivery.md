@@ -1,6 +1,6 @@
 # ADR-0001: Transactional Outbox and At-Least-Once Delivery
 
-- **Status:** Accepted design principle with accepted M1 amendment; source/outbox persistence implemented in Issue #23; source-owned relay publication implemented for M1 library/integration scope in Issue #24; projection consumer and bounded failure/restart safety implemented in Issues #25–#26
+- **Status:** Accepted design principle with accepted Event Spine amendment; source/outbox persistence implemented in Issue #23; source-owned relay publication implemented for Event Spine library/integration scope in Issue #24; projection consumer and bounded failure/restart safety implemented in Issues #25–#26
 - **Date:** 2026-08-06
 - **Scope:** Issue #4 event publication, consumption, quarantine, and replay correctness
 
@@ -23,11 +23,11 @@ The system must also remain a clean-room public platform. This ADR therefore rec
 9. The platform makes no unsupported claim of exactly-once delivery or exactly-once business effects.
 
 The full conceptual contract is in [EVENT_MODEL.md](../architecture/EVENT_MODEL.md).
-The concrete M1 contract is in [CONTRACTS.md](../../CONTRACTS.md).
+The concrete Event Spine contract is in [CONTRACTS.md](../../CONTRACTS.md).
 
-## M1 concrete amendment from ADR-Q-002
+## Event Spine concrete amendment from ADR-Q-002
 
-For the first M1 event family, the source-owned relay publishes to the
+For the first Event Spine event family, the source-owned relay publishes to the
 `seshatops.m1.events` topic using the canonical aggregate key
 `tenant_id/aggregate_type/aggregate_id`. It publishes the exact immutable JSON
 bytes recorded in the `erp` outbox and marks the row `published` only after a
@@ -108,5 +108,5 @@ These risks require later operational evidence and implementation-specific contr
 Retention and archival, partition sizing, publisher/consumer process layout,
 alerting, credentials, libraries, deployment topology, and later event families
 remain open. Issue #7 owns reliability evidence; completed Issue #9 established
-repository workflow and documentation CI; M1 and later milestones own the
+repository workflow and documentation CI; Event Spine and later capability sequences own the
 corresponding runtime choices.

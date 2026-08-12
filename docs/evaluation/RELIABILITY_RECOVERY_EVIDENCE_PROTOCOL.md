@@ -84,7 +84,7 @@ The existence of a backup is not evidence of restorability. A restore record mus
 - missing, partially restored, duplicated, stale, or corrupted data; and
 - recovery procedure, safety controls, raw artifacts, limitations, and reviewer decision.
 
-Recovery-point and recovery-time observations may be reported only from measured experiments. Planned RPO or RTO targets must not be invented in M0. Destructive recovery tests require separately approved safety controls in a later milestone.
+Recovery-point and recovery-time observations may be reported only from measured experiments. Planned RPO or RTO targets must not be invented in Project Constitution. Destructive recovery tests require separately approved safety controls in a later capability sequence.
 
 Restore success must not be reported merely because files exist, a process starts, or a health endpoint responds. The restored application must read and validate the relevant data and preserve tenant boundaries.
 
@@ -104,17 +104,17 @@ Before an SLO or availability claim is accepted, the evidence record must define
 - limitations, exclusions, and reviewer decision; and
 - claim IDs and status before and after the observation.
 
-Synthetic checks alone do not establish user-visible availability. A short successful window does not establish long-term availability. Missing telemetry cannot be silently treated as success. Planned targets remain **Planned** until a later milestone approves and measures them.
+Synthetic checks alone do not establish user-visible availability. A short successful window does not establish long-term availability. Missing telemetry cannot be silently treated as success. Planned targets remain **Planned** until a later capability sequence approves and measures them.
 
 An availability claim must not silently exclude errors, degraded behavior, dependency failures, incomplete telemetry, or user-visible failure modes. Exclusions must be explicit and justified.
 
 ## 6. Claim status and limitations
 
-Use the exact five claim statuses in [CLAIM_STATUS_VOCABULARY.md](../evidence/CLAIM_STATUS_VOCABULARY.md). All scenarios and results in this M0 protocol remain **Planned** or **Not executed**. No reliability, recovery, restorability, availability, or SLO claim is promoted here.
+Use the exact five claim statuses in [CLAIM_STATUS_VOCABULARY.md](../evidence/CLAIM_STATUS_VOCABULARY.md). All scenarios and results in this Constitution protocol remain **Planned** or **Not executed**. No reliability, recovery, restorability, availability, or SLO claim is promoted here.
 
 ## 7. Deferred decisions
 
-This protocol does not select fault-injection products, monitoring products, load-testing products, backup products, infrastructure sizes, deployment topology, telemetry queries, SLO targets, error budgets, RPO/RTO targets, pass thresholds, or repetition counts. Concrete implementation and operations decisions belong to later milestones.
+This protocol does not select fault-injection products, monitoring products, load-testing products, backup products, infrastructure sizes, deployment topology, telemetry queries, SLO targets, error budgets, RPO/RTO targets, pass thresholds, or repetition counts. Concrete implementation and operations decisions belong to later capability sequences.
 
 ## Related documents
 

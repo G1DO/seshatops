@@ -1,4 +1,4 @@
--- M1 synthetic ERP source schema (Issue #23).
+-- Event Spine synthetic ERP source schema (Issue #23).
 -- Owns orders, authoritative inventory, and outbox intent only.
 
 CREATE SCHEMA IF NOT EXISTS erp;

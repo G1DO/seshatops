@@ -10,7 +10,7 @@ import (
 //go:embed migrate.sql
 var migrateSQL embed.FS
 
-// Migrate applies the M1 platform schema to db.
+// Migrate applies the Event Spine platform schema to db.
 func Migrate(ctx context.Context, db *sql.DB) error {
 	raw, err := migrateSQL.ReadFile("migrate.sql")
 	if err != nil {
