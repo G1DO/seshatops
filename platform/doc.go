@@ -7,6 +7,8 @@
 // Conflicting reuse of event_id is an integrity failure. Malformed,
 // unsupported, and handler-poison deliveries persist sanitized
 // processing_failures rows. InspectProcessing exposes bounded failure/gap
-// visibility for M1 verification. This package does not claim exactly-once
-// delivery or processing, and does not own operator recovery controls.
+// visibility for M1 verification. After an applied projection commit,
+// SetAppliedNotifier may receive a non-blocking AppliedUpdate for the Issue
+// #27 read API. This package does not claim exactly-once delivery or
+// processing, and does not own operator recovery controls.
 package platform

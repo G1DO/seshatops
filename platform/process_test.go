@@ -848,3 +848,129 @@ func checksumOneRow(tenantID, itemID string, qty, ver int64) string {
 	sum := sha256.Sum256([]byte(line))
 	return hex.EncodeToString(sum[:])
 }
+
+type recordingNotifier struct {
+	updates []AppliedUpdate
+}
+
+func (n *recordingNotifier) NotifyApplied(update AppliedUpdate) {
+	n.updates = append(n.updates, update)
+}
+
+func installRecordingNotifier(t *testing.T) *recordingNotifier {
+	t.Helper()
+	n := &recordingNotifier{}
+	SetAppliedNotifier(n)
+	t.Cleanup(func() { SetAppliedNotifier(nil) })
+	return n
+}
+
+func TestListTenantProjectionEmptyAndApplied(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	rows, err := ListTenantProjection(context.Background(), db, fx.TenantID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 0 {
+		t.Fatalf("empty list len=%d", len(rows))
+	}
+	_ = processNorthstar(t, db, fx)
+	rows, err = ListTenantProjection(context.Background(), db, fx.TenantID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rows) != 1 || rows[0].ItemID != fx.ItemID || rows[0].QuantityOnHand != 8 || rows[0].AggregateVersion != 1 {
+		t.Fatalf("rows = %+v", rows)
+	}
+}
+
+func TestAppliedNotifierOnCommit(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	n := installRecordingNotifier(t)
+	_ = processNorthstar(t, db, fx)
+	if len(n.updates) != 1 {
+		t.Fatalf("updates = %d, want 1", len(n.updates))
+	}
+	u := n.updates[0]
+	if u.TenantID != fx.TenantID || u.ItemID != fx.ItemID || u.QuantityOnHand != 8 ||
+		u.AggregateVersion != 1 || u.EventID != fx.Event.EventID {
+		t.Fatalf("update = %+v", u)
+	}
+}
+
+func TestAppliedNotifierSilentOnRollback(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	n := installRecordingNotifier(t)
+	SetFailBeforeCommitForTest(func(context.Context) error {
+		return errors.New("injected rollback")
+	})
+	t.Cleanup(func() { SetFailBeforeCommitForTest(nil) })
+
+	raw := mustCanonical(t, fx.Event)
+	key := []byte(relay.AggregateKey(fx.TenantID, fx.Event.AggregateType, fx.Event.AggregateID))
+	_, err := ProcessRecord(context.Background(), db, key, raw, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 1,
+	})
+	if err == nil {
+		t.Fatal("expected commit failure")
+	}
+	if len(n.updates) != 0 {
+		t.Fatalf("notifier fired on rollback: %+v", n.updates)
+	}
+}
+
+func TestAppliedNotifierSilentOnDuplicate(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	n := installRecordingNotifier(t)
+	_ = processNorthstar(t, db, fx)
+	_ = processNorthstar(t, db, fx)
+	if len(n.updates) != 1 {
+		t.Fatalf("updates = %d, want 1 (duplicate must not notify)", len(n.updates))
+	}
+}
+
+func TestAppliedNotifierOnGapRedrive(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	n := installRecordingNotifier(t)
+
+	v2 := fx.Event
+	v2.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b2"
+	v2.AggregateVersion = 2
+	v2.Payload.QuantityBefore = 8
+	v2.Payload.QuantityDecremented = 1
+	v2.Payload.QuantityAfter = 7
+	v2.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	v2.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b3"
+
+	raw2 := mustCanonical(t, v2)
+	key := []byte(relay.AggregateKey(v2.TenantID, v2.AggregateType, v2.AggregateID))
+	res, err := ProcessRecord(context.Background(), db, key, raw2, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 10,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Disposition != DispositionQuarantinedGap {
+		t.Fatalf("expected gap, got %s", res.Disposition)
+	}
+	if len(n.updates) != 0 {
+		t.Fatalf("gap must not notify: %+v", n.updates)
+	}
+
+	_ = processNorthstar(t, db, fx)
+	if len(n.updates) != 2 {
+		t.Fatalf("updates = %d, want 2 (v1 apply + v2 redrive)", len(n.updates))
+	}
+	if n.updates[0].AggregateVersion != 1 || n.updates[0].QuantityOnHand != 8 {
+		t.Fatalf("first update = %+v", n.updates[0])
+	}
+	if n.updates[1].AggregateVersion != 2 || n.updates[1].QuantityOnHand != 7 ||
+		n.updates[1].EventID != v2.EventID {
+		t.Fatalf("redrive update = %+v", n.updates[1])
+	}
+}
