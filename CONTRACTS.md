@@ -2,8 +2,9 @@
 
 **Status:** Accepted M1 implementation contract. Issue #22 provides the
 executable JSON/JCS library and Northstar fixture. Issue #23 implements the
-`erp` source transaction and pending outbox persistence. Broker publication
-and projection runtime remain later M1 issues.
+`erp` source transaction and pending outbox persistence. Issue #24 implements
+the source-owned outbox relay. Issue #25 implements the Go inbox/inventory
+projection consumer. Bounded failure/backlog observability remains Issue #26.
 
 **Owns:** The concrete M1 event envelope, first event family, JSON compatibility
 rules, PostgreSQL ownership boundaries, Redpanda topic and key policy, outbox
@@ -158,6 +159,9 @@ are recorded in
 The Issue #24 relay behavior, Redpanda pin, lease/backoff, and backlog
 visibility are recorded in
 [OUTBOX_RELAY.md](docs/architecture/OUTBOX_RELAY.md).
+The Issue #25 consumer, inbox/projection schema, acknowledgement ordering, and
+checksum helper are recorded in
+[INVENTORY_PROJECTION_CONSUMER.md](docs/architecture/INVENTORY_PROJECTION_CONSUMER.md).
 
 ### Outbox relay
 

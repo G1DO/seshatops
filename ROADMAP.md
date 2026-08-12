@@ -1,9 +1,9 @@
 # SeshatOps Roadmap
 
 **Status:** M0 is complete; M1 Event Spine is active with an executable event
-contract, Northstar fixture (Issue #22), and source/outbox persistence
-(Issue #23); Redpanda publication and projection runtime remain later M1 work;
-M2–M8 are Planned.
+contract, Northstar fixture (Issue #22), source/outbox persistence (Issue #23),
+Redpanda publication (Issue #24), and inventory projection consumer (Issue #25);
+service runtime and TypeScript view remain later M1 work; M2–M8 are Planned.
 
 This document is the concise, repository-owned implementation sequence for SeshatOps. It maps each major capability to exactly one primary milestone, records supported dependencies, and defines the governance rules for activating and completing milestones. It is a roadmap, not a task board and not evidence that future capabilities exist.
 
@@ -20,15 +20,15 @@ This roadmap covers the planned sequence from the M0 constitution through the M8
 | Milestone | Status | Repository state |
 | --- | --- | --- |
 | M0 — Project Constitution | Complete | Issues #1–#10 and PRs #11–#20 are complete. Notion remains `In Progress` until its normal workflow is updated; that external state is not silently changed here. |
-| M1 — Event Spine | Active implementation | Issue #21 accepted the contract. Issue #22 adds the Go event/fixture libraries. Issue #23 adds the source transaction and pending outbox. Redpanda publication and projection remain later M1 issues. |
+| M1 — Event Spine | Active implementation | Issue #21 accepted the contract. Issues #22–#25 add event libraries, source/outbox, Redpanda relay, and the inventory projection consumer. Service runtime and TypeScript view remain later M1 issues. |
 | M2–M8 | Planned | Outcome-and-exit-gate placeholders only; no detailed future implementation backlog is maintained here. |
 
-The repository now includes a minimal Go event-contract library, synthetic
-fixture, and Issue #23 `erp` PostgreSQL source/outbox persistence. No broker
-relay, projection consumer, service runtime, model, dataset experiment,
-deployment, or production environment exists yet. Existing documents define
-intent and reviewed truth; they do not prove transport behavior, observed
-production behavior, performance, or production readiness.
+The repository now includes Go packages for the event contract, Northstar
+fixture, `erp` source/outbox, `relay` publication, and `platform` projection
+consumer. No service runtime, model, dataset experiment, deployment, or
+production environment exists yet. Existing documents define intent and
+reviewed truth; they do not prove observed production behavior, performance, or
+production readiness.
 
 ## Source-of-truth boundaries
 
@@ -46,7 +46,7 @@ Ordinary issue status remains owned by GitHub. `ROADMAP.md` records milestone in
 | Milestone | Outcome | Primary capability ownership | Supported or prerequisite capabilities | Dependencies | Exit gate | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | **M0 — Project Constitution** | A reviewer understands what SeshatOps is, what it excludes, how it will be built, and what evidence is required before application code begins. | `CAP-001`–`CAP-003` | Supports governance, evidence, and clean-room review for every later milestone. | Master Project Blueprint and Issues #1–#10; no code or external service dependency. | Reviewed documentation is merged; boundaries, ownership, and exit gates are explicit; the M1 backlog can be created without inventing a new architecture. | **Complete** |
-| **M1 — Event Spine** | A synthetic-ERP transaction travels through the transactional outbox, versioned event transport, Go projection, and TypeScript view. | `CAP-004`–`CAP-008` | Provides the event history, projections, and live view used by M2–M5 and the public demo. | M0 architecture, correctness, security, and evidence boundaries. | The vertical slice is duplicate-safe and unchanged event history reconstructs the expected projection deterministically. | **Active — source/outbox persistence** |
+| **M1 — Event Spine** | A synthetic-ERP transaction travels through the transactional outbox, versioned event transport, Go projection, and TypeScript view. | `CAP-004`–`CAP-008` | Provides the event history, projections, and live view used by M2–M5 and the public demo. | M0 architecture, correctness, security, and evidence boundaries. | The vertical slice is duplicate-safe and unchanged event history reconstructs the expected projection deterministically. | **Active — projection consumer** |
 | **M2 — Identity & Operations** | Users and service identities operate through default-deny tenant-aware boundaries with visibility into processing health and failures. | `CAP-009`–`CAP-013` | Extends M1 surfaces with identity, authorization, operational visibility, quarantine, and controlled replay. | M1 event and projection surfaces; M0 security model. | The future cross-tenant negative suite passes and privileged operations remain default-deny. | **Planned** |
 | **M3 — Traceability & Recovery** | An authorized operator traces fictional operational lineage and demonstrates controlled reconstruction and recovery. | `CAP-014`–`CAP-017` | Reuses M1 event history/projections and M2 authorization and recovery controls. | M1 event spine; M2 operational authorization and controls. | The traceability query, deterministic projection checksum, and documented restore experiment succeed with reproducible evidence. | **Planned** |
 | **M4 — Stockout Intelligence** | The platform produces evaluated stockout-risk intelligence with uncertainty and honest abstention. | `CAP-018`–`CAP-021` | Uses M1 reconstructed state and M2 tenant boundaries; supplies intelligence to M5 and M8. | M1 replayable operational state; M2 tenant-safe access; M0 evaluation protocols. | A frozen temporal evaluation is reproducible and every prediction is traceable to versioned inputs and evaluation artifacts. | **Planned** |

@@ -1,6 +1,6 @@
 # ADR-0004: M1 PostgreSQL Inbox and Projection Consistency
 
-- **Status:** Accepted M1 decision; source/outbox persistence implemented in Issue #23; inbox/projection implementation pending
+- **Status:** Accepted M1 decision; source/outbox persistence implemented in Issue #23; inbox/projection consumer implemented in Issue #25
 - **Date:** 2026-08-07
 - **Scope:** Issue #21 source/outbox ownership, inbox identity, projection transactions, gaps, and failure records
 

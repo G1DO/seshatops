@@ -1,7 +1,7 @@
 # M1 Source-Owned Outbox Relay
 
-**Status:** Implemented for Issue #24 library/integration scope. Projection
-consumer and service runtime remain later M1 issues.
+**Status:** Implemented for Issue #24 library/integration scope. Issue #25
+implements the projection consumer; service runtime remains later M1 work.
 
 **Owns:** Claiming durable `erp.outbox` rows, publishing exact stored event
 bytes to the M1 Redpanda topic, recording publication status after broker
