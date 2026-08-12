@@ -26,7 +26,7 @@ The following are design assumptions, not verified properties:
 3. Python is advisory intelligence and has no business-state write or command-execution authority.
 4. Browser input, model output, retrieved content, client-supplied identifiers, citations, approvals, receipts, and idempotency keys are untrusted until validated by Go.
 5. Asynchronous delivery may duplicate, reorder, delay, or lose an acknowledgement. Issue #4 correctness rules remain applicable.
-6. Future identity integration can establish a principal and session context, but the identity provider, token format, session lifecycle, and revocation design are not selected here.
+6. Identity integration is defined to establish a principal and session context per [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) (OIDC Authorization Code + PKCE; Go-owned session). Runtime authentication is not claimed here. IdP vendor, concrete token storage, and revocation mechanism implementation remain deferred.
 7. Tenant context must be established and checked by trusted server-side processing. A tenant identifier supplied by a client is only an assertion to validate.
 8. Future deployment controls may add network, storage, process, and credential boundaries, but this document defines the public logical architecture only.
 
@@ -412,10 +412,12 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 
 ## 9. Assumptions, residual risks, and deferred decisions
 
+Decided for Identity & Operations design by [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) / [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md): OIDC protocol profile, Go-owned session model, tenant visibility via platform membership and tenant-scoped allow-list, allow-list policy representation, and service-delegation boundaries. Runtime enforcement of those decisions remains pending.
+
 The following remain unresolved by design:
 
-- The identity provider, authentication protocol details, session/token lifecycle, and revocation mechanism.
-- The policy representation, assignment model, role catalog, scope syntax, and separation-of-duty rules.
+- Identity-provider vendor/product, concrete token storage format, and revocation mechanism implementation.
+- Role catalog content, assignment schema, scope syntax, and separation-of-duty rules (matrix content owned by Issue #44).
 - Concrete service/database roles, credential storage, credential rotation, and adapter authentication.
 - Cache and retrieval-index isolation, object-storage controls, audit retention, receipt verification, redaction, and cryptographic details.
 - Availability limits, quotas, rate controls, SLOs, and recovery thresholds.
