@@ -18,8 +18,8 @@ outbox, broker, projection, security enforcement, or production readiness.
 ## Wire-format disposition
 
 Notion Event Spine deliverables and GitHub Issue #22 still mention a “Protobuf” event
-contract. Issue #21 accepted [CONTRACTS.md](../../CONTRACTS.md) and
-[ADR-0003](../adrs/0003-event-envelope-and-schema-compatibility.md), which
+contract. Issue #21 accepted [CONTRACTS.md](../../../CONTRACTS.md) and
+[ADR-0003](../../adrs/0003-event-envelope-and-schema-compatibility.md), which
 reject Protobuf/Avro for Event Spine and require strict UTF-8 JSON with RFC 8785 JCS
 content identity.
 
@@ -37,7 +37,7 @@ added.
 | Tenant/aggregate/event/schema/time/producer/lineage/trace per #21 | Parse/validate field coverage | Covered |
 | Compatibility accept/reject cases | `TestCompatibilityRejects`, `TestParseValidV1` | Covered |
 | Same `event_id` with different content is an integrity violation | `TestIdentityConflict` | Covered |
-| Synthetic provenance recorded | [SYNTHETIC_DATA_PROVENANCE.md](../events/SYNTHETIC_DATA_PROVENANCE.md) | Covered |
+| Synthetic provenance recorded | [SYNTHETIC_DATA_PROVENANCE.md](../../events/SYNTHETIC_DATA_PROVENANCE.md) | Covered |
 | No Ahoy-derived public artifact | Clean-room review of fixtures/identifiers | Covered |
 
 ## Verification record

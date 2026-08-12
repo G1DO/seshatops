@@ -6,33 +6,11 @@ Behavioral and project guidance for the SeshatOps repository.
 
 ## 1. Repository purpose and current phase
 
-SeshatOps is a clean-room, multi-tenant operations-intelligence platform concept for the fictional Northstar Foods scenario. It is intended to consume ERP events, reconstruct replayable operational state, produce evidence-backed intelligence, and execute only authorized, human-approved actions.
+SeshatOps is a clean-room, multi-tenant operations-intelligence platform for the fictional Northstar Foods scenario. It consumes ERP events, reconstructs replayable operational state, produces evidence-backed intelligence, and executes only authorized, human-approved actions.
 
-The repository completed Event Spine exit-gate evidence
-(Issue #30). Project Constitution was completed by the merged Issue #10 integration review and
-PR #20. Issues #1 through #9 established the product, clean-room, architecture,
-correctness, security, intelligence-evaluation, operational-evidence, roadmap,
-and repository-governance documentation. Issue #21 owns the concrete Event Spine
-event-spine contract. Issue #22 owns the executable JSON event package and
-deterministic Northstar Foods fixture. Issue #23 owns the synthetic ERP source
-transaction and pending transactional outbox persistence.
+Project Constitution documentation is complete. Event Spine is implemented (`event/`, `northstar/`, `erp/`, `relay/`, `platform/`, `api/`, `web/`) with test-environment Observed evidence for `CLM-003`–`CLM-006`. Identity & Operations is the next active capability sequence on GitHub.
 
-Issue #21 remains documentation-only. Issue #22 introduces the first Go library
-code under `event/` and `northstar/`. Issue #23 adds `erp/` PostgreSQL source
-persistence. Issue #24 adds the source-owned outbox relay under `relay/` that
-publishes exact stored outbox bytes to Redpanda at least once. Issue #25 adds
-the `platform/` consumer that commits inbox and inventory-projection state
-atomically and acknowledges Redpanda offsets only after that commit. Issue #26
-adds handler-poison escalation and bounded consumer failure/backlog inspection
-on that consumer. Issue #27 adds the read-only `api/` REST and SSE surface over
-committed projection state, with post-commit notifications from `platform`.
-Issue #28 adds the TypeScript `web/` operations view over that API. Issue #29
-adds platform-only derived-state reset, retained-history rebuild, and local
-duplicate/checksum proofs. Issue #30 records the integrated exit-gate campaign
-and Observed decisions for `CLM-003`–`CLM-006` in the declared test environment.
-No deployment, model, or production environment exists here yet. Planned
-behavior must not be described as observed, reproduced, secure, reliable,
-performant, or production-ready without the required evidence.
+No deployment, model, or production environment exists here yet. Do not invent evidence. Planned behavior must not be described as observed, reproduced, secure, reliable, performant, or production-ready without the required artifacts.
 
 ## 2. Source-of-truth hierarchy
 
@@ -60,7 +38,7 @@ When sources conflict, inspect the issue, repository history, linked documents, 
 - `ROADMAP.md` owns stable milestone sequencing and capability ownership; GitHub owns active issue status.
 - `EVIDENCE.md` owns the claim ledger and claim-status vocabulary references.
 - `docs/adrs/` owns accepted technical decisions and their consequences.
-- `docs/reviews/` owns bounded review records and recorded follow-ups.
+- `docs/reviews/` owns live bounded review records; frozen historical reviews live under `docs/archive/`.
 - `AGENTS.md`, `.editorconfig`, `.gitattributes`, `.gitignore`, the PR template, and documentation CI own repository workflow and hygiene.
 
 ## 4. Read before editing
@@ -105,19 +83,7 @@ Future implementation must preserve these boundaries:
 | Rust | Measurement-gated performance or specialized components only after evidence justifies it | Speculative Event Spine scaffolding |
 | C | Excluded unless a later reviewed capability sequence explicitly changes the boundary | Any Event Spine implementation |
 
-Issue #22 establishes the root Go module (`github.com/G1DO/seshatops`, Go
-`1.25.0`) with the `event` and `northstar` packages. Issue #23 adds the `erp`
-package for the synthetic source transaction and pending outbox. Issue #24 adds
-the `relay` package for source-owned Redpanda publication. Issue #25 adds the
-`platform` package for inbox/deduplication and inventory projection consumption.
-Issue #26 extends `platform` with poison escalation and `InspectProcessing`.
-Issue #27 adds the read-only `api` package (REST snapshot + SSE) over committed
-projection state, with post-commit notifications from `platform`.
-Issue #28 adds the TypeScript `web/` operations view. Issue #29 extends
-`platform` with `ResetDerivedState` and `RebuildFromHistory` for local
-duplicate/rebuild checksum proofs. Issue #30 owns the integrated event-spine exit-gate
-campaign evidence. Later capability sequences may extend platform packages without
-inventing a second module or a general ERP schema.
+The root Go module is `github.com/G1DO/seshatops` (Go `1.25.0`) with Event Spine packages `event`, `northstar`, `erp`, `relay`, `platform`, and `api`, plus the TypeScript `web/` operations view. Later capability sequences may extend platform packages without inventing a second module or a general ERP schema.
 
 ## 8. Evidence and claim governance
 
@@ -152,15 +118,3 @@ Do not claim a hosted GitHub workflow passed until an actual hosted run exists. 
 - Prefer squash merging to keep the main history focused.
 - Complete the PR template with real verification evidence, skipped checks, claim-status changes, residual risks, and follow-up work.
 - Remove irrelevant placeholders before submission.
-
-## 11. Project Constitution definition of done
-
-Issue #9 is complete only when:
-
-- Repository governance instructions and the PR template are authoritative and internally consistent.
-- Canonical source-of-truth, clean-room, language, claim, branch, review, and verification boundaries are explicit.
-- Documentation CI covers Markdown, repository links, YAML, and secrets with least privilege and immutable action pins.
-- Private Notion links are narrowly excluded and private GitHub links are attempted with a read-only token.
-- No secrets, Ahoy material, runtime scaffolding, deployment configuration, or speculative dependencies are introduced.
-- The generated Project Constitution governance review records actual local verification, hosted-CI evidence status, assumptions, limitations, and residual risk.
-- The repository remains documentation-only; Issue #10 completed the integrated Project Constitution review and Event Spine owns the event-spine contract.

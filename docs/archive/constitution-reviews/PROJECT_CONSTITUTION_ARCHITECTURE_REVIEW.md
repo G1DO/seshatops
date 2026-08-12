@@ -29,11 +29,11 @@ Pass 2 was performed after a break from Pass 1 authoring and incorporates extern
 | --- | --- |
 | GitHub Issue #3 brief (architecture boundaries and language ownership) | Acceptance criteria and required content |
 | GitHub PR #13 review feedback | Remediation items for this pass |
-| [PRODUCT.md](../../PRODUCT.md) | Product thesis, users, loop, non-goals (Issue #1 / PR #11); hero steps 9â€“11 |
-| [CLEAN_ROOM.md](../../CLEAN_ROOM.md) | Clean-room policy (Issue #2 / PR #12) |
-| [docs/checklists/CLEAN_ROOM_REVIEW.md](../checklists/CLEAN_ROOM_REVIEW.md) | Review checklist pattern; baseline CRR-0001 |
-| [README.md](../../README.md) | Public summary and status |
-| [LICENSE](../../LICENSE) | Apache License 2.0 |
+| [PRODUCT.md](../../../PRODUCT.md) | Product thesis, users, loop, non-goals (Issue #1 / PR #11); hero steps 9â€“11 |
+| [CLEAN_ROOM.md](../../../CLEAN_ROOM.md) | Clean-room policy (Issue #2 / PR #12) |
+| [docs/checklists/CLEAN_ROOM_REVIEW.md](../../checklists/CLEAN_ROOM_REVIEW.md) | Review checklist pattern; baseline CRR-0001 |
+| [README.md](../../../README.md) | Public summary and status |
+| [LICENSE](../../../LICENSE) | Apache License 2.0 |
 | Notion: [SeshatOps â€” Master Project Blueprint](https://app.notion.com/p/3b40a821b3cc813081f0ea44fd72692a) | Approved architecture intent |
 | Notion: [Workflow â€” Notion â†’ GitHub â†’ Evidence](https://app.notion.com/p/3b40a821b3cc810eadebc2fc9a067000) | Source-of-truth boundaries |
 | Notion: [Constitution â€” Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee) | Constitution scope, issue seed list, adversarial decisions |
@@ -97,7 +97,7 @@ No additional contradictions were invented to populate this table.
 | Reviewer | G1DO (maintainer; time-separated self-review) |
 | Date (UTC) | 2026-08-06 |
 | Commit / tip | First-pass architecture at `43be239cc98ead99cdfc0e00d73bd60e77eb1533`; remediation tip `4324f77d896df45dff7c8952ca818b62cc118ee4` |
-| Scope (paths / PR) | `ARCHITECTURE.md`, `docs/reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md`, `README.md`, `PRODUCT.md` (Â§10 ownership link); PR #13 |
+| Scope (paths / PR) | `ARCHITECTURE.md`, `docs/archive/constitution-reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md`, `README.md`, `PRODUCT.md` (Â§10 ownership link); PR #13 |
 | Review type | pre-PR |
 | Result | Pass with remediation |
 

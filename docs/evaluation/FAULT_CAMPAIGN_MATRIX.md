@@ -1,5 +1,8 @@
 # Fault Campaign Matrix
 
+**Note:** Executed Event Spine rows are the maintained evidence surface. Planned
+rows are deferred placeholders and are not a living reliability program.
+
 **Status:** Reusable matrix from Issue #7. Issue #30 executed the event-spine exit-gate
 subset (FC-001, FC-007, FC-009–FC-014, plus FC-012/FC-013 overlap) in a
 **Test environment**. Non-Event Spine rows remain `Not executed` / `Planned`.

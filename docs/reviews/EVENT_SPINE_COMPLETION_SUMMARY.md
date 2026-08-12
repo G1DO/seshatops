@@ -36,7 +36,7 @@ backup/restore, SLO compliance, or hyperscale capacity.
 - [event-spine exit-gate campaign review](EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md)
 - [Fault campaign matrix](../evaluation/FAULT_CAMPAIGN_MATRIX.md) (Event Spine rows updated)
 - [Evidence ledger](../../EVIDENCE.md) (`CLM-003`–`CLM-006` Observed)
-- Prior Event Spine package reviews under `docs/reviews/EVENT_SPINE_*.md`
+- Prior Event Spine package reviews under `docs/archive/event-spine-reviews/`
 
 ## Evidence and verification
 

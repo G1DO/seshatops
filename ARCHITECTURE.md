@@ -1,6 +1,6 @@
 # ARCHITECTURE — SeshatOps Logical Boundaries
 
-**Status:** Planned logical architecture. Implementation has not started. This document defines enforceable ownership, trust, and storage boundaries. It is not deployment architecture, runtime evidence, or a claim that services exist.
+**Status:** Logical architecture and ownership boundaries. Event Spine packages (`event/`, `erp/`, `relay/`, `platform/`, `api/`, `web/`) implement the event path. This is not deployment architecture or production evidence.
 
 **Owns:** Logical system topology, language ownership, trust and communication boundaries, storage responsibilities, and high-level credential access boundaries.
 
@@ -11,7 +11,7 @@ evaluation protocols (Issue #6), reliability evidence protocols (Issue #7),
 roadmap and evidence ledger (Issue #8), repository layout and CI (Issue #9), or
 integrated constitution review (Issue #10).
 
-Companion review: [docs/reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md](docs/reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md)
+Archived constitution architecture review: [docs/archive/constitution-reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md](docs/archive/constitution-reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md).
 
 Project Constitution correctness model and Event Spine contract: [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), [CONTRACTS.md](CONTRACTS.md), and [ADRs](docs/adrs/).
 

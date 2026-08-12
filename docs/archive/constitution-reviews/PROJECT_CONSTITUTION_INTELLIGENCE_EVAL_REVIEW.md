@@ -22,11 +22,11 @@ The reviewed scope is documentation only. No application code, model, vendor, da
 
 - [GitHub Issue #6](https://github.com/G1DO/seshatops/issues/6), including its acceptance criteria, invariants, non-goals, and required evidence.
 - Merged PRs [#11](https://github.com/G1DO/seshatops/pull/11) through [#15](https://github.com/G1DO/seshatops/pull/15) and the merged outcomes of Issues #1–#5.
-- [README.md](../../README.md), [PRODUCT.md](../../PRODUCT.md), [CLEAN_ROOM.md](../../CLEAN_ROOM.md), and [ARCHITECTURE.md](../../ARCHITECTURE.md).
-- [EVENT_MODEL.md](../architecture/EVENT_MODEL.md) and [COMMAND_MODEL.md](../architecture/COMMAND_MODEL.md).
-- [THREAT_MODEL.md](../security/THREAT_MODEL.md) and [AUTHORIZATION_MODEL.md](../security/AUTHORIZATION_MODEL.md).
-- [ADR-0001](../adrs/0001-transactional-outbox-and-at-least-once-delivery.md) and [ADR-0002](../adrs/0002-idempotent-command-execution.md).
-- [Clean-room review checklist](../checklists/CLEAN_ROOM_REVIEW.md).
+- [README.md](../../../README.md), [PRODUCT.md](../../../PRODUCT.md), [CLEAN_ROOM.md](../../../CLEAN_ROOM.md), and [ARCHITECTURE.md](../../../ARCHITECTURE.md).
+- [EVENT_MODEL.md](../../architecture/EVENT_MODEL.md) and [COMMAND_MODEL.md](../../architecture/COMMAND_MODEL.md).
+- [THREAT_MODEL.md](../../security/THREAT_MODEL.md) and [AUTHORIZATION_MODEL.md](../../security/AUTHORIZATION_MODEL.md).
+- [ADR-0001](../../adrs/0001-transactional-outbox-and-at-least-once-delivery.md) and [ADR-0002](../../adrs/0002-idempotent-command-execution.md).
+- [Clean-room review checklist](../../checklists/CLEAN_ROOM_REVIEW.md).
 - [Project Constitution Architecture Review](PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md), [Project Constitution Correctness Review](PROJECT_CONSTITUTION_CORRECTNESS_REVIEW.md), and [Project Constitution Security Review](PROJECT_CONSTITUTION_SECURITY_REVIEW.md).
 
 ### Canonical planning sources

@@ -28,8 +28,8 @@ The reviewed tree contains documentation only. No application code, authenticati
 - docs/adrs/0001-transactional-outbox-and-at-least-once-delivery.md.
 - docs/adrs/0002-idempotent-command-execution.md.
 - docs/checklists/CLEAN_ROOM_REVIEW.md.
-- docs/reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md.
-- docs/reviews/PROJECT_CONSTITUTION_CORRECTNESS_REVIEW.md.
+- docs/archive/constitution-reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md.
+- docs/archive/constitution-reviews/PROJECT_CONSTITUTION_CORRECTNESS_REVIEW.md.
 
 ### Canonical planning sources
 
