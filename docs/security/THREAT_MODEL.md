@@ -26,7 +26,7 @@ The following are design assumptions, not verified properties:
 3. Python is advisory intelligence and has no business-state write or command-execution authority.
 4. Browser input, model output, retrieved content, client-supplied identifiers, citations, approvals, receipts, and idempotency keys are untrusted until validated by Go.
 5. Asynchronous delivery may duplicate, reorder, delay, or lose an acknowledgement. Issue #4 correctness rules remain applicable.
-6. Identity integration is defined to establish a principal and session context per [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) (OIDC Authorization Code + PKCE; Go-owned session). Runtime authentication is not claimed here. IdP vendor, concrete token storage, and revocation mechanism implementation remain deferred.
+6. Identity integration is defined to establish a principal and session context per [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) (OIDC Authorization Code + PKCE; Go-owned session). Issue #45 library/test runtime is recorded in [OIDC_SESSION.md](OIDC_SESSION.md). Production authentication, IdP vendor, durable token storage, and authorization enforcement remain deferred.
 7. Tenant context must be established and checked by trusted server-side processing. A tenant identifier supplied by a client is only an assertion to validate.
 8. Future deployment controls may add network, storage, process, and credential boundaries, but this document defines the public logical architecture only.
 
@@ -412,7 +412,7 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 
 ## 9. Assumptions, residual risks, and deferred decisions
 
-Decided for Identity & Operations design by [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) / [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md): OIDC protocol profile, Go-owned session model, tenant visibility via platform membership and tenant-scoped allow-list, allow-list policy representation, and service-delegation boundaries. The demo allow-list is [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md). Runtime enforcement of those decisions remains pending.
+Decided for Identity & Operations design by [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) / [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md): OIDC protocol profile, Go-owned session model, tenant visibility via platform membership and tenant-scoped allow-list, allow-list policy representation, and service-delegation boundaries. The demo allow-list is [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md). Issue #45 session runtime is recorded in [OIDC_SESSION.md](OIDC_SESSION.md). Default-deny authorization enforcement remains Issue #46.
 
 The following remain unresolved by design:
 
@@ -425,7 +425,7 @@ The following remain unresolved by design:
 
 Issue #5 defines the conceptual security model and negative-test requirements. Issue #6 owns the complete forecasting/RAG evaluation protocol. Issue #7 owns reliability and security evidence protocols. Issue #10 owns integrated constitution review. Concrete enforcement belongs to the later identity/operations and implementation capability sequences.
 
-The principal residual risk is that these are design requirements only. No runtime implementation, penetration test, identity integration, policy engine, or security-control verification exists yet.
+The principal residual risk is that these are design requirements only. Issue #45 records OIDC/session library/test runtime; production authentication, authorization enforcement, penetration tests, and policy-engine verification do not exist yet.
 
 ## 10. Clean-room boundary
 

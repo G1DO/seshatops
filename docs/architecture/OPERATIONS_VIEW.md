@@ -1,16 +1,16 @@
 # Event Spine Operations View (TypeScript)
 
-**Status:** Implemented for Issue #28 package/test scope. No authentication,
-recovery controls, deployment service binary, or `CAP-008` claim promotion is
-asserted here.
+**Status:** Implemented for Issue #28 package/test scope plus Issue #45 session
+presentation. No recovery controls, deployment service binary, tenant
+authorization, or `CAP-008` / `CAP-009` claim promotion is asserted here.
 
 **Owns:** The minimum browser TypeScript operations screen that consumes the
 Issue #27 Go REST snapshot and SSE stream for the committed Northstar Foods
-inventory projection.
+inventory projection, and presents Go-owned session state.
 
-**Does not own:** Dashboards, design systems, identity UX, quarantine/recovery
-controls, intelligence, commands, direct database or broker access, or
-authoritative inventory/business rules (those remain in Go).
+**Does not own:** Dashboards, design systems, authorization decisions,
+quarantine/recovery controls, intelligence, commands, direct database or
+broker access, or authoritative inventory/business rules (those remain in Go).
 
 ## Browser isolation
 
@@ -24,8 +24,16 @@ Package `web/` talks exclusively to:
 
 | Method | Path |
 | --- | --- |
+| `GET` | `/auth/login` |
+| `GET` | `/auth/callback` (IdP redirect target; handled by Go) |
+| `POST` | `/auth/logout` |
+| `GET` | `/auth/session` |
 | `GET` | `/v1/tenants/{tenant_id}/inventory` |
 | `GET` | `/v1/tenants/{tenant_id}/inventory/stream` |
+
+Cookies are sent with REST and SSE. The UI presents principal and expiry; it
+does not authorize. Unauthenticated callers see Sign in and are not shown
+projection data. Authentication is not authorization.
 
 ## Connection model
 
@@ -64,14 +72,15 @@ Rendered without business reinterpretation:
 
 ## Local demo
 
-See [web/README.md](../../web/README.md). Serve `api.NewServer(...).Handler()` on
+See [web/README.md](../../web/README.md). Serve the Go `identity` `/auth/*`
+handler and `api.NewServer(db, hub, auth).Handler()` on
 `http://127.0.0.1:8080` and run `npm run dev` with the default empty
-`VITE_API_BASE_URL` so Vite proxies `/v1` same-origin (no CORS required).
-Security/identity/recovery UX remains deferred to later capability sequences.
+`VITE_API_BASE_URL` so Vite proxies `/auth` and `/v1` same-origin (no CORS
+required). Tenant authorization remains Issue #46.
 
 ## Non-claims
 
 This document does not claim production readiness, hosted CI success without a
-recorded GitHub Actions run, exactly-once SSE delivery, Identity authentication, or
-promotion of `CAP-008` beyond Planned without the authorized live-view evidence
-route.
+recorded GitHub Actions run, exactly-once SSE delivery, tenant authorization,
+Identity authentication as a production control, or promotion of `CAP-008` /
+`CAP-009` beyond Planned without the required evidence route.

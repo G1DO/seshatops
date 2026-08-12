@@ -41,11 +41,11 @@ See [PRODUCT.md](PRODUCT.md) for users, hero workflow, capability boundaries, su
 
 ## Architecture
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for logical topology, language ownership, trust boundaries, and storage responsibilities. Event path packages: `event/`, `erp/`, `relay/`, `platform/`, `api/`, `web/`. Correctness model: [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), [CONTRACTS.md](CONTRACTS.md), [ADRs](docs/adrs/).
+See [ARCHITECTURE.md](ARCHITECTURE.md) for logical topology, language ownership, trust boundaries, and storage responsibilities. Event path packages: `event/`, `erp/`, `relay/`, `platform/`, `api/`, `web/`. Identity session package: `identity/`. Correctness model: [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), [CONTRACTS.md](CONTRACTS.md), [ADRs](docs/adrs/).
 
 ## Security, intelligence, and ops evidence
 
-Planned security model: [THREAT_MODEL.md](docs/security/THREAT_MODEL.md), [AUTHORIZATION_MODEL.md](docs/security/AUTHORIZATION_MODEL.md), [PERMISSION_MATRIX.md](docs/security/PERMISSION_MATRIX.md). Planned intelligence eval: [docs/intelligence/](docs/intelligence/). Evidence protocols and fault matrix: [docs/evaluation/](docs/evaluation/), including the [fault campaign matrix](docs/evaluation/FAULT_CAMPAIGN_MATRIX.md).
+Planned security model: [THREAT_MODEL.md](docs/security/THREAT_MODEL.md), [AUTHORIZATION_MODEL.md](docs/security/AUTHORIZATION_MODEL.md), [PERMISSION_MATRIX.md](docs/security/PERMISSION_MATRIX.md), [OIDC_SESSION.md](docs/security/OIDC_SESSION.md). Planned intelligence eval: [docs/intelligence/](docs/intelligence/). Evidence protocols and fault matrix: [docs/evaluation/](docs/evaluation/), including the [fault campaign matrix](docs/evaluation/FAULT_CAMPAIGN_MATRIX.md).
 
 ## Clean-room boundary
 

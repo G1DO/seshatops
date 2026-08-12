@@ -2,17 +2,19 @@
 
 **Status:** Accepted design activation for Issue #43 / ADR-0005. This note records
 identity boundaries so later Identity & Operations work does not invent
-architecture mid-flight. It does not claim that authentication, authorization,
-tenant isolation enforcement, service-identity controls, or audit protection
-currently exist.
+architecture mid-flight. Issue #45 runtime is recorded in
+[OIDC_SESSION.md](OIDC_SESSION.md). This note does not claim that
+authorization, tenant isolation enforcement, service-identity controls, audit
+protection, or production authentication currently exist.
 
 **Owns:** Short activation summary of the OIDC profile, Go-owned session model,
 service-identity boundaries, and explicit non-goals for this milestone slice.
 
 **Does not own:** Permission-matrix content (published by Issue #44 in
 [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md)), OIDC login or session
-runtime (Issue #45), default-deny API enforcement (Issue #46), operational
-visibility or quarantine/replay controls, or any `EVIDENCE.md` claim promotion.
+runtime (Issue #45, recorded in [OIDC_SESSION.md](OIDC_SESSION.md)),
+default-deny API enforcement (Issue #46), operational visibility or
+quarantine/replay controls, or any `EVIDENCE.md` claim promotion.
 
 ## Accepted profile summary
 
@@ -33,7 +35,7 @@ Full decisions are in [ADR-0005](../adrs/0005-identity-tenant-policy-and-service
 | Issue | Owns next |
 | --- | --- |
 | [#44](https://github.com/G1DO/seshatops/issues/44) | Frozen Northstar demo matrix: [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md) |
-| [#45](https://github.com/G1DO/seshatops/issues/45) | OIDC login integration and Go-owned session establishment runtime |
+| [#45](https://github.com/G1DO/seshatops/issues/45) | OIDC login integration and Go-owned session establishment runtime ([OIDC_SESSION.md](OIDC_SESSION.md)) |
 | [#46](https://github.com/G1DO/seshatops/issues/46) | Default-deny API enforcement |
 | Later Identity & Operations issues | Privileged-ops authz, audit, operational visibility, quarantine/replay |
 

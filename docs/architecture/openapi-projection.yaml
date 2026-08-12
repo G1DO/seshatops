@@ -4,7 +4,9 @@ info:
   version: "1.0.0"
   description: |
     Read-only Go surface for the committed Event Spine inventory projection (Issue #27).
-    Authentication/RBAC remain Identity. SSE is at-least-once and may drop for slow
+    Authentication/RBAC remain Identity. Issue #45 requires a Go-owned session
+    on these routes (`401 unauthenticated` when missing). Tenant authorization
+    remains Issue #46. SSE is at-least-once and may drop for slow
     clients; REST is the authoritative reconnect/catch-up path.
 servers:
   - url: /
@@ -22,6 +24,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InventorySnapshot"
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "400":
           description: Invalid tenant_id
           content:
@@ -59,6 +67,12 @@ paths:
             text/event-stream:
               schema:
                 type: string
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "400":
           description: Invalid tenant_id
           content:
@@ -80,7 +94,7 @@ components:
       schema:
         type: string
         format: uuid
-        description: Lowercase UUIDv4 tenant identifier (Event Spine validation only; not Identity auth)
+        description: Lowercase UUIDv4 tenant identifier (Event Spine validation only; not tenant authorization)
   schemas:
     InventoryItem:
       type: object

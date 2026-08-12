@@ -1,16 +1,19 @@
 # Event Spine Projection Read API (REST + SSE)
 
-**Status:** Implemented for Issue #27 library/integration scope. No deployment
-service binary, authentication, or TypeScript client is claimed here.
+**Status:** Implemented for Issue #27 library/integration scope plus Issue #45
+session gate. No deployment service binary or tenant authorization is claimed
+here.
 
 **Owns:** The minimum Go-owned read-only HTTP surface for the committed Event Spine
 inventory projection, including REST snapshot DTOs, one SSE stream for
 post-commit projection updates, reconnect/catch-up semantics, and the OpenAPI
 fragment in [`openapi-projection.yaml`](openapi-projection.yaml).
 
-**Does not own:** Authentication/RBAC, write/command endpoints, GraphQL,
-WebSockets, generic subscription gateways, operator recovery UI, Redpanda
-access from the browser, or the TypeScript operations view (Issue #28).
+**Does not own:** Tenant authorization / RBAC (Issue #46), write/command
+endpoints, GraphQL, WebSockets, generic subscription gateways, operator
+recovery UI, Redpanda access from the browser, or the TypeScript operations
+view (Issue #28). OIDC login and session establishment are owned by
+[`identity`](../../identity) / [OIDC_SESSION.md](../security/OIDC_SESSION.md).
 
 ## Browser isolation
 
@@ -36,8 +39,10 @@ and do not mutate projection state. Malformed or non-lowercase UUIDv4
 mutating state.
 
 `tenant_id` validation follows the Event Spine lowercase UUIDv4 identifier rule. This is
-context validation only; it is **not** Identity authentication or tenant
-authorization enforcement.
+context validation only; it is **not** tenant authorization enforcement (Issue #46).
+Issue #45 requires a fresh Go-owned session on these routes. Missing, expired,
+forged, or revoked sessions return `401` `{"error":"unauthenticated"}` before
+any snapshot or SSE stream is written.
 
 ## Snapshot DTO
 
@@ -108,18 +113,20 @@ Library package: `github.com/G1DO/seshatops/api`.
 
 1. Construct `hub := api.NewHub()`.
 2. `platform.SetAppliedNotifier(hub)` before consuming/applying events.
-3. Serve `api.NewServer(db, hub).Handler()`.
+3. Serve `identity` `/auth/*` alongside `api.NewServer(db, hub, auth).Handler()`
+   where `auth` is `identity.SessionLookup` (typically `service.Authenticator()`).
 
 No long-running deployment binary is provided in this issue.
 
 ## Authentication boundary (Identity)
 
-Authentication, session identity, and tenant authorization enforcement remain
-Identity & Operations scope. Event Spine carries `tenant_id` for demo context and identifier validation
-only.
+Issue #45 authenticates the caller and establishes Go-owned session context.
+Unauthenticated requests are refused. Authentication does not imply
+authorization. Tenant isolation enforcement remains Issue #46. Event Spine
+carries `tenant_id` for demo context and identifier validation only.
 
 ## Non-claims
 
 This document does not claim production readiness, hosted CI success without a
-recorded GitHub Actions run, exactly-once SSE delivery, or Identity security
-enforcement.
+recorded GitHub Actions run, exactly-once SSE delivery, tenant authorization,
+or promotion of `CAP-009`.

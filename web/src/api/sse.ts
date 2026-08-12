@@ -25,13 +25,17 @@ function isProjectionUpdated(value: unknown): value is ProjectionUpdated {
   );
 }
 
-export type EventSourceFactory = (url: string) => EventSource;
+export type EventSourceFactory = (
+  url: string,
+  init?: EventSourceInit,
+) => EventSource;
 
 /** Subscribe to committed projection updates. Heartbeats/comments are ignored. */
 export function openProjectionStream(
   url: string,
   handlers: SseHandlers,
-  createEventSource: EventSourceFactory = (u) => new EventSource(u),
+  createEventSource: EventSourceFactory = (u) =>
+    new EventSource(u, { withCredentials: true }),
 ): () => void {
   const source = createEventSource(url);
   let closed = false;

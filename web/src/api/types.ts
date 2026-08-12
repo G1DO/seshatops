@@ -37,3 +37,15 @@ export class ApiError extends Error {
     this.code = code;
   }
 }
+
+export const UNAUTHENTICATED = "unauthenticated";
+
+/** Presentation-only session fields from GET /auth/session. Not authorization. */
+export interface SessionView {
+  principal_id: string;
+  subject: string;
+  issuer: string;
+  authenticated_at: string;
+  expires_at: string;
+  correlation_id: string;
+}

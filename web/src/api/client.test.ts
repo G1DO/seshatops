@@ -1,23 +1,31 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fetchSnapshot } from "./client";
-import { ApiError } from "./types";
+import { ApiError, UNAUTHENTICATED } from "./types";
 import {
   NORTHSTAR_TENANT_ID,
   sampleSnapshotBefore,
 } from "../fixtures/northstar";
 
 describe("fetchSnapshot", () => {
-  it("returns a validated snapshot on success", async () => {
+  it("returns a validated snapshot on success and sends cookies", async () => {
     const snapshot = sampleSnapshotBefore();
-    const fetchImpl: typeof fetch = async () =>
+    const fetchImpl = vi.fn<typeof fetch>(async () =>
       new Response(JSON.stringify(snapshot), {
         status: 200,
         headers: { "Content-Type": "application/json" },
-      });
+      }),
+    );
 
     await expect(
       fetchSnapshot("http://example.test", NORTHSTAR_TENANT_ID, fetchImpl),
     ).resolves.toEqual(snapshot);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      `http://example.test/v1/tenants/${NORTHSTAR_TENANT_ID}/inventory`,
+      expect.objectContaining({
+        method: "GET",
+        credentials: "include",
+      }),
+    );
   });
 
   it("maps API error bodies", async () => {
@@ -33,6 +41,22 @@ describe("fetchSnapshot", () => {
       name: "ApiError",
       code: "invalid_tenant_id",
       status: 400,
+    } satisfies Partial<ApiError>);
+  });
+
+  it("maps unauthenticated without treating it as a snapshot failure", async () => {
+    const fetchImpl: typeof fetch = async () =>
+      new Response(JSON.stringify({ error: UNAUTHENTICATED }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+
+    await expect(
+      fetchSnapshot("http://example.test", NORTHSTAR_TENANT_ID, fetchImpl),
+    ).rejects.toMatchObject({
+      name: "ApiError",
+      code: UNAUTHENTICATED,
+      status: 401,
     } satisfies Partial<ApiError>);
   });
 
