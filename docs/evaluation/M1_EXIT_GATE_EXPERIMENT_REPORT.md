@@ -52,7 +52,7 @@ required scenarios without new architecture, and evidence supports promoting
 | Field | Value/status |
 | --- | --- |
 | Repository | `github.com/G1DO/seshatops` |
-| Commit | Runtime packages verified at `a4e5d47f67f2b4ff1d97760c415c3ea28ad83e47`. Evidence docs recorded on PR #41 head `b6bec19ba427a4a73eb543b84ade9444b8ebddc3`. |
+| Commit | Runtime packages verified at `a4e5d47f67f2b4ff1d97760c415c3ea28ad83e47`. Hosted CI verified on PR #41 commit `b59b760af69bbc2754068f5e35b7e0c1682e713b` (prior evidence commit `b6bec19`). |
 | Branch or tag | `test/30-m1-exit-gate` |
 | Dirty-working-tree state | Clean at suite start; subsequent docs-only campaign artifacts added after the run |
 | Configuration version and relevant values | Topic `seshatops.m1.events`; handler `m1-inventory-projection-v1`; schema v1 |
@@ -132,7 +132,7 @@ references.
 | 9 | Gap/reorder | Pass (gap/redrive, reorder, stale) |
 | 10 | Rebuild checksum A==B | Pass (`TestDeterministicRebuildChecksumEquality`) |
 | 11 | REST/SSE + TS reconnect | Pass (`api` + Vitest integration) |
-| 12 | Docs/secret/clean-room scans | Pass (category searches; hosted Doc CI pending PR) |
+| 12 | Docs/secret/clean-room scans | Pass (category searches; hosted Doc CI [31588310157](https://github.com/G1DO/seshatops/actions/runs/31588310157) on `b59b760`) |
 
 Package summary:
 
@@ -153,12 +153,12 @@ Not applicable: functional/fault campaign, not a latency or capacity experiment.
 
 ## Failures and anomalies
 
-None observed in the recorded suite. Hosted GitHub Actions for PR #41 head
-`b6bec19` succeeded: Go CI
-[31588107839](https://github.com/G1DO/seshatops/actions/runs/31588107839),
-Web CI [31588107888](https://github.com/G1DO/seshatops/actions/runs/31588107888),
+None observed in the recorded suite. Hosted GitHub Actions for PR #41 commit
+`b59b760` succeeded: Go CI
+[31588310097](https://github.com/G1DO/seshatops/actions/runs/31588310097),
+Web CI [31588310148](https://github.com/G1DO/seshatops/actions/runs/31588310148),
 Documentation CI
-[31588107709](https://github.com/G1DO/seshatops/actions/runs/31588107709).
+[31588310157](https://github.com/G1DO/seshatops/actions/runs/31588310157).
 
 ## Data-integrity checks
 
@@ -203,7 +203,7 @@ Documentation CI
 | --- | --- |
 | Reviewer | Implementation campaign pass; maintainer review remains a follow-up |
 | Review date | 2026-08-12 |
-| Evidence completeness | Complete for declared test-environment scope; hosted CI recorded for PR #41 head `b6bec19` |
+| Evidence completeness | Complete for declared test-environment scope; hosted CI recorded for PR #41 commit `b59b760` |
 | Documentation disposition | Pass with recorded limitations |
 | Runtime result disposition | Pass |
 

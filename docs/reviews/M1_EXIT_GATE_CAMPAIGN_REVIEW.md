@@ -31,7 +31,7 @@ M2 authorization/operations product scope, or M3 backup/restore.
 | Poison/unsupported/gapped input cannot mutate projection | Platform poison/unsupported/gap/reorder suite | Covered |
 | TypeScript view uses Go committed state; converges after reconnect | `api` SSE reconnect + `projection.integration.test.tsx` | Covered |
 | Baseline and rebuilt checksums match | `TestDeterministicRebuildChecksumEquality` | Covered |
-| Applicable contract/unit/integration/TS/docs/secret/clean-room checks | Local suites pass; hosted CI green on PR #41 `b6bec19` | Covered |
+| Applicable contract/unit/integration/TS/docs/secret/clean-room checks | Local suites pass; hosted CI green on PR #41 `b59b760` | Covered |
 | Canonical docs honest; no overclaim | Status docs + non-claims in this review | Covered |
 | `CLM-003`–`CLM-006` evidence-backed decisions | Experiment report + ledger update | Observed (test env) |
 | No exactly-once delivery/business-effect claim | Exactly-once wording scan (prohibitions only) | Covered |
@@ -47,7 +47,7 @@ M2 authorization/operations product scope, or M3 backup/restore.
 | `cd web && npm run build` | Passed |
 | Exactly-once overclaim scan | Passed; remaining hits are prohibitions/qualifications |
 | Ahoy / secret-like category search | Passed; Ahoy only as exclusion; test DB password `seshatops` and poison sanitization fixture are synthetic |
-| Hosted Go / Web / Documentation CI | Green on PR #41 head `b6bec19`: Go CI [31588107839](https://github.com/G1DO/seshatops/actions/runs/31588107839), Web CI [31588107888](https://github.com/G1DO/seshatops/actions/runs/31588107888), Documentation CI [31588107709](https://github.com/G1DO/seshatops/actions/runs/31588107709) |
+| Hosted Go / Web / Documentation CI | Green on PR #41 commit `b59b760`: Go CI [31588310097](https://github.com/G1DO/seshatops/actions/runs/31588310097), Web CI [31588310148](https://github.com/G1DO/seshatops/actions/runs/31588310148), Documentation CI [31588310157](https://github.com/G1DO/seshatops/actions/runs/31588310157) |
 | `EVIDENCE.md` | `CLM-003`–`CLM-006` promoted to Observed with limitations |
 
 ## Scenario → fault row mapping
@@ -81,6 +81,4 @@ Experiment report: [M1_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/M1_EXIT_GAT
 - At-least-once delivery only; no exactly-once claim.
 - M2 owns auth, cross-tenant negatives, operator quarantine UI, and `CLM-007`+.
 - M3 owns backup/restore and ADR-Q-005 recovery product behavior.
-- Hosted CI run IDs must be attached before citing hosted-green checks
-  (recorded for PR #41 head `b6bec19` above; re-verify after any follow-up
-  commits).
+- Hosted CI run IDs are recorded for PR #41 commit `b59b760` above.

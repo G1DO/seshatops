@@ -45,11 +45,11 @@ backup/restore, SLO compliance, or hyperscale capacity.
 - Web: `npm test` (15), `npm run typecheck`, and `npm run build` passed.
 - `CLM-003`–`CLM-006` promoted to **Observed** for the test-environment scope
   only; other claims remain Planned.
-- Hosted GitHub Actions for PR #41 head `b6bec19`: Go CI
-  [31588107839](https://github.com/G1DO/seshatops/actions/runs/31588107839),
-  Web CI [31588107888](https://github.com/G1DO/seshatops/actions/runs/31588107888),
+- Hosted GitHub Actions for PR #41 commit `b59b760`: Go CI
+  [31588310097](https://github.com/G1DO/seshatops/actions/runs/31588310097),
+  Web CI [31588310148](https://github.com/G1DO/seshatops/actions/runs/31588310148),
   Documentation CI
-  [31588107709](https://github.com/G1DO/seshatops/actions/runs/31588107709).
+  [31588310157](https://github.com/G1DO/seshatops/actions/runs/31588310157).
 
 ## Deviations and dispositions
 
