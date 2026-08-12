@@ -13,7 +13,7 @@ an implementation.
 | [ADR-0002](0002-idempotent-command-execution.md) | Idempotent command execution and durable receipts | Accepted design principle; implementation pending | Approvals / Reliability evidence |
 | [ADR-0003](0003-event-envelope-and-schema-compatibility.md) | Event Spine event envelope and schema compatibility | Accepted Event Spine decision; Issue #22 library implemented; runtime pending | Event Spine / Reliability evidence |
 | [ADR-0004](0004-postgresql-inbox-and-projection-consistency.md) | Event Spine PostgreSQL inbox and projection consistency | Accepted Event Spine decision; Issue #23 source/outbox implemented; Issues #25–#26 inbox/projection consumer and failure visibility implemented | Event Spine / Reliability evidence |
-| [ADR-0005](0005-identity-tenant-policy-and-service-delegation.md) | Identity, tenant policy, and service delegation | Accepted Identity & Operations design decision; permission matrix (#44), OIDC/session runtime (#45), and default-deny enforcement (#46) pending | Identity & Operations |
+| [ADR-0005](0005-identity-tenant-policy-and-service-delegation.md) | Identity, tenant policy, and service delegation | Accepted Identity & Operations design decision; permission matrix published (#44); OIDC/session runtime (#45) and default-deny enforcement (#46) pending | Identity & Operations |
 
 Accepted ADRs preserve Project Constitution boundaries: PostgreSQL remains transactional
 authority, asynchronous delivery is at least once, replay must be safe for

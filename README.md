@@ -45,7 +45,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for logical topology, language ownership,
 
 ## Security, intelligence, and ops evidence
 
-Planned security model: [THREAT_MODEL.md](docs/security/THREAT_MODEL.md), [AUTHORIZATION_MODEL.md](docs/security/AUTHORIZATION_MODEL.md). Planned intelligence eval: [docs/intelligence/](docs/intelligence/). Evidence protocols and fault matrix: [docs/evaluation/](docs/evaluation/), including the [fault campaign matrix](docs/evaluation/FAULT_CAMPAIGN_MATRIX.md).
+Planned security model: [THREAT_MODEL.md](docs/security/THREAT_MODEL.md), [AUTHORIZATION_MODEL.md](docs/security/AUTHORIZATION_MODEL.md), [PERMISSION_MATRIX.md](docs/security/PERMISSION_MATRIX.md). Planned intelligence eval: [docs/intelligence/](docs/intelligence/). Evidence protocols and fault matrix: [docs/evaluation/](docs/evaluation/), including the [fault campaign matrix](docs/evaluation/FAULT_CAMPAIGN_MATRIX.md).
 
 ## Clean-room boundary
 
