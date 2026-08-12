@@ -65,9 +65,9 @@ to Observed or Reproduced.
 
 ## Residual risk and follow-ups
 
-- Issue #26 owns bounded failure/backlog observability and deeper restart
-  campaign polish, including any explicit handler-poison escalation policy
-  beyond retryable PostgreSQL/processing failures (which must not ack).
+- Issue #26 completed bounded failure/backlog observability and handler-poison
+  escalation; see
+  [M1_CONSUMER_FAILURE_SAFETY_REVIEW.md](M1_CONSUMER_FAILURE_SAFETY_REVIEW.md).
 - Issue #27 owns the Go-owned projection query/SSE read surface.
 - Hosted Go CI must be observed green before citing CI success.
 - `CLM-004` / `CLM-005` / `CLM-006` stay Planned until formal evidence promotion
