@@ -8,6 +8,7 @@ import (
 	"errors"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -348,6 +349,8 @@ func TestConflictingEventIDRejected(t *testing.T) {
 }
 
 func TestAggregateVersionGapAndRedrive(t *testing.T) {
+	// FC-011-style: missing/reordered required aggregate version is quarantined
+	// and deferred, never silently skipped (M1-INV-08).
 	db := openTestDB(t)
 	fx := mustFixture(t)
 
@@ -368,8 +371,8 @@ func TestAggregateVersionGapAndRedrive(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res.Disposition != DispositionQuarantinedGap {
-		t.Fatalf("expected gap, got %s", res.Disposition)
+	if res.Disposition != DispositionQuarantinedGap || !res.ShouldAck {
+		t.Fatalf("expected gap ack, got %+v", res)
 	}
 	_, _, ok, err := ProjectionState(context.Background(), db, fx.TenantID, fx.ItemID)
 	if err != nil || ok {
@@ -388,6 +391,47 @@ func TestAggregateVersionGapAndRedrive(t *testing.T) {
 	disp, _, ok, err := InboxDisposition(context.Background(), db, v2.EventID)
 	if err != nil || !ok || disp != DispositionApplied {
 		t.Fatalf("v2 inbox disp=%q ok=%v err=%v", disp, ok, err)
+	}
+}
+
+func TestReorderAggregateVersionIsNotSilentlySkipped(t *testing.T) {
+	// FC-011: deliver v3 before v1/v2; projection must not jump to version 3.
+	db := openTestDB(t)
+	fx := mustFixture(t)
+
+	v3 := fx.Event
+	v3.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b5"
+	v3.AggregateVersion = 3
+	v3.Payload.QuantityBefore = 7
+	v3.Payload.QuantityDecremented = 1
+	v3.Payload.QuantityAfter = 6
+	v3.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b6"
+	v3.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b7"
+
+	raw3 := mustCanonical(t, v3)
+	key := []byte(relay.AggregateKey(v3.TenantID, v3.AggregateType, v3.AggregateID))
+	res, err := ProcessRecord(context.Background(), db, key, raw3, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 11,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Disposition != DispositionQuarantinedGap {
+		t.Fatalf("expected gap for reorder, got %s", res.Disposition)
+	}
+	_, _, ok, err := ProjectionState(context.Background(), db, fx.TenantID, fx.ItemID)
+	if err != nil || ok {
+		t.Fatalf("projection must remain empty across gap: ok=%v err=%v", ok, err)
+	}
+
+	_ = processNorthstar(t, db, fx)
+	qty, ver, ok, err := ProjectionState(context.Background(), db, fx.TenantID, fx.ItemID)
+	if err != nil || !ok || qty != 8 || ver != 1 {
+		t.Fatalf("after v1 only qty=%d ver=%d ok=%v err=%v", qty, ver, ok, err)
+	}
+	disp, _, ok, err := InboxDisposition(context.Background(), db, v3.EventID)
+	if err != nil || !ok || disp != DispositionQuarantinedGap {
+		t.Fatalf("v3 must remain gap until v2 arrives: disp=%q ok=%v err=%v", disp, ok, err)
 	}
 }
 
@@ -448,12 +492,16 @@ func TestMalformedEnvelopeQuarantinedWithoutProjection(t *testing.T) {
 	if !res.ShouldAck || res.Disposition != DispositionQuarantinedInvalid {
 		t.Fatalf("result = %+v", res)
 	}
+	var category, code string
 	var n int
-	if err := db.QueryRow(`SELECT COUNT(*) FROM platform.processing_failures`).Scan(&n); err != nil {
+	if err := db.QueryRow(`
+		SELECT COUNT(*), MAX(failure_category), MAX(diagnostic_code)
+		FROM platform.processing_failures
+	`).Scan(&n, &category, &code); err != nil {
 		t.Fatal(err)
 	}
-	if n != 1 {
-		t.Fatalf("failures = %d", n)
+	if n != 1 || category != "malformed_envelope" || code != "malformed_envelope" {
+		t.Fatalf("failures n=%d category=%q code=%q", n, category, code)
 	}
 	var proj int
 	if err := db.QueryRow(`SELECT COUNT(*) FROM platform.inventory_projection`).Scan(&proj); err != nil {
@@ -465,6 +513,7 @@ func TestMalformedEnvelopeQuarantinedWithoutProjection(t *testing.T) {
 }
 
 func TestUnsupportedSchemaQuarantined(t *testing.T) {
+	// FC-010-style: unsupported schema version is quarantined, never applied.
 	db := openTestDB(t)
 	fx := mustFixture(t)
 	// Craft JSON with schema 2; event.Parse rejects unsupported versions.
@@ -479,27 +528,133 @@ func TestUnsupportedSchemaQuarantined(t *testing.T) {
 	if !res.ShouldAck {
 		t.Fatalf("expected ack after unsupported quarantine, got %+v", res)
 	}
+	var category, code string
+	if err := db.QueryRow(`
+		SELECT failure_category, diagnostic_code
+		FROM platform.processing_failures
+		WHERE source_offset = 6
+	`).Scan(&category, &code); err != nil {
+		t.Fatal(err)
+	}
+	if category != "unsupported_contract" || code != "unsupported_contract" {
+		t.Fatalf("category=%q code=%q", category, code)
+	}
 	_, _, ok, err := ProjectionState(context.Background(), db, fx.TenantID, fx.ItemID)
 	if err != nil || ok {
 		t.Fatalf("projection must be empty: ok=%v err=%v", ok, err)
 	}
 }
 
+func TestFailureRecordSanitization(t *testing.T) {
+	db := openTestDB(t)
+	secret := "SUPER_SECRET_TOKEN_do_not_store"
+	raw := []byte(`{"leak":"` + secret + `",`)
+	sum := sha256.Sum256(raw)
+	wantHash := hex.EncodeToString(sum[:])
+
+	res, err := ProcessRecord(context.Background(), db, []byte("k"), raw, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 55,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.ShouldAck {
+		t.Fatalf("expected durable quarantine ack, got %+v", res)
+	}
+
+	var (
+		eventID, tenantID, aggID, contentHash sql.NullString
+		category, code, receivedHash, status  string
+		topic                                 string
+		partition                             int
+		offset                                int64
+	)
+	if err := db.QueryRow(`
+		SELECT event_id, tenant_id, aggregate_id, content_hash,
+		       failure_category, diagnostic_code, received_bytes_hash,
+		       quarantine_status, source_topic, source_partition, source_offset
+		FROM platform.processing_failures
+		WHERE source_offset = 55
+	`).Scan(
+		&eventID, &tenantID, &aggID, &contentHash,
+		&category, &code, &receivedHash,
+		&status, &topic, &partition, &offset,
+	); err != nil {
+		t.Fatal(err)
+	}
+	if category != "malformed_envelope" || code != "malformed_envelope" {
+		t.Fatalf("category=%q code=%q", category, code)
+	}
+	if status != "quarantined" || receivedHash != wantHash {
+		t.Fatalf("status=%q hash=%q want %q", status, receivedHash, wantHash)
+	}
+	if eventID.Valid || tenantID.Valid || aggID.Valid || contentHash.Valid {
+		t.Fatalf("identity fields must be null for unparseable input")
+	}
+	if topic != relay.Topic || partition != 0 || offset != 55 {
+		t.Fatalf("source position topic=%q part=%d off=%d", topic, partition, offset)
+	}
+
+	rows, err := db.Query(`
+		SELECT failure_id::text, COALESCE(event_id, ''), COALESCE(tenant_id, ''),
+		       COALESCE(aggregate_id, ''), COALESCE(content_hash, ''),
+		       failure_category, diagnostic_code, COALESCE(received_bytes_hash, ''),
+		       quarantine_status
+		FROM platform.processing_failures
+	`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var cols [9]string
+		if err := rows.Scan(&cols[0], &cols[1], &cols[2], &cols[3], &cols[4], &cols[5], &cols[6], &cols[7], &cols[8]); err != nil {
+			t.Fatal(err)
+		}
+		for _, c := range cols {
+			if containsSubstring(c, secret) {
+				t.Fatalf("failure row leaked payload substring in %q", c)
+			}
+		}
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestExplicitPoisonAttemptEventuallyAcks(t *testing.T) {
-	// bumpPoisonAttempt remains the explicit handler-poison path; retryable
+	// FC-009-style: handler poison escalates through ProcessRecord; retryable
 	// processValidated failures must not enter it (see TestCommitFailuresDoNotPoisonAck).
 	db := openTestDB(t)
 	fx := mustFixture(t)
 	raw := mustCanonical(t, fx.Event)
+	key := []byte(relay.AggregateKey(fx.TenantID, fx.Event.AggregateType, fx.Event.AggregateID))
 	pos := SourcePosition{Topic: relay.Topic, Partition: 0, Offset: 77}
-	env := fx.Event
+
+	setTestForceHandlerPoisonForTest(func() error {
+		return errors.New("boom")
+	})
+	t.Cleanup(func() { setTestForceHandlerPoisonForTest(nil) })
+
 	var res Result
 	var err error
 	for i := 0; i < MaxHandlerAttempts; i++ {
-		res, err = bumpPoisonAttempt(context.Background(), db, &env, raw, pos, "handler_poison_test", errors.New("boom"))
+		res, err = ProcessRecord(context.Background(), db, key, raw, pos)
 		if i < MaxHandlerAttempts-1 {
 			if err == nil || res.ShouldAck || !errors.Is(err, ErrTransient) {
 				t.Fatalf("attempt %d: want transient no-ack, got res=%+v err=%v", i+1, res, err)
+			}
+			var status string
+			var attempts int
+			if qerr := db.QueryRow(`
+				SELECT quarantine_status, attempt_count
+				FROM platform.processing_failures
+				WHERE source_offset = 77
+			`).Scan(&status, &attempts); qerr != nil {
+				t.Fatal(qerr)
+			}
+			if status != "retrying" || attempts != i+1 {
+				t.Fatalf("attempt %d: status=%q attempts=%d", i+1, status, attempts)
 			}
 			continue
 		}
@@ -507,10 +662,158 @@ func TestExplicitPoisonAttemptEventuallyAcks(t *testing.T) {
 			t.Fatalf("final attempt: want poison ack, got res=%+v err=%v", res, err)
 		}
 	}
+	var status, category, code string
+	if err := db.QueryRow(`
+		SELECT quarantine_status, failure_category, diagnostic_code
+		FROM platform.processing_failures
+		WHERE source_offset = 77
+	`).Scan(&status, &category, &code); err != nil {
+		t.Fatal(err)
+	}
+	if status != "quarantined" || category != "handler_poison" || code != "handler_poison" {
+		t.Fatalf("status=%q category=%q code=%q", status, category, code)
+	}
 	_, _, ok, err := ProjectionState(context.Background(), db, fx.TenantID, fx.ItemID)
 	if err != nil || ok {
 		t.Fatalf("poison path must not mutate projection: ok=%v err=%v", ok, err)
 	}
+}
+
+func TestInspectProcessingVisibility(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+
+	malformed := []byte(`{"not":"an-envelope"`)
+	_, err := ProcessRecord(context.Background(), db, []byte("k"), malformed, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 20,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v2 := fx.Event
+	v2.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e2"
+	v2.AggregateVersion = 2
+	v2.Payload.QuantityBefore = 8
+	v2.Payload.QuantityDecremented = 1
+	v2.Payload.QuantityAfter = 7
+	v2.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e4"
+	v2.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e3"
+	raw2 := mustCanonical(t, v2)
+	keyA := []byte(relay.AggregateKey(v2.TenantID, v2.AggregateType, v2.AggregateID))
+	res, err := ProcessRecord(context.Background(), db, keyA, raw2, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 21,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Disposition != DispositionQuarantinedGap {
+		t.Fatalf("expected gap, got %s", res.Disposition)
+	}
+
+	other := fx.Event
+	other.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e1"
+	other.AggregateID = "item-sugar-001"
+	other.Payload.ItemID = "item-sugar-001"
+	other.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e5"
+	other.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e6"
+	rawB := mustCanonical(t, other)
+	keyB := []byte(relay.AggregateKey(other.TenantID, other.AggregateType, other.AggregateID))
+	res, err = ProcessRecord(context.Background(), db, keyB, rawB, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 22,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Disposition != DispositionApplied {
+		t.Fatalf("unrelated aggregate result = %+v", res)
+	}
+
+	ins, err := InspectProcessing(context.Background(), db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ins.Applied != 1 || ins.QuarantinedGap != 1 || ins.FailuresQuarantined != 1 {
+		t.Fatalf("inspect counts = %+v", ins)
+	}
+	if ins.OldestGap.IsZero() || ins.OldestFailure.IsZero() {
+		t.Fatalf("expected oldest timestamps, got gap=%v failure=%v", ins.OldestGap, ins.OldestFailure)
+	}
+	if len(ins.Failures) != 1 || ins.Failures[0].FailureCategory != "malformed_envelope" {
+		t.Fatalf("failures sample = %+v", ins.Failures)
+	}
+	if len(ins.Gaps) != 1 || ins.Gaps[0].EventID != v2.EventID || ins.Gaps[0].AggregateVersion != 2 {
+		t.Fatalf("gaps sample = %+v", ins.Gaps)
+	}
+	for _, f := range ins.Failures {
+		if containsSubstring(f.DiagnosticCode, `"not"`) || containsSubstring(f.EventID, "an-envelope") {
+			t.Fatalf("failure sample leaked payload: %+v", f)
+		}
+	}
+}
+
+func TestUnsafeEventDoesNotBlockUnrelatedAggregate(t *testing.T) {
+	// FC-009 invariant: durable quarantine of aggregate A must not prevent
+	// independent aggregate B from applying.
+	db := openTestDB(t)
+	fx := mustFixture(t)
+
+	gap := fx.Event
+	gap.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f2"
+	gap.AggregateVersion = 2
+	gap.Payload.QuantityBefore = 8
+	gap.Payload.QuantityDecremented = 1
+	gap.Payload.QuantityAfter = 7
+	gap.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f4"
+	gap.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f3"
+	rawGap := mustCanonical(t, gap)
+	keyA := []byte(relay.AggregateKey(gap.TenantID, gap.AggregateType, gap.AggregateID))
+	res, err := ProcessRecord(context.Background(), db, keyA, rawGap, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 30,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Disposition != DispositionQuarantinedGap || !res.ShouldAck {
+		t.Fatalf("gap result = %+v", res)
+	}
+
+	other := fx.Event
+	other.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f1"
+	other.AggregateID = "item-sugar-001"
+	other.Payload.ItemID = "item-sugar-001"
+	other.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f5"
+	other.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f6"
+	rawB := mustCanonical(t, other)
+	keyB := []byte(relay.AggregateKey(other.TenantID, other.AggregateType, other.AggregateID))
+	res, err = ProcessRecord(context.Background(), db, keyB, rawB, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 31,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Disposition != DispositionApplied || !res.ShouldAck {
+		t.Fatalf("unrelated result = %+v", res)
+	}
+	qty, ver, ok, err := ProjectionState(context.Background(), db, other.TenantID, other.AggregateID)
+	if err != nil || !ok || qty != 8 || ver != 1 {
+		t.Fatalf("unrelated projection qty=%d ver=%d ok=%v err=%v", qty, ver, ok, err)
+	}
+	_, _, ok, err = ProjectionState(context.Background(), db, fx.TenantID, fx.ItemID)
+	if err != nil || ok {
+		t.Fatalf("gapped aggregate must have empty projection: ok=%v err=%v", ok, err)
+	}
+	ins, err := InspectProcessing(context.Background(), db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ins.QuarantinedGap != 1 || ins.Applied != 1 {
+		t.Fatalf("inspect = %+v", ins)
+	}
+}
+
+func containsSubstring(s, sub string) bool {
+	return strings.Contains(s, sub)
 }
 
 func TestChecksumEmptyAndApplied(t *testing.T) {
