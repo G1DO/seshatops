@@ -18,18 +18,12 @@ All public narrative and demos use **Northstar Foods**, a fictional manufacturer
 
 ## Status
 
-**M0 is complete. M1 Event Spine is active: the reviewed contract exists,
-Issue #22 adds the executable JSON event library and deterministic Northstar
-Foods fixture, Issue #23 adds the synthetic ERP source transaction with a
-pending transactional outbox, Issue #24 adds the source-owned outbox relay that
-publishes exact stored bytes to Redpanda at least once, Issue #25 adds the
-Go consumer that transactionally updates the inventory projection,
-Issue #26 makes consumer failure, poison, gap, and restart behavior observable
-and safe without an operator recovery console, Issue #27 exposes the
-committed inventory projection through a read-only Go REST/SSE API,
-Issue #28 adds the minimum TypeScript operations view, and Issue #29 adds
-local duplicate-injection and deterministic projection-rebuild checksum
-proofs.**
+**M0 is complete. M1 Event Spine exit-gate evidence is recorded (Issue #30):
+Issues #21–#29 delivered the contract, JSON event library and Northstar
+fixture, synthetic ERP source/outbox, Redpanda relay, inventory projection
+consumer with failure/restart safety, read-only REST/SSE API, TypeScript
+operations view, and duplicate/rebuild checksum proofs. `CLM-003`–`CLM-006`
+are Observed for the declared test environment only.**
 
 This repository holds the completed M0 documentation, the reviewed M1
 event-spine contract in [CONTRACTS.md](CONTRACTS.md), Go packages under
@@ -43,13 +37,16 @@ consumer note in
 the projection read API note in
 [PROJECTION_READ_API.md](docs/architecture/PROJECTION_READ_API.md),
 the operations view note in
-[OPERATIONS_VIEW.md](docs/architecture/OPERATIONS_VIEW.md), and the rebuild
+[OPERATIONS_VIEW.md](docs/architecture/OPERATIONS_VIEW.md), the rebuild
 proof note in
-[PROJECTION_REBUILD.md](docs/architecture/PROJECTION_REBUILD.md).
+[PROJECTION_REBUILD.md](docs/architecture/PROJECTION_REBUILD.md), and the
+exit-gate campaign artifacts under
+[M1_EXIT_GATE_PROCEDURE.md](docs/evaluation/M1_EXIT_GATE_PROCEDURE.md) and
+[M1_EXIT_GATE_EXPERIMENT_REPORT.md](docs/evaluation/M1_EXIT_GATE_EXPERIMENT_REPORT.md).
 A long-running deployment service is not present yet. Planned capabilities must
-not be read as completed or measured results.
+not be read as completed or measured results beyond the linked evidence.
 
-Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml), and Go package tests are checked by [Go CI](.github/workflows/go-ci.yml). The [M0 repository-governance review](docs/reviews/M0_REPOSITORY_GOVERNANCE_REVIEW.md), [integrated constitution review](docs/reviews/M0_INTEGRATED_CONSTITUTION_REVIEW.md), [M0 completion summary](docs/reviews/M0_COMPLETION_SUMMARY.md), [M1 event-contract fixture review](docs/reviews/M1_EVENT_CONTRACT_FIXTURE_REVIEW.md), [M1 source/outbox review](docs/reviews/M1_SOURCE_OUTBOX_REVIEW.md), [M1 outbox relay review](docs/reviews/M1_OUTBOX_RELAY_REVIEW.md), [M1 inventory projection review](docs/reviews/M1_INVENTORY_PROJECTION_REVIEW.md), [M1 consumer failure safety review](docs/reviews/M1_CONSUMER_FAILURE_SAFETY_REVIEW.md), [M1 projection read API review](docs/reviews/M1_PROJECTION_READ_API_REVIEW.md), [M1 operations view review](docs/reviews/M1_OPERATIONS_VIEW_REVIEW.md), and [M1 projection rebuild review](docs/reviews/M1_PROJECTION_REBUILD_REVIEW.md) record reviewed state, evidence boundaries, limitations, and residual risk.
+Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml), and Go package tests are checked by [Go CI](.github/workflows/go-ci.yml). The [M0 repository-governance review](docs/reviews/M0_REPOSITORY_GOVERNANCE_REVIEW.md), [integrated constitution review](docs/reviews/M0_INTEGRATED_CONSTITUTION_REVIEW.md), [M0 completion summary](docs/reviews/M0_COMPLETION_SUMMARY.md), [M1 event-contract fixture review](docs/reviews/M1_EVENT_CONTRACT_FIXTURE_REVIEW.md), [M1 source/outbox review](docs/reviews/M1_SOURCE_OUTBOX_REVIEW.md), [M1 outbox relay review](docs/reviews/M1_OUTBOX_RELAY_REVIEW.md), [M1 inventory projection review](docs/reviews/M1_INVENTORY_PROJECTION_REVIEW.md), [M1 consumer failure safety review](docs/reviews/M1_CONSUMER_FAILURE_SAFETY_REVIEW.md), [M1 projection read API review](docs/reviews/M1_PROJECTION_READ_API_REVIEW.md), [M1 operations view review](docs/reviews/M1_OPERATIONS_VIEW_REVIEW.md), [M1 projection rebuild review](docs/reviews/M1_PROJECTION_REBUILD_REVIEW.md), [M1 exit-gate campaign review](docs/reviews/M1_EXIT_GATE_CAMPAIGN_REVIEW.md), and [M1 completion summary](docs/reviews/M1_COMPLETION_SUMMARY.md) record reviewed state, evidence boundaries, limitations, and residual risk.
 
 ## Product constitution
 
@@ -71,7 +68,7 @@ See the [forecasting evaluation protocol](docs/intelligence/FORECASTING_EVALUATI
 
 ## Operational evidence
 
-See the [claim-status vocabulary](docs/evidence/CLAIM_STATUS_VOCABULARY.md), [security evidence protocol](docs/evaluation/SECURITY_EVIDENCE_PROTOCOL.md), [reliability and recovery evidence protocol](docs/evaluation/RELIABILITY_RECOVERY_EVIDENCE_PROTOCOL.md), [performance evidence protocol](docs/evaluation/PERFORMANCE_EVIDENCE_PROTOCOL.md), [fault campaign matrix](docs/evaluation/FAULT_CAMPAIGN_MATRIX.md), [experiment report template](docs/evaluation/templates/EXPERIMENT_REPORT.md), and [M0 operational evidence review](docs/reviews/M0_OPERATIONAL_EVIDENCE_REVIEW.md). These define future evidence requirements; no runtime experiment or operational claim is made.
+See the [claim-status vocabulary](docs/evidence/CLAIM_STATUS_VOCABULARY.md), [security evidence protocol](docs/evaluation/SECURITY_EVIDENCE_PROTOCOL.md), [reliability and recovery evidence protocol](docs/evaluation/RELIABILITY_RECOVERY_EVIDENCE_PROTOCOL.md), [performance evidence protocol](docs/evaluation/PERFORMANCE_EVIDENCE_PROTOCOL.md), [fault campaign matrix](docs/evaluation/FAULT_CAMPAIGN_MATRIX.md), [M1 exit-gate procedure](docs/evaluation/M1_EXIT_GATE_PROCEDURE.md), [M1 exit-gate experiment report](docs/evaluation/M1_EXIT_GATE_EXPERIMENT_REPORT.md), [experiment report template](docs/evaluation/templates/EXPERIMENT_REPORT.md), and [M0 operational evidence review](docs/reviews/M0_OPERATIONAL_EVIDENCE_REVIEW.md). Protocols define evidence requirements; only linked experiment records support Observed claims.
 
 ## Roadmap and evidence ledger
 

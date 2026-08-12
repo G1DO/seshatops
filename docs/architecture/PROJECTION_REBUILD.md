@@ -94,5 +94,8 @@ emit an in-process read hint after an apply; that is not an external effect.
 
 ## Non-claims
 
-This document does not claim hosted FC-001/FC-014 campaign success, Observed or
-Reproduced claim status, production readiness, or exactly-once transport.
+This document does not claim production readiness, staging parity, or
+exactly-once transport. Issue #30 records test-environment FC-001/FC-014
+campaign evidence and Observed decisions for `CLM-004`/`CLM-006`; see
+[M1_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/M1_EXIT_GATE_EXPERIMENT_REPORT.md).
+M3 still owns authorized recovery/restore product scope.

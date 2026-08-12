@@ -88,10 +88,12 @@ cited as successful rebuild proofs.
 
 ## Residual risk and follow-ups
 
-- Hosted FC-001 / FC-014 campaigns and claim promotion remain Issue #30 /
-  evidence-governance follow-ups.
+- Issue #30 records test-environment FC-001 / FC-014 campaign evidence and
+  Observed decisions for `CLM-004` / `CLM-006`; staging/production promotion
+  remains out of scope.
 - M2 owns authorized operator replay/quarantine release; M3 owns backup/restore
   and ADR-Q-005 recovery product behavior.
 - Incomplete rebuilds may still emit a diagnostic checksum; callers must gate
   equality proofs on status `complete`.
-- Hosted Go CI must be observed green before citing CI success.
+- Hosted Go CI must be observed green for the Issue #30 PR head before citing
+  hosted CI success.
