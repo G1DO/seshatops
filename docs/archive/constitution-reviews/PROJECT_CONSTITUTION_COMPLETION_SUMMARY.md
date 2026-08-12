@@ -51,10 +51,10 @@ History links: [Issue #10](https://github.com/G1DO/seshatops/issues/10),
 ## Final artifacts
 
 - [Integrated constitution review](PROJECT_CONSTITUTION_INTEGRATED_REVIEW.md)
-- [Clean-room checklist and CRR-0003](../checklists/CLEAN_ROOM_REVIEW.md)
-- [ADR index and deferred queue](../adrs/README.md)
-- [Roadmap](../../ROADMAP.md)
-- [Evidence ledger](../../EVIDENCE.md)
+- [Clean-room checklist and CRR-0003](../../checklists/CLEAN_ROOM_REVIEW.md)
+- [ADR index and deferred queue](../../adrs/README.md)
+- [Roadmap](../../../ROADMAP.md)
+- [Evidence ledger](../../../EVIDENCE.md)
 - [Repository governance review](PROJECT_CONSTITUTION_GOVERNANCE_REVIEW.md)
 
 The repository remains documentation-only. No implementation package,

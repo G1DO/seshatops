@@ -1,6 +1,6 @@
 # PRODUCT — SeshatOps Constitution
 
-**Status:** Planned. Implementation has not started. This document defines product intent and enforceable boundaries for SeshatOps. It is not evidence that capabilities exist.
+**Status:** Product intent for SeshatOps. Event Spine is implemented with test-environment Observed evidence (`CLM-003`–`CLM-006`). Later capabilities remain Planned. This document is not itself runtime evidence.
 
 ## 1. Product thesis
 

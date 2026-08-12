@@ -13,29 +13,6 @@ Closes #123
 - Scope:
 - Non-goals:
 
-## Changed files or components
-
-<!-- List the meaningful paths changed by this pull request. -->
-
-## Acceptance criteria coverage
-
-- [ ] Each requested acceptance criterion is addressed or explicitly deferred.
-- [ ] No unrelated cleanup or scope expansion was introduced.
-- [ ] Hosted check results are reported from GitHub for the reviewed commit.
-
-## Correctness, security, and clean-room impact
-
-- [ ] Correctness impact reviewed.
-- [ ] Security and trust-boundary impact reviewed.
-- [ ] Clean-room provenance reviewed.
-- [ ] No secrets, private identifiers, or excluded Ahoy material were added.
-
-## Evidence and claim status
-
-- Claim IDs affected:
-- Status changes:
-- Evidence artifacts or limitations:
-
 ## Verification performed
 
 | Command or check | Actual outcome |
@@ -46,14 +23,15 @@ Closes #123
 
 <!-- Name each skipped check and give the concrete reason. Do not claim it passed. -->
 
-## Content review
+## Evidence and claim status
 
-- [ ] Content and evidence were reviewed before submission.
+- Claim IDs affected:
+- Status changes:
+- Evidence artifacts or limitations:
 
-## Documentation and ADR updates
+## Clean-room
 
-- Documentation updated:
-- ADR updated or not needed because:
+- [ ] Clean-room provenance reviewed; no secrets, private identifiers, or excluded Ahoy material were added.
 
 ## Residual risks
 

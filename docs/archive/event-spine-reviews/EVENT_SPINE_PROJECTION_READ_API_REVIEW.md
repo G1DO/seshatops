@@ -23,7 +23,7 @@ without a recorded GitHub Actions run.
 | --- | --- | --- |
 | REST returns only committed inventory-projection state | `TestRESTReturnsCommittedProjection`; `platform.ListTenantProjection` | Covered |
 | SSE emits only after projection transaction commits | `TestSSEEmitsOnlyAfterCommit`; rollback silence via `SetFailBeforeCommitForTest` | Covered |
-| Reconnecting client converges via REST snapshot/catch-up | `TestSSEDisconnectReconnectRESTConverge`; [PROJECTION_READ_API.md](../architecture/PROJECTION_READ_API.md) reconnect section | Covered |
+| Reconnecting client converges via REST snapshot/catch-up | `TestSSEDisconnectReconnectRESTConverge`; [PROJECTION_READ_API.md](../../architecture/PROJECTION_READ_API.md) reconnect section | Covered |
 | API surface is read-only for Event Spine projection state | `TestReadOnlyRejectsMutatingMethods` (`405`) | Covered |
 | Browser-facing contracts do not require DB/broker access | `api` imports PostgreSQL helpers only (no `relay`/franz-go); architecture docs | Covered |
 | Version/freshness metadata represented consistently | Snapshot `aggregate_version` + `checksum` + `observed_at`; SSE `last_applied_event_id` + `checksum` | Covered |

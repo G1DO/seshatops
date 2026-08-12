@@ -20,8 +20,8 @@ isolation, reliability, performance, deployment, or production readiness.
 ## Sources reviewed
 
 - [GitHub Issue #21](https://github.com/G1DO/seshatops/issues/21)
-- [README.md](../../README.md), [PRODUCT.md](../../PRODUCT.md), [ARCHITECTURE.md](../../ARCHITECTURE.md), [ROADMAP.md](../../ROADMAP.md), [EVIDENCE.md](../../EVIDENCE.md), and [CLEAN_ROOM.md](../../CLEAN_ROOM.md)
-- [EVENT_MODEL.md](../architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](../architecture/COMMAND_MODEL.md), and Project Constitution security models
+- [README.md](../../../README.md), [PRODUCT.md](../../../PRODUCT.md), [ARCHITECTURE.md](../../../ARCHITECTURE.md), [ROADMAP.md](../../../ROADMAP.md), [EVIDENCE.md](../../../EVIDENCE.md), and [CLEAN_ROOM.md](../../../CLEAN_ROOM.md)
+- [EVENT_MODEL.md](../../architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](../../architecture/COMMAND_MODEL.md), and Project Constitution security models
 - ADR-0001, ADR-0002, ADR-Q-001, ADR-Q-002, and ADR-Q-003
 - Constitution completion, architecture, correctness, roadmap/evidence, security, and integrated review records
 

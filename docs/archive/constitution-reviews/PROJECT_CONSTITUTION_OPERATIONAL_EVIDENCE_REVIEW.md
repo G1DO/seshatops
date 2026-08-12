@@ -24,10 +24,10 @@ The repository remains documentation-only. No runtime code, executable schema, f
 
 - [GitHub Issue #7](https://github.com/G1DO/seshatops/issues/7), including its acceptance criteria, invariants, non-goals, and required evidence.
 - Merged Issues #1–#6 and PRs [#11](https://github.com/G1DO/seshatops/pull/11) through [#16](https://github.com/G1DO/seshatops/pull/16).
-- [README.md](../../README.md), [PRODUCT.md](../../PRODUCT.md), [CLEAN_ROOM.md](../../CLEAN_ROOM.md), and [ARCHITECTURE.md](../../ARCHITECTURE.md).
-- [EVENT_MODEL.md](../architecture/EVENT_MODEL.md) and [COMMAND_MODEL.md](../architecture/COMMAND_MODEL.md).
-- [THREAT_MODEL.md](../security/THREAT_MODEL.md) and [AUTHORIZATION_MODEL.md](../security/AUTHORIZATION_MODEL.md).
-- Both Issue #4 ADRs: [ADR-0001](../adrs/0001-transactional-outbox-and-at-least-once-delivery.md) and [ADR-0002](../adrs/0002-idempotent-command-execution.md).
+- [README.md](../../../README.md), [PRODUCT.md](../../../PRODUCT.md), [CLEAN_ROOM.md](../../../CLEAN_ROOM.md), and [ARCHITECTURE.md](../../../ARCHITECTURE.md).
+- [EVENT_MODEL.md](../../architecture/EVENT_MODEL.md) and [COMMAND_MODEL.md](../../architecture/COMMAND_MODEL.md).
+- [THREAT_MODEL.md](../../security/THREAT_MODEL.md) and [AUTHORIZATION_MODEL.md](../../security/AUTHORIZATION_MODEL.md).
+- Both Issue #4 ADRs: [ADR-0001](../../adrs/0001-transactional-outbox-and-at-least-once-delivery.md) and [ADR-0002](../../adrs/0002-idempotent-command-execution.md).
 - Both intelligence protocols, both conceptual schemas, both empty intelligence report templates, and all existing Constitution review documents.
 
 ### Canonical planning sources

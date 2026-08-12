@@ -20,7 +20,7 @@ This model applies to:
 - audit records, receipts, exports, logs, traces, and evidence; and
 - administrative and operational actions.
 
-All controls in this document are planned. The current repository contains documentation only.
+All authorization controls in this document remain Planned. Event Spine packages implement the event path; authentication, authorization runtime, tenant isolation enforcement, approval enforcement, and audit protection are not claimed as implemented.
 
 ## 2. Four separate concepts
 
