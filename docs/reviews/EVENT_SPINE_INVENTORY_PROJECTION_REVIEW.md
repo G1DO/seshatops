@@ -1,4 +1,4 @@
-# M1 Inventory Projection Consumer Review - Issue #25
+# Event Spine Inventory Projection Consumer Review - Issue #25
 
 This document records the Issue #25 implementation review for the transactional
 Redpanda consumer that commits inbox/deduplication state with the inventory
@@ -67,7 +67,7 @@ to Observed or Reproduced.
 
 - Issue #26 completed bounded failure/backlog observability and handler-poison
   escalation; see
-  [M1_CONSUMER_FAILURE_SAFETY_REVIEW.md](M1_CONSUMER_FAILURE_SAFETY_REVIEW.md).
+  [EVENT_SPINE_CONSUMER_FAILURE_SAFETY_REVIEW.md](EVENT_SPINE_CONSUMER_FAILURE_SAFETY_REVIEW.md).
 - Issue #27 owns the Go-owned projection query/SSE read surface.
 - Hosted Go CI must be observed green before citing CI success.
 - `CLM-004` / `CLM-005` / `CLM-006` stay Planned until formal evidence promotion

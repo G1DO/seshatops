@@ -2,7 +2,7 @@ package platform
 
 import "errors"
 
-// Sentinel outcomes and validation failures for the M1 projection consumer.
+// Sentinel outcomes and validation failures for the Event Spine projection consumer.
 var (
 	// ErrTransient indicates a retryable processing failure. The caller must
 	// not acknowledge the Redpanda offset.
@@ -13,7 +13,7 @@ var (
 	// retryable PostgreSQL begin/commit/SQL failures.
 	ErrHandlerPoison = errors.New("platform: handler poison")
 
-	// ErrPoison indicates the delivery exceeded the M1 handler-attempt budget
+	// ErrPoison indicates the delivery exceeded the Event Spine handler-attempt budget
 	// and a sanitized failure record was persisted.
 	ErrPoison = errors.New("platform: poison delivery quarantined")
 )

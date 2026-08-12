@@ -306,7 +306,7 @@ The following are deliberately not selected here:
 - external adapter contracts, reconciliation protocols, and retry schedules; and
 - RAG evaluation protocol and model/provider-specific safeguards.
 
-Issue #5 owns the conceptual security model. Issue #6 owns intelligence evaluation. Issue #7 owns security and reliability evidence protocols. Issue #10 owns integrated constitution review. Concrete enforcement belongs to later identity/operations and implementation milestones.
+Issue #5 owns the conceptual security model. Issue #6 owns intelligence evaluation. Issue #7 owns security and reliability evidence protocols. Issue #10 owns integrated constitution review. Concrete enforcement belongs to later identity/operations and implementation capability sequences.
 
 ## 15. Clean-room boundary
 

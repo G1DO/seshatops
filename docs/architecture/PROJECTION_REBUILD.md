@@ -1,12 +1,12 @@
-# M1 Projection Rebuild and Duplicate Proof
+# Event Spine Projection Rebuild and Duplicate Proof
 
 **Status:** Implemented for Issue #29 library/integration scope. Local FC-001
 and FC-014-style proofs exist; hosted fault campaigns and claim promotion
-remain deferred. No M2 recovery console or M3 backup/restore is introduced.
+remain deferred. No Identity & Operations recovery console or Traceability & Recovery backup/restore is introduced.
 
 **Owns:** Controlled duplicate-injection harness coverage, the documented use of
 the CONTRACTS.md §8 inventory projection checksum, isolated reset of derived
-M1 platform state, replay of retained event history through the replay-safe
+Event Spine platform state, replay of retained event history through the replay-safe
 projection handler, rebuild completeness gating, and reproduction metadata for
 `CLM-004` / `CLM-006` support artifacts.
 
@@ -42,7 +42,7 @@ excluded.
 ## Isolated derived-state reset
 
 `ResetDerivedState` is a test/verification procedure that clears **only**
-derived M1 platform processing state. It must not:
+derived Event Spine platform processing state. It must not:
 
 - mutate `erp.inventory_items`, `erp.orders`, or `erp.outbox`;
 - delete or rewrite retained Redpanda topic history;
@@ -89,13 +89,13 @@ emit an in-process read hint after an apply; that is not an external effect.
 
 | Later owner | Deferred behavior |
 | --- | --- |
-| M2 (`CAP-013`) | Authorized quarantine release and operator-controlled replay |
-| M3 (`CAP-015`–`CAP-017`, ADR-Q-005) | Authorized recovery/restore product and broader checksum reconstruction campaigns |
+| Identity (`CAP-013`) | Authorized quarantine release and operator-controlled replay |
+| Traceability (`CAP-015`–`CAP-017`, ADR-Q-005) | Authorized recovery/restore product and broader checksum reconstruction campaigns |
 
 ## Non-claims
 
 This document does not claim production readiness, staging parity, or
 exactly-once transport. Issue #30 records test-environment FC-001/FC-014
 campaign evidence and Observed decisions for `CLM-004`/`CLM-006`; see
-[M1_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/M1_EXIT_GATE_EXPERIMENT_REPORT.md).
-M3 still owns authorized recovery/restore product scope.
+[EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md).
+Traceability still owns authorized recovery/restore product scope.

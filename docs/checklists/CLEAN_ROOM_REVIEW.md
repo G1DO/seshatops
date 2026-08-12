@@ -115,15 +115,15 @@ No private Ahoy material, secrets, or application code found. `Ahoy` appears onl
 - Checked boxes record that this review occurred; they do not prove absence of undiscovered issues.
 - Remediation for the findings above is included in this pull request after the reviewed tip `8419c86811`.
 
-### CRR-0003 — Final M0 constitution review (Issue #10)
+### CRR-0003 — Final Project Constitution review (Issue #10)
 
 | Field | Value |
 | --- | --- |
 | Reviewer | Codex implementation/review pass; maintainer review remains a follow-up |
 | Date (UTC) | 2026-08-07 |
 | Commit / tip | Baseline `7c1d59a`; PR #20 pushed diff, with the exact current head recorded in PR metadata |
-| Scope (paths / PR) | Full tracked M0 repository, reviewed Issues #1–#10 and PRs #11–#19, and PR #20's pushed diff |
-| Review type | Final M0 integration and PR clean-room review |
+| Scope (paths / PR) | Full tracked Constitution repository, reviewed Issues #1–#10 and PRs #11–#19, and PR #20's pushed diff |
+| Review type | Final Constitution integration and PR clean-room review |
 | Result | Pass with recorded follow-ups |
 
 #### Checks
@@ -150,7 +150,7 @@ No private Ahoy material, secrets, or application code found. `Ahoy` appears onl
 2. The Issue #9 governance review contained pre-merge statements about PR #19;
    those statements were preserved as historical context and clarified with
    the later merge disposition.
-3. Notion M0 remains `In Progress`, and its M1 planning page contains concrete
+3. Notion Constitution remains `In Progress`, and its Event Spine planning page contains concrete
    future suggestions. Neither external state was changed or promoted to a
    repository implementation decision.
 
@@ -161,7 +161,7 @@ production context was found in the reviewed scope.
 
 1. Assigned `CRR-0003` to this final record and preserved the historical
    architecture `CRR-0002`.
-2. Added the integrated M0 review, completion summary, and deferred ADR queue.
+2. Added the integrated Project Constitution review, completion summary, and deferred ADR queue.
 3. Reconciled roadmap, claim-ledger guidance, fault-matrix guidance, README,
    and the historical governance review without changing claim statuses.
 
@@ -173,15 +173,15 @@ production context was found in the reviewed scope.
 - Checked boxes record that this review occurred; they do not prove absence of
   undiscovered issues.
 
-### CRR-0004 - M1 event-spine contract review (Issue #21)
+### CRR-0004 - event-spine contract review (Issue #21)
 
 | Field | Value |
 | --- | --- |
 | Reviewer | Codex implementation/review pass; maintainer review remains a follow-up |
 | Date (UTC) | 2026-08-07 |
 | Commit / tip | Working tree based on `5bc9e65`; final commit to be recorded by the implementation PR |
-| Scope (paths / PR) | Issue #21 M1 contract, ADR-0003, ADR-0004, amended ADR-0001, status reconciliation, and M1 review |
-| Review type | M1 documentation, contract, security, and clean-room review |
+| Scope (paths / PR) | Issue #21 Event Spine contract, ADR-0003, ADR-0004, amended ADR-0001, status reconciliation, and Event Spine review |
+| Review type | Event Spine documentation, contract, security, and clean-room review |
 | Result | Pass with recorded follow-ups |
 
 #### Checks
@@ -201,7 +201,7 @@ production context was found in the reviewed scope.
 
 #### Findings and disposition
 
-1. The M1 contract is limited to one synthetic order line and one event family;
+1. The Event Spine contract is limited to one synthetic order line and one event family;
    broader ERP and event-domain design remains deferred.
 2. The event contract, topic/key policy, transaction boundaries, failure rules,
    checksum, and toolchain are documented without adding runtime infrastructure.
@@ -215,7 +215,7 @@ production context was found in the reviewed scope.
 - Checked boxes record that this review occurred; they do not prove absence of
   undiscovered issues.
 
-### CRR-0005 - M1 source transaction and outbox review (Issue #23)
+### CRR-0005 - Event Spine source transaction and outbox review (Issue #23)
 
 | Field | Value |
 | --- | --- |
@@ -223,7 +223,7 @@ production context was found in the reviewed scope.
 | Date (UTC) | 2026-08-10 |
 | Commit / tip | `feat/23-transactional-outbox` implementation commit for Issue #23 |
 | Scope (paths / PR) | Issue #23 `erp` package, migrations, integration tests, source/outbox persistence docs, and status updates |
-| Review type | M1 source persistence, clean-room, and verification honesty review |
+| Review type | Event Spine source persistence, clean-room, and verification honesty review |
 | Result | Pass with recorded follow-ups |
 
 #### Checks
@@ -257,15 +257,15 @@ production context was found in the reviewed scope.
 - Checked boxes record that this review occurred; they do not prove absence of
   undiscovered issues.
 
-### CRR-0010 - M1 exit-gate campaign review (Issue #30)
+### CRR-0010 - event-spine exit-gate campaign review (Issue #30)
 
 | Field | Value |
 | --- | --- |
 | Reviewer | Implementation campaign pass on branch `test/30-m1-exit-gate`; maintainer review remains a follow-up |
 | Date (UTC) | 2026-08-12 |
 | Commit / tip | Runtime verified at `a4e5d47`; evidence docs on Issue #30 PR head |
-| Scope (paths / PR) | Issue #30 procedure, experiment report, campaign review, completion summary, FAULT matrix M1 rows, EVIDENCE.md `CLM-003`–`CLM-006`, status docs |
-| Review type | M1 exit-gate evidence, clean-room, and verification honesty review |
+| Scope (paths / PR) | Issue #30 procedure, experiment report, campaign review, completion summary, FAULT matrix Event Spine rows, EVIDENCE.md `CLM-003`–`CLM-006`, status docs |
+| Review type | event-spine exit-gate evidence, clean-room, and verification honesty review |
 | Result | Pass with recorded follow-ups |
 
 #### Checks

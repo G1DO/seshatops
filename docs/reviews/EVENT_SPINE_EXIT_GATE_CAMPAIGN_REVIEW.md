@@ -1,9 +1,9 @@
-# M1 Exit-Gate Campaign Review - Issue #30
+# Event-Spine Exit-Gate Campaign Review - Issue #30
 
-This document records the Issue #30 integrated M1 exit-gate campaign. It
+This document records the Issue #30 integrated event-spine exit-gate campaign. It
 evaluates the existing #21–#29 vertical slice under a declared test environment.
 It does not claim production readiness, staging parity, exactly-once delivery,
-M2 authorization/operations product scope, or M3 backup/restore.
+Identity authorization/operations product scope, or Traceability & Recovery backup/restore.
 
 ## Review record
 
@@ -13,7 +13,7 @@ M2 authorization/operations product scope, or M3 backup/restore.
 | Date (UTC) | 2026-08-12 |
 | Branch | `test/30-m1-exit-gate` |
 | Runtime commit verified | `a4e5d47f67f2b4ff1d97760c415c3ea28ad83e47` |
-| Scope | Issue #30 only: execute M1 exit-gate scenarios, record evidence, update `CLM-003`–`CLM-006` and M1 fault-matrix rows |
+| Scope | Issue #30 only: execute event-spine exit-gate scenarios, record evidence, update `CLM-003`–`CLM-006` and Event Spine fault-matrix rows |
 | Review type | Integration/fault evidence, clean-room, claim-status, and verification honesty review |
 | Runtime disposition | Pass in test environment (Testcontainers + Vitest) |
 
@@ -59,8 +59,8 @@ M2 authorization/operations product scope, or M3 backup/restore.
 | Poison / unsupported / gap | FC-009, FC-010, FC-011 | `CLM-005` |
 | Deterministic rebuild | FC-014 | `CLM-006` |
 
-Full procedure: [M1_EXIT_GATE_PROCEDURE.md](../evaluation/M1_EXIT_GATE_PROCEDURE.md).
-Experiment report: [M1_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/M1_EXIT_GATE_EXPERIMENT_REPORT.md).
+Full procedure: [EVENT_SPINE_EXIT_GATE_PROCEDURE.md](../evaluation/EVENT_SPINE_EXIT_GATE_PROCEDURE.md).
+Experiment report: [EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md).
 
 ## Clean-room review
 
@@ -79,6 +79,6 @@ Experiment report: [M1_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/M1_EXIT_GAT
 - Live browser demo remains optional; Vitest uses mocked EventSource.
 - Operator Go `1.26.2` vs CI Go `1.25.0` difference is recorded.
 - At-least-once delivery only; no exactly-once claim.
-- M2 owns auth, cross-tenant negatives, operator quarantine UI, and `CLM-007`+.
-- M3 owns backup/restore and ADR-Q-005 recovery product behavior.
+- Identity owns auth, cross-tenant negatives, operator quarantine UI, and `CLM-007`+.
+- Traceability owns backup/restore and ADR-Q-005 recovery product behavior.
 - Hosted CI run IDs are recorded for PR #41 commit `b59b760` above.

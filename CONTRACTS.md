@@ -1,6 +1,6 @@
-# M1 Event Spine Contracts
+# Event Spine Contracts
 
-**Status:** Accepted M1 implementation contract. Issue #22 provides the
+**Status:** Accepted Event Spine implementation contract. Issue #22 provides the
 executable JSON/JCS library and Northstar fixture. Issue #23 implements the
 `erp` source transaction and pending outbox persistence. Issue #24 implements
 the source-owned outbox relay. Issue #25 implements the Go inbox/inventory
@@ -9,7 +9,7 @@ observability and handler-poison escalation on that consumer. Issue #27
 implements the Go-owned projection REST/SSE read surface documented in
 [PROJECTION_READ_API.md](docs/architecture/PROJECTION_READ_API.md).
 
-**Owns:** The concrete M1 event envelope, first event family, JSON compatibility
+**Owns:** The concrete Event Spine event envelope, first event family, JSON compatibility
 rules, PostgreSQL ownership boundaries, Redpanda topic and key policy, outbox
 publication, inbox and projection consistency, failure dispositions, checksum
 canonicalization, and the minimum local toolchain.
@@ -20,16 +20,16 @@ component design, authentication or RBAC, operator recovery controls,
 deployment topology, observability targets, data retention policy, or later
 event families.
 
-This contract implements the M0 principles in [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md)
+This contract implements Project Constitution principles in [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md)
 and [ADR-0001](docs/adrs/0001-transactional-outbox-and-at-least-once-delivery.md).
 Executable JSON/JCS helpers are in the Go `event` package; the deterministic
-fixture is in `northstar`. This document remains documentation truth for M1
+fixture is in `northstar`. This document remains documentation truth for Event Spine
 behavior. Library tests do not prove broker delivery, projection correctness,
 security, reliability, performance, or production readiness.
 
-## 1. M1 vertical slice
+## 1. Event Spine vertical slice
 
-M1 supports one synthetic order line for one tenant and one inventory item:
+Event Spine supports one synthetic order line for one tenant and one inventory item:
 
 > accepted synthetic order -> PostgreSQL source transaction and outbox ->
 > Redpanda -> Go consumer -> transactional inbox and inventory projection ->
@@ -46,12 +46,12 @@ operator recovery, and intelligence are outside this contract.
 
 The wire value is UTF-8 JSON. The v1 envelope contains exactly these fields:
 
-| Field | Type and M1 rule |
+| Field | Type and Event Spine rule |
 | --- | --- |
 | `event_id` | UUIDv4 string; stable identity of one logical event |
 | `tenant_id` | Canonical lowercase UUID string |
 | `event_type` | Exactly `inventory.quantity_decremented` |
-| `event_schema_version` | Positive integer; M1 accepts exactly `1` |
+| `event_schema_version` | Positive integer; Event Spine accepts exactly `1` |
 | `aggregate_type` | Exactly `inventory_item` |
 | `aggregate_id` | Canonical lowercase inventory-item identifier |
 | `aggregate_version` | Positive integer; per-tenant, per-item sequence beginning at `1` |
@@ -63,7 +63,7 @@ The wire value is UTF-8 JSON. The v1 envelope contains exactly these fields:
 | `trace_id` | Stable opaque lineage string; it is not a distributed-tracing claim |
 | `payload` | Strict `inventory.quantity_decremented` v1 payload |
 
-M1 does not permit free-form metadata. Future metadata requires a reviewed
+Event Spine does not permit free-form metadata. Future metadata requires a reviewed
 schema version.
 
 The normative v1 payload is:
@@ -113,8 +113,8 @@ The identifiers in this example are synthetic and illustrative only.
 
 Version compatibility is exact and explicit:
 
-- M1 producers emit only event type `inventory.quantity_decremented` and schema version `1`.
-- M1 consumers reject unknown event types, unknown schema versions, missing fields, unknown fields, duplicate object member names, invalid types, and invalid values.
+- Event Spine producers emit only event type `inventory.quantity_decremented` and schema version `1`.
+- Event Spine consumers reject unknown event types, unknown schema versions, missing fields, unknown fields, duplicate object member names, invalid types, and invalid values.
 - There is no implicit coercion, defaulting, fallback handler, or schema-registry service.
 - Any semantic, required-field, or interpretation change requires a new schema version and handler.
 
@@ -147,7 +147,7 @@ an ordinary duplicate.
 
 ## 4. PostgreSQL ownership and transaction boundaries
 
-M1 uses one PostgreSQL database with separate logical schemas and credentials:
+Event Spine uses one PostgreSQL database with separate logical schemas and credentials:
 
 | Schema | Owns | Must not own |
 | --- | --- | --- |
@@ -210,7 +210,7 @@ committed only after that transaction commits.
 
 ## 5. Redpanda delivery contract
 
-| Item | M1 decision |
+| Item | Event Spine decision |
 | --- | --- |
 | Topic | `seshatops.m1.events` |
 | Value | UTF-8 canonical JSON envelope |
@@ -221,7 +221,7 @@ committed only after that transaction commits.
 | Producer | Source-owned outbox relay only |
 | Consumer | Go projection consumer; consume-only broker capability |
 
-The key is never `event_id`. M1 does not use or claim Redpanda exactly-once
+The key is never `event_id`. Event Spine does not use or claim Redpanda exactly-once
 features.
 
 ## 6. Inbox and inventory projection
@@ -250,7 +250,7 @@ with expected and received versions; once the missing event applies, the
 consumer may automatically re-drive contiguous `quarantined_gap` inbox rows
 from their retained canonical event bytes. Re-drive revalidates the content
 hash and applies each event transactionally before changing its disposition.
-M1 adds no recovery UI.
+Event Spine adds no recovery UI.
 
 ## 7. Failure and quarantine contract
 
@@ -336,6 +336,6 @@ of these tools.
 
 This contract does not claim exactly-once delivery, exactly-once processing,
 runtime correctness, tenant-isolation enforcement, performance, availability,
-or production readiness. Later M1 issues may define Go API routes, UI details,
+or production readiness. Later Event Spine issues may define Go API routes, UI details,
 deployment, observability, retention, and authentication/RBAC while preserving
-this contract and the M0 invariants.
+this contract and Project Constitution invariants.

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Parse strictly decodes UTF-8 JSON into a validated M1 envelope.
+// Parse strictly decodes UTF-8 JSON into a validated Event Spine envelope.
 // Duplicate object member names, unknown fields, and non-integer numerics are rejected.
 func Parse(raw []byte) (Envelope, error) {
 	root, err := decodeStrict(raw)
@@ -60,12 +60,12 @@ func decodeValue(dec *json.Decoder) (any, error) {
 		case '{':
 			return decodeObject(dec)
 		case '[':
-			return nil, fmt.Errorf("arrays are not permitted in the M1 event contract")
+			return nil, fmt.Errorf("arrays are not permitted in the Event Spine event contract")
 		default:
 			return nil, fmt.Errorf("unexpected delimiter %q", t)
 		}
 	case bool:
-		return nil, fmt.Errorf("booleans are not permitted in the M1 event contract")
+		return nil, fmt.Errorf("booleans are not permitted in the Event Spine event contract")
 	case string:
 		return t, nil
 	case json.Number:

@@ -1,4 +1,4 @@
-# M0 Intelligence Evaluation Review — Issue #6
+# Project Constitution Intelligence Evaluation Review — Issue #6
 
 This document records a documentation review of the forecasting and governed-RAG evaluation protocols, conceptual schemas, report templates, and traceability. It does not claim that runtime evaluation cases were executed, that a model or retrieval system is accurate or secure, or that SeshatOps is production-ready.
 
@@ -27,13 +27,13 @@ The reviewed scope is documentation only. No application code, model, vendor, da
 - [THREAT_MODEL.md](../security/THREAT_MODEL.md) and [AUTHORIZATION_MODEL.md](../security/AUTHORIZATION_MODEL.md).
 - [ADR-0001](../adrs/0001-transactional-outbox-and-at-least-once-delivery.md) and [ADR-0002](../adrs/0002-idempotent-command-execution.md).
 - [Clean-room review checklist](../checklists/CLEAN_ROOM_REVIEW.md).
-- [M0 Architecture Review](M0_ARCHITECTURE_REVIEW.md), [M0 Correctness Model Review](M0_CORRECTNESS_MODEL_REVIEW.md), and [M0 Security Model Review](M0_SECURITY_MODEL_REVIEW.md).
+- [Project Constitution Architecture Review](PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md), [Project Constitution Correctness Review](PROJECT_CONSTITUTION_CORRECTNESS_REVIEW.md), and [Project Constitution Security Review](PROJECT_CONSTITUTION_SECURITY_REVIEW.md).
 
 ### Canonical planning sources
 
 - [SeshatOps — Master Project Blueprint](https://app.notion.com/p/3b40a821b3cc813081f0ea44fd72692a).
 - [Workflow — Notion → GitHub → Evidence](https://app.notion.com/p/3b40a821b3cc810eadebc2fc9a067000).
-- [M0 — Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee).
+- [Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee).
 
 The Blueprint's suggested models, case counts, numerical targets, OIDC, vector storage, infrastructure, and broader evidence targets were treated as planning context only. They were not adopted as Issue #6 decisions.
 
@@ -152,8 +152,8 @@ The documentation-review disposition is separate from runtime evaluation status.
 
 | Work | Owner |
 | --- | --- |
-| Forecast and governed-RAG evaluation protocols, conceptual schemas, report templates, and M0 traceability | Issue #6 |
-| Identity/session enforcement, policy implementation, retrieval implementation, cache/index isolation, and proposal validation | Later identity, intelligence, retrieval, and implementation milestones |
+| Forecast and governed-RAG evaluation protocols, conceptual schemas, report templates, and Constitution traceability | Issue #6 |
+| Identity/session enforcement, policy implementation, retrieval implementation, cache/index isolation, and proposal validation | Later identity, intelligence, retrieval, and implementation capability sequences |
 | Security, reliability, recovery, performance, capacity, and broad assurance evidence | Issue #7 |
 | Roadmap and evidence-ledger integration | Issue #8 |
 | Repository instructions and documentation CI | Issue #9 |

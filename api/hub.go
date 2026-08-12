@@ -6,7 +6,7 @@ import (
 	"github.com/G1DO/seshatops/platform"
 )
 
-// subscriberBuf is large enough for the M1 demo fanout without blocking the
+// subscriberBuf is large enough for the Event Spine demo fanout without blocking the
 // consumer. Overflow drops the update; clients must REST catch-up.
 const subscriberBuf = 16
 

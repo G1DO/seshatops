@@ -1,6 +1,6 @@
-# M1 Event Spine Contract Review - Issue #21
+# Event Spine Contract Review - Issue #21
 
-This document records the documentation-only contract review for M1 Event Spine.
+This document records the documentation-only contract review for Event Spine.
 It does not claim application implementation, runtime correctness, tenant
 isolation, reliability, performance, deployment, or production readiness.
 
@@ -11,9 +11,9 @@ isolation, reliability, performance, deployment, or production readiness.
 | Reviewer | Codex implementation/review pass; maintainer review remains a follow-up |
 | Date (UTC) | 2026-08-07 |
 | Branch | `docs/21-event-spine-contract` |
-| Base tip | `5bc9e65` (merged M0 review head) |
-| Scope | Issue #21, M0 canonical documents, ADR-Q-001 through ADR-Q-003, and new M1 contract artifacts |
-| Review type | M1 implementation-contract, consistency, security, and clean-room review |
+| Base tip | `5bc9e65` (merged Constitution review head) |
+| Scope | Issue #21, Constitution canonical documents, ADR-Q-001 through ADR-Q-003, and new Event Spine contract artifacts |
+| Review type | Event Spine implementation-contract, consistency, security, and clean-room review |
 | Documentation disposition | Pass with recorded follow-ups |
 | Runtime disposition | Not applicable; no runtime project exists and no runtime files were added |
 
@@ -21,9 +21,9 @@ isolation, reliability, performance, deployment, or production readiness.
 
 - [GitHub Issue #21](https://github.com/G1DO/seshatops/issues/21)
 - [README.md](../../README.md), [PRODUCT.md](../../PRODUCT.md), [ARCHITECTURE.md](../../ARCHITECTURE.md), [ROADMAP.md](../../ROADMAP.md), [EVIDENCE.md](../../EVIDENCE.md), and [CLEAN_ROOM.md](../../CLEAN_ROOM.md)
-- [EVENT_MODEL.md](../architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](../architecture/COMMAND_MODEL.md), and the M0 security models
+- [EVENT_MODEL.md](../architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](../architecture/COMMAND_MODEL.md), and Project Constitution security models
 - ADR-0001, ADR-0002, ADR-Q-001, ADR-Q-002, and ADR-Q-003
-- M0 completion, architecture, correctness, roadmap/evidence, security, and integrated review records
+- Constitution completion, architecture, correctness, roadmap/evidence, security, and integrated review records
 
 ## Acceptance matrix
 
@@ -38,19 +38,19 @@ isolation, reliability, performance, deployment, or production readiness.
 | Define deterministic checksum inputs and normalization | CONTRACTS.md section 8 | Covered |
 | Bound the local toolchain | CONTRACTS.md section 9 | Covered |
 | Avoid exactly-once claims and runtime promotion | CONTRACTS.md section 10 and unchanged EVIDENCE.md | Covered |
-| Permit subsequent M1 implementation issues without new architecture | Contract cross-references and explicit later-decision boundary | Covered |
+| Permit subsequent Event Spine implementation issues without new architecture | Contract cross-references and explicit later-decision boundary | Covered |
 
 ## Reconciliation findings
 
 1. Issue #10 is closed and PR #20 is merged; current README, roadmap, and
-   repository instructions now state M0 complete and M1 contract planning active.
-2. Historical M0 review records retain their original facts and receive dated
+   repository instructions now state Constitution complete and Event Spine contract planning active.
+2. Historical Constitution review records retain their original facts and receive dated
    subsequent-status notes rather than being rewritten.
-3. Notion M0 remains an external workflow state and was not changed.
-4. M0's deferred concrete schemas, topic/key policy, persistence boundaries,
+3. Notion Constitution remains an external workflow state and was not changed.
+4. Constitution's deferred concrete schemas, topic/key policy, persistence boundaries,
    retry rules, and acknowledgement semantics are resolved only for the bounded
-   M1 slice.
-5. No accepted M0 architecture or correctness invariant is contradicted.
+   Event Spine slice.
+5. No accepted Project Constitution architecture or correctness invariant is contradicted.
 6. EVIDENCE.md remains unchanged and all runtime claims remain Planned.
 
 ## Security and clean-room review
@@ -93,7 +93,7 @@ and a runtime-like file/dependency scan.
 
 The follow-up review identified ambiguity in gap-event re-drive storage,
 tenant/key validation order, malformed-event content hashes, strict JCS input
-handling, and the architecture diagram's source-publication path. The M1
+handling, and the architecture diagram's source-publication path. The Event Spine
 contract and ADRs now define canonical gap-event retention and disposition,
 validation before duplicate acknowledgement, nullable canonical hashes when no
 envelope exists, JCS-compatible parsing constraints, and an explicit

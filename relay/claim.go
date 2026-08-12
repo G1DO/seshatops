@@ -34,7 +34,7 @@ type Record struct {
 	CreatedAt        time.Time
 }
 
-// AggregateKey returns the M1 Redpanda partition key:
+// AggregateKey returns the Event Spine Redpanda partition key:
 // tenant_id/aggregate_type/aggregate_id.
 func AggregateKey(tenantID, aggregateType, aggregateID string) string {
 	return tenantID + "/" + aggregateType + "/" + aggregateID

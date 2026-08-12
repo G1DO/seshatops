@@ -11,7 +11,7 @@ import (
 	"github.com/G1DO/seshatops/relay"
 )
 
-// HandlerVersion identifies the M1 inventory-projection handler logic used for
+// HandlerVersion identifies the Event Spine inventory-projection handler logic used for
 // reproduction metadata (EVENT_MODEL.md §7). It is distinct from
 // event_schema_version.
 const HandlerVersion = "m1-inventory-projection-v1"
@@ -75,7 +75,7 @@ type RebuildResult struct {
 	Dispositions      []string
 }
 
-// ResetDerivedState deletes only derived M1 platform processing state:
+// ResetDerivedState deletes only derived Event Spine platform processing state:
 // inbox, inventory_projection, and processing_failures. It never mutates the
 // erp schema or broker history.
 func ResetDerivedState(ctx context.Context, db *sql.DB) error {
@@ -140,7 +140,7 @@ func RebuildFromHistory(ctx context.Context, db *sql.DB, records []HistoryRecord
 		out.Metadata.ChecksumInputs = "tenant inventory_projection rows: tenant_id, item_id, quantity_on_hand, aggregate_version (CONTRACTS.md §8)"
 	}
 	if out.Metadata.Limitations == "" {
-		out.Metadata.Limitations = "Local library rebuild only; not a hosted FC-014 campaign; not M2 operator recovery or M3 backup/restore."
+		out.Metadata.Limitations = "Local library rebuild only; not a hosted FC-014 campaign; not Identity & Operations operator recovery or Traceability & Recovery backup/restore."
 	}
 
 	if len(records) == 0 {

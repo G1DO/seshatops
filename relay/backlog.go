@@ -14,7 +14,7 @@ type QuarantineSample struct {
 	CreatedAt     time.Time
 }
 
-// Backlog is the minimum unpublished/failure visibility surface for M1.
+// Backlog is the minimum unpublished/failure visibility surface for Event Spine.
 type Backlog struct {
 	Pending     int
 	Publishing  int

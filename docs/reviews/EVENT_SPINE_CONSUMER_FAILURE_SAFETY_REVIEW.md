@@ -1,4 +1,4 @@
-# M1 Consumer Failure Safety Review - Issue #26
+# Event Spine Consumer Failure Safety Review - Issue #26
 
 This document records the Issue #26 implementation review for consumer poison,
 gap, restart-window, sanitization, and bounded failure/backlog visibility. It
@@ -28,7 +28,7 @@ without a recorded GitHub Actions run.
 | Durable failure records retain identity/lineage without unrestricted payload | `TestFailureRecordSanitization`; schema in `platform/migrate.sql` | Covered |
 | Failure/backlog state inspectable through bounded signal | `InspectProcessing`, `TestInspectProcessingVisibility` | Covered |
 | Unsafe event does not permanently stop unrelated aggregates when independent | `TestUnsafeEventDoesNotBlockUnrelatedAggregate` | Covered |
-| Operator-controlled recovery deferred to M2 | Consumer docs operator-recovery boundary; no release/replay API | Covered |
+| Operator-controlled recovery deferred to Identity | Consumer docs operator-recovery boundary; no release/replay API | Covered |
 
 ## Verification record
 
@@ -77,9 +77,9 @@ Malformed delivery with a fake secret-like substring produces one
 - Transient no-ack failures can still head-of-line block a partition until retry
   succeeds; unrelated-aggregate progress is guaranteed for durable quarantine
   decisions, not in-flight database outages.
-- `InspectProcessing` is a library verification surface, not M2 operational
-  monitoring (`CAP-012` / `CLM-009` remain Planned).
-- Operator release-from-quarantine and privileged replay remain M2 (`CAP-013`).
+- `InspectProcessing` is a library verification surface, not an Identity & Operations
+  monitoring product (`CAP-012` / `CLM-009` remain Planned).
+- Operator release-from-quarantine and privileged replay remain Identity & Operations (`CAP-013`).
 - Issue #27 owns the Go-owned projection query/SSE read surface.
 - Hosted Go CI must be observed green before citing CI success.
 - Formal FC-009–FC-012 campaign execution remains later evidence work.

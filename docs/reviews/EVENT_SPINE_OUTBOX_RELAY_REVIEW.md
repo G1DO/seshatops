@@ -1,4 +1,4 @@
-# M1 Outbox Relay Review - Issue #24
+# Event Spine Outbox Relay Review - Issue #24
 
 This document records the Issue #24 implementation review for the source-owned
 outbox relay that publishes durable `erp.outbox` records to Redpanda. It does

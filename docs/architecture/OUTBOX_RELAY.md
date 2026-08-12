@@ -1,10 +1,10 @@
-# M1 Source-Owned Outbox Relay
+# Event Spine Source-Owned Outbox Relay
 
 **Status:** Implemented for Issue #24 library/integration scope. Issue #25
-implements the projection consumer; service runtime remains later M1 work.
+implements the projection consumer; service runtime remains later Event Spine work.
 
 **Owns:** Claiming durable `erp.outbox` rows, publishing exact stored event
-bytes to the M1 Redpanda topic, recording publication status after broker
+bytes to the Event Spine Redpanda topic, recording publication status after broker
 acknowledgement, transient backoff, durable quarantine, and minimum backlog
 visibility.
 
@@ -24,7 +24,7 @@ must use the digest pin. PostgreSQL continues to use `erp.PostgresImage`.
 
 ## Topic and key policy
 
-| Item | M1 value |
+| Item | Event Spine value |
 | --- | --- |
 | Topic | `seshatops.m1.events` |
 | Key | `tenant_id/aggregate_type/aggregate_id` |
@@ -65,8 +65,8 @@ content. Duplicate publication is expected and safe; silent loss is not.
 
 `InspectBacklog` exposes pending, publishing, published, and quarantined
 counts, the oldest unpublished `created_at`, and a bounded quarantine sample.
-This is the M1 verification surface for unpublished intent and terminal
-publication failures. It is not an M2 metrics or alerting stack.
+This is the Event Spine verification surface for unpublished intent and terminal
+publication failures. It is not an Identity & Operations metrics or alerting stack.
 
 ## Integration harness
 

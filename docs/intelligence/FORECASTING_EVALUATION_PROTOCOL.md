@@ -101,7 +101,7 @@ The evaluator may report metric categories that fit the target and decision cont
 | Interval width or sharpness | Informativeness of uncertainty ranges | Narrow intervals are not useful if coverage is unreliable. |
 | Calibration | Agreement between stated uncertainty and observed outcomes | State the calibration method and limitations. |
 | Abstention or unavailable rate | Frequency and distribution of withheld results | Assess both safety and operational effect. |
-| Operationally material errors | Error categories tied to a declared decision risk | Do not invent materiality thresholds in M0. |
+| Operationally material errors | Error categories tied to a declared decision risk | Do not invent materiality thresholds in Project Constitution. |
 
 Reports must include distributions and declared slices, not only one aggregate average. Metric applicability and interpretation remain task-specific. Every target, result, benchmark value, and pass threshold is `Planned`, `Not evaluated`, or `TBD — evidence required` until supported by repository evidence.
 

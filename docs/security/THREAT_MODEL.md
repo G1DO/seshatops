@@ -166,7 +166,7 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 - **Detective/recovery controls:** Auditable denials and mismatch events; quarantine unsafe events; controlled investigation and recovery without cross-tenant replay.
 - **Future negative test:** Attempt every read, retrieve, cite, approve, command, modify, export, audit, replay, and recovery action using another tenant's context and colliding identifiers.
 - **Residual risk:** A missing enforcement point or incorrectly scoped service/cache can still leak data until implementation-wide testing exists.
-- **Deferred owner:** Issue #5 defines the invariant; M1 identity/operations implementation and Issue #7 evidence own enforcement and measured proof.
+- **Deferred owner:** Issue #5 defines the invariant; Event Spine identity/operations implementation and Issue #7 evidence own enforcement and measured proof.
 
 ### T-02 - Identifier substitution and insecure direct-object access
 
@@ -421,7 +421,7 @@ The following remain unresolved by design:
 - Availability limits, quotas, rate controls, SLOs, and recovery thresholds.
 - The full RAG evaluation protocol, corpus, metrics, and release gates.
 
-Issue #5 defines the conceptual security model and negative-test requirements. Issue #6 owns the complete forecasting/RAG evaluation protocol. Issue #7 owns reliability and security evidence protocols. Issue #10 owns integrated constitution review. Concrete enforcement belongs to the later identity/operations and implementation milestones.
+Issue #5 defines the conceptual security model and negative-test requirements. Issue #6 owns the complete forecasting/RAG evaluation protocol. Issue #7 owns reliability and security evidence protocols. Issue #10 owns integrated constitution review. Concrete enforcement belongs to the later identity/operations and implementation capability sequences.
 
 The principal residual risk is that these are design requirements only. No runtime implementation, penetration test, identity integration, policy engine, or security-control verification exists yet.
 

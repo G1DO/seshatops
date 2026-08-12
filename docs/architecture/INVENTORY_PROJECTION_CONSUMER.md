@@ -1,4 +1,4 @@
-# M1 Inventory Projection Consumer
+# Event Spine Inventory Projection Consumer
 
 **Status:** Implemented for Issues #25 and #26 library/integration scope.
 Issue #27 adds post-commit `AppliedNotifier` hooks used by the HTTP/SSE read
@@ -6,7 +6,7 @@ surface in [PROJECTION_READ_API.md](PROJECTION_READ_API.md). Issue #29 adds
 isolated derived-state reset and retained-history rebuild proofs in
 [PROJECTION_REBUILD.md](PROJECTION_REBUILD.md).
 
-**Owns:** Consuming the M1 Redpanda topic, durable inbox/deduplication,
+**Owns:** Consuming the Event Spine Redpanda topic, durable inbox/deduplication,
 aggregate-version validation, PostgreSQL inventory projection updates, atomic
 inbox+projection commits, acknowledgement-after-commit ordering, minimal
 sanitized processing-failure records for unparseable/poison deliveries,
@@ -74,7 +74,7 @@ hash is `quarantined_conflict` and does not mutate the projection.
 
 Delivery remains at least once. A crash after DB commit and before offset
 acknowledgement may redeliver; redelivery must not duplicate the inventory
-effect. M1 does not use or claim Redpanda exactly-once features.
+effect. Event Spine does not use or claim Redpanda exactly-once features.
 
 ## Failure and quarantine
 
@@ -122,18 +122,18 @@ Northstar-safe illustration only (not a production observation):
 
 `InspectProcessing` exposes inbox disposition counts, `processing_failures`
 retrying/quarantined counts, oldest gap and failure timestamps, and bounded
-sanitized samples (`LIMIT 20`) for M1 verification. Samples omit `event_bytes`
-and raw payloads. This is not an M2 metrics, alerting, or operator console
+sanitized samples (`LIMIT 20`) for Event Spine verification. Samples omit `event_bytes`
+and raw payloads. This is not an Identity & Operations metrics, alerting, or operator console
 surface.
 
 Durable quarantine decisions acknowledge offsets so unrelated aggregates on the
 same consumer path can continue. Transient no-ack failures may still head-of-line
 block a partition until retry succeeds.
 
-## Operator recovery boundary (M2)
+## Operator recovery boundary (Identity)
 
-M1 does not provide release-from-quarantine, privileged replay, authentication,
-or RBAC for recovery. Operator-controlled recovery remains M2 scope
+Event Spine does not provide release-from-quarantine, privileged replay, authentication,
+or RBAC for recovery. Operator-controlled recovery remains Identity & Operations scope
 (`CAP-013`).
 
 ## Projection checksum
@@ -157,5 +157,5 @@ Issue #29 documents how checksum `A`/`B` comparison is used after
 ## Non-claims
 
 This document does not claim exactly-once delivery, production readiness,
-tenant-isolation security enforcement beyond the M1 contract checks, SLO
+tenant-isolation security enforcement beyond the Event Spine contract checks, SLO
 compliance, or hosted CI success without a recorded GitHub Actions run.

@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  title: SeshatOps M1 Inventory Projection Read API
+  title: SeshatOps Event Spine Inventory Projection Read API
   version: "1.0.0"
   description: |
-    Read-only Go surface for the committed M1 inventory projection (Issue #27).
-    Authentication/RBAC remain M2. SSE is at-least-once and may drop for slow
+    Read-only Go surface for the committed Event Spine inventory projection (Issue #27).
+    Authentication/RBAC remain Identity. SSE is at-least-once and may drop for slow
     clients; REST is the authoritative reconnect/catch-up path.
 servers:
   - url: /
@@ -80,7 +80,7 @@ components:
       schema:
         type: string
         format: uuid
-        description: Lowercase UUIDv4 tenant identifier (M1 validation only; not M2 auth)
+        description: Lowercase UUIDv4 tenant identifier (Event Spine validation only; not Identity auth)
   schemas:
     InventoryItem:
       type: object

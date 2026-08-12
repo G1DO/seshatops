@@ -1,4 +1,4 @@
--- M1 platform inbox and inventory projection schema (Issue #25).
+-- Event Spine platform inbox and inventory projection schema (Issue #25).
 -- Owns inbox/deduplication, inventory projection, and sanitized processing failures.
 -- Must not own erp source inventory or outbox state.
 

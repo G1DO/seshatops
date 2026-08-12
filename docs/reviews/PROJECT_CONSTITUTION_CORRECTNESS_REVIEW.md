@@ -1,4 +1,4 @@
-# M0 Correctness Model Review — Issue #4
+# Project Constitution Correctness Model Review — Issue #4
 
 Evidence that a documentation review occurred for SeshatOps Issue #4: event, command, consistency, idempotency, replay, and failure-handling principles. Checked items are not proof that a future implementation will satisfy the model.
 
@@ -20,7 +20,7 @@ This review evaluates the conceptual documentation only. It does not claim runti
 - [GitHub Issue #4](https://github.com/G1DO/seshatops/issues/4) and the supplied expanded Issue #4 brief.
 - Issues #1–#3 and merged PRs [#11](https://github.com/G1DO/seshatops/pull/11), [#12](https://github.com/G1DO/seshatops/pull/12), and [#13](https://github.com/G1DO/seshatops/pull/13).
 - Repository product, clean-room, architecture, checklist, review, and license documents.
-- Notion: [SeshatOps — Master Project Blueprint](https://app.notion.com/p/3b40a821b3cc813081f0ea44fd72692a), [Workflow — Notion → GitHub → Evidence](https://app.notion.com/p/3b40a821b3cc810eadebc2fc9a067000), and [M0 — Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee).
+- Notion: [SeshatOps — Master Project Blueprint](https://app.notion.com/p/3b40a821b3cc813081f0ea44fd72692a), [Workflow — Notion → GitHub → Evidence](https://app.notion.com/p/3b40a821b3cc810eadebc2fc9a067000), and [Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee).
 - The Issue #4 artifacts in this working tree: `EVENT_MODEL.md`, `COMMAND_MODEL.md`, ADRs 0001–0002, and this review.
 
 ## Requirement-to-invariant traceability
@@ -127,7 +127,7 @@ Both ADRs explicitly identify consequences, risks, and implementation choices th
 | Roadmap, milestone integration, and evidence ledger | Issue #8 |
 | Repository instructions, CI, concrete transports, schemas, code generation, dependencies, and deployment | Issue #9 |
 | Integrated constitution review | Issue #10 |
-| Concrete topic/partition/retention/retry choices, adapter contracts, archival policy, and recovery algorithms | Later implementation milestones |
+| Concrete topic/partition/retention/retry choices, adapter contracts, archival policy, and recovery algorithms | Later implementation capability sequences |
 
 ## Residual risks
 

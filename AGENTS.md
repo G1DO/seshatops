@@ -8,11 +8,11 @@ Behavioral and project guidance for the SeshatOps repository.
 
 SeshatOps is a clean-room, multi-tenant operations-intelligence platform concept for the fictional Northstar Foods scenario. It is intended to consume ERP events, reconstruct replayable operational state, produce evidence-backed intelligence, and execute only authorized, human-approved actions.
 
-The repository completed Milestone M1 Event Spine exit-gate evidence
-(Issue #30). M0 was completed by the merged Issue #10 integration review and
+The repository completed Event Spine exit-gate evidence
+(Issue #30). Project Constitution was completed by the merged Issue #10 integration review and
 PR #20. Issues #1 through #9 established the product, clean-room, architecture,
 correctness, security, intelligence-evaluation, operational-evidence, roadmap,
-and repository-governance documentation. Issue #21 owns the concrete M1
+and repository-governance documentation. Issue #21 owns the concrete Event Spine
 event-spine contract. Issue #22 owns the executable JSON event package and
 deterministic Northstar Foods fixture. Issue #23 owns the synthetic ERP source
 transaction and pending transactional outbox persistence.
@@ -40,7 +40,7 @@ Use the following ownership boundaries. Do not create a second task tracker or s
 
 | Source | Owns | Does not own |
 | --- | --- | --- |
-| Notion | Product and architecture intent, milestone purpose, high-level risks, exit gates, and milestone summaries | Daily execution state or repository technical truth |
+| Notion | Product and architecture intent, capability-sequence purpose, high-level risks, exit gates, and capability-sequence summaries | Daily execution state or repository technical truth |
 | GitHub issues and milestones | Active execution state, bounded deliverables, acceptance criteria, dependencies, and progress | Long-form product strategy or evidence claims |
 | Repository documents and ADRs | Reviewed technical truth, contracts, invariants, ownership, roadmap, and evidence rules | Unreviewed brainstorming or duplicated daily issue state |
 | Pull requests, CI, tests, evaluations, and evidence artifacts | Actual changes, review discussion, verification performed, limitations, and claim support | Future-scope ideas or unsupported claims |
@@ -102,8 +102,8 @@ Future implementation must preserve these boundaries:
 | TypeScript | UI, browser, and user-facing interaction surfaces | Authoritative transactional or authorization state |
 | Go | Transactional platform, event processing, authorization, and durable state boundaries | Unreviewed intelligence authority |
 | Python | Evaluated or advisory intelligence and read-only analysis | Authentication, authorization, business writes, or command authority |
-| Rust | Measurement-gated performance or specialized components only after evidence justifies it | Speculative M1 scaffolding |
-| C | Excluded unless a later reviewed milestone explicitly changes the boundary | Any M1 implementation |
+| Rust | Measurement-gated performance or specialized components only after evidence justifies it | Speculative Event Spine scaffolding |
+| C | Excluded unless a later reviewed capability sequence explicitly changes the boundary | Any Event Spine implementation |
 
 Issue #22 establishes the root Go module (`github.com/G1DO/seshatops`, Go
 `1.25.0`) with the `event` and `northstar` packages. Issue #23 adds the `erp`
@@ -115,8 +115,8 @@ Issue #27 adds the read-only `api` package (REST snapshot + SSE) over committed
 projection state, with post-commit notifications from `platform`.
 Issue #28 adds the TypeScript `web/` operations view. Issue #29 extends
 `platform` with `ResetDerivedState` and `RebuildFromHistory` for local
-duplicate/rebuild checksum proofs. Issue #30 owns the integrated M1 exit-gate
-campaign evidence. Later milestones may extend platform packages without
+duplicate/rebuild checksum proofs. Issue #30 owns the integrated event-spine exit-gate
+campaign evidence. Later capability sequences may extend platform packages without
 inventing a second module or a general ERP schema.
 
 ## 8. Evidence and claim governance
@@ -153,7 +153,7 @@ Do not claim a hosted GitHub workflow passed until an actual hosted run exists. 
 - Complete the PR template with real verification evidence, skipped checks, claim-status changes, residual risks, and follow-up work.
 - Remove irrelevant placeholders before submission.
 
-## 11. M0 definition of done
+## 11. Project Constitution definition of done
 
 Issue #9 is complete only when:
 
@@ -162,5 +162,5 @@ Issue #9 is complete only when:
 - Documentation CI covers Markdown, repository links, YAML, and secrets with least privilege and immutable action pins.
 - Private Notion links are narrowly excluded and private GitHub links are attempted with a read-only token.
 - No secrets, Ahoy material, runtime scaffolding, deployment configuration, or speculative dependencies are introduced.
-- The generated M0 governance review records actual local verification, hosted-CI evidence status, assumptions, limitations, and residual risk.
-- The repository remains documentation-only; Issue #10 completed the integrated M0 review and M1 owns the event-spine contract.
+- The generated Project Constitution governance review records actual local verification, hosted-CI evidence status, assumptions, limitations, and residual risk.
+- The repository remains documentation-only; Issue #10 completed the integrated Project Constitution review and Event Spine owns the event-spine contract.

@@ -1,4 +1,4 @@
-// Package relay implements the M1 source-owned outbox publisher: claim durable
+// Package relay implements the Event Spine source-owned outbox publisher: claim durable
 // erp.outbox rows, publish exact stored event bytes to Redpanda, and record
 // publication status only after broker acknowledgement (CONTRACTS.md §§4–5).
 //

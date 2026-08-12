@@ -1,12 +1,12 @@
-# M1 Projection Read API (REST + SSE)
+# Event Spine Projection Read API (REST + SSE)
 
 **Status:** Implemented for Issue #27 library/integration scope. No deployment
 service binary, authentication, or TypeScript client is claimed here.
 
-**Owns:** The minimum Go-owned read-only HTTP surface for the committed M1
+**Owns:** The minimum Go-owned read-only HTTP surface for the committed Event Spine
 inventory projection, including REST snapshot DTOs, one SSE stream for
 post-commit projection updates, reconnect/catch-up semantics, and the OpenAPI
-fragment in [`openapi-m1-projection.yaml`](openapi-m1-projection.yaml).
+fragment in [`openapi-projection.yaml`](openapi-projection.yaml).
 
 **Does not own:** Authentication/RBAC, write/command endpoints, GraphQL,
 WebSockets, generic subscription gateways, operator recovery UI, Redpanda
@@ -20,7 +20,7 @@ Per [ARCHITECTURE.md](../../ARCHITECTURE.md):
 - Prohibited: Browser → PostgreSQL; Browser → Redpanda.
 
 Package `api` reads committed `platform.inventory_projection` rows through
-PostgreSQL only. It does not import or contact the broker. UI data for M1 must
+PostgreSQL only. It does not import or contact the broker. UI data for Event Spine must
 flow exclusively through this Go surface.
 
 ## Routes
@@ -35,8 +35,8 @@ and do not mutate projection state. Malformed or non-lowercase UUIDv4
 `tenant_id` values return `400` (or `404` for empty path segments) without
 mutating state.
 
-`tenant_id` validation follows the M1 lowercase UUIDv4 identifier rule. This is
-context validation only; it is **not** M2 authentication or tenant
+`tenant_id` validation follows the Event Spine lowercase UUIDv4 identifier rule. This is
+context validation only; it is **not** Identity authentication or tenant
 authorization enforcement.
 
 ## Snapshot DTO
@@ -112,14 +112,14 @@ Library package: `github.com/G1DO/seshatops/api`.
 
 No long-running deployment binary is provided in this issue.
 
-## Authentication boundary (M2)
+## Authentication boundary (Identity)
 
 Authentication, session identity, and tenant authorization enforcement remain
-M2 scope. M1 carries `tenant_id` for demo context and identifier validation
+Identity & Operations scope. Event Spine carries `tenant_id` for demo context and identifier validation
 only.
 
 ## Non-claims
 
 This document does not claim production readiness, hosted CI success without a
-recorded GitHub Actions run, exactly-once SSE delivery, or M2 security
+recorded GitHub Actions run, exactly-once SSE delivery, or Identity security
 enforcement.

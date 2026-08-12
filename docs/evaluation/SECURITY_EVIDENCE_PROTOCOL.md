@@ -4,7 +4,7 @@
 
 **Owns:** Security evidence scope, tenant-isolation coverage, authorization-negative-test categories, evidence-record requirements, and claim limitations.
 
-**Does not own:** Identity-provider selection, policy implementation, executable fixtures, test code, infrastructure, monitoring products, or runtime security controls owned by later milestones.
+**Does not own:** Identity-provider selection, policy implementation, executable fixtures, test code, infrastructure, monitoring products, or runtime security controls owned by later capability sequences.
 
 ## 1. Evidence boundary
 
@@ -64,7 +64,7 @@ Future tests must include, where applicable:
 - prompt injection attempting to change authority; and
 - unauthorized citation or retrieval.
 
-The categories extend the planned controls and negative-test themes in [THREAT_MODEL.md](../security/THREAT_MODEL.md) and [AUTHORIZATION_MODEL.md](../security/AUTHORIZATION_MODEL.md). They do not create a runtime test suite in M0.
+The categories extend the planned controls and negative-test themes in [THREAT_MODEL.md](../security/THREAT_MODEL.md) and [AUTHORIZATION_MODEL.md](../security/AUTHORIZATION_MODEL.md). They do not create a runtime test suite in Project Constitution.
 
 ## 4. Required evidence for each scenario
 
@@ -99,11 +99,11 @@ Evidence must identify the artifact provenance and must not create a new unrestr
 
 ## 6. Evidence and claim status
 
-Use the exact vocabulary in [CLAIM_STATUS_VOCABULARY.md](../evidence/CLAIM_STATUS_VOCABULARY.md). Security scenarios in this M0 matrix and protocol remain **Planned** with no observed result. Future records may use `Not executed` as a result marker, but it is not a claim status.
+Use the exact vocabulary in [CLAIM_STATUS_VOCABULARY.md](../evidence/CLAIM_STATUS_VOCABULARY.md). Security scenarios in this Constitution matrix and protocol remain **Planned** with no observed result. Future records may use `Not executed` as a result marker, but it is not a claim status.
 
 ## 7. Deferred decisions
 
-This protocol deliberately does not select identity providers, policy engines, database roles, cache or index products, secret-management products, penetration-test tools, monitoring products, fault-injection products, test fixtures, deployment topology, or production authorization procedures. Those decisions belong to later identity, operations, governance, reliability, and implementation milestones.
+This protocol deliberately does not select identity providers, policy engines, database roles, cache or index products, secret-management products, penetration-test tools, monitoring products, fault-injection products, test fixtures, deployment topology, or production authorization procedures. Those decisions belong to later identity, operations, governance, reliability, and implementation capability sequences.
 
 ## Related documents
 

@@ -1,4 +1,4 @@
-# M0 Operational Evidence Review — Issue #7
+# Project Constitution Operational Evidence Review — Issue #7
 
 This document records a documentation-only review of the Issue #7 operational evidence protocols. It does not claim that security, reliability, recovery, SLO, performance, availability, restorability, or production experiments were executed or passed.
 
@@ -28,13 +28,13 @@ The repository remains documentation-only. No runtime code, executable schema, f
 - [EVENT_MODEL.md](../architecture/EVENT_MODEL.md) and [COMMAND_MODEL.md](../architecture/COMMAND_MODEL.md).
 - [THREAT_MODEL.md](../security/THREAT_MODEL.md) and [AUTHORIZATION_MODEL.md](../security/AUTHORIZATION_MODEL.md).
 - Both Issue #4 ADRs: [ADR-0001](../adrs/0001-transactional-outbox-and-at-least-once-delivery.md) and [ADR-0002](../adrs/0002-idempotent-command-execution.md).
-- Both intelligence protocols, both conceptual schemas, both empty intelligence report templates, and all existing M0 review documents.
+- Both intelligence protocols, both conceptual schemas, both empty intelligence report templates, and all existing Constitution review documents.
 
 ### Canonical planning sources
 
 - [SeshatOps — Master Project Blueprint](https://app.notion.com/p/3b40a821b3cc813081f0ea44fd72692a).
 - [Workflow — Notion → GitHub → Evidence](https://app.notion.com/p/3b40a821b3cc810eadebc2fc9a067000).
-- [M0 — Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee).
+- [Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee).
 
 The Blueprint’s illustrative targets, infrastructure suggestions, products, and deployment ideas were treated as planning context only. They were not adopted as Issue #7 targets or implementation decisions.
 
@@ -56,7 +56,7 @@ The Blueprint’s illustrative targets, infrastructure suggestions, products, an
 - The claim-status vocabulary contains exactly: `Planned`, `Implemented`, `Observed`, `Reproduced`, and `Superseded`.
 - `Implemented` is explicitly not behavioral evidence.
 - `Observed` is scoped to exact tested conditions and requires reproducible artifacts and limitations.
-- `Reproduced` requires independent/operator/rebuild/equivalence information without inventing M0 tolerances.
+- `Reproduced` requires independent/operator/rebuild/equivalence information without inventing Constitution tolerances.
 - `Superseded` evidence remains traceable.
 - `Not executed` is explicitly a result marker, not a sixth claim status.
 - Existing Issue #6 labels are treated as record dispositions rather than additions to the Issue #7 claim vocabulary.
@@ -132,8 +132,8 @@ No runtime, security, fault, recovery, backup/restore, SLO, load, or performance
 | Decision or assumption | Disposition |
 | --- | --- |
 | Blueprint numeric latency, checksum, availability, and RTO examples | Planning context only; not adopted as Issue #7 targets. |
-| Concrete identity, monitoring, fault-injection, load-testing, backup, and infrastructure products | Deferred to later milestones. |
-| Production authorization and data-handling controls | Required before any production evidence; not selected in M0. |
+| Concrete identity, monitoring, fault-injection, load-testing, backup, and infrastructure products | Deferred to later capability sequences. |
+| Production authorization and data-handling controls | Required before any production evidence; not selected in Project Constitution. |
 | SLO, RPO, RTO, latency, throughput, availability, repetition, and pass thresholds | Must be approved and measured later; none are invented here. |
 | Runtime fixtures, test harnesses, observability, and recovery procedures | Deferred to implementation and operations milestones. |
 | Roadmap/evidence ledger, repository workflow/CI, and integrated constitution review | Owned by Issues #8, #9, and #10 respectively. |
@@ -146,8 +146,8 @@ No runtime, security, fault, recovery, backup/restore, SLO, load, or performance
 | Fault, recovery, backup/restore, SLO, and performance execution | Later reliability and operations milestones |
 | Evidence ledger and roadmap integration | Issue #8 |
 | Repository instructions and documentation CI | Issue #9 |
-| Integrated M0 constitution review | Issue #10 |
-| Concrete fixtures, tools, topology, and deployment configuration | Later implementation milestones |
+| Integrated Project Constitution review | Issue #10 |
+| Concrete fixtures, tools, topology, and deployment configuration | Later implementation capability sequences |
 
 ## 19. Residual risks
 

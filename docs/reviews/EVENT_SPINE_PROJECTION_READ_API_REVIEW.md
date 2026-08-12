@@ -1,4 +1,4 @@
-# M1 Projection Read API Review - Issue #27
+# Event Spine Projection Read API Review - Issue #27
 
 This document records the Issue #27 implementation review for the read-only Go
 REST snapshot and SSE live-update surface over the committed inventory
@@ -24,10 +24,10 @@ without a recorded GitHub Actions run.
 | REST returns only committed inventory-projection state | `TestRESTReturnsCommittedProjection`; `platform.ListTenantProjection` | Covered |
 | SSE emits only after projection transaction commits | `TestSSEEmitsOnlyAfterCommit`; rollback silence via `SetFailBeforeCommitForTest` | Covered |
 | Reconnecting client converges via REST snapshot/catch-up | `TestSSEDisconnectReconnectRESTConverge`; [PROJECTION_READ_API.md](../architecture/PROJECTION_READ_API.md) reconnect section | Covered |
-| API surface is read-only for M1 projection state | `TestReadOnlyRejectsMutatingMethods` (`405`) | Covered |
+| API surface is read-only for Event Spine projection state | `TestReadOnlyRejectsMutatingMethods` (`405`) | Covered |
 | Browser-facing contracts do not require DB/broker access | `api` imports PostgreSQL helpers only (no `relay`/franz-go); architecture docs | Covered |
 | Version/freshness metadata represented consistently | Snapshot `aggregate_version` + `checksum` + `observed_at`; SSE `last_applied_event_id` + `checksum` | Covered |
-| Tenant/context fields without claiming M2 auth | Lowercase UUIDv4 validation; explicit M2 deferral in API docs | Covered |
+| Tenant/context fields without claiming Identity auth | Lowercase UUIDv4 validation; explicit Identity deferral in API docs | Covered |
 | API/SSE errors do not mutate projection state | Malformed/read-only negatives leave projection unchanged | Covered |
 
 ## Verification record
@@ -64,6 +64,6 @@ Reproduced.
 - In-process hub notifications are process-local; API process restart requires
   clients to REST catch-up and reopen SSE.
 - Slow clients may miss SSE frames by design; REST remains authoritative.
-- Authentication and tenant authorization enforcement remain M2.
+- Authentication and tenant authorization enforcement remain Identity.
 - Issue #28 owns the TypeScript operations view that consumes this surface.
 - Hosted Go CI must be observed green before citing CI success.

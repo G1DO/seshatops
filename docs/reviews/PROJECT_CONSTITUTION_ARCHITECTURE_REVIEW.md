@@ -1,4 +1,4 @@
-# M0 Architecture Review â€” Issue #3
+# Project Constitution Architecture Review â€” Issue #3
 
 Evidence that an architecture-boundary review **occurred** for SeshatOps Issue #3 (logical topology, language ownership, trust boundaries, storage responsibilities). Checked items are not proof that no undiscovered issue exists.
 
@@ -18,7 +18,7 @@ Evidence that an architecture-boundary review **occurred** for SeshatOps Issue #
 
 | Pass | When (UTC) | What was reviewed |
 | --- | --- | --- |
-| 1 | 2026-08-06 (authoring) | Initial `ARCHITECTURE.md`, review matrix, README link against Issue #3, PRODUCT, CLEAN_ROOM, and Notion M0/Blueprint |
+| 1 | 2026-08-06 (authoring) | Initial `ARCHITECTURE.md`, review matrix, README link against Issue #3, PRODUCT, CLEAN_ROOM, and Notion Constitution/Blueprint |
 | 2 | 2026-08-06 (PR review remediation) | Separate pass after PR feedback: approve/validate order vs PRODUCT hero steps 9â€“11; Goâ†’Python one-way edges; Redpanda produce wording; Issue #4 vocabulary softening; naming; matrix and clean-room record |
 
 Pass 2 was performed after a break from Pass 1 authoring and incorporates external PR review findings. Result below applies only after Pass 2 remediation is in the tip commit.
@@ -36,7 +36,7 @@ Pass 2 was performed after a break from Pass 1 authoring and incorporates extern
 | [LICENSE](../../LICENSE) | Apache License 2.0 |
 | Notion: [SeshatOps â€” Master Project Blueprint](https://app.notion.com/p/3b40a821b3cc813081f0ea44fd72692a) | Approved architecture intent |
 | Notion: [Workflow â€” Notion â†’ GitHub â†’ Evidence](https://app.notion.com/p/3b40a821b3cc810eadebc2fc9a067000) | Source-of-truth boundaries |
-| Notion: [M0 â€” Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee) | M0 scope, issue seed list, adversarial decisions |
+| Notion: [Constitution â€” Project Constitution](https://app.notion.com/p/3b40a821b3cc81f082c2e5e77d0499ee) | Constitution scope, issue seed list, adversarial decisions |
 | Merged PR #11 / Issue #1 | Product constitution outcome |
 | Merged PR #12 / Issue #2 | Clean-room policy outcome |
 
@@ -46,17 +46,17 @@ No Ahoy repository, private source, schema, migration, log, screenshot, configur
 
 | ID | Sources | Finding | Disposition |
 | --- | --- | --- | --- |
-| C1 | Master Blueprint â€œExact stackâ€ vs Issue #3 / M0 adversarial decisions | Blueprint names concrete frameworks and deploy tooling; M0 says this milestone fixes ownership and trust boundaries, not versions, schemas, or deployment topology | **Resolved for Issue #3:** `ARCHITECTURE.md` records logical paths and store roles only. Concrete stack and protocol choices are deferred (see Deferred decisions). |
+| C1 | Master Blueprint â€œExact stackâ€ vs Issue #3 / Constitution adversarial decisions | Blueprint names concrete frameworks and deploy tooling; Constitution says this milestone fixes ownership and trust boundaries, not versions, schemas, or deployment topology | **Resolved for Issue #3:** `ARCHITECTURE.md` records logical paths and store roles only. Concrete stack and protocol choices are deferred (see Deferred decisions). |
 | C2 | Master Blueprint communication table vs Issue #3 | Blueprint specifies particular browser and RPC mechanisms; Issue #3 forbids endpoint paths and concrete framework internals | **Resolved for Issue #3:** Allowed and prohibited paths are logical. Transports deferred to Issues #4 and #9. |
 | C3 | PRODUCT.md language-agnostic hero steps vs Blueprint language-tagged steps | Different document layers, not conflicting requirements | **No conflict.** PRODUCT owns product narrative; ARCHITECTURE owns language tagging. |
-| C4 | Blueprint progress tracker vs repository and M0 page | Blueprint still showed constitution â€œNot startedâ€ while Issues #1â€“#2 were merged | **Out of ARCHITECTURE scope.** Notion blueprint freshness only; no repository contradiction. |
+| C4 | Blueprint progress tracker vs repository and Constitution page | Blueprint still showed constitution â€œNot startedâ€ while Issues #1â€“#2 were merged | **Out of ARCHITECTURE scope.** Notion blueprint freshness only; no repository contradiction. |
 | C5 | Blueprint SOP-001â€¦010 vs GitHub Issues #1â€“#10 | Parallel numbering schemes | **Resolved:** GitHub Issues are the execution source of truth per Workflow. Follow #3â€“#10. |
 | C6 | PRODUCT.md hero steps 9â€“11 vs ARCHITECTURE sequence diagram | First-pass diagram showed human approve before Go validate/authorize; PRODUCT requires platform validation then human approval then execute (with recheck before command) | **Fixed:** Sequence and prose now validate/authorize â†’ human approve â†’ short recheck â†’ ERP command. |
 | A1 | Blueprint Pythonâ†’PostgreSQL read-only feature views vs Issue #3 â€œno broad transactional-database credentialsâ€ | Ambiguity on whether Python may read PostgreSQL at all | **Decided:** Narrow, non-transactional read of approved feature/read surfaces is allowed. Broad write/workflow credentials are prohibited. Exact database-role design belongs to Issue #5. |
 | A2 | PRODUCT synthetic ERP capability vs architecture component detail | How much ERP detail belongs in ARCHITECTURE | **Decided:** Synthetic ERP is a Go-owned logical component and the public operational boundary. No schemas or endpoints in Issue #3. |
 | A3 | ARCHITECTURE allowed paths vs Go credential â€œconsume/produceâ€ | Topology and allowed paths showed ERPâ†’Redpandaâ†’Go consume only; credentials still mentioned produce | **Fixed:** Removed produce from Go credentials until Issue #4 defines publication ownership. |
-| â€” | Northstar Foods public scenario | Aligned across PRODUCT, CLEAN_ROOM, Blueprint, M0 | **None found** |
-| â€” | Ahoy excluded from public dependencies | Aligned across PRODUCT, CLEAN_ROOM, Blueprint, M0 | **None found** |
+| â€” | Northstar Foods public scenario | Aligned across PRODUCT, CLEAN_ROOM, Blueprint, Constitution | **None found** |
+| â€” | Ahoy excluded from public dependencies | Aligned across PRODUCT, CLEAN_ROOM, Blueprint, Constitution | **None found** |
 | â€” | Human approval before execution; UI not authoritative for authorization | Aligned across PRODUCT and Blueprint | **None found** |
 | â€” | Honest consistency stance (at-least-once with idempotent effects) | Product/Blueprint agree; detailed protocol is Issue #4 | **Aligned; detail deferred** |
 
@@ -97,7 +97,7 @@ No additional contradictions were invented to populate this table.
 | Reviewer | G1DO (maintainer; time-separated self-review) |
 | Date (UTC) | 2026-08-06 |
 | Commit / tip | First-pass architecture at `43be239cc98ead99cdfc0e00d73bd60e77eb1533`; remediation tip `4324f77d896df45dff7c8952ca818b62cc118ee4` |
-| Scope (paths / PR) | `ARCHITECTURE.md`, `docs/reviews/M0_ARCHITECTURE_REVIEW.md`, `README.md`, `PRODUCT.md` (Â§10 ownership link); PR #13 |
+| Scope (paths / PR) | `ARCHITECTURE.md`, `docs/reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md`, `README.md`, `PRODUCT.md` (Â§10 ownership link); PR #13 |
 | Review type | pre-PR |
 | Result | Pass with remediation |
 
@@ -152,7 +152,7 @@ No private Ahoy material, secrets, or application code found. `Ahoy` appears onl
 | Security, reliability, recovery, and performance evidence protocols; SLO and fault-campaign detail | #7 |
 | Roadmap, milestone map, evidence ledger | #8 |
 | Repository instructions, PR workflow, documentation CI, concrete local/runtime layout | #9 |
-| Integrated constitution review across M0 documents | #10 |
+| Integrated constitution review across Project Constitution documents | #10 |
 | Concrete browser/intelligence transports and contract tooling | #4 / #9 |
 | Deployment profiles and cloud topology | Later milestones (not Issue #3) |
 | Rust admission measurement procedure | Later ADR when a gate is proposed |

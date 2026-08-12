@@ -1,8 +1,8 @@
-# M1 Completion Summary
+# Event Spine Completion Summary
 
 ## Outcome
 
-Milestone M1 delivered the SeshatOps event spine for the fictional Northstar
+Event Spine delivered the SeshatOps event spine for the fictional Northstar
 Foods scenario: reviewed contract, deterministic fixture, synthetic ERP source
 transaction with transactional outbox, Redpanda relay, inventory projection
 consumer with failure/restart safety, read-only REST/SSE API, TypeScript
@@ -11,10 +11,10 @@ integrated exit-gate campaign in a declared **test environment** and recorded
 evidence for `CLM-003`–`CLM-006`.
 
 This summary does not claim production readiness, staging parity, exactly-once
-delivery, M2 identity/authorization/operations product scope, M3
+delivery, Identity/authorization/operations product scope, Traceability
 backup/restore, SLO compliance, or hyperscale capacity.
 
-## M1 delivery history
+## Event Spine delivery history
 
 | Area | Delivered through |
 | --- | --- |
@@ -31,12 +31,12 @@ backup/restore, SLO compliance, or hyperscale capacity.
 
 ## Final artifacts
 
-- [M1 exit-gate procedure](../evaluation/M1_EXIT_GATE_PROCEDURE.md)
-- [M1 exit-gate experiment report](../evaluation/M1_EXIT_GATE_EXPERIMENT_REPORT.md)
-- [M1 exit-gate campaign review](M1_EXIT_GATE_CAMPAIGN_REVIEW.md)
-- [Fault campaign matrix](../evaluation/FAULT_CAMPAIGN_MATRIX.md) (M1 rows updated)
+- [event-spine exit-gate procedure](../evaluation/EVENT_SPINE_EXIT_GATE_PROCEDURE.md)
+- [event-spine exit-gate experiment report](../evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md)
+- [event-spine exit-gate campaign review](EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md)
+- [Fault campaign matrix](../evaluation/FAULT_CAMPAIGN_MATRIX.md) (Event Spine rows updated)
 - [Evidence ledger](../../EVIDENCE.md) (`CLM-003`–`CLM-006` Observed)
-- Prior M1 package reviews under `docs/reviews/M1_*.md`
+- Prior Event Spine package reviews under `docs/reviews/EVENT_SPINE_*.md`
 
 ## Evidence and verification
 
@@ -57,9 +57,9 @@ backup/restore, SLO compliance, or hyperscale capacity.
    documented package Testcontainers/Vitest suite (Issue #30 non-goal: no new
    architecture merely to pass).
 2. Live browser walkthrough remains optional supporting evidence.
-3. Non-M1 fault rows (FC-002–006, FC-008, FC-015+) remain Not executed.
+3. Non-Event Spine fault rows (FC-002–006, FC-008, FC-015+) remain Not executed.
 
 ## Residual risk
 
-See [M1_EXIT_GATE_CAMPAIGN_REVIEW.md](M1_EXIT_GATE_CAMPAIGN_REVIEW.md). M2
-activates identity and operations; M3 owns restore product scope.
+See [EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md](EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md). Identity
+activates identity and operations; Traceability owns restore product scope.

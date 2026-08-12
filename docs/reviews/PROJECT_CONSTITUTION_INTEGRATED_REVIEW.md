@@ -1,7 +1,7 @@
-# M0 Integrated Constitution Review - Issue #10
+# Project Constitution Integrated Constitution Review - Issue #10
 
 This document records the final documentation-only integration and adversarial
-review for Milestone M0. It is a review of repository truth and governance
+review for Project Constitution. It is a review of repository truth and governance
 coverage, not evidence that application behavior, security enforcement,
 reliability, performance, recovery, deployment, or production readiness exists.
 
@@ -14,10 +14,10 @@ reliability, performance, recovery, deployment, or production readiness exists.
 | Branch | `docs/10-integrated-m0-review` |
 | Base tip | `7c1d59a` (`main` and `origin/main`) |
 | Pull request | [PR #20](https://github.com/G1DO/seshatops/pull/20), final pushed diff |
-| Scope | Full tracked M0 repository, Issues #1-#10 and PRs #11-#19 as reviewed history, and PR #20's pushed diff |
-| Review type | Final M0 constitution, clean-room, evidence, and documentation review |
+| Scope | Full tracked Constitution repository, Issues #1-#10 and PRs #11-#19 as reviewed history, and PR #20's pushed diff |
+| Review type | Final Project Constitution, clean-room, evidence, and documentation review |
 | Documentation disposition | Pass with recorded follow-ups |
-| Runtime disposition | Not applicable; no runtime project exists and M0 remains documentation-only |
+| Runtime disposition | Not applicable; no runtime project exists and Constitution remains documentation-only |
 
 The repository was clean before this review. No commit, push, pull request,
 GitHub mutation, Notion mutation, or external-account change was performed by
@@ -25,7 +25,7 @@ this review.
 
 ## 2. Source-of-truth and history review
 
-The review covered the repository canonical documents, existing M0 review
+The review covered the repository canonical documents, existing Constitution review
 records, accepted ADRs, Issue #10, Issues #1-#9, merged PRs #11-#19, and the
 canonical Notion planning sources identified by the repository workflow.
 
@@ -33,32 +33,32 @@ The source-of-truth boundary remains:
 
 | Source | Owns |
 | --- | --- |
-| Notion | Product and architecture intent, milestone purpose, high-level risks, exit gates, and milestone summaries |
+| Notion | Product and architecture intent, capability-sequence purpose, high-level risks, exit gates, and capability-sequence summaries |
 | GitHub | Active issue and milestone execution state, acceptance criteria, dependencies, and progress |
 | Repository documents and ADRs | Reviewed technical truth, contracts, invariants, roadmap, and evidence rules |
 | Pull requests, CI, tests, evaluations, and artifacts | Actual changes, verification performed, limitations, and claim support |
 | `EVIDENCE.md` | Repository-owned claim identifiers, evidence routes, and claim status records |
 
 Issues #1-#9 are closed through merged PRs #11-#19. Issue #10 remained the
-integrated M0 review owner when this review record was written. Notion's M0
+integrated Project Constitution review owner when this review record was written. Notion's Constitution
 page still reports `In Progress`; it was not mutated, and GitHub/repository
 execution truth is not silently promoted by changing the Notion status.
 
 Subsequent repository status: Issue #10 was closed as completed and PR #20 was
-merged into `main`. Issue #21 owns M1 activation and concrete event-spine
+merged into `main`. Issue #21 owns Event Spine activation and concrete event-spine
 contract planning. This note does not alter the historical review record.
 
 ## 3. Issue #10 acceptance matrix
 
 | Requirement | Repository evidence | Verification route | Disposition |
 | --- | --- | --- | --- |
-| Review canonical docs for consistency | Existing M0 reviews, `README.md`, `PRODUCT.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `EVIDENCE.md`, protocols, and ADRs | Cross-document terminology, ownership, status, and link scans | Satisfied for documentation scope |
+| Review canonical docs for consistency | Existing Project Constitution reviews, `README.md`, `PRODUCT.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `EVIDENCE.md`, protocols, and ADRs | Cross-document terminology, ownership, status, and link scans | Satisfied for documentation scope |
 | Complete clean-room review | `CRR-0003` in `docs/checklists/CLEAN_ROOM_REVIEW.md` | Category-based repository and history scans; manual source review | Pass with recorded follow-ups |
 | Give every future claim a verification route | `EVIDENCE.md`, capability matrix, evaluation protocols, and evidence templates | Count IDs, uniqueness, required fields, and status scan | Satisfied; all 35 claims remain `Planned` |
-| Confirm M1 can be planned without new architecture | M1 roadmap outcome, architecture boundaries, event/command models, ADRs, and readiness section below | Fixed-versus-deferred decision audit | Satisfied; detailed implementation choices remain deferred |
+| Confirm Event Spine can be planned without new architecture | Event Spine roadmap outcome, architecture boundaries, event/command models, ADRs, and readiness section below | Fixed-versus-deferred decision audit | Satisfied; detailed implementation choices remain deferred |
 | Record intentionally deferred decisions | `docs/adrs/README.md` and `ADR-Q-001` through `ADR-Q-011` | Queue ID, owner, trigger, and constraint review | Satisfied; no queue item resolves an implementation choice |
 | Preserve documentation-only scope | Repository tree and language-boundary rules | Runtime-like file, manifest, dependency, deployment, and source scan | Satisfied; no runtime implementation exists |
-| Publish an M0 completion summary | `M0_COMPLETION_SUMMARY.md` | Link and content review | Satisfied for the local reviewed state; final merge remains a maintainer action |
+| Publish an Constitution completion summary | `PROJECT_CONSTITUTION_COMPLETION_SUMMARY.md` | Link and content review | Satisfied for the local reviewed state; final merge remains a maintainer action |
 | Maintain green documentation checks | PR #20 hosted Documentation CI; prior head run `31152243708` passed all four jobs | Re-run and confirm the hosted workflow for the final pushed head before merge | Follow-up required after this correction; no runtime check is implied |
 
 ## 4. Constitution consistency audit
@@ -81,13 +81,13 @@ external outcomes from exactly-once network or broker delivery.
 
 ### Language and authority boundaries
 
-| Language | Reviewed ownership | M0 result |
+| Language | Reviewed ownership | Constitution result |
 | --- | --- | --- |
 | TypeScript | UI, browser, and user-facing interaction | Not authoritative for transactions or authorization |
 | Go | Transactional platform, event processing, authorization, and durable state | Owns transactional and command authority |
 | Python | Evaluated/advisory intelligence and read-only analysis | Cannot authenticate, authorize, write business state, or execute commands |
-| Rust | Measurement-gated specialized or performance components | No speculative M0 workspace or component |
-| C | Excluded unless a later reviewed milestone changes the boundary | No M0 role |
+| Rust | Measurement-gated specialized or performance components | No speculative Constitution workspace or component |
+| C | Excluded unless a later reviewed milestone changes the boundary | No Constitution role |
 
 No language workspace, package manifest, dependency, service, database,
 broker, deployment configuration, or application source was introduced.
@@ -104,24 +104,24 @@ broker, deployment configuration, or application source was introduced.
   controls, uncertainty, abstention, citations, provenance, and no model-owned
   authority.
 - Evidence remains claim-ID based and environment-scoped. `Implemented`,
-  `Observed`, and `Reproduced` are not asserted by M0 documentation alone.
+  `Observed`, and `Reproduced` are not asserted by Project Constitution documentation alone.
 
 ## 5. Capability and roadmap audit
 
 The roadmap contains exactly 40 unique capabilities (`CAP-001` through
-`CAP-040`) and assigns each one primary milestone owner. The nine milestone
-names and high-level outcomes align with the reviewed M0-M8 planning sequence.
+`CAP-040`) and assigns each one primary capability owner owner. The nine milestone
+names and high-level outcomes align with the reviewed Project Constitution through Portfolio Release planning sequence.
 
 The final repository state is:
 
-- M0: final integrated documentation/governance review, pending the normal
+- Constitution: final integrated documentation/governance review, pending the normal
   Issue #10 review and merge workflow;
-- M1-M8: `Planned` outcome-and-exit-gate placeholders;
-- no detailed M1 backlog or future implementation issue decomposition;
+- Event Spine through Portfolio Release: `Planned` outcome-and-exit-gate placeholders;
+- no detailed Event Spine backlog or future implementation issue decomposition;
 - no application implementation, runtime evidence, or production result.
 
-The M5 phrase “one durable business effect” remains explicitly bounded and is
-not an exactly-once transport claim. The Notion M1 page's concrete technology
+The Approvals phrase “one durable business effect” remains explicitly bounded and is
+not an exactly-once transport claim. The Notion Event Spine page's concrete technology
 suggestions remain planning input only; they are not accepted repository
 decisions.
 
@@ -139,7 +139,7 @@ execution or claim promotion.
 
 ## 7. Clean-room result
 
-The completed record is `CRR-0003`. It covers the full tracked M0 repository,
+The completed record is `CRR-0003`. It covers the full tracked Constitution repository,
 reviewed history, and PR #20's pushed diff. The existing
 architecture record `CRR-0002` is preserved; the final record uses `CRR-0003`
 because the requested identifier was already occupied.
@@ -154,25 +154,25 @@ Foods scenario.
 Checklist completion records that a review occurred; it does not prove that
 all undiscovered future contamination is impossible.
 
-## 8. Deferred decisions and M1 readiness
+## 8. Deferred decisions and Event Spine readiness
 
 `docs/adrs/README.md` records `ADR-Q-001` through `ADR-Q-011` with an earliest
-owning milestone, trigger, and fixed M0 constraints. The queue does not choose
+owning capability sequence, trigger, and fixed Constitution constraints. The queue does not choose
 Protobuf, APIs, package layouts, databases, topics, partitions, retention,
 libraries, deployment topology, sizing, or thresholds.
 
-M1 can be planned without inventing new architecture. Its fixed inputs are:
+Event Spine can be planned without inventing new architecture. Its fixed inputs are:
 
 - a synthetic order flow through durable outbox, at-least-once transport,
   duplicate-safe handling, deterministic Go projection, and TypeScript view;
 - event identity, tenant, aggregate/version, schema, time, and trace context;
 - replay, quarantine, gap handling, tenant/default-deny, and evidence rules;
-- TypeScript/Go/Python/Rust/C ownership boundaries already defined by M0.
+- TypeScript/Go/Python/Rust/C ownership boundaries already defined by Constitution.
 
 Its deferred inputs are concrete event/API schemas, topic and key policy,
 partition and retention settings, persistence indexes, retry parameters,
 package/toolchain choices, deployment topology, observability targets, and
-detailed issue decomposition. M1 implementation has not started.
+detailed issue decomposition. Event Spine implementation has not started.
 
 ## 9. Verification record
 
@@ -198,21 +198,21 @@ The correction in this PR requires a fresh hosted Documentation CI run for the
 new final head before merge. The prior PR-head run `31152243708` passed
 Markdown lint, link checking, YAML lint, and secret scanning. Local Markdown,
 YAML, link, and secret tools remain unavailable. No typecheck, build, runtime,
-or application test is applicable because M0 has no runtime project.
+or application test is applicable because Constitution has no runtime project.
 
 ## 10. Disposition, limitations, and follow-ups
 
-**Pass with recorded follow-ups.** M0 documentation and governance coverage
+**Pass with recorded follow-ups.** Project Constitution documentation and governance coverage
 is internally reconciled within the repository scope. The following remain
 explicit:
 
 - maintainer review and merge of the Issue #10 change;
 - a fresh hosted Documentation CI run for the corrected final PR head and the
   subsequent merged `main` commit;
-- external Notion M0 status synchronization, if the maintainer chooses to do
+- external Notion Constitution status synchronization, if the maintainer chooses to do
   so through the normal workflow;
 - all runtime, security, reliability, performance, recovery, deployment, and
-  intelligence evidence in later milestones.
+  intelligence evidence in later capability sequences.
 
 This review does not claim that any future capability is implemented,
 observed, reproduced, secure, reliable, performant, or production-ready.

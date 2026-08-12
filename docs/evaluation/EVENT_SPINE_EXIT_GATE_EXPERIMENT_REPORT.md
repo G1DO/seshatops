@@ -1,4 +1,4 @@
-# M1 Exit-Gate Experiment Report
+# Event-Spine Exit-Gate Experiment Report
 
 > Filled from [templates/EXPERIMENT_REPORT.md](templates/EXPERIMENT_REPORT.md) for
 > Issue #30. Results below are from an actual authorized campaign run.
@@ -8,7 +8,7 @@
 | Field | Value/status |
 | --- | --- |
 | Experiment ID | `EXP-M1-EXIT-GATE-001` |
-| Experiment name | M1 integrated exit-gate campaign |
+| Experiment name | Event Spine integrated exit-gate campaign |
 | Experiment type | Reliability / fault / integration evidence |
 | Claim IDs under evaluation | `CLM-003`, `CLM-004`, `CLM-005`, `CLM-006` |
 | Prior claim status | Planned |
@@ -26,7 +26,7 @@
 
 ## Objective and hypothesis
 
-Decide whether the implemented M1 vertical slice satisfies the Issue #30 exit
+Decide whether the implemented Event Spine vertical slice satisfies the Issue #30 exit
 gate under a declared **Test environment**: synthetic Northstar order → outbox →
 Redpanda → consumer → projection → REST/SSE → TypeScript view, including
 rollback, broker outage, ambiguous publish, duplicates, both consumer crash
@@ -62,17 +62,17 @@ required scenarios without new architecture, and evidence supports promoting
 
 | Field | Value/status |
 | --- | --- |
-| Dataset, fixture, corpus, or workload identity | Deterministic Northstar Foods M1 order-line fixture |
+| Dataset, fixture, corpus, or workload identity | Deterministic Northstar Foods Event Spine order-line fixture |
 | Provenance and clean-room independence | Synthetic; see `docs/events/SYNTHETIC_DATA_PROVENANCE.md` |
 | Version or snapshot | Seed `northstar-m1-order-line-v1` |
 | Generation or preparation method | `northstar.Generate` / package test helpers |
-| Tenant distribution and data boundaries | Single fictional tenant used by M1 fixtures |
+| Tenant distribution and data boundaries | Single fictional tenant used by Event Spine fixtures |
 | Seed(s), or reason not applicable | `northstar-m1-order-line-v1` |
 
 ## Preconditions
 
 - Docker available for Testcontainers.
-- Procedure in [M1_EXIT_GATE_PROCEDURE.md](M1_EXIT_GATE_PROCEDURE.md).
+- Procedure in [EVENT_SPINE_EXIT_GATE_PROCEDURE.md](EVENT_SPINE_EXIT_GATE_PROCEDURE.md).
 - Candidate commit includes Issues #21–#29 merged stack.
 
 ## Method
@@ -91,7 +91,7 @@ cd web && npm test && npm run typecheck && npm run build
 ```
 
 Scenario-focused entry points are listed in
-[M1_EXIT_GATE_PROCEDURE.md](M1_EXIT_GATE_PROCEDURE.md).
+[EVENT_SPINE_EXIT_GATE_PROCEDURE.md](EVENT_SPINE_EXIT_GATE_PROCEDURE.md).
 
 ## Safety and termination criteria
 
@@ -108,8 +108,8 @@ were targeted.
 | Web test log | `/tmp/m1-exit-gate-npm-test.log` | 15/15 Vitest passed |
 | Typecheck/build logs | `/tmp/m1-exit-gate-typecheck.log`, `/tmp/m1-exit-gate-build.log` | Passed |
 | Duplicate/rebuild traces | Test names in `platform/rebuild_test.go`, `platform/consume_test.go` | Contract §8 equality asserted in-process |
-| Procedure | [M1_EXIT_GATE_PROCEDURE.md](M1_EXIT_GATE_PROCEDURE.md) | N/A |
-| Review | [M1_EXIT_GATE_CAMPAIGN_REVIEW.md](../reviews/M1_EXIT_GATE_CAMPAIGN_REVIEW.md) | N/A |
+| Procedure | [EVENT_SPINE_EXIT_GATE_PROCEDURE.md](EVENT_SPINE_EXIT_GATE_PROCEDURE.md) | N/A |
+| Review | [EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md](../reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md) | N/A |
 
 Committed raw machine logs are omitted to avoid noisy binary/testcontainer
 output; package names, commands, and exit outcomes are the reproducible
@@ -185,15 +185,15 @@ Documentation CI
   EventSource.
 - Operator Go toolchain (`1.26.2`) differs from CI Go `1.25.0`.
 - Claims do **not** establish exactly-once delivery, SLO, capacity, or
-  multi-tenant authorization (M2).
-- `CLM-006` is M1 rebuild proof only; M3 owns authorized recovery/restore
+  multi-tenant authorization (Identity).
+- `CLM-006` is Event Spine rebuild proof only; Traceability owns authorized recovery/restore
   product scope (ADR-Q-005).
 
 ## Reproduction instructions
 
 1. Check out the reviewed campaign commit (PR head after Issue #30 docs land).
 2. Ensure Docker is available.
-3. Follow [M1_EXIT_GATE_PROCEDURE.md](M1_EXIT_GATE_PROCEDURE.md).
+3. Follow [EVENT_SPINE_EXIT_GATE_PROCEDURE.md](EVENT_SPINE_EXIT_GATE_PROCEDURE.md).
 4. Run the full suite gate commands above.
 5. Compare outcomes to this report; attach hosted CI run IDs when present.
 
@@ -213,7 +213,7 @@ Documentation CI
 | --- | --- |
 | New claim status | `CLM-003`–`CLM-006` → **Observed** (test environment) |
 | Decision rationale | Named experiment, exact commands, package pass outcomes, and limitations recorded; distinct from exactly-once or production claims |
-| Evidence links | This report; [M1_EXIT_GATE_CAMPAIGN_REVIEW.md](../reviews/M1_EXIT_GATE_CAMPAIGN_REVIEW.md); [FAULT_CAMPAIGN_MATRIX.md](FAULT_CAMPAIGN_MATRIX.md); [EVIDENCE.md](../../EVIDENCE.md) |
+| Evidence links | This report; [EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md](../reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md); [FAULT_CAMPAIGN_MATRIX.md](FAULT_CAMPAIGN_MATRIX.md); [EVIDENCE.md](../../EVIDENCE.md) |
 
 ## Superseded evidence
 
@@ -224,6 +224,6 @@ four claims only.
 ## Follow-up work
 
 - Maintainer review of claim promotion and clean-room record.
-- M2+ owns operator quarantine UI, auth, and operational health claims
+- Identity+ owns operator quarantine UI, auth, and operational health claims
   (`CLM-007`+).
-- M3 owns backup/restore and authorized recovery product claims.
+- Traceability owns backup/restore and authorized recovery product claims.

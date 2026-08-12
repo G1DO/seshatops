@@ -15,7 +15,7 @@ import (
 
 const maxSafeInt = int64(9007199254740991) // 2^53 - 1
 
-// OrderCommand is the minimum one-line synthetic order accepted by M1.
+// OrderCommand is the minimum one-line synthetic order accepted by Event Spine.
 type OrderCommand struct {
 	EventID       string
 	TenantID      string

@@ -1,10 +1,10 @@
-# M1 Projection Rebuild Review - Issue #29
+# Event Spine Projection Rebuild Review - Issue #29
 
 This document records the Issue #29 implementation review for controlled
 duplicate injection, isolated derived-state reset, deterministic projection
 rebuild, and CONTRACTS.md §8 checksum equality proofs. It does not claim
 exactly-once delivery, production readiness, hosted fault-campaign success,
-Observed/Reproduced claim promotion, M2 operator recovery, or M3 backup/restore.
+Observed/Reproduced claim promotion, Identity & Operations operator recovery, or Traceability & Recovery backup/restore.
 
 ## Review record
 
@@ -52,7 +52,7 @@ Observed/Reproduced claim promotion, M2 operator recovery, or M3 backup/restore.
 | History range (local unit path) | partition `0`, offset `7` for the retained baseline record in `TestDeterministicRebuildChecksumEquality` |
 | Checksum inputs | tenant `inventory_projection` rows: `tenant_id`, `item_id`, `quantity_on_hand`, `aggregate_version` (CONTRACTS.md §8) |
 | Checksum `A` / `B` | Equal for complete rebuild of the Northstar fixture (`quantity_on_hand=8`, `aggregate_version=1`) |
-| Limitations | Local library/integration only; not hosted FC-014; not M2 recovery or M3 restore |
+| Limitations | Local library/integration only; not hosted FC-014; not Identity recovery or Traceability restore |
 
 ## Duplicate-injection trace (CLM-004 support note)
 
@@ -91,7 +91,7 @@ cited as successful rebuild proofs.
 - Issue #30 records test-environment FC-001 / FC-014 campaign evidence and
   Observed decisions for `CLM-004` / `CLM-006`; staging/production promotion
   remains out of scope.
-- M2 owns authorized operator replay/quarantine release; M3 owns backup/restore
+- Identity owns authorized operator replay/quarantine release; Traceability owns backup/restore
   and ADR-Q-005 recovery product behavior.
 - Incomplete rebuilds may still emit a diagnostic checksum; callers must gate
   equality proofs on status `complete`.

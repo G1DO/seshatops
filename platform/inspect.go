@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// FailureSample is one sanitized processing_failures row for M1 inspection.
+// FailureSample is one sanitized processing_failures row for Event Spine inspection.
 type FailureSample struct {
 	FailureID        string
 	EventID          string
@@ -34,7 +34,7 @@ type GapSample struct {
 }
 
 // ProcessingInspection is the minimum consumer failure/backlog visibility
-// surface for M1 verification. It is not an M2 metrics or alerting stack.
+// surface for Event Spine verification. It is not an Identity & Operations metrics or alerting stack.
 type ProcessingInspection struct {
 	Applied               int
 	DuplicateNoop         int
