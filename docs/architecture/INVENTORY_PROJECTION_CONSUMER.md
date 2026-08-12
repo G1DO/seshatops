@@ -1,17 +1,20 @@
 # M1 Inventory Projection Consumer
 
 **Status:** Implemented for Issues #25 and #26 library/integration scope.
-HTTP/SSE read surface remains Issue #27.
+Issue #27 adds post-commit `AppliedNotifier` hooks used by the HTTP/SSE read
+surface in [PROJECTION_READ_API.md](PROJECTION_READ_API.md).
 
 **Owns:** Consuming the M1 Redpanda topic, durable inbox/deduplication,
 aggregate-version validation, PostgreSQL inventory projection updates, atomic
 inbox+projection commits, acknowledgement-after-commit ordering, minimal
 sanitized processing-failure records for unparseable/poison deliveries,
-bounded failure/gap inspection via `InspectProcessing`, and the projection
-checksum helper.
+bounded failure/gap inspection via `InspectProcessing`, the projection
+checksum helper, tenant projection listing, and optional post-commit applied
+notifications for the Go read API.
 
 **Does not own:** Generic CQRS frameworks, order projections, operator recovery
-UI, release-from-quarantine workflows, HTTP/SSE APIs, metrics SLOs, or
+UI, release-from-quarantine workflows, HTTP/SSE route design (Issue #27 /
+[PROJECTION_READ_API.md](PROJECTION_READ_API.md)), metrics SLOs, or
 exactly-once transport claims.
 
 ## Toolchain pins

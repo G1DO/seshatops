@@ -1,0 +1,148 @@
+openapi: 3.0.3
+info:
+  title: SeshatOps M1 Inventory Projection Read API
+  version: "1.0.0"
+  description: |
+    Read-only Go surface for the committed M1 inventory projection (Issue #27).
+    Authentication/RBAC remain M2. SSE is at-least-once and may drop for slow
+    clients; REST is the authoritative reconnect/catch-up path.
+servers:
+  - url: /
+paths:
+  /v1/tenants/{tenant_id}/inventory:
+    get:
+      operationId: getInventorySnapshot
+      summary: Authoritative committed inventory projection snapshot
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "200":
+          description: Committed projection snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventorySnapshot"
+        "400":
+          description: Invalid tenant_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "405":
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    post:
+      operationId: postInventoryRejected
+      summary: Rejected write (read-only)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "405":
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /v1/tenants/{tenant_id}/inventory/stream:
+    get:
+      operationId: streamInventoryUpdates
+      summary: SSE stream of committed projection updates
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "200":
+          description: text/event-stream of inventory_projection.updated events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "400":
+          description: Invalid tenant_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "405":
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+components:
+  parameters:
+    TenantID:
+      name: tenant_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        description: Lowercase UUIDv4 tenant identifier (M1 validation only; not M2 auth)
+  schemas:
+    InventoryItem:
+      type: object
+      required: [item_id, quantity_on_hand, aggregate_version]
+      properties:
+        item_id:
+          type: string
+        quantity_on_hand:
+          type: integer
+          format: int64
+          minimum: 0
+        aggregate_version:
+          type: integer
+          format: int64
+          minimum: 0
+    InventorySnapshot:
+      type: object
+      required: [tenant_id, items, checksum, observed_at]
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InventoryItem"
+        checksum:
+          type: string
+          description: CONTRACTS.md §8 SHA-256 hex of the tenant projection
+        observed_at:
+          type: string
+          format: date-time
+          description: Server UTC time when the snapshot was read
+    ProjectionUpdated:
+      type: object
+      required:
+        - tenant_id
+        - item_id
+        - quantity_on_hand
+        - aggregate_version
+        - last_applied_event_id
+        - checksum
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+        item_id:
+          type: string
+        quantity_on_hand:
+          type: integer
+          format: int64
+        aggregate_version:
+          type: integer
+          format: int64
+        last_applied_event_id:
+          type: string
+          format: uuid
+        checksum:
+          type: string
+    ErrorBody:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string

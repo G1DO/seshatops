@@ -24,8 +24,9 @@ publishes exact stored outbox bytes to Redpanda at least once. Issue #25 adds
 the `platform/` consumer that commits inbox and inventory-projection state
 atomically and acknowledges Redpanda offsets only after that commit. Issue #26
 adds handler-poison escalation and bounded consumer failure/backlog inspection
-on that consumer. No deployment, model, or production environment exists here
-yet. Planned behavior
+on that consumer. Issue #27 adds the read-only `api/` REST and SSE surface over
+committed projection state. No deployment, model, or production environment
+exists here yet. Planned behavior
 must not be described as observed, reproduced, secure, reliable, performant, or
 production-ready without the required evidence.
 
@@ -106,6 +107,8 @@ package for the synthetic source transaction and pending outbox. Issue #24 adds
 the `relay` package for source-owned Redpanda publication. Issue #25 adds the
 `platform` package for inbox/deduplication and inventory projection consumption.
 Issue #26 extends `platform` with poison escalation and `InspectProcessing`.
+Issue #27 adds the read-only `api` package (REST snapshot + SSE) over committed
+projection state, with post-commit notifications from `platform`.
 Later M1 issues may extend platform packages without inventing a second module
 or a general ERP schema.
 
