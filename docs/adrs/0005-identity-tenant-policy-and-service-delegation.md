@@ -1,6 +1,6 @@
 # ADR-0005: Identity, Tenant Policy, and Service Delegation
 
-- **Status:** Accepted Identity & Operations design decision; permission matrix (#44), OIDC/session runtime (#45), and default-deny API enforcement (#46) remain pending
+- **Status:** Accepted Identity & Operations design decision; permission matrix published (#44); OIDC/session runtime (#45) and default-deny API enforcement (#46) remain pending
 - **Date:** 2026-08-12
 - **Scope:** Issue #43 resolution of ADR-Q-004 — OIDC integration profile, Go-owned principal/session model, tenant visibility, policy representation, and service-identity delegation boundaries
 
@@ -31,7 +31,7 @@ This ADR freezes those decisions so Issue #44 can publish a permission matrix an
 1. Tenant visibility for this milestone means tenant-scoped allow-list entries plus platform-owned tenant membership. Principals see and act only within tenants assigned by platform policy; IdP claims and client-supplied tenant fields are assertions to validate, not visibility authority.
 2. Authorization continues to use the conceptual tuple in AUTHORIZATION_MODEL §4: tenant, principal, resource type, resource identity, action, scope or contextual constraints, current resource state, relevant policy and assignment version, and freshness where required.
 3. Policy for Identity & Operations is an **explicit allow-list**. A missing entry is deny. Roles are labels bound to tenant, resource, and action; a role name alone is never sufficient.
-4. No policy-engine product or policy DSL is selected here. Issue #44 owns the frozen Northstar demo permission matrix mapped to the tuple and stable matrix identifiers.
+4. No policy-engine product or policy DSL is selected here. Issue #44 published the frozen Northstar demo permission matrix mapped to the tuple and stable matrix identifiers in [PERMISSION_MATRIX.md](../security/PERMISSION_MATRIX.md).
 
 ### Service identity and delegation
 

@@ -385,7 +385,7 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 - **Preventive controls:** AUTH-02 tenant isolation; AUTH-03 Go-owned resource enforcement; AUTH-07 checkpoint rechecks; AUTH-12 preserve initiating principal and tenant context; AUTH-13 least-privilege service capabilities; tenant-administrator, platform-operator, recovery, and audit duties remain separate unless a future governed delegation explicitly permits the action.
 - **Detective/recovery controls:** Audit administrative and service identities separately; alert on scope or tenant mismatch; quarantine unsafe recovery/replay; revoke compromised capability; preserve evidence without allowing recovery access to rewrite business truth.
 - **Future negative test:** Attempt another tenant's administration, business command, approval, export, audit, replay, and recovery operation using a tenant administrator, platform operator, and privileged service identity; require denial or explicitly governed scoped behavior with preserved lineage.
-- **Residual risk:** The exhaustive role catalog, break-glass rules, recovery authorization, and platform-operator operating model remain deferred.
+- **Residual risk:** The Identity & Operations demo role catalog is frozen in [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md). Break-glass rules, catalogs beyond this milestone, recovery authorization runtime, and the platform-operator operating model remain deferred.
 - **Deferred owner:** Issue #5 conceptual requirement; later identity/operations and governance implementation; Issue #7 evidence.
 
 ## 8. Threat-to-control summary
@@ -412,12 +412,12 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 
 ## 9. Assumptions, residual risks, and deferred decisions
 
-Decided for Identity & Operations design by [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) / [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md): OIDC protocol profile, Go-owned session model, tenant visibility via platform membership and tenant-scoped allow-list, allow-list policy representation, and service-delegation boundaries. Runtime enforcement of those decisions remains pending.
+Decided for Identity & Operations design by [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) / [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md): OIDC protocol profile, Go-owned session model, tenant visibility via platform membership and tenant-scoped allow-list, allow-list policy representation, and service-delegation boundaries. The demo allow-list is [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md). Runtime enforcement of those decisions remains pending.
 
 The following remain unresolved by design:
 
 - Identity-provider vendor/product, concrete token storage format, and revocation mechanism implementation.
-- Role catalog content, assignment schema, scope syntax, and separation-of-duty rules (matrix content owned by Issue #44).
+- Assignment schema, scope syntax, and separation-of-duty rules beyond the frozen Identity & Operations demo matrix.
 - Concrete service/database roles, credential storage, credential rotation, and adapter authentication.
 - Cache and retrieval-index isolation, object-storage controls, audit retention, receipt verification, redaction, and cryptographic details.
 - Availability limits, quotas, rate controls, SLOs, and recovery thresholds.

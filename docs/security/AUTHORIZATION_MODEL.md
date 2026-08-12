@@ -303,10 +303,14 @@ explicit allow-list policy representation, and service-identity delegation
 boundaries for Identity & Operations design. Vendor selection, routes, schemas,
 and runtime enforcement remain deferred.
 
+The Identity & Operations demo role catalog, resource/action IDs, and allow-list
+rows are published in [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md). A
+policy-engine product, assignment schema, and scope syntax remain deferred.
+
 The following remain deliberately not selected here:
 
 - identity-provider vendor/product, concrete token storage format, and revocation mechanism implementation;
-- policy-engine product, role catalog content, assignment schema, and scope syntax;
+- policy-engine product, assignment schema, and scope syntax;
 - API routes, request/response schemas, middleware, and generated clients;
 - database tables, indexes, database roles, row-level mechanisms, caches, and storage layout;
 - cryptographic receipt or audit protocols;

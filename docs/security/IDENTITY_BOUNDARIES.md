@@ -9,7 +9,8 @@ currently exist.
 **Owns:** Short activation summary of the OIDC profile, Go-owned session model,
 service-identity boundaries, and explicit non-goals for this milestone slice.
 
-**Does not own:** Permission-matrix content (Issue #44), OIDC login or session
+**Does not own:** Permission-matrix content (published by Issue #44 in
+[PERMISSION_MATRIX.md](PERMISSION_MATRIX.md)), OIDC login or session
 runtime (Issue #45), default-deny API enforcement (Issue #46), operational
 visibility or quarantine/replay controls, or any `EVIDENCE.md` claim promotion.
 
@@ -31,7 +32,7 @@ Full decisions are in [ADR-0005](../adrs/0005-identity-tenant-policy-and-service
 
 | Issue | Owns next |
 | --- | --- |
-| [#44](https://github.com/G1DO/seshatops/issues/44) | Frozen Northstar demo tenant/role/resource/action permission matrix |
+| [#44](https://github.com/G1DO/seshatops/issues/44) | Frozen Northstar demo matrix: [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md) |
 | [#45](https://github.com/G1DO/seshatops/issues/45) | OIDC login integration and Go-owned session establishment runtime |
 | [#46](https://github.com/G1DO/seshatops/issues/46) | Default-deny API enforcement |
 | Later Identity & Operations issues | Privileged-ops authz, audit, operational visibility, quarantine/replay |
@@ -48,5 +49,6 @@ Full decisions are in [ADR-0005](../adrs/0005-identity-tenant-policy-and-service
 ## Related documents
 
 - [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md)
+- [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md)
 - [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
 - [THREAT_MODEL.md](THREAT_MODEL.md)
