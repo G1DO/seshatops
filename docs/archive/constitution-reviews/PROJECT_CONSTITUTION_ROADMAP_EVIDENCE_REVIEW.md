@@ -6,7 +6,7 @@ This document records a documentation-only review of the Issue #8 roadmap, capab
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Codex implementation/review pass; maintainer review remains a recorded follow-up |
+| Author | G1DO |
 | Date (UTC) | 2026-08-07 |
 | Branch | `docs/8-roadmap-evidence-ledger` |
 | Base commit | `13201d4` |

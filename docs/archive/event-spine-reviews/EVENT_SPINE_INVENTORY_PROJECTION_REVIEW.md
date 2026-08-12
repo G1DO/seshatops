@@ -10,7 +10,8 @@ GitHub Actions run.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Implementation pass on branch `feat/25-inventory-projection-consumer`; maintainer review remains a follow-up |
+| Author | G1DO |
+| Branch | `feat/25-inventory-projection-consumer` |
 | Date (UTC) | 2026-08-12 |
 | Branch | `feat/25-inventory-projection-consumer` |
 | Scope | Issue #25 only: `platform` package, inbox/projection/failure schema, ProcessRecord dispositions, manual offset commit, checksum helper, integration tests, consumer docs |

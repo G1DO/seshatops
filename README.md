@@ -27,7 +27,8 @@ Project Constitution is complete. Event Spine is complete for the declared test 
 | [CONTRACTS.md](CONTRACTS.md) | Concrete Event Spine event-spine contract |
 | [ROADMAP.md](ROADMAP.md) | Capability-sequence ownership and sequencing |
 | [EVIDENCE.md](EVIDENCE.md) | Claim ledger and verification routes |
-| [EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md](docs/evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md) | Exit-gate experiment record |
+| [EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md](docs/evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md) | Exit-gate experiment evidence |
+| [EVENT_SPINE_EXIT_GATE_CAMPAIGN.md](docs/reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN.md) | Exit-gate campaign acceptance matrix |
 | [EVENT_SPINE_COMPLETION_SUMMARY.md](docs/reviews/EVENT_SPINE_COMPLETION_SUMMARY.md) | Event Spine completion boundary |
 | [AGENTS.md](AGENTS.md) | Contribution and verification rules |
 | [CLEAN_ROOM.md](CLEAN_ROOM.md) | Ahoy exclusion and provenance policy |

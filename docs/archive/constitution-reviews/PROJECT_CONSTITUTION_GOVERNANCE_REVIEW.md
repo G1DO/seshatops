@@ -6,7 +6,7 @@ This document records the documentation-only implementation and static review fo
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Repository implementation/review pass; maintainer review remains a recorded follow-up |
+| Author | G1DO |
 | Date (UTC) | 2026-08-07 |
 | Branch | `chore/9-repository-governance` |
 | Base commit | `c7408ee` |

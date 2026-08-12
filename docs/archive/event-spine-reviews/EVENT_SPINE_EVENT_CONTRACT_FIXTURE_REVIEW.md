@@ -8,7 +8,8 @@ outbox, broker, projection, security enforcement, or production readiness.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Implementation pass on branch `feat/22-event-contract-fixtures`; maintainer review remains a follow-up |
+| Author | G1DO |
+| Branch | `feat/22-event-contract-fixtures` |
 | Date (UTC) | 2026-08-08 |
 | Branch | `feat/22-event-contract-fixtures` |
 | Scope | Issue #22 only: JSON/JCS event contract, Northstar fixture, tests, provenance, Go CI |

@@ -69,4 +69,3 @@ origin via CORS.
 - [OPERATIONS_VIEW.md](../docs/architecture/OPERATIONS_VIEW.md)
 - [PROJECTION_READ_API.md](../docs/architecture/PROJECTION_READ_API.md)
 - [EVENT_SPINE_COMPLETION_SUMMARY.md](../docs/reviews/EVENT_SPINE_COMPLETION_SUMMARY.md)
-- Archived package review: [EVENT_SPINE_OPERATIONS_VIEW_REVIEW.md](../docs/archive/event-spine-reviews/EVENT_SPINE_OPERATIONS_VIEW_REVIEW.md)

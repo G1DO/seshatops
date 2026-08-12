@@ -1,8 +1,7 @@
-# Archived Project Constitution reviews
+# Archived Project Constitution notes
 
-Frozen historical review records from the Project Constitution sequence
-(Issues #1–#10). These documents are retained for provenance and are not the
-live review surface.
+Frozen historical Project Constitution notes (Issues #1–#10).
+Kept for provenance only — not a living documentation surface.
 
-Active Event Spine completion evidence lives under
-[`docs/reviews/`](../../reviews/).
+Live Event Spine evidence lives under [`docs/reviews/`](../../reviews/) and
+[`docs/evaluation/`](../../evaluation/).

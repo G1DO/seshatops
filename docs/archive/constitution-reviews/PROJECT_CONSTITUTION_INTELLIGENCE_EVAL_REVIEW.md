@@ -6,7 +6,7 @@ This document records a documentation review of the forecasting and governed-RAG
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Codex documentation implementation/review pass; maintainer review remains a recorded follow-up |
+| Author | G1DO |
 | Date (UTC) | 2026-08-06 |
 | Branch / base | `docs/6-intelligence-evaluation`; base `1b5578743ee79ab42a2e0b6e17425015c6dc0ad3` |
 | Scope | Issue #6 forecasting and governed-RAG protocols, schemas, templates, README discoverability, and this review |

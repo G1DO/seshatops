@@ -27,16 +27,16 @@ backup/restore, SLO compliance, or hyperscale capacity.
 | Read-only projection REST/SSE API | Issue #27 |
 | TypeScript operations view | Issue #28 |
 | Duplicate injection + deterministic rebuild | Issue #29 |
-| Integrated exit-gate campaign + claim review | Issue #30 / this summary |
+| Integrated exit-gate campaign + claim update | Issue #30 / this summary |
 
 ## Final artifacts
 
 - [event-spine exit-gate procedure](../evaluation/EVENT_SPINE_EXIT_GATE_PROCEDURE.md)
 - [event-spine exit-gate experiment report](../evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md)
-- [event-spine exit-gate campaign review](EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md)
+- [event-spine exit-gate campaign record](EVENT_SPINE_EXIT_GATE_CAMPAIGN.md)
 - [Fault campaign matrix](../evaluation/FAULT_CAMPAIGN_MATRIX.md) (Event Spine rows updated)
 - [Evidence ledger](../../EVIDENCE.md) (`CLM-003`–`CLM-006` Observed)
-- Prior Event Spine package reviews under `docs/archive/event-spine-reviews/`
+- Prior Event Spine package notes under `docs/archive/event-spine-reviews/`
 
 ## Evidence and verification
 
@@ -61,5 +61,5 @@ backup/restore, SLO compliance, or hyperscale capacity.
 
 ## Residual risk
 
-See [EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md](EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md). Identity
+See [EVENT_SPINE_EXIT_GATE_CAMPAIGN.md](EVENT_SPINE_EXIT_GATE_CAMPAIGN.md). Identity
 activates identity and operations; Traceability owns restore product scope.

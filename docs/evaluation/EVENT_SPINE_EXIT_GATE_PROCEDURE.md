@@ -71,7 +71,7 @@ reviewed PR head before hosted-green claims are recorded.
 After execution, record results in:
 
 - [EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md](EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md)
-- [EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md](../reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md)
+- [EVENT_SPINE_EXIT_GATE_CAMPAIGN.md](../reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN.md)
 - [FAULT_CAMPAIGN_MATRIX.md](FAULT_CAMPAIGN_MATRIX.md) (Event Spine rows only)
 - [EVIDENCE.md](../../EVIDENCE.md) (`CLM-003`–`CLM-006` only when evidence supports promotion)
 

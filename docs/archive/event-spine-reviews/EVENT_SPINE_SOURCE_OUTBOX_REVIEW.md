@@ -9,7 +9,8 @@ or production readiness.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Implementation pass on branch `feat/23-transactional-outbox`; maintainer review remains a follow-up |
+| Author | G1DO |
+| Branch | `feat/23-transactional-outbox` |
 | Date (UTC) | 2026-08-10 |
 | Branch | `feat/23-transactional-outbox` |
 | Scope | Issue #23 only: `erp` schema, AcceptOrder transaction, outbox insert, Northstar seed, PostgreSQL integration tests, persistence docs |

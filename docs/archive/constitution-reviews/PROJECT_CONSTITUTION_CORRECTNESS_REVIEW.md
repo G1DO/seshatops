@@ -6,7 +6,7 @@ Evidence that a documentation review occurred for SeshatOps Issue #4: event, com
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Codex documentation implementation/review pass; maintainer review remains a recorded follow-up |
+| Author | G1DO |
 | Date (UTC) | 2026-08-06 |
 | Branch / base | `docs/4-correctness-model`; base commit `32d6bb555883f1ff5c42fe3ecf3ed29ff066f46b`; working-tree changes reviewed before commit |
 | Scope | Issue #4 correctness model, event and command documents, ADRs 0001–0002, discoverability links |

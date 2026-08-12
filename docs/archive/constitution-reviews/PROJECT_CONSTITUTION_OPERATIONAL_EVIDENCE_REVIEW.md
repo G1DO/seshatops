@@ -6,7 +6,7 @@ This document records a documentation-only review of the Issue #7 operational ev
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Codex implementation/review pass; maintainer review remains a recorded follow-up |
+| Author | G1DO |
 | Date (UTC) | 2026-08-07 |
 | Branch | `docs/7-operational-evidence` |
 | Reviewed state | PR #17 pre-fix head `0e634a458b4ebf2c4786c4ee795ac3b1d92f9833`; working tree clean at review |

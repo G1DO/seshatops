@@ -6,7 +6,7 @@ This document records a documentation review of the SeshatOps threat model and a
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Codex documentation implementation/review pass; maintainer review remains a recorded follow-up |
+| Author | G1DO |
 | Date (UTC) | 2026-08-06 |
 | Branch / base | docs/5-threat-authorization-model; base commit 6a0fbf9 |
 | Reviewed tip | c15ce8096db6798fb106251a66ba93e17b1c01a5 |

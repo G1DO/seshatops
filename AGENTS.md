@@ -38,7 +38,7 @@ When sources conflict, inspect the issue, repository history, linked documents, 
 - `ROADMAP.md` owns stable milestone sequencing and capability ownership; GitHub owns active issue status.
 - `EVIDENCE.md` owns the claim ledger and claim-status vocabulary references.
 - `docs/adrs/` owns accepted technical decisions and their consequences.
-- `docs/reviews/` owns live bounded review records; frozen historical reviews live under `docs/archive/`.
+- Exit-gate and claim evidence live in `docs/evaluation/` and `EVIDENCE.md`. Short completion notes may live under `docs/reviews/`; do not create per-issue review novels. Historical notes may exist under `docs/archive/`.
 - `AGENTS.md`, `.editorconfig`, `.gitattributes`, `.gitignore`, the PR template, and documentation CI own repository workflow and hygiene.
 
 ## 4. Read before editing
@@ -47,7 +47,7 @@ Before a non-trivial change:
 
 1. Inspect `git status`, the current branch, recent history, and the requested issue.
 2. Read every file named by the request and the related canonical documents.
-3. Scan neighboring modules and existing reviews for established terminology and patterns.
+3. Scan neighboring modules and related docs for established terminology and patterns.
 4. State assumptions, scope, non-goals, and verification checkpoints before implementation.
 5. Check for contradictions, stale status, unsupported claims, clean-room concerns, secrets, and unrelated user changes.
 
