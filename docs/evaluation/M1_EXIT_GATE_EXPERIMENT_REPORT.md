@@ -52,7 +52,7 @@ required scenarios without new architecture, and evidence supports promoting
 | Field | Value/status |
 | --- | --- |
 | Repository | `github.com/G1DO/seshatops` |
-| Commit | Runtime packages verified at `a4e5d47f67f2b4ff1d97760c415c3ea28ad83e47` (clean working tree for Go/`web` sources at run start). Evidence-doc commit for Issue #30 is recorded on the campaign PR head. |
+| Commit | Runtime packages verified at `a4e5d47f67f2b4ff1d97760c415c3ea28ad83e47`. Evidence docs recorded on PR #41 head `b6bec19ba427a4a73eb543b84ade9444b8ebddc3`. |
 | Branch or tag | `test/30-m1-exit-gate` |
 | Dirty-working-tree state | Clean at suite start; subsequent docs-only campaign artifacts added after the run |
 | Configuration version and relevant values | Topic `seshatops.m1.events`; handler `m1-inventory-projection-v1`; schema v1 |
@@ -153,9 +153,12 @@ Not applicable: functional/fault campaign, not a latency or capacity experiment.
 
 ## Failures and anomalies
 
-None observed in the recorded suite. Hosted GitHub Actions runs were not yet
-available at report authoring time and must be attached on the PR head before
-hosted-green wording.
+None observed in the recorded suite. Hosted GitHub Actions for PR #41 head
+`b6bec19` succeeded: Go CI
+[31588107839](https://github.com/G1DO/seshatops/actions/runs/31588107839),
+Web CI [31588107888](https://github.com/G1DO/seshatops/actions/runs/31588107888),
+Documentation CI
+[31588107709](https://github.com/G1DO/seshatops/actions/runs/31588107709).
 
 ## Data-integrity checks
 
@@ -200,7 +203,7 @@ hosted-green wording.
 | --- | --- |
 | Reviewer | Implementation campaign pass; maintainer review remains a follow-up |
 | Review date | 2026-08-12 |
-| Evidence completeness | Complete for declared test-environment scope; hosted CI IDs pending PR |
+| Evidence completeness | Complete for declared test-environment scope; hosted CI recorded for PR #41 head `b6bec19` |
 | Documentation disposition | Pass with recorded limitations |
 | Runtime result disposition | Pass |
 
@@ -220,7 +223,6 @@ four claims only.
 
 ## Follow-up work
 
-- Attach hosted `go-ci` / `web-ci` / `documentation-ci` run IDs on the PR head.
 - Maintainer review of claim promotion and clean-room record.
 - M2+ owns operator quarantine UI, auth, and operational health claims
   (`CLM-007`+).

@@ -290,7 +290,10 @@ production context was found in the reviewed scope.
 2. Exactly-once wording scan found only prohibitions and qualifications.
 3. `CLM-003`–`CLM-006` promoted to Observed for test-environment scope with
    explicit limitations; other claims remain Planned.
-4. Hosted CI run IDs remain required on the PR head before hosted-green claims.
+4. Hosted CI run IDs recorded for PR #41 head `b6bec19` (Go
+   [31588107839](https://github.com/G1DO/seshatops/actions/runs/31588107839),
+   Web [31588107888](https://github.com/G1DO/seshatops/actions/runs/31588107888),
+   Docs [31588107709](https://github.com/G1DO/seshatops/actions/runs/31588107709)).
 
 #### Notes
 
