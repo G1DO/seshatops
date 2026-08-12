@@ -2,15 +2,18 @@
 
 **Status:** Implemented for Issues #25 and #26 library/integration scope.
 Issue #27 adds post-commit `AppliedNotifier` hooks used by the HTTP/SSE read
-surface in [PROJECTION_READ_API.md](PROJECTION_READ_API.md).
+surface in [PROJECTION_READ_API.md](PROJECTION_READ_API.md). Issue #29 adds
+isolated derived-state reset and retained-history rebuild proofs in
+[PROJECTION_REBUILD.md](PROJECTION_REBUILD.md).
 
 **Owns:** Consuming the M1 Redpanda topic, durable inbox/deduplication,
 aggregate-version validation, PostgreSQL inventory projection updates, atomic
 inbox+projection commits, acknowledgement-after-commit ordering, minimal
 sanitized processing-failure records for unparseable/poison deliveries,
 bounded failure/gap inspection via `InspectProcessing`, the projection
-checksum helper, tenant projection listing, and optional post-commit applied
-notifications for the Go read API.
+checksum helper, tenant projection listing, optional post-commit applied
+notifications for the Go read API, and (with Issue #29) test-scoped derived
+state reset plus retained-history rebuild helpers.
 
 **Does not own:** Generic CQRS frameworks, order projections, operator recovery
 UI, release-from-quarantine workflows, HTTP/SSE route design (Issue #27 /
@@ -139,6 +142,10 @@ or RBAC for recovery. Operator-controlled recovery remains M2 scope
 lowercase identifiers, base-10 integers, rows sorted by tenant then item,
 tab-delimited UTF-8 lines ending in `\n`, SHA-256 hex. Empty projection hashes
 the empty byte sequence.
+
+Issue #29 documents how checksum `A`/`B` comparison is used after
+`ResetDerivedState` and `RebuildFromHistory` in
+[PROJECTION_REBUILD.md](PROJECTION_REBUILD.md).
 
 ## Integration harness
 

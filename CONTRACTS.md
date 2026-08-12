@@ -171,6 +171,8 @@ visibility are recorded in
 The Issue #25 consumer, inbox/projection schema, acknowledgement ordering, and
 checksum helper are recorded in
 [INVENTORY_PROJECTION_CONSUMER.md](docs/architecture/INVENTORY_PROJECTION_CONSUMER.md).
+Issue #29 duplicate-injection and deterministic rebuild proofs are recorded in
+[PROJECTION_REBUILD.md](docs/architecture/PROJECTION_REBUILD.md).
 
 ### Outbox relay
 
@@ -295,6 +297,11 @@ Canonicalization is:
 
 Timestamps, database row order, offsets, inbox IDs, failure records, and mutable
 metadata are excluded. The empty projection hashes the empty byte sequence.
+
+Issue #29 records the isolated derived-state reset, retained-history rebuild
+procedure, duplicate-injection harness, and reproduction metadata in
+[PROJECTION_REBUILD.md](docs/architecture/PROJECTION_REBUILD.md). The checksum
+definition itself remains this section.
 
 ## 9. Minimum local toolchain
 
