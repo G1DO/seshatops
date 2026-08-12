@@ -4,7 +4,8 @@
 executable JSON/JCS library and Northstar fixture. Issue #23 implements the
 `erp` source transaction and pending outbox persistence. Issue #24 implements
 the source-owned outbox relay. Issue #25 implements the Go inbox/inventory
-projection consumer. Bounded failure/backlog observability remains Issue #26.
+projection consumer. Issue #26 implements bounded consumer failure/backlog
+observability and handler-poison escalation on that consumer.
 
 **Owns:** The concrete M1 event envelope, first event family, JSON compatibility
 rules, PostgreSQL ownership boundaries, Redpanda topic and key policy, outbox

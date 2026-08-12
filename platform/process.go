@@ -57,6 +57,14 @@ func setTestFailBeforeCommitForTest(fn func(ctx context.Context) error) {
 	testFailBeforeCommit = fn
 }
 
+// testForceHandlerPoison, when set by same-package tests, injects an explicit
+// handler-poison fault after parse/key checks and before processValidated.
+var testForceHandlerPoison func() error
+
+func setTestForceHandlerPoisonForTest(fn func() error) {
+	testForceHandlerPoison = fn
+}
+
 // ProcessRecord validates one Redpanda delivery, commits inbox + projection (or
 // quarantine) atomically, and reports whether the caller may acknowledge.
 func ProcessRecord(ctx context.Context, db *sql.DB, key, value []byte, pos SourcePosition) (Result, error) {
@@ -77,11 +85,19 @@ func ProcessRecord(ctx context.Context, db *sql.DB, key, value []byte, pos Sourc
 		return quarantineInbox(ctx, db, env, value, DispositionQuarantinedMismatch, nil, nil)
 	}
 
+	if testForceHandlerPoison != nil {
+		if perr := testForceHandlerPoison(); perr != nil {
+			return bumpPoisonAttempt(ctx, db, &env, value, pos, "handler_poison", fmt.Errorf("%w: %v", ErrHandlerPoison, perr))
+		}
+	}
+
 	res, err := processValidated(ctx, db, env, value)
 	if err != nil {
-		// Retryable processing/DB failures (including begin/commit) must not
-		// consume the poison budget or acknowledge. Poison escalation is only
-		// for explicit handler-poison paths via bumpPoisonAttempt.
+		// Explicit handler poison consumes the attempt budget. Retryable
+		// processing/DB failures (including begin/commit) must not.
+		if errors.Is(err, ErrHandlerPoison) {
+			return bumpPoisonAttempt(ctx, db, &env, value, pos, "handler_poison", err)
+		}
 		if errors.Is(err, ErrTransient) || isRetryableDB(err) {
 			return Result{ShouldAck: false}, err
 		}

@@ -22,8 +22,10 @@ All public narrative and demos use **Northstar Foods**, a fictional manufacturer
 Issue #22 adds the executable JSON event library and deterministic Northstar
 Foods fixture, Issue #23 adds the synthetic ERP source transaction with a
 pending transactional outbox, Issue #24 adds the source-owned outbox relay that
-publishes exact stored bytes to Redpanda at least once, and Issue #25 adds the
-Go consumer that transactionally updates the inventory projection.**
+publishes exact stored bytes to Redpanda at least once, Issue #25 adds the
+Go consumer that transactionally updates the inventory projection, and
+Issue #26 makes consumer failure, poison, gap, and restart behavior observable
+and safe without an operator recovery console.**
 
 This repository holds the completed M0 documentation, the reviewed M1
 event-spine contract in [CONTRACTS.md](CONTRACTS.md), Go packages under
@@ -36,7 +38,7 @@ consumer note in
 Service runtime and the TypeScript operations view are not present yet. Planned
 capabilities must not be read as completed or measured results.
 
-Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml), and Go package tests are checked by [Go CI](.github/workflows/go-ci.yml). The [M0 repository-governance review](docs/reviews/M0_REPOSITORY_GOVERNANCE_REVIEW.md), [integrated constitution review](docs/reviews/M0_INTEGRATED_CONSTITUTION_REVIEW.md), [M0 completion summary](docs/reviews/M0_COMPLETION_SUMMARY.md), [M1 event-contract fixture review](docs/reviews/M1_EVENT_CONTRACT_FIXTURE_REVIEW.md), [M1 source/outbox review](docs/reviews/M1_SOURCE_OUTBOX_REVIEW.md), [M1 outbox relay review](docs/reviews/M1_OUTBOX_RELAY_REVIEW.md), and [M1 inventory projection review](docs/reviews/M1_INVENTORY_PROJECTION_REVIEW.md) record reviewed state, evidence boundaries, limitations, and residual risk.
+Repository contribution rules are defined in [AGENTS.md](AGENTS.md), pull requests use the [PR template](.github/pull_request_template.md), documentation hygiene is checked by [Documentation CI](.github/workflows/documentation-ci.yml), and Go package tests are checked by [Go CI](.github/workflows/go-ci.yml). The [M0 repository-governance review](docs/reviews/M0_REPOSITORY_GOVERNANCE_REVIEW.md), [integrated constitution review](docs/reviews/M0_INTEGRATED_CONSTITUTION_REVIEW.md), [M0 completion summary](docs/reviews/M0_COMPLETION_SUMMARY.md), [M1 event-contract fixture review](docs/reviews/M1_EVENT_CONTRACT_FIXTURE_REVIEW.md), [M1 source/outbox review](docs/reviews/M1_SOURCE_OUTBOX_REVIEW.md), [M1 outbox relay review](docs/reviews/M1_OUTBOX_RELAY_REVIEW.md), [M1 inventory projection review](docs/reviews/M1_INVENTORY_PROJECTION_REVIEW.md), and [M1 consumer failure safety review](docs/reviews/M1_CONSUMER_FAILURE_SAFETY_REVIEW.md) record reviewed state, evidence boundaries, limitations, and residual risk.
 
 ## Product constitution
 

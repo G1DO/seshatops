@@ -137,6 +137,8 @@ func TestRedpandaFirstDeliveryAndDuplicate(t *testing.T) {
 }
 
 func TestCrashBeforeCommitThenRecover(t *testing.T) {
+	// FC-012 / M1-INV-05: crash before PostgreSQL commit leaves no partial
+	// inbox/projection effect; redelivery applies safely.
 	db := openTestDB(t)
 	fx := mustFixture(t)
 	raw := mustCanonical(t, fx.Event)
@@ -152,6 +154,17 @@ func TestCrashBeforeCommitThenRecover(t *testing.T) {
 	}
 	setTestFailBeforeCommitForTest(nil)
 
+	var inboxN, projN int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM platform.inbox`).Scan(&inboxN); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.QueryRow(`SELECT COUNT(*) FROM platform.inventory_projection`).Scan(&projN); err != nil {
+		t.Fatal(err)
+	}
+	if inboxN != 0 || projN != 0 {
+		t.Fatalf("pre-commit crash left partial state inbox=%d projection=%d", inboxN, projN)
+	}
+
 	res, err := ProcessRecord(context.Background(), db, key, raw, pos)
 	if err != nil {
 		t.Fatal(err)
@@ -162,6 +175,8 @@ func TestCrashBeforeCommitThenRecover(t *testing.T) {
 }
 
 func TestCrashAfterCommitBeforeAckIsDuplicateNoop(t *testing.T) {
+	// FC-012 / M1-INV-06: crash after DB commit and before broker ack may
+	// redeliver; redelivery is a durable no-op business effect.
 	db := openTestDB(t)
 	seed, stop := startRedpanda(t)
 	t.Cleanup(stop)
