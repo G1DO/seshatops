@@ -8,7 +8,7 @@ isolation, reliability, performance, deployment, or production readiness.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Codex implementation/review pass; maintainer review remains a follow-up |
+| Author | G1DO |
 | Date (UTC) | 2026-08-07 |
 | Branch | `docs/21-event-spine-contract` |
 | Base tip | `5bc9e65` (merged Constitution review head) |

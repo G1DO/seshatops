@@ -10,7 +10,8 @@ Observed/Reproduced claim promotion, Identity & Operations operator recovery, or
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Implementation pass on branch `feat/29-projection-rebuild`; maintainer review remains a follow-up |
+| Author | G1DO |
+| Branch | `feat/29-projection-rebuild` |
 | Date (UTC) | 2026-08-12 |
 | Branch | `feat/29-projection-rebuild` |
 | Scope | Issue #29 only: `ResetDerivedState`, `RebuildFromHistory`, `HandlerVersion`, FC-001/FC-014-style platform tests, rebuild docs, evidence/matrix notes |

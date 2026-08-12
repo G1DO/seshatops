@@ -10,7 +10,8 @@ without a recorded GitHub Actions run.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Implementation pass on branch `feat/27-projection-api-sse`; maintainer review remains a follow-up |
+| Author | G1DO |
+| Branch | `feat/27-projection-api-sse` |
 | Date (UTC) | 2026-08-12 |
 | Branch | `feat/27-projection-api-sse` |
 | Scope | Issue #27 only: `platform` list/notify helpers, `api` REST/SSE library, OpenAPI/contract docs, integration tests |

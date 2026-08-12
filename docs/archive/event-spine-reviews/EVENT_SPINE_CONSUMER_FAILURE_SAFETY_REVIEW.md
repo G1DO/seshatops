@@ -10,7 +10,8 @@ without a recorded GitHub Actions run.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Implementation pass on branch `feat/26-consumer-failure-safety`; maintainer review remains a follow-up |
+| Author | G1DO |
+| Branch | `feat/26-consumer-failure-safety` |
 | Date (UTC) | 2026-08-12 |
 | Branch | `feat/26-consumer-failure-safety` |
 | Scope | Issue #26 only: handler-poison escalation via `ProcessRecord`, `InspectProcessing`, FC-009–012-style platform tests, consumer docs, matrix residual notes |

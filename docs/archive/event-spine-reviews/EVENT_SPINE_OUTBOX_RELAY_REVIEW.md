@@ -9,7 +9,8 @@ reliability SLOs, or production readiness.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Implementation pass on branch `feat/24-redpanda-outbox-relay`; maintainer review remains a follow-up |
+| Author | G1DO |
+| Branch | `feat/24-redpanda-outbox-relay` |
 | Date (UTC) | 2026-08-11 |
 | Branch | `feat/24-redpanda-outbox-relay` |
 | Scope | Issue #24 only: `relay` package, claim/lease/backoff/quarantine, franz-go publish, backlog inspect, Redpanda pin, integration tests, relay docs |

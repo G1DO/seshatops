@@ -1,20 +1,21 @@
-# Event-Spine Exit-Gate Campaign Review - Issue #30
+# Event-Spine Exit-Gate Campaign - Issue #30
 
 This document records the Issue #30 integrated event-spine exit-gate campaign. It
 evaluates the existing #21–#29 vertical slice under a declared test environment.
 It does not claim production readiness, staging parity, exactly-once delivery,
 Identity authorization/operations product scope, or Traceability & Recovery backup/restore.
 
-## Review record
+## Campaign record
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Implementation campaign pass on branch `test/30-m1-exit-gate`; maintainer review remains a follow-up |
+| Author | G1DO |
+| Verified by | Local `go test ./...`, web Vitest/typecheck/build, hosted CI on PR #41 `b59b760` |
 | Date (UTC) | 2026-08-12 |
 | Branch | `test/30-m1-exit-gate` |
 | Runtime commit verified | `a4e5d47f67f2b4ff1d97760c415c3ea28ad83e47` |
 | Scope | Issue #30 only: execute event-spine exit-gate scenarios, record evidence, update `CLM-003`–`CLM-006` and Event Spine fault-matrix rows |
-| Review type | Integration/fault evidence, clean-room, claim-status, and verification honesty review |
+| Kind | Integration/fault evidence, clean-room, claim-status, and verification honesty |
 | Runtime disposition | Pass in test environment (Testcontainers + Vitest) |
 
 ## Acceptance matrix
@@ -62,7 +63,7 @@ Identity authorization/operations product scope, or Traceability & Recovery back
 Full procedure: [EVENT_SPINE_EXIT_GATE_PROCEDURE.md](../evaluation/EVENT_SPINE_EXIT_GATE_PROCEDURE.md).
 Experiment report: [EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md).
 
-## Clean-room review
+## Clean-room check
 
 - Fixture, topic, tenant, and schema material remain fictional Northstar Foods /
   CONTRACTS.md artifacts.

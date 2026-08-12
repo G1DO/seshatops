@@ -11,8 +11,6 @@ evaluation protocols (Issue #6), reliability evidence protocols (Issue #7),
 roadmap and evidence ledger (Issue #8), repository layout and CI (Issue #9), or
 integrated constitution review (Issue #10).
 
-Archived constitution architecture review: [docs/archive/constitution-reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md](docs/archive/constitution-reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md).
-
 Project Constitution correctness model and Event Spine contract: [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), [CONTRACTS.md](CONTRACTS.md), and [ADRs](docs/adrs/).
 
 ## 1. Purpose

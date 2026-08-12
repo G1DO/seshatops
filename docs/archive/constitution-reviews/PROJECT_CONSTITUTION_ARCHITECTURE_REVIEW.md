@@ -6,7 +6,7 @@ Evidence that an architecture-boundary review **occurred** for SeshatOps Issue #
 
 | Field | Value |
 | --- | --- |
-| Reviewer | G1DO (maintainer; time-separated self-review completed) |
+| Author | G1DO |
 | Date (UTC) | 2026-08-06 |
 | First-pass tip | Architecture docs at `43be239cc98ead99cdfc0e00d73bd60e77eb1533`; review tip record at `4228ea91343c39cc59e4e5b12dd9f3559d5ab6fb` |
 | Commit / branch reviewed | Branch `docs/3-architecture-boundaries`; tip updated after PR-review remediation (see tip SHA below). Base `219160b4ebc65b67978e0f2361d9f85f5faa6a2e` (`main` after PR #12). |
@@ -94,7 +94,7 @@ No additional contradictions were invented to populate this table.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | G1DO (maintainer; time-separated self-review) |
+| Author | G1DO |
 | Date (UTC) | 2026-08-06 |
 | Commit / tip | First-pass architecture at `43be239cc98ead99cdfc0e00d73bd60e77eb1533`; remediation tip `4324f77d896df45dff7c8952ca818b62cc118ee4` |
 | Scope (paths / PR) | `ARCHITECTURE.md`, `docs/archive/constitution-reviews/PROJECT_CONSTITUTION_ARCHITECTURE_REVIEW.md`, `README.md`, `PRODUCT.md` (Â§10 ownership link); PR #13 |

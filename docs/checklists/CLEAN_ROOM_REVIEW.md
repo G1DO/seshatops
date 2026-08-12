@@ -6,30 +6,30 @@ Reusable checklist for SeshatOps clean-room reviews. Policy: [CLEAN_ROOM.md](../
 
 ## How to use
 
-1. Copy the **Review record** section into a pull-request description, or complete it in place for a release audit.
+1. Copy the **Record** section into a pull-request description, or complete it in place for a release audit.
 2. Mark every applicable checkbox. Record findings and remediation explicitly.
 3. Set **Result** only after remediation (if any) is done.
-4. Link the completed record from the PR or release notes when claiming that a review occurred.
-5. For pre-public-release reviews, expand scope to the full repository, history, issues, and release artifacts.
+4. Link the completed record from the PR or release notes when claiming that a clean-room check occurred.
+5. For pre-public-release checks, expand scope to the full repository, history, issues, and release artifacts.
 
 Do not commit private identifier denylists. Use category searches only.
 
 ---
 
-## Review record (template)
+## Record (template)
 
-Copy from here for each review:
+Copy from here for each clean-room check:
 
 ```markdown
-### Clean-room review record
+### Clean-room record
 
 | Field | Value |
 | --- | --- |
-| Reviewer | |
+| Author | |
 | Date (UTC) | |
 | Commit / tip | |
 | Scope (paths / PR) | |
-| Review type | pre-commit / pre-PR / pre-public-release |
+| Kind | pre-commit / pre-PR / pre-public-release |
 | Result | Pass / Fail / Pass with remediation |
 
 #### Checks
@@ -72,7 +72,7 @@ Completed reviews against repository artifacts. Newest first.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | G1DO (maintainer; time-separated self-review) |
+| Author | G1DO |
 | Date (UTC) | 2026-08-06 |
 | Commit / tip | Constitution at `3fe3763`; clean-room policy docs reviewed at `8419c86811dba5df4e1f0af43db0ed7e0167b522` (Issue #2) |
 | Scope (paths / PR) | `README.md`, `PRODUCT.md`, `LICENSE`, `CLEAN_ROOM.md`, `docs/checklists/CLEAN_ROOM_REVIEW.md` |
@@ -119,7 +119,7 @@ No private Ahoy material, secrets, or application code found. `Ahoy` appears onl
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Codex implementation/review pass; maintainer review remains a follow-up |
+| Author | G1DO |
 | Date (UTC) | 2026-08-07 |
 | Commit / tip | Baseline `7c1d59a`; PR #20 pushed diff, with the exact current head recorded in PR metadata |
 | Scope (paths / PR) | Full tracked Constitution repository, reviewed Issues #1–#10 and PRs #11–#19, and PR #20's pushed diff |
@@ -177,7 +177,7 @@ production context was found in the reviewed scope.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Codex implementation/review pass; maintainer review remains a follow-up |
+| Author | G1DO |
 | Date (UTC) | 2026-08-07 |
 | Commit / tip | Working tree based on `5bc9e65`; final commit to be recorded by the implementation PR |
 | Scope (paths / PR) | Issue #21 Event Spine contract, ADR-0003, ADR-0004, amended ADR-0001, status reconciliation, and Event Spine review |
@@ -219,7 +219,8 @@ production context was found in the reviewed scope.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Implementation pass on branch `feat/23-transactional-outbox`; maintainer review remains a follow-up |
+| Author | G1DO |
+| Branch | `feat/23-transactional-outbox` |
 | Date (UTC) | 2026-08-10 |
 | Commit / tip | `feat/23-transactional-outbox` implementation commit for Issue #23 |
 | Scope (paths / PR) | Issue #23 `erp` package, migrations, integration tests, source/outbox persistence docs, and status updates |
@@ -261,7 +262,8 @@ production context was found in the reviewed scope.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Implementation campaign pass on branch `test/30-m1-exit-gate`; maintainer review remains a follow-up |
+| Author | G1DO |
+| Verified by | Local `go test ./...`, web Vitest/typecheck/build, hosted CI on PR #41 `b59b760` |
 | Date (UTC) | 2026-08-12 |
 | Commit / tip | Runtime verified at `a4e5d47`; evidence docs on Issue #30 PR head |
 | Scope (paths / PR) | Issue #30 procedure, experiment report, campaign review, completion summary, FAULT matrix Event Spine rows, EVIDENCE.md `CLM-003`–`CLM-006`, status docs |

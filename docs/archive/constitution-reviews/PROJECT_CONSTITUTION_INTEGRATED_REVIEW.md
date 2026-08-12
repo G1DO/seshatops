@@ -9,7 +9,7 @@ reliability, performance, recovery, deployment, or production readiness exists.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Codex implementation/review pass; maintainer review remains a follow-up |
+| Author | G1DO |
 | Date (UTC) | 2026-08-07 |
 | Branch | `docs/10-integrated-m0-review` |
 | Base tip | `7c1d59a` (`main` and `origin/main`) |

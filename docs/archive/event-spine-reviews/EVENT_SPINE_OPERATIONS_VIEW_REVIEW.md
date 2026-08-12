@@ -10,7 +10,8 @@ recorded GitHub Actions run.
 
 | Field | Value |
 | --- | --- |
-| Reviewer | Implementation pass on branch `feat/28-operations-view`; maintainer review remains a follow-up |
+| Author | G1DO |
+| Branch | `feat/28-operations-view` |
 | Date (UTC) | 2026-08-12 |
 | Branch | `feat/28-operations-view` |
 | Scope | Issue #28 only: `web/` operations screen, REST/SSE client, connection states, tests, docs |

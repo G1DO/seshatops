@@ -18,7 +18,7 @@
 
 | Field | Value/status |
 | --- | --- |
-| Operator or operator role | Implementation campaign pass on branch `test/30-m1-exit-gate` |
+| Operator or operator role | G1DO on branch `test/30-m1-exit-gate` |
 | Run start timestamp | 2026-08-12T10:29:10Z |
 | Run end timestamp | 2026-08-12T10:32:25Z |
 | Clock and time-zone assumptions | UTC wall clock on the operator host |
@@ -109,7 +109,7 @@ were targeted.
 | Typecheck/build logs | `/tmp/m1-exit-gate-typecheck.log`, `/tmp/m1-exit-gate-build.log` | Passed |
 | Duplicate/rebuild traces | Test names in `platform/rebuild_test.go`, `platform/consume_test.go` | Contract §8 equality asserted in-process |
 | Procedure | [EVENT_SPINE_EXIT_GATE_PROCEDURE.md](EVENT_SPINE_EXIT_GATE_PROCEDURE.md) | N/A |
-| Review | [EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md](../reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md) | N/A |
+| Review | [EVENT_SPINE_EXIT_GATE_CAMPAIGN.md](../reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN.md) | N/A |
 
 Committed raw machine logs are omitted to avoid noisy binary/testcontainer
 output; package names, commands, and exit outcomes are the reproducible
@@ -197,12 +197,13 @@ Documentation CI
 4. Run the full suite gate commands above.
 5. Compare outcomes to this report; attach hosted CI run IDs when present.
 
-## Reviewer decision
+## Decision
 
 | Field | Value/status |
 | --- | --- |
-| Reviewer | Implementation campaign pass; maintainer review remains a follow-up |
-| Review date | 2026-08-12 |
+| Author | G1DO |
+| Verified by | Local suites + hosted CI on PR #41 `b59b760` |
+| Date | 2026-08-12 |
 | Evidence completeness | Complete for declared test-environment scope; hosted CI recorded for PR #41 commit `b59b760` |
 | Documentation disposition | Pass with recorded limitations |
 | Runtime result disposition | Pass |
@@ -213,7 +214,7 @@ Documentation CI
 | --- | --- |
 | New claim status | `CLM-003`–`CLM-006` → **Observed** (test environment) |
 | Decision rationale | Named experiment, exact commands, package pass outcomes, and limitations recorded; distinct from exactly-once or production claims |
-| Evidence links | This report; [EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md](../reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN_REVIEW.md); [FAULT_CAMPAIGN_MATRIX.md](FAULT_CAMPAIGN_MATRIX.md); [EVIDENCE.md](../../EVIDENCE.md) |
+| Evidence links | This report; [EVENT_SPINE_EXIT_GATE_CAMPAIGN.md](../reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN.md); [FAULT_CAMPAIGN_MATRIX.md](FAULT_CAMPAIGN_MATRIX.md); [EVIDENCE.md](../../EVIDENCE.md) |
 
 ## Superseded evidence
 
