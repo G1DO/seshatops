@@ -8,14 +8,14 @@ Behavioral and project guidance for the SeshatOps repository.
 
 SeshatOps is a clean-room, multi-tenant operations-intelligence platform concept for the fictional Northstar Foods scenario. It is intended to consume ERP events, reconstruct replayable operational state, produce evidence-backed intelligence, and execute only authorized, human-approved actions.
 
-The repository is in Milestone M1, Event Spine. M0 was completed by the merged
-Issue #10 integration review and PR #20. Issues #1 through #9 established the
-product, clean-room, architecture, correctness, security,
-intelligence-evaluation, operational-evidence, roadmap, and
-repository-governance documentation. Issue #21 owns the concrete M1 event-spine
-contract. Issue #22 owns the executable JSON event package and deterministic
-Northstar Foods fixture. Issue #23 owns the synthetic ERP source transaction
-and pending transactional outbox persistence.
+The repository completed Milestone M1 Event Spine exit-gate evidence
+(Issue #30). M0 was completed by the merged Issue #10 integration review and
+PR #20. Issues #1 through #9 established the product, clean-room, architecture,
+correctness, security, intelligence-evaluation, operational-evidence, roadmap,
+and repository-governance documentation. Issue #21 owns the concrete M1
+event-spine contract. Issue #22 owns the executable JSON event package and
+deterministic Northstar Foods fixture. Issue #23 owns the synthetic ERP source
+transaction and pending transactional outbox persistence.
 
 Issue #21 remains documentation-only. Issue #22 introduces the first Go library
 code under `event/` and `northstar/`. Issue #23 adds `erp/` PostgreSQL source
@@ -28,10 +28,11 @@ on that consumer. Issue #27 adds the read-only `api/` REST and SSE surface over
 committed projection state, with post-commit notifications from `platform`.
 Issue #28 adds the TypeScript `web/` operations view over that API. Issue #29
 adds platform-only derived-state reset, retained-history rebuild, and local
-duplicate/checksum proofs. No deployment, model, or production environment
-exists here yet. Planned behavior
-must not be described as observed, reproduced, secure, reliable, performant, or
-production-ready without the required evidence.
+duplicate/checksum proofs. Issue #30 records the integrated exit-gate campaign
+and Observed decisions for `CLM-003`–`CLM-006` in the declared test environment.
+No deployment, model, or production environment exists here yet. Planned
+behavior must not be described as observed, reproduced, secure, reliable,
+performant, or production-ready without the required evidence.
 
 ## 2. Source-of-truth hierarchy
 
@@ -114,9 +115,9 @@ Issue #27 adds the read-only `api` package (REST snapshot + SSE) over committed
 projection state, with post-commit notifications from `platform`.
 Issue #28 adds the TypeScript `web/` operations view. Issue #29 extends
 `platform` with `ResetDerivedState` and `RebuildFromHistory` for local
-duplicate/rebuild checksum proofs.
-Later M1 issues may extend platform packages without inventing a second module
-or a general ERP schema.
+duplicate/rebuild checksum proofs. Issue #30 owns the integrated M1 exit-gate
+campaign evidence. Later milestones may extend platform packages without
+inventing a second module or a general ERP schema.
 
 ## 8. Evidence and claim governance
 

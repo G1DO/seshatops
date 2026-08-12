@@ -256,3 +256,44 @@ production context was found in the reviewed scope.
 - No Ahoy repository or private Ahoy artifact was inspected or used.
 - Checked boxes record that this review occurred; they do not prove absence of
   undiscovered issues.
+
+### CRR-0010 - M1 exit-gate campaign review (Issue #30)
+
+| Field | Value |
+| --- | --- |
+| Reviewer | Implementation campaign pass on branch `test/30-m1-exit-gate`; maintainer review remains a follow-up |
+| Date (UTC) | 2026-08-12 |
+| Commit / tip | Runtime verified at `a4e5d47`; evidence docs on Issue #30 PR head |
+| Scope (paths / PR) | Issue #30 procedure, experiment report, campaign review, completion summary, FAULT matrix M1 rows, EVIDENCE.md `CLM-003`–`CLM-006`, status docs |
+| Review type | M1 exit-gate evidence, clean-room, and verification honesty review |
+| Result | Pass with recorded follow-ups |
+
+#### Checks
+
+- [x] No Ahoy or other private code, schemas, migrations, data, logs, traces, or production config
+- [x] No private screenshots, recordings, or exports
+- [x] No production identifiers, hostnames, internal URLs, or private account/tenant IDs
+- [x] No private business-specific rules, recipes, prices, customers, suppliers, or process knowledge
+- [x] No secrets, credentials, tokens, or private environment files
+- [x] No raw AI conversations or prompt histories containing private context
+- [x] All new material has a permitted source or recorded synthetic provenance
+- [x] Synthetic example values are fictional and independently explainable
+- [x] Uncertain provenance excluded rather than sanitized and retained
+- [x] Category repository search run over the Issue #30 scope
+- [x] Public artifacts remain independently explainable without private systems
+- [x] No private denylist of real identifiers was added
+
+#### Findings and disposition
+
+1. Campaign evidence uses synthetic Northstar Foods fixtures and Testcontainers
+   only; no private systems were contacted.
+2. Exactly-once wording scan found only prohibitions and qualifications.
+3. `CLM-003`–`CLM-006` promoted to Observed for test-environment scope with
+   explicit limitations; other claims remain Planned.
+4. Hosted CI run IDs remain required on the PR head before hosted-green claims.
+
+#### Notes
+
+- No Ahoy repository or private Ahoy artifact was inspected or used.
+- Checked boxes record that this review occurred; they do not prove absence of
+  undiscovered issues.
