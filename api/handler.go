@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/G1DO/seshatops/identity"
 	"github.com/G1DO/seshatops/platform"
 )
 
@@ -17,33 +18,45 @@ const EventProjectionUpdated = "inventory_projection.updated"
 
 // Server is the Event Spine read-only projection HTTP surface.
 type Server struct {
-	db  *sql.DB
-	hub *Hub
-	now func() time.Time
+	db           *sql.DB
+	hub          *Hub
+	auth         identity.SessionLookup
+	now          func() time.Time
+	sseHeartbeat time.Duration
 }
 
 // NewServer constructs a read-only API server. hub may be nil only when SSE is
 // unused; REST still works. Callers that run the consumer should
-// platform.SetAppliedNotifier(hub).
-func NewServer(db *sql.DB, hub *Hub) *Server {
+// platform.SetAppliedNotifier(hub). auth is required: a nil lookup fails closed
+// with 401 rather than serving projection data.
+func NewServer(db *sql.DB, hub *Hub, auth identity.SessionLookup) *Server {
 	if hub == nil {
 		hub = NewHub()
 	}
 	return &Server{
-		db:  db,
-		hub: hub,
-		now: func() time.Time { return time.Now().UTC() },
+		db:           db,
+		hub:          hub,
+		auth:         auth,
+		now:          func() time.Time { return time.Now().UTC() },
+		sseHeartbeat: 15 * time.Second,
 	}
 }
 
 // Hub returns the notification hub used for SSE fanout.
 func (s *Server) Hub() *Hub { return s.hub }
 
+// SetSSEHeartbeatForTest shortens the SSE session-recheck interval.
+func (s *Server) SetSSEHeartbeatForTest(d time.Duration) {
+	s.sseHeartbeat = d
+}
+
 // Handler returns the HTTP handler for the Event Spine projection routes.
+// Every /v1 path requires a fresh Go-owned session (Issue #45). This is
+// authentication, not tenant authorization.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/tenants/", s.serveTenant)
-	return mux
+	return identity.RequireSession(s.auth, mux)
 }
 
 func (s *Server) serveTenant(w http.ResponseWriter, r *http.Request) {
@@ -156,7 +169,11 @@ func (s *Server) handleSSE(w http.ResponseWriter, r *http.Request, tenantID stri
 	updates, cancel := s.hub.Subscribe(tenantID)
 	defer cancel()
 
-	heartbeat := time.NewTicker(15 * time.Second)
+	interval := s.sseHeartbeat
+	if interval <= 0 {
+		interval = 15 * time.Second
+	}
+	heartbeat := time.NewTicker(interval)
 	defer heartbeat.Stop()
 
 	ctx := r.Context()
@@ -165,12 +182,18 @@ func (s *Server) handleSSE(w http.ResponseWriter, r *http.Request, tenantID stri
 		case <-ctx.Done():
 			return
 		case <-heartbeat.C:
+			if !s.sessionFresh(r) {
+				return
+			}
 			if _, err := fmt.Fprintf(w, ": heartbeat\n\n"); err != nil {
 				return
 			}
 			flusher.Flush()
 		case update, ok := <-updates:
 			if !ok {
+				return
+			}
+			if !s.sessionFresh(r) {
 				return
 			}
 			payload, err := s.projectionUpdatedPayload(ctx, update)
@@ -183,6 +206,14 @@ func (s *Server) handleSSE(w http.ResponseWriter, r *http.Request, tenantID stri
 			flusher.Flush()
 		}
 	}
+}
+
+func (s *Server) sessionFresh(r *http.Request) bool {
+	if s.auth == nil {
+		return false
+	}
+	_, err := s.auth.Session(r)
+	return err == nil
 }
 
 func (s *Server) projectionUpdatedPayload(ctx context.Context, update platform.AppliedUpdate) (ProjectionUpdated, error) {

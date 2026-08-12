@@ -56,6 +56,7 @@ export async function fetchSnapshot(
     response = await fetchImpl(url, {
       method: "GET",
       headers: { Accept: "application/json" },
+      credentials: "include",
     });
   } catch {
     throw new ApiError(0, "network_error");

@@ -18,6 +18,7 @@ import (
 	"github.com/G1DO/seshatops/api"
 	"github.com/G1DO/seshatops/erp"
 	"github.com/G1DO/seshatops/event"
+	"github.com/G1DO/seshatops/identity"
 	"github.com/G1DO/seshatops/northstar"
 	"github.com/G1DO/seshatops/platform"
 	"github.com/G1DO/seshatops/relay"
@@ -132,12 +133,34 @@ func processEnvelope(t *testing.T, db *sql.DB, env event.Envelope, offset int64)
 	return res
 }
 
+type allowAllAuth struct{}
+
+func (allowAllAuth) Session(*http.Request) (*identity.Session, error) {
+	now := time.Now().UTC()
+	return &identity.Session{
+		PrincipalID:     "test-operator",
+		Issuer:          "https://idp.test",
+		Subject:         "test-operator",
+		AuthenticatedAt: now,
+		ExpiresAt:       now.Add(time.Hour),
+		CorrelationID:   "test-correlation",
+	}, nil
+}
+
 func newTestServer(t *testing.T, db *sql.DB) *api.Server {
 	t.Helper()
 	hub := api.NewHub()
 	platform.SetAppliedNotifier(hub)
 	t.Cleanup(func() { platform.SetAppliedNotifier(nil) })
-	return api.NewServer(db, hub)
+	return api.NewServer(db, hub, allowAllAuth{})
+}
+
+func newGatedServer(t *testing.T, db *sql.DB, auth identity.SessionLookup) *api.Server {
+	t.Helper()
+	hub := api.NewHub()
+	platform.SetAppliedNotifier(hub)
+	t.Cleanup(func() { platform.SetAppliedNotifier(nil) })
+	return api.NewServer(db, hub, auth)
 }
 
 func inventoryPath(tenantID string) string {
@@ -448,6 +471,167 @@ func TestMalformedTenantRejected(t *testing.T) {
 	qty, ver, ok, err := platform.ProjectionState(context.Background(), db, fx.TenantID, fx.ItemID)
 	if err != nil || !ok || qty != 8 || ver != 1 {
 		t.Fatalf("projection mutated: qty=%d ver=%d ok=%v err=%v", qty, ver, ok, err)
+	}
+}
+
+func TestUnauthenticatedRefusedOnRESTAndSSE(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	store := identity.NewStore(time.Hour, nil)
+	auth := identity.NewAuthenticator(store, identity.DefaultCookieName)
+	srv := newGatedServer(t, db, auth)
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+
+	resp, err := http.Get(ts.URL + inventoryPath(fx.TenantID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("REST status=%d body=%s", resp.StatusCode, body)
+	}
+	if ct := resp.Header.Get("Content-Type"); !strings.Contains(ct, "application/json") {
+		t.Fatalf("REST content-type=%q", ct)
+	}
+	if !strings.Contains(string(body), "unauthenticated") {
+		t.Fatalf("REST body=%s", body)
+	}
+
+	resp, err = http.Get(ts.URL + streamPath(fx.TenantID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ = io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("SSE status=%d body=%s", resp.StatusCode, body)
+	}
+	if ct := resp.Header.Get("Content-Type"); strings.Contains(ct, "text/event-stream") {
+		t.Fatalf("SSE started stream without session: content-type=%q", ct)
+	}
+	if !strings.Contains(string(body), "unauthenticated") {
+		t.Fatalf("SSE body=%s", body)
+	}
+}
+
+func TestAuthenticatedSessionCanReadInventory(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	_ = processEnvelope(t, db, fx.Event, 1)
+	store := identity.NewStore(time.Hour, nil)
+	sess, err := store.Create("operator-northstar", "https://idp.test", "operator-northstar", "corr")
+	if err != nil {
+		t.Fatal(err)
+	}
+	auth := identity.NewAuthenticator(store, identity.DefaultCookieName)
+	srv := newGatedServer(t, db, auth)
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+
+	req, err := http.NewRequest(http.MethodGet, ts.URL+inventoryPath(fx.TenantID), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.AddCookie(&http.Cookie{Name: identity.DefaultCookieName, Value: sess.ID})
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		t.Fatalf("status=%d body=%s", resp.StatusCode, body)
+	}
+	var snap api.InventorySnapshot
+	if err := json.NewDecoder(resp.Body).Decode(&snap); err != nil {
+		t.Fatal(err)
+	}
+	if snap.TenantID != fx.TenantID || len(snap.Items) != 1 {
+		t.Fatalf("snapshot = %+v", snap)
+	}
+}
+
+func TestSSEStopsAfterSessionRevoked(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	store := identity.NewStore(time.Hour, nil)
+	sess, err := store.Create("operator-northstar", "https://idp.test", "operator-northstar", "corr")
+	if err != nil {
+		t.Fatal(err)
+	}
+	auth := identity.NewAuthenticator(store, identity.DefaultCookieName)
+	srv := newGatedServer(t, db, auth)
+	srv.SetSSEHeartbeatForTest(20 * time.Millisecond)
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ts.URL+streamPath(fx.TenantID), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.AddCookie(&http.Cookie{Name: identity.DefaultCookieName, Value: sess.ID})
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status=%d", resp.StatusCode)
+	}
+
+	events := make(chan api.ProjectionUpdated, 4)
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- readSSEUpdates(resp.Body, events)
+	}()
+	time.Sleep(30 * time.Millisecond)
+
+	store.Delete(sess.ID)
+
+	select {
+	case err := <-errCh:
+		if err != nil {
+			t.Fatalf("sse reader: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("SSE did not close after session revoke")
+	}
+
+	_ = processEnvelope(t, db, fx.Event, 1)
+	select {
+	case u := <-events:
+		t.Fatalf("SSE emitted after revoke: %+v", u)
+	case <-time.After(100 * time.Millisecond):
+	}
+}
+
+func TestClientPrincipalHeaderDoesNotAuthenticate(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	store := identity.NewStore(time.Hour, nil)
+	auth := identity.NewAuthenticator(store, identity.DefaultCookieName)
+	srv := newGatedServer(t, db, auth)
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+
+	req, err := http.NewRequest(http.MethodGet, ts.URL+inventoryPath(fx.TenantID), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("X-Principal-ID", "attacker")
+	req.Header.Set("X-User", "attacker")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("status=%d body=%s", resp.StatusCode, body)
 	}
 }
 

@@ -1,6 +1,6 @@
 # Authorization Model - SeshatOps
 
-**Status:** Planned authorization design for Issue #5. This document defines decisions and invariants for future implementation. It does not claim that authentication, authorization, tenant isolation, approval enforcement, service identity controls, or audit protection currently exist.
+**Status:** Planned authorization design for Issue #5. This document defines decisions and invariants for future implementation. Issue #45 records OIDC/session library/test runtime in [OIDC_SESSION.md](OIDC_SESSION.md). This document does not claim that authorization, tenant isolation, approval enforcement, service identity controls, or audit protection currently exist, or that authentication is a verified production control.
 
 **Owns:** Conceptual authorization semantics, default-deny behavior, tenant isolation, authorization checkpoints, service identity boundaries, confused-deputy protections, and the relationship between authorization and evidence.
 
@@ -20,7 +20,7 @@ This model applies to:
 - audit records, receipts, exports, logs, traces, and evidence; and
 - administrative and operational actions.
 
-All authorization controls in this document remain Planned. Event Spine packages implement the event path; authentication, authorization runtime, tenant isolation enforcement, approval enforcement, and audit protection are not claimed as implemented.
+All authorization controls in this document remain Planned. Event Spine packages implement the event path. Issue #45 implements OIDC login and Go-owned session establishment at library/test scope; authorization runtime, tenant isolation enforcement, approval enforcement, and audit protection are not claimed as implemented.
 
 ## 2. Four separate concepts
 
@@ -300,8 +300,10 @@ The full test inventory and evidence ownership are recorded in the Issue #5 revi
 profile (Authorization Code + PKCE; no custom IdP), Go-owned principal/session
 model, tenant visibility via platform membership and tenant-scoped allow-list,
 explicit allow-list policy representation, and service-identity delegation
-boundaries for Identity & Operations design. Vendor selection, routes, schemas,
-and runtime enforcement remain deferred.
+boundaries for Identity & Operations design. Issue #45 implements the OIDC
+login and session runtime recorded in [OIDC_SESSION.md](OIDC_SESSION.md).
+Vendor selection, durable session storage, and authorization enforcement
+remain deferred.
 
 The Identity & Operations demo role catalog, resource/action IDs, and allow-list
 rows are published in [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md). A
@@ -309,9 +311,9 @@ policy-engine product, assignment schema, and scope syntax remain deferred.
 
 The following remain deliberately not selected here:
 
-- identity-provider vendor/product, concrete token storage format, and revocation mechanism implementation;
+- identity-provider vendor/product, durable token/session storage format, and revocation product;
 - policy-engine product, assignment schema, and scope syntax;
-- API routes, request/response schemas, middleware, and generated clients;
+- authorization API evaluation, generated clients, and default-deny tenant enforcement (Issue #46);
 - database tables, indexes, database roles, row-level mechanisms, caches, and storage layout;
 - cryptographic receipt or audit protocols;
 - secret-management products, credential rotation mechanisms, and deployment topology;
