@@ -203,6 +203,15 @@ func processValidated(ctx context.Context, db *sql.DB, env event.Envelope, raw [
 	if err := commitWithHook(ctx, tx); err != nil {
 		return Result{}, err
 	}
+	if disp == DispositionApplied {
+		notifyApplied(AppliedUpdate{
+			TenantID:         env.TenantID,
+			ItemID:           env.AggregateID,
+			QuantityOnHand:   env.Payload.QuantityAfter,
+			AggregateVersion: env.AggregateVersion,
+			EventID:          env.EventID,
+		})
+	}
 	return Result{
 		Disposition: disp,
 		EventID:     env.EventID,

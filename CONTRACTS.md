@@ -5,16 +5,20 @@ executable JSON/JCS library and Northstar fixture. Issue #23 implements the
 `erp` source transaction and pending outbox persistence. Issue #24 implements
 the source-owned outbox relay. Issue #25 implements the Go inbox/inventory
 projection consumer. Issue #26 implements bounded consumer failure/backlog
-observability and handler-poison escalation on that consumer.
+observability and handler-poison escalation on that consumer. Issue #27
+implements the Go-owned projection REST/SSE read surface documented in
+[PROJECTION_READ_API.md](docs/architecture/PROJECTION_READ_API.md).
 
 **Owns:** The concrete M1 event envelope, first event family, JSON compatibility
 rules, PostgreSQL ownership boundaries, Redpanda topic and key policy, outbox
 publication, inbox and projection consistency, failure dispositions, checksum
 canonicalization, and the minimum local toolchain.
 
-**Does not own:** HTTP routes, UI component design, authentication or RBAC,
-operator recovery controls, deployment topology, observability targets, data
-retention policy, or later event families.
+**Does not own:** HTTP route design (see
+[PROJECTION_READ_API.md](docs/architecture/PROJECTION_READ_API.md)), UI
+component design, authentication or RBAC, operator recovery controls,
+deployment topology, observability targets, data retention policy, or later
+event families.
 
 This contract implements the M0 principles in [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md)
 and [ADR-0001](docs/adrs/0001-transactional-outbox-and-at-least-once-delivery.md).
@@ -30,6 +34,10 @@ M1 supports one synthetic order line for one tenant and one inventory item:
 > accepted synthetic order -> PostgreSQL source transaction and outbox ->
 > Redpanda -> Go consumer -> transactional inbox and inventory projection ->
 > Go-owned read surface for the TypeScript operations view
+
+The Go-owned read surface for that final step is defined by
+[PROJECTION_READ_API.md](docs/architecture/PROJECTION_READ_API.md) (Issue #27).
+This contracts document does not redefine HTTP routes or SSE frames.
 
 Multi-line orders, additional event families, commands, approvals, identity,
 operator recovery, and intelligence are outside this contract.
