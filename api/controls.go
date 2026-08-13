@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -34,39 +35,71 @@ func (s *Server) authorizeControl(w http.ResponseWriter, r *http.Request, tenant
 		writeJSON(w, http.StatusUnauthorized, ErrorBody{Error: "unauthenticated"})
 		return false
 	}
-	if s.policy == nil || s.policy.Allow(sess.PrincipalID, tenantID, resource, action) != nil {
-		s.recordDecision(ControlDecision{
-			PrincipalID: sess.PrincipalID,
-			TenantID:    tenantID,
-			Resource:    resource,
-			Action:      action,
-			Outcome:     decisionDeny,
-			Reason:      "forbidden",
-			TargetID:    targetID,
-		})
-		writeJSON(w, http.StatusForbidden, ErrorBody{Error: "forbidden"})
-		return false
-	}
-	s.recordDecision(ControlDecision{
+	decision := ControlDecision{
 		PrincipalID: sess.PrincipalID,
 		TenantID:    tenantID,
 		Resource:    resource,
 		Action:      action,
-		Outcome:     decisionAllow,
-		Reason:      "matrix_allow",
+		Outcome:     decisionDeny,
+		Reason:      "forbidden",
 		TargetID:    targetID,
-	})
+	}
+	if s.policy != nil && s.policy.Allow(sess.PrincipalID, tenantID, resource, action) == nil {
+		decision.Outcome = decisionAllow
+		decision.Reason = "matrix_allow"
+	}
+	if err := s.recordDecision(r.Context(), decision); err != nil {
+		writeJSON(w, http.StatusInternalServerError, ErrorBody{Error: "audit_failed"})
+		return false
+	}
+	if decision.Outcome != decisionAllow {
+		writeJSON(w, http.StatusForbidden, ErrorBody{Error: "forbidden"})
+		return false
+	}
 	return true
 }
 
-func (s *Server) recordDecision(d ControlDecision) {
-	if s == nil || s.OnDecision == nil {
-		return
+func (s *Server) recordDecision(ctx context.Context, d ControlDecision) error {
+	if s == nil {
+		return nil
 	}
+	at := s.now().UTC()
 	if d.At == "" {
-		d.At = s.now().UTC().Format(time.RFC3339Nano)
+		d.At = at.Format(time.RFC3339Nano)
 	}
-	s.OnDecision(d)
+	rec, err := identity.AppendDecision(ctx, s.db, identity.DecisionRecord{
+		PrincipalID: d.PrincipalID,
+		TenantID:    d.TenantID,
+		Resource:    d.Resource,
+		Action:      d.Action,
+		Outcome:     d.Outcome,
+		Reason:      d.Reason,
+		TargetID:    d.TargetID,
+		RecordedAt:  at,
+	})
+	if err != nil {
+		return err
+	}
+	d.DecisionID = rec.DecisionID
+	d.At = rec.RecordedAt.UTC().Format(time.RFC3339Nano)
+	if s.OnDecision != nil {
+		s.OnDecision(d)
+	}
+	return nil
+}
+
+func controlDecisionFromRecord(rec identity.DecisionRecord) ControlDecision {
+	return ControlDecision{
+		DecisionID:  rec.DecisionID,
+		PrincipalID: rec.PrincipalID,
+		TenantID:    rec.TenantID,
+		Resource:    rec.Resource,
+		Action:      rec.Action,
+		Outcome:     rec.Outcome,
+		Reason:      rec.Reason,
+		TargetID:    rec.TargetID,
+		At:          rec.RecordedAt.UTC().Format(time.RFC3339Nano),
+	}
 }
 
 func (s *Server) handleQuarantineRelease(w http.ResponseWriter, r *http.Request, tenantID string) {
@@ -120,6 +153,26 @@ func (s *Server) handleRebuild(w http.ResponseWriter, r *http.Request, tenantID 
 	}
 	result, err := platform.RebuildTenantFromHistory(r.Context(), s.db, tenantID)
 	s.writeReplayResult(w, tenantID, controlRebuild, "", result, err)
+}
+
+func (s *Server) handleAuditRead(w http.ResponseWriter, r *http.Request, tenantID string) {
+	if !s.authorizeControl(w, r, tenantID, identity.ResAudit, identity.ActAuditRead, "") {
+		return
+	}
+	rows, err := identity.ListDecisionsForTenant(r.Context(), s.db, tenantID)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, ErrorBody{Error: "audit_failed"})
+		return
+	}
+	records := make([]ControlDecision, 0, len(rows))
+	for _, rec := range rows {
+		records = append(records, controlDecisionFromRecord(rec))
+	}
+	writeJSON(w, http.StatusOK, AuditSnapshot{
+		TenantID:   tenantID,
+		ObservedAt: s.now().UTC().Format(time.RFC3339Nano),
+		Records:    records,
+	})
 }
 
 func (s *Server) writeReplayResult(w http.ResponseWriter, tenantID, control, eventID string, result platform.RebuildResult, err error) {

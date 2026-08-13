@@ -127,9 +127,10 @@ type ControlResult struct {
 	IncompleteReasons []string `json:"incomplete_reasons,omitempty"`
 }
 
-// ControlDecision is an in-process authorization decision for a privileged
-// control. Issue #49 may persist it; this issue does not.
+// ControlDecision is a privileged authorization decision. Issue #49 persists
+// it append-only from the Go-owned session principal and path tenant.
 type ControlDecision struct {
+	DecisionID  string `json:"decision_id,omitempty"`
 	PrincipalID string `json:"principal_id"`
 	TenantID    string `json:"tenant_id"`
 	Resource    string `json:"resource"`
@@ -138,4 +139,11 @@ type ControlDecision struct {
 	Reason      string `json:"reason"`
 	TargetID    string `json:"target_id,omitempty"`
 	At          string `json:"at"`
+}
+
+// AuditSnapshot is the authorized same-tenant privileged-decision timeline.
+type AuditSnapshot struct {
+	TenantID   string            `json:"tenant_id"`
+	ObservedAt string            `json:"observed_at"`
+	Records    []ControlDecision `json:"records"`
 }

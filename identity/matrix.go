@@ -2,8 +2,8 @@ package identity
 
 // Stable identifiers from docs/security/PERMISSION_MATRIX.md. Query APIs
 // evaluate MX-001 for inventory and MX-002/MX-003 for ops visibility.
-// Privileged HTTP controls evaluate MX-004/MX-005/MX-006. MX-007 is reserved
-// for Issue #49 audit read and is not served here.
+// Privileged HTTP controls evaluate MX-004/MX-005/MX-006. MX-007 is the
+// privileged audit-read row served by GET .../ops/audit.
 const (
 	TenantNS001     = "TENANT-NS-001"
 	TenantNS001UUID = "11111111-1111-4111-8111-111111111111"

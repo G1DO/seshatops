@@ -18,5 +18,5 @@
 // tenant-scoped ResetDerivedStateForTenant, ReplayTenantHistory, and
 // RebuildTenantFromHistory for authorized operator controls. This package does
 // not claim exactly-once delivery or processing, and does not own backup/restore
-// (Traceability & Recovery) or a durable audit product.
+// (Traceability & Recovery) or a durable audit product (Issue #49, identity).
 package platform

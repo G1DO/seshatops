@@ -93,7 +93,8 @@ the operator product. Issue #47 exposes tenant-scoped
 `GET /v1/tenants/{tenant_id}/ops` after Go evaluates `RES-OPS-VISIBILITY`
 `ACT-READ`. The UI renders those counts and timestamps without inventing SLOs.
 Issue #48 POSTs privileged controls through the same Go API; the browser does
-not authorize.
+not authorize. Issue #49 serves `GET /v1/tenants/{tenant_id}/ops/audit` from
+Go after `MX-007`; this TypeScript view does not consume that route.
 
 ## Local demo
 
@@ -105,6 +106,8 @@ required). Inventory, ops-visibility, and privileged-ops authorization is
 recorded in
 [QUERY_API_AUTHORIZATION.md](../security/QUERY_API_AUTHORIZATION.md) and
 [PRIVILEGED_OPS_AUTHORIZATION.md](../security/PRIVILEGED_OPS_AUTHORIZATION.md).
+Audit read is recorded in
+[AUDIT_AUTHORIZATION.md](../security/AUDIT_AUTHORIZATION.md).
 
 ## Non-claims
 

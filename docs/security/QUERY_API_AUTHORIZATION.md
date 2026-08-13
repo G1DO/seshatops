@@ -16,7 +16,8 @@ assignments for:
 - `GET /v1/tenants/{tenant_id}/ops` (`MX-002` / `MX-003` /
   `RES-OPS-VISIBILITY` / `ACT-READ`)
 
-**Does not own:** Audit recording (Issue #49), service-identity credentials
+**Does not own:** Audit recording (Issue #49, recorded in
+[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md)), service-identity credentials
 (CAP-011), a policy-engine product, a durable assignment schema, a
 deployment service binary, SLO/alerting, or any `EVIDENCE.md` claim
 promotion.
@@ -70,3 +71,4 @@ are independent.
 - [OPERATIONS_VIEW.md](../architecture/OPERATIONS_VIEW.md)
 - [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
 - [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md)
+- [AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md)
