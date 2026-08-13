@@ -23,7 +23,7 @@ parity, production IdP/revocation, service-identity credentials, Traceability
 
 | Issue #50 criterion | Evidence | Disposition |
 | --- | --- | --- |
-| Suite is listed and reproducible | Fenced `^(A|B)$` `-run` blocks in the procedure (not table `\|`) | Covered |
+| Suite is listed and reproducible | Fenced anchored `-run` blocks in the procedure (not table-escaped pipes) | Covered |
 | Cross-tenant leakage cases fail closed | Policy + HTTP inventory/ops/control/audit/rebuild tests | Covered |
 | Privileged ops without permission fail closed | Reader/missing-role/nil-policy/unassigned/service-principal tests | Covered |
 | Forged/stale identity fails closed | Session cookie, expiry, forged/swapped/expired ID token, assignment revoke, client principal header | Covered |
@@ -36,7 +36,7 @@ parity, production IdP/revocation, service-identity credentials, Traceability
 
 | Check | Result |
 | --- | --- |
-| Frozen `go test ./identity` filters | Passed 2026-08-13; copy-paste `^(A|B)$` filters re-checked 2026-08-13 including `TestPolicyDeniesMissingOrAmbiguousMembership` and `TestDirectoryClearRevokesMembership` |
+| Frozen `go test ./identity` filters | Passed 2026-08-13; copy-paste anchored `-run` filters re-checked 2026-08-13 including `TestPolicyDeniesMissingOrAmbiguousMembership` and `TestDirectoryClearRevokesMembership` |
 | Frozen `go test ./api` added fail-closed tests | Passed 2026-08-13 (`ok` 26.089s): assignment-revoke SSE, unassigned inventory/ops, nil-policy ops, client actor ignore, audit insert failure, operator audit GET |
 | Frozen `go test ./api` original filters | Passed (`ok` 112.530s; scenarios 2, 4–9 as first recorded) |
 | `go test ./... -count=1 -timeout 25m` | Passed 2026-08-13 (api/erp/event/identity/northstar/platform/relay all `ok`) |

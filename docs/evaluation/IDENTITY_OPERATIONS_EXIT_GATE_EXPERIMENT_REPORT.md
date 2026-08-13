@@ -27,7 +27,7 @@
 ## Objective and hypothesis
 
 Decide whether the implemented Identity & Operations surfaces from Issues
-#43–#49 satisfy the Issue #50 exit gate under a declared **Test environment**:
+43 through 49 satisfy the Issue #50 exit gate under a declared **Test environment**:
 forged/stale identity fail-closed, cross-tenant HTTP leakage fail-closed,
 privilege escalation fail-closed, authorized same-tenant ops visibility, and
 authorized same-tenant quarantine/replay/rebuild with append-only privileged
