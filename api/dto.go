@@ -105,3 +105,37 @@ type OpsGapSample struct {
 	ReceivedVersion  int64  `json:"received_version"`
 	CreatedAt        string `json:"created_at"`
 }
+
+// ControlRequest is the JSON body for privileged ops POSTs.
+// TenantID, if present, is ignored; the path tenant is the assertion.
+type ControlRequest struct {
+	EventID  string `json:"event_id"`
+	TenantID string `json:"tenant_id"`
+}
+
+// ControlResult is the authorized outcome of a privileged control.
+type ControlResult struct {
+	TenantID          string   `json:"tenant_id"`
+	Control           string   `json:"control"`
+	EventID           string   `json:"event_id,omitempty"`
+	Status            string   `json:"status"`
+	Disposition       string   `json:"disposition,omitempty"`
+	Applied           int      `json:"applied"`
+	DuplicateNoop     int      `json:"duplicate_noop"`
+	Quarantined       int      `json:"quarantined"`
+	Checksum          string   `json:"checksum,omitempty"`
+	IncompleteReasons []string `json:"incomplete_reasons,omitempty"`
+}
+
+// ControlDecision is an in-process authorization decision for a privileged
+// control. Issue #49 may persist it; this issue does not.
+type ControlDecision struct {
+	PrincipalID string `json:"principal_id"`
+	TenantID    string `json:"tenant_id"`
+	Resource    string `json:"resource"`
+	Action      string `json:"action"`
+	Outcome     string `json:"outcome"`
+	Reason      string `json:"reason"`
+	TargetID    string `json:"target_id,omitempty"`
+	At          string `json:"at"`
+}
