@@ -6,7 +6,8 @@ info:
     Read-only Go surface for the committed Event Spine inventory projection (Issue #27).
     Authentication/RBAC remain Identity. Issue #45 requires a Go-owned session
     on these routes (`401 unauthenticated` when missing). Issue #46 requires
-    MX-001 for the path tenant (`403 forbidden` when unauthorized). SSE is
+    MX-001 for inventory (`403 forbidden` when unauthorized). Issue #47
+    requires MX-002 or MX-003 for ops visibility. SSE is
     at-least-once and may drop for slow clients; REST is the authoritative
     reconnect/catch-up path.
 servers:
@@ -98,6 +99,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+  /v1/tenants/{tenant_id}/ops:
+    get:
+      operationId: getOpsVisibility
+      summary: Authorized lag, poison/quarantine, and projection freshness snapshot
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "200":
+          description: Tenant-scoped ops visibility snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpsSnapshot"
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller is not authorized for this tenant ops read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "400":
+          description: Invalid tenant_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "405":
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    post:
+      operationId: postOpsRejected
+      summary: Rejected write (read-only)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "405":
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 components:
   parameters:
     TenantID:
@@ -107,7 +157,7 @@ components:
       schema:
         type: string
         format: uuid
-        description: Lowercase UUIDv4 tenant identifier (path assertion; MX-001 is evaluated separately)
+        description: Lowercase UUIDv4 tenant identifier (path assertion; matrix row evaluated separately)
   schemas:
     InventoryItem:
       type: object
@@ -167,6 +217,86 @@ components:
           format: uuid
         checksum:
           type: string
+    OpsSnapshot:
+      type: object
+      required: [tenant_id, observed_at, projection, backlog, processing]
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+        observed_at:
+          type: string
+          format: date-time
+        projection:
+          type: object
+          required: [checksum, item_count]
+          properties:
+            checksum:
+              type: string
+            item_count:
+              type: integer
+        backlog:
+          type: object
+          required:
+            - pending
+            - publishing
+            - published
+            - quarantined
+            - oldest_unpublished
+            - quarantines
+          properties:
+            pending:
+              type: integer
+            publishing:
+              type: integer
+            published:
+              type: integer
+            quarantined:
+              type: integer
+            oldest_unpublished:
+              type: string
+              format: date-time
+              nullable: true
+            quarantines:
+              type: array
+              items:
+                type: object
+        processing:
+          type: object
+          required:
+            - applied
+            - quarantined_gap
+            - failures_retrying
+            - failures_quarantined
+            - oldest_gap
+            - oldest_failure
+            - failures
+            - gaps
+          properties:
+            applied:
+              type: integer
+            quarantined_gap:
+              type: integer
+            failures_retrying:
+              type: integer
+            failures_quarantined:
+              type: integer
+            oldest_gap:
+              type: string
+              format: date-time
+              nullable: true
+            oldest_failure:
+              type: string
+              format: date-time
+              nullable: true
+            failures:
+              type: array
+              items:
+                type: object
+            gaps:
+              type: array
+              items:
+                type: object
     ErrorBody:
       type: object
       required: [error]

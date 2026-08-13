@@ -61,6 +61,88 @@ describe("OperationsView", () => {
     expect(screen.getByTestId("last-applied-event")).toHaveTextContent("evt-1");
   });
 
+  it("renders ops visibility independently of inventory", () => {
+    render(
+      <OperationsView
+        connection="error"
+        projection={{
+          items: [],
+          checksum: "",
+          observed_at: "",
+          last_applied_event_id: null,
+        }}
+        errorMessage="forbidden"
+        tenantId={NORTHSTAR_TENANT_ID}
+        ops={{
+          tenant_id: NORTHSTAR_TENANT_ID,
+          observed_at: "2026-08-13T06:00:00.000Z",
+          projection: { checksum: "abc", item_count: 1 },
+          backlog: {
+            pending: 2,
+            publishing: 0,
+            published: 0,
+            quarantined: 0,
+            oldest_unpublished: "2026-08-13T05:59:00.000Z",
+            quarantines: [],
+          },
+          processing: {
+            applied: 1,
+            duplicate_noop: 0,
+            quarantined_conflict: 0,
+            quarantined_gap: 1,
+            quarantined_stale: 0,
+            quarantined_invalid: 0,
+            quarantined_mismatch: 0,
+            quarantined_transition: 0,
+            failures_retrying: 0,
+            failures_quarantined: 0,
+            oldest_gap: "2026-08-13T05:58:00.000Z",
+            oldest_failure: null,
+            failures: [],
+            gaps: [],
+          },
+        }}
+        opsError={null}
+      />,
+    );
+    expect(screen.getByTestId("error-banner")).toHaveTextContent("forbidden");
+    expect(screen.getByTestId("ops-pending")).toHaveTextContent("2");
+    expect(screen.getByTestId("ops-gaps")).toHaveTextContent("1");
+    expect(screen.getByTestId("ops-oldest-unpublished")).toHaveTextContent(
+      "2026-08-13T05:59:00.000Z",
+    );
+  });
+
+  it("renders ops forbidden without hiding inventory", () => {
+    render(
+      <OperationsView
+        connection="live"
+        projection={{
+          items: [
+            {
+              item_id: NORTHSTAR_ITEM_ID,
+              quantity_on_hand: 8,
+              aggregate_version: 1,
+              previous_quantity_on_hand: 10,
+            },
+          ],
+          checksum: "abc",
+          observed_at: "2026-08-12T07:00:00Z",
+          last_applied_event_id: "evt-1",
+        }}
+        errorMessage={null}
+        tenantId={NORTHSTAR_TENANT_ID}
+        ops={null}
+        opsError="forbidden"
+      />,
+    );
+    expect(screen.getByTestId(`after-${NORTHSTAR_ITEM_ID}`)).toHaveTextContent(
+      "8",
+    );
+    expect(screen.getByTestId("ops-error")).toHaveTextContent("forbidden");
+    expect(screen.queryByTestId("ops-pending")).toBeNull();
+  });
+
   it("renders sign-in when unauthenticated and does not show inventory", () => {
     const onSignIn = vi.fn();
     render(

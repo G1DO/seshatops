@@ -11,6 +11,7 @@ import (
 
 	"github.com/G1DO/seshatops/identity"
 	"github.com/G1DO/seshatops/platform"
+	"github.com/G1DO/seshatops/relay"
 )
 
 // EventProjectionUpdated is the SSE event name for committed projection changes.
@@ -55,7 +56,8 @@ func (s *Server) SetSSEHeartbeatForTest(d time.Duration) {
 
 // Handler returns the HTTP handler for the Event Spine projection routes.
 // Every /v1 path requires a fresh Go-owned session (Issue #45). Inventory
-// reads also require MX-001 for the path tenant (Issue #46).
+// reads also require MX-001 for the path tenant (Issue #46). Ops visibility
+// requires MX-002 or MX-003 (Issue #47).
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/tenants/", s.serveTenant)
@@ -95,6 +97,20 @@ func (s *Server) serveTenant(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			s.handleSSE(w, r, tenantID)
+		case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
+			w.Header().Set("Allow", http.MethodGet)
+			writeJSON(w, http.StatusMethodNotAllowed, ErrorBody{Error: "method_not_allowed"})
+		default:
+			w.Header().Set("Allow", http.MethodGet)
+			writeJSON(w, http.StatusMethodNotAllowed, ErrorBody{Error: "method_not_allowed"})
+		}
+	case "ops":
+		switch r.Method {
+		case http.MethodGet:
+			if !s.authorizeOpsRead(w, r, tenantID) {
+				return
+			}
+			s.handleOps(w, r, tenantID)
 		case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 			w.Header().Set("Allow", http.MethodGet)
 			writeJSON(w, http.StatusMethodNotAllowed, ErrorBody{Error: "method_not_allowed"})
@@ -217,6 +233,113 @@ func (s *Server) handleSSE(w http.ResponseWriter, r *http.Request, tenantID stri
 	}
 }
 
+func (s *Server) handleOps(w http.ResponseWriter, r *http.Request, tenantID string) {
+	ctx := r.Context()
+	snap, err := s.loadOps(ctx, tenantID)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, ErrorBody{Error: "ops_failed"})
+		return
+	}
+	writeJSON(w, http.StatusOK, snap)
+}
+
+func (s *Server) loadOps(ctx context.Context, tenantID string) (OpsSnapshot, error) {
+	rows, err := platform.ListTenantProjection(ctx, s.db, tenantID)
+	if err != nil {
+		return OpsSnapshot{}, err
+	}
+	checksum, err := platform.ChecksumTenant(ctx, s.db, tenantID)
+	if err != nil {
+		return OpsSnapshot{}, err
+	}
+	backlog, err := relay.InspectBacklogForTenant(ctx, s.db, tenantID)
+	if err != nil {
+		return OpsSnapshot{}, err
+	}
+	proc, err := platform.InspectProcessingForTenant(ctx, s.db, tenantID)
+	if err != nil {
+		return OpsSnapshot{}, err
+	}
+
+	quarantines := make([]OpsQuarantineSample, 0, len(backlog.Quarantines))
+	for _, q := range backlog.Quarantines {
+		quarantines = append(quarantines, OpsQuarantineSample{
+			EventID:       q.EventID,
+			LastErrorCode: q.LastErrorCode,
+			CreatedAt:     q.CreatedAt.UTC().Format(time.RFC3339Nano),
+		})
+	}
+	failures := make([]OpsFailureSample, 0, len(proc.Failures))
+	for _, f := range proc.Failures {
+		failures = append(failures, OpsFailureSample{
+			FailureID:        f.FailureID,
+			EventID:          f.EventID,
+			FailureCategory:  f.FailureCategory,
+			DiagnosticCode:   f.DiagnosticCode,
+			QuarantineStatus: f.QuarantineStatus,
+			SourceTopic:      f.SourceTopic,
+			SourcePartition:  f.SourcePartition,
+			SourceOffset:     f.SourceOffset,
+			AttemptCount:     f.AttemptCount,
+			CreatedAt:        f.CreatedAt.UTC().Format(time.RFC3339Nano),
+		})
+	}
+	gaps := make([]OpsGapSample, 0, len(proc.Gaps))
+	for _, g := range proc.Gaps {
+		gaps = append(gaps, OpsGapSample{
+			EventID:          g.EventID,
+			TenantID:         g.TenantID,
+			AggregateType:    g.AggregateType,
+			AggregateID:      g.AggregateID,
+			AggregateVersion: g.AggregateVersion,
+			ExpectedVersion:  g.ExpectedVersion,
+			ReceivedVersion:  g.ReceivedVersion,
+			CreatedAt:        g.CreatedAt.UTC().Format(time.RFC3339Nano),
+		})
+	}
+
+	return OpsSnapshot{
+		TenantID:   tenantID,
+		ObservedAt: s.now().Format(time.RFC3339Nano),
+		Projection: OpsProjection{
+			Checksum:  checksum,
+			ItemCount: len(rows),
+		},
+		Backlog: OpsBacklog{
+			Pending:           backlog.Pending,
+			Publishing:        backlog.Publishing,
+			Published:         backlog.Published,
+			Quarantined:       backlog.Quarantined,
+			OldestUnpublished: formatTimePtr(backlog.OldestUnpublished),
+			Quarantines:       quarantines,
+		},
+		Processing: OpsProcessing{
+			Applied:               proc.Applied,
+			DuplicateNoop:         proc.DuplicateNoop,
+			QuarantinedConflict:   proc.QuarantinedConflict,
+			QuarantinedGap:        proc.QuarantinedGap,
+			QuarantinedStale:      proc.QuarantinedStale,
+			QuarantinedInvalid:    proc.QuarantinedInvalid,
+			QuarantinedMismatch:   proc.QuarantinedMismatch,
+			QuarantinedTransition: proc.QuarantinedTransition,
+			FailuresRetrying:      proc.FailuresRetrying,
+			FailuresQuarantined:   proc.FailuresQuarantined,
+			OldestGap:             formatTimePtr(proc.OldestGap),
+			OldestFailure:         formatTimePtr(proc.OldestFailure),
+			Failures:              failures,
+			Gaps:                  gaps,
+		},
+	}, nil
+}
+
+func formatTimePtr(t time.Time) *string {
+	if t.IsZero() {
+		return nil
+	}
+	s := t.UTC().Format(time.RFC3339Nano)
+	return &s
+}
+
 func (s *Server) authorizeInventoryRead(w http.ResponseWriter, r *http.Request, tenantID string) bool {
 	sess, ok := identity.FromContext(r.Context())
 	if !ok || sess == nil {
@@ -224,6 +347,19 @@ func (s *Server) authorizeInventoryRead(w http.ResponseWriter, r *http.Request, 
 		return false
 	}
 	if s.policy == nil || s.policy.Allow(sess.PrincipalID, tenantID, identity.ResInventoryProjection, identity.ActRead) != nil {
+		writeJSON(w, http.StatusForbidden, ErrorBody{Error: "forbidden"})
+		return false
+	}
+	return true
+}
+
+func (s *Server) authorizeOpsRead(w http.ResponseWriter, r *http.Request, tenantID string) bool {
+	sess, ok := identity.FromContext(r.Context())
+	if !ok || sess == nil {
+		writeJSON(w, http.StatusUnauthorized, ErrorBody{Error: "unauthenticated"})
+		return false
+	}
+	if s.policy == nil || s.policy.Allow(sess.PrincipalID, tenantID, identity.ResOpsVisibility, identity.ActRead) != nil {
 		writeJSON(w, http.StatusForbidden, ErrorBody{Error: "forbidden"})
 		return false
 	}

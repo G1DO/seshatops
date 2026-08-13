@@ -1,8 +1,9 @@
 package identity
 
 // Stable identifiers from docs/security/PERMISSION_MATRIX.md. Query APIs
-// evaluate MX-001 only. Other rows exist so unmatched roles fail closed;
-// they do not authorize ops-visibility or privileged-op HTTP surfaces.
+// evaluate MX-001 for inventory and MX-002/MX-003 for ops visibility.
+// Privileged rows exist so unmatched roles fail closed; they do not
+// authorize quarantine/replay HTTP surfaces.
 const (
 	TenantNS001     = "TENANT-NS-001"
 	TenantNS001UUID = "11111111-1111-4111-8111-111111111111"

@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { fetchSnapshot } from "./client";
+import { fetchOps, fetchSnapshot } from "./client";
 import { ApiError, FORBIDDEN, UNAUTHENTICATED } from "./types";
 import {
   NORTHSTAR_TENANT_ID,
+  sampleOpsSnapshot,
   sampleSnapshotBefore,
 } from "../fixtures/northstar";
 
@@ -85,6 +86,68 @@ describe("fetchSnapshot", () => {
 
     await expect(
       fetchSnapshot("http://example.test", NORTHSTAR_TENANT_ID, fetchImpl),
+    ).rejects.toMatchObject({ code: "malformed_response" });
+  });
+});
+
+describe("fetchOps", () => {
+  it("returns a validated ops snapshot on success and sends cookies", async () => {
+    const snapshot = sampleOpsSnapshot();
+    const fetchImpl = vi.fn<typeof fetch>(async () =>
+      new Response(JSON.stringify(snapshot), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await expect(
+      fetchOps("http://example.test", NORTHSTAR_TENANT_ID, fetchImpl),
+    ).resolves.toEqual(snapshot);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      `http://example.test/v1/tenants/${NORTHSTAR_TENANT_ID}/ops`,
+      expect.objectContaining({
+        method: "GET",
+        credentials: "include",
+      }),
+    );
+  });
+
+  it("maps unauthenticated and forbidden without treating them as snapshots", async () => {
+    const unauth: typeof fetch = async () =>
+      new Response(JSON.stringify({ error: UNAUTHENTICATED }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    await expect(
+      fetchOps("http://example.test", NORTHSTAR_TENANT_ID, unauth),
+    ).rejects.toMatchObject({
+      name: "ApiError",
+      code: UNAUTHENTICATED,
+      status: 401,
+    } satisfies Partial<ApiError>);
+
+    const forbidden: typeof fetch = async () =>
+      new Response(JSON.stringify({ error: FORBIDDEN }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    await expect(
+      fetchOps("http://example.test", NORTHSTAR_TENANT_ID, forbidden),
+    ).rejects.toMatchObject({
+      name: "ApiError",
+      code: FORBIDDEN,
+      status: 403,
+    } satisfies Partial<ApiError>);
+  });
+
+  it("rejects malformed success bodies", async () => {
+    const fetchImpl: typeof fetch = async () =>
+      new Response(JSON.stringify({ tenant_id: "x" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    await expect(
+      fetchOps("http://example.test", NORTHSTAR_TENANT_ID, fetchImpl),
     ).rejects.toMatchObject({ code: "malformed_response" });
   });
 });

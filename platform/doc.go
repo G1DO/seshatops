@@ -7,9 +7,10 @@
 // Conflicting reuse of event_id is an integrity failure. Malformed,
 // unsupported, and handler-poison deliveries persist sanitized
 // processing_failures rows. InspectProcessing exposes bounded failure/gap
-// visibility for Event Spine verification. After an applied projection commit,
-// SetAppliedNotifier may receive a non-blocking AppliedUpdate for the Issue
-// #27 read API.
+// visibility for Event Spine verification. InspectProcessingForTenant is the
+// tenant-scoped helper used by the Issue #47 ops product surface. After an
+// applied projection commit, SetAppliedNotifier may receive a non-blocking
+// AppliedUpdate for the Issue #27 read API.
 //
 // Issue #29 adds ResetDerivedState and RebuildFromHistory so tests can clear
 // only derived platform state and replay retained event bytes through the same

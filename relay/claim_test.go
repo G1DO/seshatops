@@ -566,3 +566,60 @@ func TestAcceptSurvivesUnreachableBroker(t *testing.T) {
 		t.Fatalf("backlog %+v", b)
 	}
 }
+
+func TestInspectBacklogForTenantRejectsEmptyTenant(t *testing.T) {
+	_, err := InspectBacklogForTenant(context.Background(), nil, "")
+	if err == nil {
+		t.Fatal("empty tenant_id must fail closed")
+	}
+}
+
+func TestInspectBacklogForTenantExcludesOtherTenants(t *testing.T) {
+	db := openTestDB(t)
+	fx, _ := seedAndAccept(t, db)
+	ctx := context.Background()
+	otherTenant := "22222222-2222-4222-8222-222222222222"
+	otherEvent := "018f5d78-6e64-4f5f-bd16-8e9f7c4a2099"
+	_, err := db.ExecContext(ctx, `
+		INSERT INTO erp.outbox (
+			event_id, tenant_id, aggregate_type, aggregate_id, aggregate_version,
+			content_hash, event_bytes, status, recorded_at, last_error_code
+		) VALUES (
+			$1, $2, 'inventory_item', 'item-flour-001', 1,
+			'aa', '{}', 'quarantined', now(), 'other_tenant_poison'
+		)
+	`, otherEvent, otherTenant)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	global, err := InspectBacklog(ctx, db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if global.Pending != 1 || global.Quarantined != 1 {
+		t.Fatalf("global backlog = %+v", global)
+	}
+
+	scoped, err := InspectBacklogForTenant(ctx, db, fx.TenantID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if scoped.Pending != 1 || scoped.Quarantined != 0 || len(scoped.Quarantines) != 0 {
+		t.Fatalf("tenant backlog leaked other tenant: %+v", scoped)
+	}
+	if scoped.OldestUnpublished.IsZero() {
+		t.Fatal("expected oldest unpublished for tenant pending row")
+	}
+
+	other, err := InspectBacklogForTenant(ctx, db, otherTenant)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if other.Pending != 0 || other.Quarantined != 1 || len(other.Quarantines) != 1 {
+		t.Fatalf("other tenant backlog = %+v", other)
+	}
+	if other.Quarantines[0].EventID != otherEvent || other.Quarantines[0].LastErrorCode != "other_tenant_poison" {
+		t.Fatalf("other sample = %+v", other.Quarantines[0])
+	}
+}
