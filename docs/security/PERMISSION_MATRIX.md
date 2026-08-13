@@ -8,6 +8,8 @@ ops-visibility query-API evaluation is recorded in
 This matrix does not claim production tenant isolation or `CAP-010` evidence.
 Privileged-ops HTTP evaluation is recorded in
 [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md).
+Privileged-decision audit is recorded in
+[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md).
 
 **Owns:** Northstar demo tenant identifiers, milestone role labels, resource
 and action IDs, explicit allow-list rows mapped to the AUTHORIZATION_MODEL
@@ -19,7 +21,8 @@ evaluation, Issue #47 records ops-visibility evaluation in
 [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md), and Issue #48
 records privileged-ops evaluation in
 [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md)), OIDC
-login or session runtime (Issue #45), audit recording (Issue #49), a
+login or session runtime (Issue #45), audit recording (Issue #49, recorded in
+[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md)), a
 policy-engine product, assignment schema, or any `EVIDENCE.md` claim
 promotion.
 
@@ -105,7 +108,7 @@ It is not a license for internal callers to skip the matrix.
 | `RES-QUARANTINE` | Quarantine-release control | Issue #48 |
 | `RES-REPLAY` | Controlled replay | Issue #48 |
 | `RES-REBUILD` | Derived-state rebuild | Issue #48 |
-| `RES-AUDIT` | Privileged authorization-decision audit read | Issue #49 binds recording; ID reserved here because privileged audit must be explicit |
+| `RES-AUDIT` | Privileged authorization-decision audit read | Issue #49 binds `GET /v1/tenants/{tenant_id}/ops/audit` |
 
 Unknown resource types are deny.
 
@@ -177,6 +180,8 @@ product. Inventory and ops-visibility query-API evaluation is recorded in
 [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Privileged-ops HTTP
 surfaces are recorded in
 [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md).
+Privileged-decision audit is recorded in
+[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md).
 
 ## 10. Related documents
 
@@ -186,4 +191,5 @@ surfaces are recorded in
 - [THREAT_MODEL.md](THREAT_MODEL.md)
 - [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)
 - [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md)
+- [AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md)
 - [PRODUCT.md](../../PRODUCT.md) (personas)

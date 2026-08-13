@@ -2,9 +2,10 @@
 
 **Status:** Implemented for Issue #48 library/test scope. This note records
 tenant-scoped default-deny on quarantine release, replay, and rebuild
-controls. It does not claim that privileged ops are a production control,
-that `CAP-013` or `CLM-010` are promoted, or that a durable audit product
-exists.
+controls. Durable privileged-decision audit is recorded in
+[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md). It does not claim that
+privileged ops are a production control, or that `CAP-013` or `CLM-010`
+are promoted.
 
 **Owns:** Go evaluation of the frozen permission matrix for:
 
@@ -15,7 +16,8 @@ exists.
 - `POST /v1/tenants/{tenant_id}/ops/rebuild` (`MX-006` / `RES-REBUILD` /
   `ACT-REBUILD`)
 
-**Does not own:** Audit recording or `MX-007` read (Issue #49), the
+**Does not own:** Audit recording or `MX-007` read (Issue #49,
+[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md)), the
 Identity & Operations exit-gate suite (Issue #50), backup/restore, service
 identity credentials, a policy-engine product, or any `EVIDENCE.md` claim
 promotion.
@@ -47,10 +49,11 @@ buttons are not authority.
 
 ## Decision path
 
-Each authenticated allow or deny produces an in-process `ControlDecision`
-(principal, tenant, resource, action, outcome, reason, target, timestamp).
-`api.Server.OnDecision` may observe it. Issue #49 owns durable append-only
-audit records.
+Each authenticated allow or deny produces a durable append-only
+`identity.authorization_decisions` row (principal, tenant, resource, action,
+outcome, reason, target, timestamp) before a privileged mutation runs.
+`api.Server.OnDecision` may observe the persisted decision. Details are in
+[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md).
 
 ## Fail closed
 
