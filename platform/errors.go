@@ -16,4 +16,17 @@ var (
 	// ErrPoison indicates the delivery exceeded the Event Spine handler-attempt budget
 	// and a sanitized failure record was persisted.
 	ErrPoison = errors.New("platform: poison delivery quarantined")
+
+	// ErrNotReleasable means an authorized operator asked to force-apply a
+	// terminal inbox quarantine (gap, conflict, stale, invalid, mismatch,
+	// transition) or a poison row with no retained same-tenant bytes.
+	ErrNotReleasable = errors.New("platform: quarantine not releasable")
+
+	// ErrControlNotFound means no same-tenant quarantined outbox or poison
+	// row matched the requested event identity.
+	ErrControlNotFound = errors.New("platform: control target not found")
+
+	// ErrTenantMismatch means retained event bytes named a different tenant
+	// than the authorized path tenant.
+	ErrTenantMismatch = errors.New("platform: retained history tenant mismatch")
 )

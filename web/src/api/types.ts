@@ -114,3 +114,17 @@ export interface OpsSnapshot {
     gaps: OpsGapSample[];
   };
 }
+
+/** Authorized outcome of a privileged quarantine/replay/rebuild POST. */
+export interface ControlResult {
+  tenant_id: string;
+  control: string;
+  event_id?: string;
+  status: string;
+  disposition?: string;
+  applied: number;
+  duplicate_noop: number;
+  quarantined: number;
+  checksum?: string;
+  incomplete_reasons?: string[];
+}

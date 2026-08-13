@@ -3,9 +3,10 @@
 **Status:** Implemented for Issue #46 inventory and Issue #47 ops-visibility
 library/test scope. This note records tenant-scoped default-deny on those
 query APIs. It does not claim that tenant isolation holds across all protected
-operations, that privileged ops are enforced, that authorization is a
-production control, or that `CAP-010`, `CAP-012`, `CLM-007`, `CLM-008`, or
-`CLM-009` are promoted.
+operations, that authorization is a production control, or that `CAP-010`,
+`CAP-012`, `CLM-007`, `CLM-008`, or `CLM-009` are promoted. Privileged-ops
+HTTP evaluation is recorded in
+[PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md).
 
 **Owns:** Go evaluation of the frozen permission matrix against platform
 assignments for:
@@ -15,10 +16,10 @@ assignments for:
 - `GET /v1/tenants/{tenant_id}/ops` (`MX-002` / `MX-003` /
   `RES-OPS-VISIBILITY` / `ACT-READ`)
 
-**Does not own:** Quarantine/replay/rebuild controls (Issue #48), audit
-recording (Issue #49), service-identity credentials (CAP-011), a
-policy-engine product, a durable assignment schema, a deployment service
-binary, SLO/alerting, or any `EVIDENCE.md` claim promotion.
+**Does not own:** Audit recording (Issue #49), service-identity credentials
+(CAP-011), a policy-engine product, a durable assignment schema, a
+deployment service binary, SLO/alerting, or any `EVIDENCE.md` claim
+promotion.
 
 ## Authentication is not authorization
 
@@ -68,3 +69,4 @@ are independent.
 - [PROJECTION_READ_API.md](../architecture/PROJECTION_READ_API.md)
 - [OPERATIONS_VIEW.md](../architecture/OPERATIONS_VIEW.md)
 - [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
+- [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md)

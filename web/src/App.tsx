@@ -1,6 +1,7 @@
 import { OperationsView } from "./ui/OperationsView";
 import { useInventoryProjection } from "./state/useInventoryProjection";
 import { useOpsVisibility } from "./state/useOpsVisibility";
+import { useOpsControls } from "./state/useOpsControls";
 import { useSession } from "./state/useSession";
 import { emptyProjectionView } from "./state/projectionStore";
 import { loginUrl } from "./api/session";
@@ -67,6 +68,10 @@ function AuthenticatedView(props: {
     baseUrl: API_BASE_URL,
     tenantId: TENANT_ID,
   });
+  const controls = useOpsControls({
+    baseUrl: API_BASE_URL,
+    tenantId: TENANT_ID,
+  });
 
   if (errorMessage === UNAUTHENTICATED) {
     return (
@@ -91,6 +96,12 @@ function AuthenticatedView(props: {
       onLogout={props.onLogout}
       ops={ops.snapshot}
       opsError={ops.errorMessage}
+      onRelease={(eventId) => void controls.release(eventId)}
+      onReplay={(eventId) => void controls.replay(eventId)}
+      onRebuild={() => void controls.rebuild()}
+      controlBusy={controls.busy}
+      controlError={controls.errorMessage}
+      controlStatus={controls.result?.status ?? null}
     />
   );
 }

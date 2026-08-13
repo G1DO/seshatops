@@ -57,11 +57,10 @@ origin via CORS.
 
 A session is identity only. Inventory reads also require `MX-001` for the
 path tenant. Ops visibility requires `MX-002` or `MX-003` (Go-owned; the UI
-cannot authorize).
+cannot authorize). Privileged POSTs require `MX-004`, `MX-005`, or `MX-006`.
 
 ## Explicit deferrals
 
-- No recovery/quarantine controls (Issue #48)
 - No dashboard suite or design system
 - No SLO/alerting platform
 

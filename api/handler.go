@@ -17,7 +17,8 @@ import (
 // EventProjectionUpdated is the SSE event name for committed projection changes.
 const EventProjectionUpdated = "inventory_projection.updated"
 
-// Server is the Event Spine read-only projection HTTP surface.
+// Server is the Event Spine projection HTTP surface plus Issue #48
+// privileged quarantine/replay/rebuild controls.
 type Server struct {
 	db           *sql.DB
 	hub          *Hub
@@ -25,9 +26,10 @@ type Server struct {
 	policy       identity.Authorizer
 	now          func() time.Time
 	sseHeartbeat time.Duration
+	OnDecision   func(ControlDecision)
 }
 
-// NewServer constructs a read-only API server. hub may be nil only when SSE is
+// NewServer constructs the API server. hub may be nil only when SSE is
 // unused; REST still works. Callers that run the consumer should
 // platform.SetAppliedNotifier(hub). auth is required: a nil lookup fails closed
 // with 401 rather than serving projection data. policy is required: a nil
@@ -57,7 +59,8 @@ func (s *Server) SetSSEHeartbeatForTest(d time.Duration) {
 // Handler returns the HTTP handler for the Event Spine projection routes.
 // Every /v1 path requires a fresh Go-owned session (Issue #45). Inventory
 // reads also require MX-001 for the path tenant (Issue #46). Ops visibility
-// requires MX-002 or MX-003 (Issue #47).
+// requires MX-002 or MX-003 (Issue #47). Privileged POSTs require MX-004,
+// MX-005, or MX-006 (Issue #48).
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/tenants/", s.serveTenant)
@@ -118,6 +121,12 @@ func (s *Server) serveTenant(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Allow", http.MethodGet)
 			writeJSON(w, http.StatusMethodNotAllowed, ErrorBody{Error: "method_not_allowed"})
 		}
+	case "ops/quarantine/release":
+		s.handleControlMethod(w, r, tenantID, http.MethodPost, s.handleQuarantineRelease)
+	case "ops/replay":
+		s.handleControlMethod(w, r, tenantID, http.MethodPost, s.handleReplay)
+	case "ops/rebuild":
+		s.handleControlMethod(w, r, tenantID, http.MethodPost, s.handleRebuild)
 	default:
 		writeJSON(w, http.StatusNotFound, ErrorBody{Error: "not_found"})
 	}

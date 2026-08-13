@@ -1,6 +1,6 @@
 # ADR-0005: Identity, Tenant Policy, and Service Delegation
 
-- **Status:** Accepted Identity & Operations design decision; permission matrix published (#44); OIDC/session runtime implemented for Issue #45 library/test scope; query-API default-deny implemented for Issue #46 library/test scope
+- **Status:** Accepted Identity & Operations design decision; permission matrix published (#44); OIDC/session runtime implemented for Issue #45 library/test scope; query-API default-deny implemented for Issue #46 library/test scope; privileged-ops HTTP evaluated for Issue #48 library/test scope
 - **Date:** 2026-08-12
 - **Scope:** Issue #43 resolution of ADR-Q-004 — OIDC integration profile, Go-owned principal/session model, tenant visibility, policy representation, and service-identity delegation boundaries
 
@@ -90,4 +90,4 @@ Documentation review must confirm:
 - Issue #44 (matrix), Issue #45 (OIDC/session runtime), and Issue #46 (query-API default-deny) ownership remain clear;
 - no runtime claim promotion appears in `EVIDENCE.md` from this change alone.
 
-This ADR does not claim that authentication is a verified production control, or that production tenant isolation, privileged-ops enforcement, service-identity controls, or audit protection currently exist. Issue #45 records OIDC/session library/test runtime in [OIDC_SESSION.md](../security/OIDC_SESSION.md). Issue #46 records inventory query-API default-deny in [QUERY_API_AUTHORIZATION.md](../security/QUERY_API_AUTHORIZATION.md). CAP-009–CAP-013 remain Planned until later implementation and evidence.
+This ADR does not claim that authentication is a verified production control, or that production tenant isolation, privileged-ops enforcement, service-identity controls, or audit protection currently exist. Issue #45 records OIDC/session library/test runtime in [OIDC_SESSION.md](../security/OIDC_SESSION.md). Issue #46 records inventory query-API default-deny in [QUERY_API_AUTHORIZATION.md](../security/QUERY_API_AUTHORIZATION.md). Issue #48 records privileged-ops HTTP evaluation in [PRIVILEGED_OPS_AUTHORIZATION.md](../security/PRIVILEGED_OPS_AUTHORIZATION.md). CAP-009–CAP-013 remain Planned until later implementation and evidence.

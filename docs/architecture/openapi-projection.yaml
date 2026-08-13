@@ -7,7 +7,8 @@ info:
     Authentication/RBAC remain Identity. Issue #45 requires a Go-owned session
     on these routes (`401 unauthenticated` when missing). Issue #46 requires
     MX-001 for inventory (`403 forbidden` when unauthorized). Issue #47
-    requires MX-002 or MX-003 for ops visibility. SSE is
+    requires MX-002 or MX-003 for ops visibility. Issue #48 requires MX-004,
+    MX-005, or MX-006 for privileged POSTs. SSE is
     at-least-once and may drop for slow clients; REST is the authoritative
     reconnect/catch-up path.
 servers:
@@ -144,6 +145,104 @@ paths:
       responses:
         "405":
           description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /v1/tenants/{tenant_id}/ops/quarantine/release:
+    post:
+      operationId: postQuarantineRelease
+      summary: Authorized same-tenant outbox or poison quarantine retry (MX-004)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ControlRequest"
+      responses:
+        "200":
+          description: Quarantine released to pending or re-driven through ProcessRecord
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ControlResult"
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller is not authorized for quarantine release
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No same-tenant quarantined target
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "409":
+          description: Terminal inbox quarantine is not releasable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /v1/tenants/{tenant_id}/ops/replay:
+    post:
+      operationId: postReplay
+      summary: Authorized same-tenant retained-history replay (MX-005)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ControlRequest"
+      responses:
+        "200":
+          description: Replay result (duplicate_noop for already-applied events)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ControlResult"
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller is not authorized for replay
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /v1/tenants/{tenant_id}/ops/rebuild:
+    post:
+      operationId: postRebuild
+      summary: Authorized tenant-scoped derived-state rebuild (MX-006)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "200":
+          description: Rebuild result; incomplete is not a successful checksum proof
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ControlResult"
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller is not authorized for rebuild
           content:
             application/json:
               schema:
@@ -297,6 +396,45 @@ components:
               type: array
               items:
                 type: object
+    ControlRequest:
+      type: object
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          description: Target event identity; required for quarantine release
+        tenant_id:
+          type: string
+          format: uuid
+          description: Ignored client assertion; path tenant is authoritative
+    ControlResult:
+      type: object
+      required: [tenant_id, control, status, applied, duplicate_noop, quarantined]
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+        control:
+          type: string
+        event_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        disposition:
+          type: string
+        applied:
+          type: integer
+        duplicate_noop:
+          type: integer
+        quarantined:
+          type: integer
+        checksum:
+          type: string
+        incomplete_reasons:
+          type: array
+          items:
+            type: string
     ErrorBody:
       type: object
       required: [error]
