@@ -107,6 +107,23 @@ func TestPolicyDeniesCrossTenantOpsVisibility(t *testing.T) {
 	}
 }
 
+func TestPolicyAllowsPlatformOperatorPrivilegedOps(t *testing.T) {
+	p := NewPolicy(NewDirectory(Assignment{
+		PrincipalID: "platform-operator",
+		TenantID:    TenantNS001UUID,
+		RoleID:      RolePlatformOperator,
+	}))
+	if err := p.Allow("platform-operator", TenantNS001UUID, ResQuarantine, ActQuarantineRelease); err != nil {
+		t.Fatalf("MX-004 allow: %v", err)
+	}
+	if err := p.Allow("platform-operator", TenantNS001UUID, ResReplay, ActReplay); err != nil {
+		t.Fatalf("MX-005 allow: %v", err)
+	}
+	if err := p.Allow("platform-operator", TenantNS001UUID, ResRebuild, ActRebuild); err != nil {
+		t.Fatalf("MX-006 allow: %v", err)
+	}
+}
+
 func TestPolicyDeniesPrivilegedActionsForOpsReader(t *testing.T) {
 	p := NewPolicy(NewDirectory(Assignment{
 		PrincipalID: "operator-northstar",
@@ -114,7 +131,30 @@ func TestPolicyDeniesPrivilegedActionsForOpsReader(t *testing.T) {
 		RoleID:      RoleOpsReader,
 	}))
 	if err := p.Allow("operator-northstar", TenantNS001UUID, ResQuarantine, ActQuarantineRelease); !errors.Is(err, ErrForbidden) {
-		t.Fatalf("privileged action err=%v", err)
+		t.Fatalf("release err=%v", err)
+	}
+	if err := p.Allow("operator-northstar", TenantNS001UUID, ResReplay, ActReplay); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("replay err=%v", err)
+	}
+	if err := p.Allow("operator-northstar", TenantNS001UUID, ResRebuild, ActRebuild); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("rebuild err=%v", err)
+	}
+}
+
+func TestPolicyDeniesCrossTenantPrivilegedOps(t *testing.T) {
+	p := NewPolicy(NewDirectory(Assignment{
+		PrincipalID: "platform-operator",
+		TenantID:    TenantNS001UUID,
+		RoleID:      RolePlatformOperator,
+	}))
+	if err := p.Allow("platform-operator", TenantNS002UUID, ResQuarantine, ActQuarantineRelease); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("cross-tenant release err=%v", err)
+	}
+	if err := p.Allow("platform-operator", TenantNS002UUID, ResReplay, ActReplay); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("cross-tenant replay err=%v", err)
+	}
+	if err := p.Allow("platform-operator", TenantNS002UUID, ResRebuild, ActRebuild); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("cross-tenant rebuild err=%v", err)
 	}
 }
 
