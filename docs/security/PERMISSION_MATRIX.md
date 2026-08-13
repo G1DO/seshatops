@@ -5,8 +5,9 @@ CAP-010 design. This document names tenants, roles, resources, actions, and
 allow-list rows so later enforcement can cite stable IDs. Inventory and
 ops-visibility query-API evaluation is recorded in
 [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md).
-This matrix does not claim production tenant isolation, privileged-ops
-controls, or `CAP-010` evidence.
+This matrix does not claim production tenant isolation or `CAP-010` evidence.
+Privileged-ops HTTP evaluation is recorded in
+[PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md).
 
 **Owns:** Northstar demo tenant identifiers, milestone role labels, resource
 and action IDs, explicit allow-list rows mapped to the AUTHORIZATION_MODEL
@@ -14,11 +15,13 @@ tuple, privileged versus read classification, and default-deny gaps for this
 milestone.
 
 **Does not own:** Runtime enforcement (Issue #46 records inventory query-API
-evaluation and Issue #47 records ops-visibility evaluation in
-[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)), OIDC login or
-session runtime (Issue #45), quarantine/replay controls (Issue #48), audit
-recording (Issue #49), a policy-engine product, assignment schema, or any
-`EVIDENCE.md` claim promotion.
+evaluation, Issue #47 records ops-visibility evaluation in
+[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md), and Issue #48
+records privileged-ops evaluation in
+[PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md)), OIDC
+login or session runtime (Issue #45), audit recording (Issue #49), a
+policy-engine product, assignment schema, or any `EVIDENCE.md` claim
+promotion.
 
 ## 1. How to read this matrix
 
@@ -172,7 +175,8 @@ Publishing this matrix does not implement authorization, does not promote
 `CAP-010`, `CLM-007`, or `CLM-008`, and does not select a policy-engine
 product. Inventory and ops-visibility query-API evaluation is recorded in
 [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Privileged-ops HTTP
-surfaces remain later Identity & Operations issues.
+surfaces are recorded in
+[PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md).
 
 ## 10. Related documents
 
@@ -181,4 +185,5 @@ surfaces remain later Identity & Operations issues.
 - [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
 - [THREAT_MODEL.md](THREAT_MODEL.md)
 - [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)
+- [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md)
 - [PRODUCT.md](../../PRODUCT.md) (personas)

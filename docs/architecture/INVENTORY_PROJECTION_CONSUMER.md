@@ -15,8 +15,10 @@ checksum helper, tenant projection listing, optional post-commit applied
 notifications for the Go read API, and (with Issue #29) test-scoped derived
 state reset plus retained-history rebuild helpers.
 
-**Does not own:** Generic CQRS frameworks, order projections, operator recovery
-UI, release-from-quarantine workflows, HTTP/SSE route design (Issue #27 /
+**Does not own:** Generic CQRS frameworks, order projections, HTTP
+authorization (Issue #48 /
+[PRIVILEGED_OPS_AUTHORIZATION.md](../security/PRIVILEGED_OPS_AUTHORIZATION.md)),
+HTTP/SSE route design (Issue #27 /
 [PROJECTION_READ_API.md](PROJECTION_READ_API.md)), metrics SLOs, or
 exactly-once transport claims.
 
@@ -133,9 +135,10 @@ block a partition until retry succeeds.
 
 ## Operator recovery boundary (Identity)
 
-Event Spine does not provide release-from-quarantine, privileged replay, authentication,
-or RBAC for recovery. Operator-controlled recovery remains Identity & Operations scope
-(`CAP-013`).
+Issue #48 adds authorized quarantine release and tenant-scoped replay/rebuild
+HTTP after `MX-004`/`MX-005`/`MX-006`. Terminal inbox quarantines remain
+not-releasable. See
+[PRIVILEGED_OPS_AUTHORIZATION.md](../security/PRIVILEGED_OPS_AUTHORIZATION.md).
 
 ## Projection checksum
 

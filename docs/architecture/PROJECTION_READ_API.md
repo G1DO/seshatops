@@ -9,13 +9,15 @@ inventory projection, including REST snapshot DTOs, one SSE stream for
 post-commit projection updates, reconnect/catch-up semantics, and the OpenAPI
 fragment in [`openapi-projection.yaml`](openapi-projection.yaml).
 
-**Does not own:** Write/command endpoints, GraphQL, WebSockets, generic
-subscription gateways, operator recovery UI, Redpanda access from the
-browser, or the TypeScript operations view (Issue #28). OIDC login and
-session establishment are owned by [`identity`](../../identity) /
+**Does not own:** GraphQL, WebSockets, generic subscription gateways,
+Redpanda access from the browser, or the TypeScript operations view
+(Issue #28). OIDC login and session establishment are owned by
+[`identity`](../../identity) /
 [OIDC_SESSION.md](../security/OIDC_SESSION.md). Tenant-scoped inventory
 authorization is owned by
 [QUERY_API_AUTHORIZATION.md](../security/QUERY_API_AUTHORIZATION.md).
+Privileged quarantine/replay/rebuild POSTs are owned by
+[PRIVILEGED_OPS_AUTHORIZATION.md](../security/PRIVILEGED_OPS_AUTHORIZATION.md).
 
 ## Browser isolation
 
@@ -35,18 +37,22 @@ flow exclusively through this Go surface.
 | `GET` | `/v1/tenants/{tenant_id}/inventory` | Authoritative committed snapshot |
 | `GET` | `/v1/tenants/{tenant_id}/inventory/stream` | SSE live updates after projection commit |
 | `GET` | `/v1/tenants/{tenant_id}/ops` | Authorized lag/poison/freshness (Issue #47; `MX-002`/`MX-003`) |
+| `POST` | `/v1/tenants/{tenant_id}/ops/quarantine/release` | Authorized outbox/poison retry (Issue #48; `MX-004`) |
+| `POST` | `/v1/tenants/{tenant_id}/ops/replay` | Authorized same-tenant replay (Issue #48; `MX-005`) |
+| `POST` | `/v1/tenants/{tenant_id}/ops/rebuild` | Authorized tenant-scoped rebuild (Issue #48; `MX-006`) |
 
-`POST`, `PUT`, `PATCH`, and `DELETE` on these paths return `405 Method Not Allowed`
-and do not mutate projection state. Malformed or non-lowercase UUIDv4
-`tenant_id` values return `400` (or `404` for empty path segments) without
-mutating state.
+`POST`, `PUT`, `PATCH`, and `DELETE` on the inventory and `GET .../ops` paths
+return `405 Method Not Allowed` and do not mutate projection state. Malformed
+or non-lowercase UUIDv4 `tenant_id` values return `400` (or `404` for empty
+path segments) without mutating state.
 
 `tenant_id` validation follows the Event Spine lowercase UUIDv4 identifier rule. This is
 context validation only. Issue #45 requires a fresh Go-owned session on these routes.
 Missing, expired, forged, or revoked sessions return `401` `{"error":"unauthenticated"}`
 before any snapshot or SSE stream is written. Issue #46 requires `MX-001` for
-inventory; Issue #47 requires `MX-002` or `MX-003` for ops. Unauthorized
-callers return `403` `{"error":"forbidden"}` with no snapshot body.
+inventory; Issue #47 requires `MX-002` or `MX-003` for ops; Issue #48 requires
+`MX-004`/`MX-005`/`MX-006` for privileged POSTs. Unauthorized
+callers return `403` `{"error":"forbidden"}` with no snapshot or mutation.
 
 ## Snapshot DTO
 

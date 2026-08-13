@@ -2,7 +2,9 @@
 
 **Status:** Implemented for Issue #29 library/integration scope. Local FC-001
 and FC-014-style proofs exist; hosted fault campaigns and claim promotion
-remain deferred. No Identity & Operations recovery console or Traceability & Recovery backup/restore is introduced.
+remain deferred. Traceability & Recovery backup/restore is not introduced.
+Issue #48 operator HTTP is recorded in
+[PRIVILEGED_OPS_AUTHORIZATION.md](../security/PRIVILEGED_OPS_AUTHORIZATION.md).
 
 **Owns:** Controlled duplicate-injection harness coverage, the documented use of
 the CONTRACTS.md §8 inventory projection checksum, isolated reset of derived
@@ -10,9 +12,10 @@ Event Spine platform state, replay of retained event history through the replay-
 projection handler, rebuild completeness gating, and reproduction metadata for
 `CLM-004` / `CLM-006` support artifacts.
 
-**Does not own:** Operator recovery UI, quarantine release, privileged replay
-endpoints (`CAP-013`), backup/restore (`CAP-015`–`CAP-017`), generalized
-event-sourcing frameworks, or exactly-once delivery claims.
+**Does not own:** Operator HTTP authorization (Issue #48 /
+[PRIVILEGED_OPS_AUTHORIZATION.md](../security/PRIVILEGED_OPS_AUTHORIZATION.md)),
+backup/restore (`CAP-015`–`CAP-017`), generalized event-sourcing frameworks,
+or exactly-once delivery claims.
 
 ## Building blocks
 
@@ -22,6 +25,8 @@ event-sourcing frameworks, or exactly-once delivery claims.
 | `platform.ChecksumTenant` | CONTRACTS.md §8 SHA-256 of one tenant's inventory projection |
 | `platform.ResetDerivedState` | Deletes only `platform.inbox`, `platform.inventory_projection`, and `platform.processing_failures` |
 | `platform.RebuildFromHistory` | Replays retained `HistoryRecord` key/value/position bytes through `ProcessRecord` |
+| `platform.ResetDerivedStateForTenant` | Issue #48 tenant-scoped derived-state delete |
+| `platform.ReplayTenantHistory` / `RebuildTenantFromHistory` | Issue #48 operator replay/rebuild through `ProcessRecord` |
 | `platform.ReproductionMetadata` | Seed, contract version, handler version, commit, broker range, checksum inputs/result, status, limitations |
 
 ## Canonical checksum
@@ -89,7 +94,7 @@ emit an in-process read hint after an apply; that is not an external effect.
 
 | Later owner | Deferred behavior |
 | --- | --- |
-| Identity (`CAP-013`) | Authorized quarantine release and operator-controlled replay |
+| Identity (`CAP-013`) | Authorized quarantine release and operator-controlled replay (Issue #48 library/test HTTP; claim remains Planned) |
 | Traceability (`CAP-015`–`CAP-017`, ADR-Q-005) | Authorized recovery/restore product and broader checksum reconstruction campaigns |
 
 ## Non-claims

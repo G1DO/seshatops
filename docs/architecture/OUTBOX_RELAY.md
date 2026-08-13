@@ -68,7 +68,8 @@ counts, the oldest unpublished `created_at`, and a bounded quarantine sample.
 This is the Event Spine verification surface for unpublished intent and terminal
 publication failures. It is not an Identity & Operations metrics or alerting
 stack. Issue #47 product reads use tenant-scoped `InspectBacklogForTenant`
-through `GET /v1/tenants/{tenant_id}/ops`.
+through `GET /v1/tenants/{tenant_id}/ops`. Issue #48 may return a same-tenant
+quarantined row to `pending` via `ReleaseQuarantined` after `MX-004`.
 
 ## Integration harness
 
