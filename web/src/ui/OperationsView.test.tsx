@@ -143,6 +143,31 @@ describe("OperationsView", () => {
     expect(screen.queryByTestId("ops-pending")).toBeNull();
   });
 
+  it("shows control 403 as a request error, not a grant", () => {
+    const onRelease = vi.fn();
+    render(
+      <OperationsView
+        connection="live"
+        projection={{
+          items: [],
+          checksum: "abc",
+          observed_at: "2026-08-12T07:00:00Z",
+          last_applied_event_id: null,
+        }}
+        errorMessage={null}
+        tenantId={NORTHSTAR_TENANT_ID}
+        onRelease={onRelease}
+        controlError="forbidden"
+      />,
+    );
+    expect(screen.getByTestId("ops-controls")).toBeTruthy();
+    expect(screen.getByTestId("ops-control-error")).toHaveTextContent(
+      "forbidden",
+    );
+    const release = screen.getByTestId("ops-release") as HTMLButtonElement;
+    expect(release.disabled).toBe(true);
+  });
+
   it("renders sign-in when unauthenticated and does not show inventory", () => {
     const onSignIn = vi.fn();
     render(

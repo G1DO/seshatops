@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { connectionLabel, type ConnectionState } from "../state/connection";
 import type { ProjectionViewState } from "../state/projectionStore";
 import type { OpsSnapshot, SessionView } from "../api/types";
@@ -13,6 +14,12 @@ export interface OperationsViewProps {
   onLogout?: () => void;
   ops?: OpsSnapshot | null;
   opsError?: string | null;
+  onRelease?: (eventId: string) => void;
+  onReplay?: (eventId?: string) => void;
+  onRebuild?: () => void;
+  controlBusy?: boolean;
+  controlError?: string | null;
+  controlStatus?: string | null;
 }
 
 export function OperationsView(props: OperationsViewProps) {
@@ -27,9 +34,17 @@ export function OperationsView(props: OperationsViewProps) {
     onLogout,
     ops,
     opsError,
+    onRelease,
+    onReplay,
+    onRebuild,
+    controlBusy,
+    controlError,
+    controlStatus,
   } = props;
   const live = !unauthenticated && connection === "live";
   const showOps = ops !== undefined || opsError !== undefined;
+  const showControls = Boolean(onRelease || onReplay || onRebuild);
+  const [eventId, setEventId] = useState("");
 
   return (
     <main className="ops">
@@ -158,8 +173,7 @@ export function OperationsView(props: OperationsViewProps) {
               <h2>Processing visibility</h2>
               <p className="ops__visibility-note">
                 Lag, poison/quarantine, and projection freshness for this
-                tenant. Go authorizes; this screen does not. No release or
-                replay controls.
+                tenant. Go authorizes; this screen does not.
               </p>
               {opsError ? (
                 <p data-testid="ops-error" role="alert">
@@ -228,6 +242,67 @@ export function OperationsView(props: OperationsViewProps) {
               ) : opsError ? null : (
                 <p data-testid="ops-loading">Loading processing signals.</p>
               )}
+            </section>
+          ) : null}
+
+          {showControls ? (
+            <section className="ops__controls" data-testid="ops-controls">
+              <h2>Privileged controls</h2>
+              <p className="ops__visibility-note">
+                Go authorizes quarantine release, replay, and rebuild. Hidden
+                or disabled buttons are not a security boundary.
+              </p>
+              <label className="ops__control-field">
+                Event ID
+                <input
+                  data-testid="ops-event-id"
+                  value={eventId}
+                  onChange={(e) => setEventId(e.target.value)}
+                  spellCheck={false}
+                />
+              </label>
+              <div className="ops__control-actions">
+                {onRelease ? (
+                  <button
+                    type="button"
+                    data-testid="ops-release"
+                    disabled={controlBusy || eventId === ""}
+                    onClick={() => onRelease(eventId)}
+                  >
+                    Release quarantine
+                  </button>
+                ) : null}
+                {onReplay ? (
+                  <button
+                    type="button"
+                    data-testid="ops-replay"
+                    disabled={controlBusy}
+                    onClick={() => onReplay(eventId || undefined)}
+                  >
+                    Replay
+                  </button>
+                ) : null}
+                {onRebuild ? (
+                  <button
+                    type="button"
+                    data-testid="ops-rebuild"
+                    disabled={controlBusy}
+                    onClick={() => onRebuild()}
+                  >
+                    Rebuild
+                  </button>
+                ) : null}
+              </div>
+              {controlError ? (
+                <p data-testid="ops-control-error" role="alert">
+                  Control API error: {controlError}
+                </p>
+              ) : null}
+              {controlStatus ? (
+                <p data-testid="ops-control-status">
+                  Last control status: {controlStatus}
+                </p>
+              ) : null}
             </section>
           ) : null}
         </>

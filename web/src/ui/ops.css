@@ -232,3 +232,34 @@ body {
   font-size: 0.92rem;
   overflow-wrap: anywhere;
 }
+
+.ops__controls {
+  margin-top: 1.75rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.ops__controls h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+}
+
+.ops__control-field {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.ops__control-field input {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  padding: 0.4rem 0.5rem;
+}
+
+.ops__control-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

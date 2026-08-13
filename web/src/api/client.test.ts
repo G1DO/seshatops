@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fetchOps, fetchSnapshot } from "./client";
+import { fetchOps, fetchSnapshot, postQuarantineRelease } from "./client";
 import { ApiError, FORBIDDEN, UNAUTHENTICATED } from "./types";
 import {
   NORTHSTAR_TENANT_ID,
@@ -149,5 +149,35 @@ describe("fetchOps", () => {
     await expect(
       fetchOps("http://example.test", NORTHSTAR_TENANT_ID, fetchImpl),
     ).rejects.toMatchObject({ code: "malformed_response" });
+  });
+});
+
+describe("postQuarantineRelease", () => {
+  it("POSTs cookies and maps forbidden without treating it as success", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(async () =>
+      new Response(JSON.stringify({ error: FORBIDDEN }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    await expect(
+      postQuarantineRelease(
+        "http://example.test",
+        NORTHSTAR_TENANT_ID,
+        "018f5d78-6e64-4f5f-bd16-8e9f7c4a2001",
+        fetchImpl,
+      ),
+    ).rejects.toMatchObject({
+      name: "ApiError",
+      code: FORBIDDEN,
+      status: 403,
+    } satisfies Partial<ApiError>);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      `http://example.test/v1/tenants/${NORTHSTAR_TENANT_ID}/ops/quarantine/release`,
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+      }),
+    );
   });
 });

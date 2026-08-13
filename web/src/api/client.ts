@@ -1,5 +1,6 @@
 import {
   ApiError,
+  type ControlResult,
   type ErrorBody,
   type InventoryItem,
   type InventorySnapshot,
@@ -174,4 +175,106 @@ export async function fetchOps(
   }
 
   return body;
+}
+
+function isControlResult(value: unknown): value is ControlResult {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+  const body = value as Record<string, unknown>;
+  return (
+    typeof body.tenant_id === "string" &&
+    typeof body.control === "string" &&
+    typeof body.status === "string" &&
+    isFiniteNumber(body.applied) &&
+    isFiniteNumber(body.duplicate_noop) &&
+    isFiniteNumber(body.quarantined)
+  );
+}
+
+async function postControl(
+  url: string,
+  body: Record<string, string>,
+  fetchImpl: typeof fetch,
+): Promise<ControlResult> {
+  let response: Response;
+  try {
+    response = await fetchImpl(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new ApiError(0, "network_error");
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = await response.json();
+  } catch {
+    throw new ApiError(response.status, "malformed_response");
+  }
+
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      errorCodeFromBody(parsed) ?? "request_failed",
+    );
+  }
+  if (!isControlResult(parsed)) {
+    throw new ApiError(response.status, "malformed_response");
+  }
+  return parsed;
+}
+
+/** Privileged quarantine release. Go authorizes; this client does not. */
+export async function postQuarantineRelease(
+  baseUrl: string,
+  tenantId: string,
+  eventId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<ControlResult> {
+  const root = baseUrl.replace(/\/$/, "");
+  return postControl(
+    `${root}/v1/tenants/${encodeURIComponent(tenantId)}/ops/quarantine/release`,
+    { event_id: eventId },
+    fetchImpl,
+  );
+}
+
+/** Privileged same-tenant replay. Go authorizes; this client does not. */
+export async function postReplay(
+  baseUrl: string,
+  tenantId: string,
+  eventId?: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<ControlResult> {
+  const root = baseUrl.replace(/\/$/, "");
+  const body: Record<string, string> = {};
+  if (eventId) {
+    body.event_id = eventId;
+  }
+  return postControl(
+    `${root}/v1/tenants/${encodeURIComponent(tenantId)}/ops/replay`,
+    body,
+    fetchImpl,
+  );
+}
+
+/** Privileged same-tenant rebuild. Go authorizes; this client does not. */
+export async function postRebuild(
+  baseUrl: string,
+  tenantId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<ControlResult> {
+  const root = baseUrl.replace(/\/$/, "");
+  return postControl(
+    `${root}/v1/tenants/${encodeURIComponent(tenantId)}/ops/rebuild`,
+    {},
+    fetchImpl,
+  );
 }
