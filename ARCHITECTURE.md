@@ -1,6 +1,6 @@
 # ARCHITECTURE — SeshatOps Logical Boundaries
 
-**Status:** Logical architecture and ownership boundaries. Event Spine packages (`event/`, `erp/`, `relay/`, `platform/`, `api/`, `web/`) implement the event path. Package `identity/` implements Issue #45 OIDC/session runtime. This is not deployment architecture or production evidence.
+**Status:** Logical architecture and ownership boundaries. Event Spine packages (`event/`, `erp/`, `relay/`, `platform/`, `api/`, `web/`) implement the event path. Package `identity/` implements Identity & Operations session, policy, and privileged-decision audit. This is not deployment architecture or production evidence.
 
 **Owns:** Logical system topology, language ownership, trust and communication boundaries, storage responsibilities, and high-level credential access boundaries.
 

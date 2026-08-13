@@ -2,10 +2,12 @@
 
 **Status:** Implemented for Issue #46 inventory and Issue #47 ops-visibility
 library/test scope. This note records tenant-scoped default-deny on those
-query APIs. It does not claim that tenant isolation holds across all protected
-operations, that authorization is a production control, or that `CAP-010`,
-`CAP-012`, `CLM-007`, `CLM-008`, or `CLM-009` are promoted. Privileged-ops
-HTTP evaluation is recorded in
+query APIs. It does not claim that tenant isolation holds across all product
+surfaces, that authorization is a production control, or that retrieval,
+citations, approvals, commands, or exports are covered. Issue #50 records the
+Identity & Operations exit-gate suite in
+[IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md).
+Privileged-ops HTTP evaluation is recorded in
 [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md).
 
 **Owns:** Go evaluation of the frozen permission matrix against platform
@@ -19,8 +21,7 @@ assignments for:
 **Does not own:** Audit recording (Issue #49, recorded in
 [AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md)), service-identity credentials
 (CAP-011), a policy-engine product, a durable assignment schema, a
-deployment service binary, SLO/alerting, or any `EVIDENCE.md` claim
-promotion.
+deployment service binary, SLO/alerting, or the Issue #50 exit-gate campaign.
 
 ## Authentication is not authorization
 

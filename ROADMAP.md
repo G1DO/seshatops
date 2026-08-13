@@ -2,10 +2,9 @@
 
 **Status:** Project Constitution is complete; Event Spine exit-gate evidence is recorded for
 the Issue #30 test-environment campaign (`CLM-003`–`CLM-006` Observed).
-Issues #21–#29 delivered the contract, Northstar fixture, source/outbox,
-Redpanda relay, inventory projection consumer, failure/restart safety,
-projection read API, TypeScript operations view, and duplicate/rebuild proofs.
-Identity & Operations through Portfolio Release remain Planned.
+Identity & Operations exit-gate evidence is recorded for the Issue #50
+test-environment campaign (`CLM-007`–`CLM-010` Observed). Traceability & Recovery
+through Portfolio Release remain Planned.
 
 This document is the concise, repository-owned implementation sequence for SeshatOps. It maps each major capability to exactly one primary capability owner, records supported dependencies, and defines the governance rules for activating and completing capability sequences. It is a roadmap, not a task board and not evidence that future capabilities exist.
 
@@ -23,14 +22,15 @@ This roadmap covers the planned sequence from the Project Constitution through P
 | --- | --- | --- |
 | Project Constitution | Complete | Issues #1–#10 and PRs #11–#20 are complete. GitHub [milestone/1](https://github.com/G1DO/seshatops/milestone/1) and the Notion Project Constitution page are closed/Complete as of 2026-08-12. |
 | Event Spine | Complete (test-environment exit gate) | Issues #21–#30 delivered the stack and exit-gate campaign (`CLM-003`–`CLM-006` Observed). GitHub [milestone/2](https://github.com/G1DO/seshatops/milestone/2) and the Notion Event Spine page are closed/Complete as of 2026-08-12. No production deployment. |
-| Identity & Operations through Portfolio Release | Planned | Outcome-and-exit-gate placeholders only; no detailed future implementation backlog is maintained here. Next activation: Identity & Operations. |
+| Identity & Operations | Complete (test-environment exit gate, except `CAP-011`) | Issues #43–#50 delivered identity, default-deny HTTP, ops visibility, privileged controls, audit, and the exit-gate negative suite (`CLM-007`–`CLM-010` Observed). `CAP-011` remains Planned. No production deployment. |
+| Traceability & Recovery through Portfolio Release | Planned | Outcome-and-exit-gate placeholders only; no detailed future implementation backlog is maintained here. Next activation: Traceability & Recovery. |
 
 The repository now includes Go packages for the event contract, Northstar
 fixture, `erp` source/outbox, `relay` publication, `platform` projection
-consumer (including Issue #29 rebuild helpers), `api` read surface, and the
-`web/` TypeScript operations view. No long-running deployment service, model,
-dataset experiment, or production environment exists yet. Existing documents
-define intent and
+consumer (including Issue #29 rebuild helpers), `api` read surface, `identity/`
+session and policy, and the `web/` TypeScript operations view. No long-running
+deployment service, model, dataset experiment, or production environment exists
+yet. Existing documents define intent and
 reviewed truth; they do not prove observed production behavior, performance, or
 production readiness.
 
@@ -51,7 +51,7 @@ Ordinary issue status remains owned by GitHub. `ROADMAP.md` records capability-s
 | --- | --- | --- | --- | --- | --- | --- |
 | **Project Constitution** | A reviewer understands what SeshatOps is, what it excludes, how it will be built, and what evidence is required before application code begins. | `CAP-001`–`CAP-003` | Supports governance, evidence, and clean-room review for every later capability sequence. | Master Project Blueprint and Issues #1–#10; no code or external service dependency. | Reviewed documentation is merged; boundaries, ownership, and exit gates are explicit; the Event Spine backlog can be created without inventing a new architecture. | **Complete** |
 | **Event Spine** | A synthetic-ERP transaction travels through the transactional outbox, versioned event transport, Go projection, and TypeScript view. | `CAP-004`–`CAP-008` | Provides the event history, projections, and live view used by Identity & Operations through Approved Actions and the public demo. | Project Constitution architecture, correctness, security, and evidence boundaries. | The vertical slice is duplicate-safe and unchanged event history reconstructs the expected projection deterministically. | **Complete — test-environment exit gate (Issue #30)** |
-| **Identity & Operations** | Users and service identities operate through default-deny tenant-aware boundaries with visibility into processing health and failures. | `CAP-009`–`CAP-013` | Extends Event Spine surfaces with identity, authorization, operational visibility, quarantine, and controlled replay. | Event Spine event and projection surfaces; Project Constitution security model. | The future cross-tenant negative suite passes and privileged operations remain default-deny. | **Planned** |
+| **Identity & Operations** | Users operate through default-deny tenant-aware HTTP boundaries with visibility into processing health and failures. Service-identity credentials remain Planned (`CAP-011`). | `CAP-009`–`CAP-013` | Extends Event Spine surfaces with identity, authorization, operational visibility, quarantine, and controlled replay. | Event Spine event and projection surfaces; Project Constitution security model. | The cross-tenant negative suite passes and privileged operations remain default-deny on implemented HTTP surfaces. | **Complete — test-environment exit gate (Issue #50), except `CAP-011`** |
 | **Traceability & Recovery** | An authorized operator traces fictional operational lineage and demonstrates controlled reconstruction and recovery. | `CAP-014`–`CAP-017` | Reuses Event Spine event history/projections and Identity & Operations authorization and recovery controls. | Event Spine; Identity & Operations authorization and controls. | The traceability query, deterministic projection checksum, and documented restore experiment succeed with reproducible evidence. | **Planned** |
 | **Stockout Intelligence** | The platform produces evaluated stockout-risk intelligence with uncertainty and honest abstention. | `CAP-018`–`CAP-021` | Uses Event Spine reconstructed state and Identity & Operations tenant boundaries; supplies intelligence to Approved Actions and Portfolio Release. | Event Spine replayable operational state; Identity & Operations tenant-safe access; Project Constitution evaluation protocols. | A frozen temporal evaluation is reproducible and every prediction is traceable to versioned inputs and evaluation artifacts. | **Planned** |
 | **Approved Actions** | An authorized human approves a typed recommendation and retries produce one durable business effect with traceable receipts. | `CAP-022`–`CAP-026` | Uses Event Spine current state, Identity & Operations authorization, Stockout Intelligence recommendations, and Traceability & Recovery lineage/recovery context. | Event Spine operational state; Identity & Operations authorization; sequencing preference for Stockout Intelligence proposal output. | Authorized approval and repeated command delivery produce one durable business effect with traceable evidence. This is not an exactly-once network or broker-delivery claim. | **Planned** |
@@ -73,11 +73,11 @@ Each capability has exactly one primary capability owner. A supporting owner may
 | `CAP-006` | Versioned event contracts and transport | Event Spine | Traceability, Reliability | Compatibility test and delivery trace | Observed (test env; CLM-005) |
 | `CAP-007` | Deduplicated operational projections | Event Spine | Traceability, Reliability | Duplicate-delivery test and projection artifact | Observed (test env; CLM-004/006) |
 | `CAP-008` | TypeScript live operations view | Event Spine | Portfolio | Authorized live-view demonstration and test evidence | Planned (implemented UI + Vitest/API reconnect evidence in Issue #30; authorized live-view claim route remains open) |
-| `CAP-009` | Identity and sessions | Identity | Approved Actions through Portfolio Release | Identity/session integration and negative tests | Planned |
-| `CAP-010` | Tenant-aware authorization | Identity | Traceability, Approvals, Governed RAG, Reliability | Cross-tenant negative suite | Planned |
+| `CAP-009` | Identity and sessions | Identity | Approved Actions through Portfolio Release | Identity/session integration and negative tests | Observed (test env; CLM-008 session negatives) |
+| `CAP-010` | Tenant-aware authorization | Identity | Traceability, Approvals, Governed RAG, Reliability | Cross-tenant negative suite | Observed (test env; CLM-007/008) |
 | `CAP-011` | Service identities and least privilege | Identity | Approved Actions through Reliability & Cloud | Service-identity authorization tests and audit evidence | Planned |
-| `CAP-012` | Operational visibility | Identity | Reliability | Health, lag, failure, quarantine, and replay evidence | Planned |
-| `CAP-013` | Quarantine and controlled replay operations | Identity | Traceability, Reliability | Authorized fault/replay campaign | Planned |
+| `CAP-012` | Operational visibility | Identity | Reliability | Health, lag, failure, quarantine, and replay evidence | Observed (test env; CLM-009) |
+| `CAP-013` | Quarantine and controlled replay operations | Identity | Traceability, Reliability | Authorized fault/replay campaign | Observed (test env; CLM-010 authorization subset) |
 | `CAP-014` | Traceability and recall | Traceability | Approvals, Portfolio | Lineage query and recall report | Planned |
 | `CAP-015` | Deterministic projection replay and checksum reconstruction | Traceability | Event Spine, Reliability | Deterministic checksum comparison | Planned |
 | `CAP-016` | Backup and restore | Traceability | Reliability | Restore experiment with application-readable and integrity checks | Planned |
@@ -136,8 +136,9 @@ Dependencies are recorded only where supported by the product constitution, arch
 
 ## Active capability-sequence decomposition rule
 
-Event Spine exit-gate evidence is recorded (Issue #30). Identity & Operations is the next Planned
-capability sequence. Detailed GitHub issues remain bounded to
+Event Spine exit-gate evidence is recorded (Issue #30). Identity & Operations
+exit-gate evidence is recorded (Issue #50). Traceability & Recovery is the next
+Planned capability sequence. Detailed GitHub issues remain bounded to
 the active capability sequence. Traceability & Recovery through Portfolio Release remain outcome-and-exit-gate placeholders and must
 not accumulate speculative implementation backlogs.
 
@@ -206,3 +207,4 @@ Deferred decisions are owned by the relevant capability sequence: completed Issu
 - [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md)
 - [CLAIM_STATUS_VOCABULARY.md](docs/evidence/CLAIM_STATUS_VOCABULARY.md)
 - [EVIDENCE.md](EVIDENCE.md)
+- [Identity & Operations Exit-Gate Experiment Report](docs/evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md)

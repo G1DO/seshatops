@@ -2,8 +2,10 @@
 
 **Status:** Implemented for Issue #45 library/test scope. This note records the
 OIDC Authorization Code + PKCE relying-party flow and Go-owned session gate.
-It does not claim production authentication, production tenant isolation, or
-`CAP-009` evidence promotion. Inventory query-API default-deny is recorded in
+It does not claim production authentication or production tenant isolation.
+Issue #50 records the Identity & Operations exit-gate suite in
+[IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md).
+Inventory query-API default-deny is recorded in
 [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md).
 
 **Owns:** Configurable OIDC relying-party integration, opaque Go-owned
@@ -13,7 +15,7 @@ session presentation for the operations UI.
 **Does not own:** Tenant/role/resource/action default-deny (Issue #46,
 recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)),
 IdP vendor selection, durable session storage, secret management, a
-deployment service binary, or any `EVIDENCE.md` claim promotion.
+deployment service binary, or the Issue #50 exit-gate campaign itself.
 
 ## Authentication is not authorization
 

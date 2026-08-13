@@ -26,7 +26,7 @@ The following are design assumptions, not verified properties:
 3. Python is advisory intelligence and has no business-state write or command-execution authority.
 4. Browser input, model output, retrieved content, client-supplied identifiers, citations, approvals, receipts, and idempotency keys are untrusted until validated by Go.
 5. Asynchronous delivery may duplicate, reorder, delay, or lose an acknowledgement. Issue #4 correctness rules remain applicable.
-6. Identity integration is defined to establish a principal and session context per [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) (OIDC Authorization Code + PKCE; Go-owned session). Issue #45 library/test runtime is recorded in [OIDC_SESSION.md](OIDC_SESSION.md). Issue #46 library/test query-API default-deny is recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Production authentication, IdP vendor, durable token storage, and privileged-ops HTTP enforcement remain deferred.
+6. Identity integration is defined to establish a principal and session context per [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) (OIDC Authorization Code + PKCE; Go-owned session). Issue #45 library/test runtime is recorded in [OIDC_SESSION.md](OIDC_SESSION.md). Issue #46 library/test query-API default-deny is recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Issue #50 records the test-environment exit-gate suite. Production authentication, IdP vendor, durable token storage, and pentest verification remain deferred.
 7. Tenant context must be established and checked by trusted server-side processing. A tenant identifier supplied by a client is only an assertion to validate.
 8. Future deployment controls may add network, storage, process, and credential boundaries, but this document defines the public logical architecture only.
 
@@ -165,8 +165,8 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 - **Preventive controls:** AUTH-01 default deny; AUTH-02 tenant-isolation invariant; AUTH-03 server-side tenant/resource binding; tenant checks at every boundary.
 - **Detective/recovery controls:** Auditable denials and mismatch events; quarantine unsafe events; controlled investigation and recovery without cross-tenant replay.
 - **Future negative test:** Attempt every read, retrieve, cite, approve, command, modify, export, audit, replay, and recovery action using another tenant's context and colliding identifiers.
-- **Residual risk:** A missing enforcement point or incorrectly scoped service/cache can still leak data until implementation-wide testing exists.
-- **Deferred owner:** Issue #5 defines the invariant; Event Spine identity/operations implementation and Issue #7 evidence own enforcement and measured proof.
+- **Residual risk:** Issue #50 Observed a test-environment HTTP subset (inventory, ops, quarantine, replay, rebuild, audit). Retrieval, citations, approvals, commands, exports, caches, indexes, and backup/restore remain untested. A missing enforcement point on those later surfaces can still leak data. Production isolation is not claimed.
+- **Deferred owner:** Issue #50 records the HTTP subset; later capability sequences and Issue #7 evidence own remaining surfaces.
 
 ### T-02 - Identifier substitution and insecure direct-object access
 
@@ -198,8 +198,8 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 - **Preventive controls:** AUTH-01 default deny; AUTH-07 current authorization and freshness at every checkpoint; AUTH-11 treats changed policy, assignment, role, scope, session, membership, or target version as invalidating the attempt.
 - **Detective/recovery controls:** Record stale-context denials; expire or revoke affected workflows; require renewed authorization or approval.
 - **Future negative test:** Change role, scope, tenant membership, session state, or policy after display and after approval, then require execution denial or renewed approval.
-- **Residual risk:** Cache invalidation, revocation timing, and clock/freshness policy are deferred.
-- **Deferred owner:** Issue #5 conceptual requirement; later identity/operations implementation.
+- **Residual risk:** Issue #50 Observed logout, expiry, forged/stale tokens, and SSE stop after session or assignment revoke on Identity HTTP. Approval/execution freshness, cache invalidation, production revocation, and clock/freshness policy remain deferred.
+- **Deferred owner:** Issue #50 records the HTTP session/assignment subset; Approved Actions owns display/approval/execution freshness.
 
 ### T-05 - Replayed commands and approvals
 
@@ -412,7 +412,7 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 
 ## 9. Assumptions, residual risks, and deferred decisions
 
-Decided for Identity & Operations design by [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) / [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md): OIDC protocol profile, Go-owned session model, tenant visibility via platform membership and tenant-scoped allow-list, allow-list policy representation, and service-delegation boundaries. The demo allow-list is [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md). Issue #45 session runtime is recorded in [OIDC_SESSION.md](OIDC_SESSION.md). Issue #46 inventory query-API default-deny is recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md).
+Decided for Identity & Operations design by [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) / [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md): OIDC protocol profile, Go-owned session model, tenant visibility via platform membership and tenant-scoped allow-list, allow-list policy representation, and service-delegation boundaries. The demo allow-list is [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md). Issue #45 session runtime is recorded in [OIDC_SESSION.md](OIDC_SESSION.md). Issue #46 inventory query-API default-deny is recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Issue #50 records the test-environment exit-gate suite in [IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md).
 
 The following remain unresolved by design:
 
@@ -423,9 +423,9 @@ The following remain unresolved by design:
 - Availability limits, quotas, rate controls, SLOs, and recovery thresholds.
 - The full RAG evaluation protocol, corpus, metrics, and release gates.
 
-Issue #5 defines the conceptual security model and negative-test requirements. Issue #6 owns the complete forecasting/RAG evaluation protocol. Issue #7 owns reliability and security evidence protocols. Issue #10 owns integrated constitution review. Inventory query-API default-deny is library/test scope only ([QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)). Privileged-ops HTTP, service-identity runtime, and production enforcement remain later identity/operations work.
+Issue #5 defines the conceptual security model and negative-test requirements. Issue #6 owns the complete forecasting/RAG evaluation protocol. Issue #7 owns reliability and security evidence protocols. Issue #10 owns integrated constitution review. Inventory query-API default-deny is library/test scope only ([QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)). Privileged-ops HTTP and privileged-decision audit are library/test scope. Service-identity credential runtime and production enforcement remain later work (`CAP-011` Planned).
 
-The principal residual risk is that most of these remain design requirements. Issue #45 records OIDC/session library/test runtime and Issue #46 records inventory query-API default-deny in library/test scope; production authentication, production tenant isolation, privileged-ops enforcement, penetration tests, and policy-engine verification do not exist yet. `CLM-007`, `CLM-008`, and `CAP-010` remain Planned.
+The principal residual risk is that production authentication, production tenant isolation, penetration tests, and policy-engine verification do not exist. Issue #50 records a test-environment negative suite for Identity & Operations HTTP surfaces (`CLM-007`–`CLM-010` Observed with limitations). Isolation is not claimed for retrieval, citations, approvals, commands, exports, or backup/restore. `CAP-011` remains Planned.
 
 ## 10. Clean-room boundary
 

@@ -174,14 +174,16 @@ A demo must not add bypass rows to make operator work easier.
 
 ## 9. Non-claims
 
-Publishing this matrix does not implement authorization, does not promote
-`CAP-010`, `CLM-007`, or `CLM-008`, and does not select a policy-engine
+Publishing this matrix does not implement authorization, does not itself
+promote `CAP-010`, `CLM-007`, or `CLM-008`, and does not select a policy-engine
 product. Inventory and ops-visibility query-API evaluation is recorded in
 [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Privileged-ops HTTP
 surfaces are recorded in
 [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md).
 Privileged-decision audit is recorded in
-[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md).
+[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md). Issue #50 records the
+test-environment exit-gate suite in
+[IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md).
 
 ## 10. Related documents
 

@@ -302,3 +302,47 @@ production context was found in the reviewed scope.
 - No Ahoy repository or private Ahoy artifact was inspected or used.
 - Checked boxes record that this review occurred; they do not prove absence of
   undiscovered issues.
+
+### CRR-0011 - Identity & Operations exit-gate campaign review (Issue #50)
+
+| Field | Value |
+| --- | --- |
+| Author | G1DO |
+| Verified by | Local `go test ./...`, frozen identity/api filters, web Vitest/typecheck/build |
+| Date (UTC) | 2026-08-13 |
+| Commit / tip | Runtime verified at `173cedb`; evidence docs on Issue #50 branch `test/50-identity-negative-suite` |
+| Scope (paths / PR) | Issue #50 procedure, experiment report, campaign review, completion summary, EVIDENCE.md `CLM-007`–`CLM-010`, ROADMAP/README/AGENTS status, threat-model residual risks, #50 pointer notes |
+| Review type | identity exit-gate evidence, clean-room, and verification honesty review |
+| Result | Pass with recorded follow-ups |
+
+#### Checks
+
+- [x] No Ahoy or other private code, schemas, migrations, data, logs, traces, or production config
+- [x] No private screenshots, recordings, or exports
+- [x] No production identifiers, hostnames, internal URLs, or private account/tenant IDs
+- [x] No private business-specific rules, recipes, prices, customers, suppliers, or process knowledge
+- [x] No secrets, credentials, tokens, or private environment files
+- [x] No raw AI conversations or prompt histories containing private context
+- [x] All new material has a permitted source or recorded synthetic provenance
+- [x] Synthetic example values are fictional and independently explainable
+- [x] Uncertain provenance excluded rather than sanitized and retained
+- [x] Category repository search run over the Issue #50 scope
+- [x] Public artifacts remain independently explainable without private systems
+- [x] No private denylist of real identifiers was added
+
+#### Findings and disposition
+
+1. Campaign evidence uses synthetic Northstar Foods fixtures, mock OIDC, and
+   Testcontainers only; no private systems were contacted.
+2. `CLM-007`–`CLM-010` promoted to Observed for test-environment Identity &
+   Operations HTTP surfaces with explicit limitations; retrieval, citations,
+   approvals, commands, exports, and backup/restore remain untested.
+3. `CAP-011` remains Planned. `FC-015`/`FC-016` remain Not executed.
+4. Hosted CI run IDs are not recorded; they must not be claimed until GitHub
+   shows a successful run for the reviewed commit.
+
+#### Notes
+
+- No Ahoy repository or private Ahoy artifact was inspected or used.
+- Checked boxes record that this review occurred; they do not prove absence of
+  undiscovered issues.
