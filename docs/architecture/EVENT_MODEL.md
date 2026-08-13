@@ -1,10 +1,10 @@
 # Event Model — SeshatOps Correctness Principles
 
-**Status:** Planned conceptual contract from Issue #4. This document defines
-principles that future implementations must preserve. The concrete Event Spine contract is in [`CONTRACTS.md`](../../CONTRACTS.md).
-Executable parse, validation, JCS canonicalization, and content-hash helpers
-for that contract live in the Go package `event`. Neither the documents nor the
-library prove transport, projection, or production readiness.
+**Status:** Event meaning and invariants for the implemented Event Spine.
+The concrete wire, persistence, and checksum contract is
+[`CONTRACTS.md`](../../CONTRACTS.md). Executable parse, validation, JCS
+canonicalization, and content-hash helpers live in the Go package `event`.
+These documents do not prove production readiness.
 
 **Owns:** Event meaning, authority boundaries, identity, aggregate ordering, publication and consumption guarantees, quarantine, replay, and event-related degraded behavior.
 
@@ -144,7 +144,9 @@ Replay of projections must not repeat irreversible external commands, notificati
 - The platform must not claim that asynchronous consumers are current during the outage.
 - Controlled backpressure or temporary rejection is preferable to silently accepting work that cannot be durably retained.
 
-### Python outage
+### Python outage (not in the current topology)
+
+Python intelligence is not implemented. If it is added later:
 
 - Core Go-owned transactional operations, authorization, and existing business-state transitions remain available.
 - New forecasts, retrieval results, explanations, and proposals may be unavailable or explicitly stale.
@@ -168,13 +170,11 @@ Replay of projections must not repeat irreversible external commands, notificati
 
 ## 10. Deferred implementation choices
 
-Issue #21 resolves the first Event Spine event serialization, schema compatibility,
-topic/key policy, source/outbox boundary, inbox/projection transaction, retry
-and acknowledgement contract, failure record, and checksum canonicalization in
-[`CONTRACTS.md`](../../CONTRACTS.md).
+Event Spine serialization, schema compatibility, topic/key policy,
+source/outbox, inbox/projection, retry, failure, and checksum decisions are
+in [`CONTRACTS.md`](../../CONTRACTS.md).
 
-The following remain deliberately open: later event families, retention and
-archival, partition sizing, publisher and consumer process layout, metrics,
-alerts and thresholds, deployment-specific credentials, HTTP routes, and
-operator recovery controls. Those choices remain subject to the invariants in
-this document and the Event Spine contract.
+The following remain open: later event families, retention, partition sizing,
+publisher and consumer process layout, metrics, alerts, and deployment
+credentials. Those choices remain subject to the invariants in this document
+and the Event Spine contract.

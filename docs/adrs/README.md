@@ -11,7 +11,7 @@ an implementation.
 | --- | --- | --- | --- |
 | [ADR-0001](0001-transactional-outbox-and-at-least-once-delivery.md) | Transactional outbox and at-least-once delivery | Accepted design principle; Issue #23 source/outbox persistence and Issue #24 relay implemented | Event Spine / Reliability evidence |
 | [ADR-0002](0002-idempotent-command-execution.md) | Idempotent command execution and durable receipts | Accepted design principle; implementation pending | Approvals / Reliability evidence |
-| [ADR-0003](0003-event-envelope-and-schema-compatibility.md) | Event Spine event envelope and schema compatibility | Accepted Event Spine decision; Issue #22 library implemented; runtime pending | Event Spine / Reliability evidence |
+| [ADR-0003](0003-event-envelope-and-schema-compatibility.md) | Event Spine event envelope and schema compatibility | Accepted Event Spine decision; Issue #22 library and Issues #23–#29 runtime implemented | Event Spine / Reliability evidence |
 | [ADR-0004](0004-postgresql-inbox-and-projection-consistency.md) | Event Spine PostgreSQL inbox and projection consistency | Accepted Event Spine decision; Issue #23 source/outbox implemented; Issues #25–#26 inbox/projection consumer and failure visibility implemented | Event Spine / Reliability evidence |
 | [ADR-0005](0005-identity-tenant-policy-and-service-delegation.md) | Identity, tenant policy, and service delegation | Accepted Identity & Operations design decision; runtime through Issue #49; Issue #50 test-environment exit-gate recorded | Identity & Operations |
 

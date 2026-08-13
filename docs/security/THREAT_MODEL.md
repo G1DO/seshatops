@@ -1,14 +1,22 @@
 # Threat Model - SeshatOps
 
-**Status:** Planned security design for Issue #5. This document defines the threat model and security properties that future implementation must preserve. It is not evidence that authentication, authorization, isolation, monitoring, or any other control exists.
+**Status:** Threat model for SeshatOps. **Active** for the implemented Event
+Spine and Identity HTTP surfaces. **Deferred** for Python intelligence, object
+storage, approvals, commands, retrieval, and production controls. This file is
+not pentest or production evidence.
 
 **Owns:** Security scope, assets, actors, trust boundaries, threat classes, planned control objectives, negative-test intent, and residual-risk framing.
 
-**Does not own:** Concrete identity providers, policy languages, API routes, middleware, tokens, cryptographic protocols, database tables, secret-management products, deployment topology, penetration testing, or the full RAG evaluation protocol owned by Issue #6.
+**Does not own:** Concrete identity providers, policy languages, API routes, middleware, tokens, cryptographic protocols, database tables, secret-management products, deployment topology, penetration testing, or future governed-RAG evaluation.
 
 ## 1. Scope and security assumptions
 
-SeshatOps is a clean-room, multi-tenant operations-intelligence platform. The public logical architecture consists of a browser client, a Go-owned transactional platform, PostgreSQL, Redpanda, object storage, Python intelligence, asynchronous publishers and consumers, and an external operational adapter represented publicly by the synthetic ERP.
+SeshatOps is a clean-room, multi-tenant operations-intelligence platform.
+**Implemented now:** a browser client, a Go-owned transactional platform,
+PostgreSQL, Redpanda, asynchronous publishers and consumers, and a synthetic
+ERP. **Deferred (not in the current topology):** object storage, Python
+intelligence, approval/command workflows, and production deployment. See
+[ARCHITECTURE.md](../../ARCHITECTURE.md).
 
 The model protects:
 
@@ -30,7 +38,7 @@ The following are design assumptions, not verified properties:
 7. Tenant context must be established and checked by trusted server-side processing. A tenant identifier supplied by a client is only an assertion to validate.
 8. Future deployment controls may add network, storage, process, and credential boundaries, but this document defines the public logical architecture only.
 
-Controls described as required, planned, or future are not implemented controls. No runtime security property is claimed until a later implementation and evidence review demonstrates it.
+Deferred controls are not implemented. Identity HTTP surfaces have test-environment Observed evidence in [EVIDENCE.md](../../EVIDENCE.md); that is not production pentest evidence.
 
 ## 2. Trust classification
 
@@ -70,7 +78,7 @@ Trust classification does not mean that any component is currently secure. It de
 | P-05 | External identity provider | Partially trusted authentication dependency. It may establish identity assertions, but Go must validate the resulting principal, tenant context, session state, and authorization independently |
 | P-06 | Browser client | Untrusted execution environment. It may render and submit requests but cannot enforce authoritative authorization |
 | P-07 | Go-owned transactional platform | Trusted logical authority for authorization, workflow decisions, state transitions, commands, receipts, and audit; this is a design ownership statement, not implementation evidence |
-| P-08 | Python intelligence capability | Partially trusted advisory service. It may forecast, retrieve, cite, explain, and propose within approved inputs, but it cannot authorize, approve, write business state, or execute commands |
+| P-08 | Python intelligence capability | **Deferred.** Partially trusted advisory service when implemented. It cannot authorize, approve, write business state, or execute commands |
 | P-09 | Asynchronous consumers and publishers | Partially trusted service identities. They may transport or process bounded events but must preserve tenant context, lineage, integrity, deduplication, and authorization boundaries |
 | P-10 | External operational adapter | Partially trusted operational boundary. It receives only narrowly scoped Go-authorized commands and may return success, failure, or uncertainty; it does not own SeshatOps authorization |
 | P-11 | Malicious external actor | Untrusted actor attempting discovery, token theft, injection, replay, denial of service, tampering, or cross-tenant access |
@@ -81,7 +89,7 @@ The initiating principal and tenant context must survive delegated service calls
 
 ## 5. Logical trust boundaries
 
-These are logical boundaries. They do not define network topology, cloud accounts, ports, subnets, processes, or deployment manifests.
+These are logical boundaries. They do not define network topology, cloud accounts, ports, subnets, processes, or deployment manifests. Boundaries 5–8 and 10 (retrieval/citation/command) apply when those surfaces exist; they are **deferred** until the owning milestone. Active now: 1–4, 9 (event path), 11, and tenant isolation on implemented HTTP.
 
 1. **Browser to Go APIs:** browser requests, identifiers, filters, approval references, receipts, and visible actions cross into an authoritative server boundary. Go must validate identity, tenant, resource, action, scope, and freshness.
 2. **External identity provider to Go:** identity assertions cross a partially trusted authentication boundary. Go must validate the resulting principal, tenant membership, session state, and current authorization independently; an assertion does not carry business authority.
@@ -108,36 +116,24 @@ flowchart LR
   subgraph dataBoundary["Data and transport boundaries"]
     PG["PostgreSQL"]
     BUS["Redpanda"]
-    OBJ["Object storage"]
-  end
-  subgraph intelligenceBoundary["Advisory intelligence boundary"]
-    PY["Python intelligence"]
-    RET["Approved retrieval and evidence inputs"]
   end
   subgraph externalBoundary["External operational boundary"]
-    ERP["Synthetic ERP or future adapter"]
+    ERP["Synthetic ERP"]
   end
   IDP["External identity provider"]
   B -->|"session and API requests"| G
   IDP -->|"identity assertions"| G
-  G <-->|"authoritative state and governance"| PG
+  G <-->|"authoritative state and audit"| PG
   G -->|"publish or consume with validation"| PUB
   PUB --> BUS
   BUS --> CON
   CON --> G
-  G -->|"approved context"| PY
-  RET -->|"authorized untrusted content"| PY
-  PY -->|"advisory output"| G
-  G --> OBJ
-  PY -->|"bounded artifacts"| OBJ
-  G -->|"authorized idempotent command"| ERP
-  B -.->|"must not authorize"| PY
-  PY -.->|"must not command or write business state"| ERP
+  ERP -->|"atomic source plus outbox"| PG
   B -.->|"must not access directly"| PG
   B -.->|"must not access directly"| BUS
 ~~~
 
-The dashed edges are prohibited authority paths, not network-deny or firewall claims.
+The dashed edges are prohibited authority paths, not network-deny or firewall claims. Object storage, Python intelligence, retrieval, and ERP command dispatch are deferred; they are listed in boundaries 5–8 above and are not drawn as current components.
 
 ## 6. Threat handling principles
 
@@ -206,7 +202,7 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 - **Asset:** A-04, A-05, A-10.
 - **Actor and entry boundary:** P-11, P-12, or P-13 through repeated API submission, message redelivery, receipt retrieval, or recovered workflow.
 - **Consequence:** Duplicate approval, repeated business effect, or authority after expiry.
-- **Preventive controls:** AUTH-06 approval does not replace execution-time authorization; AUTH-07 rechecks current authorization and freshness; AUTH-10 prevents caller-supplied receipts from becoming authority; AUTH-11 rejects stale or changed authority; Issue #4 CM-02 through CM-04 provide business-intent idempotency.
+- **Preventive controls:** AUTH-06 approval does not replace execution-time authorization; AUTH-07 rechecks current authorization and freshness; AUTH-10 prevents caller-supplied receipts from becoming authority; AUTH-11 rejects stale or changed authority; [ADR-0002](../adrs/0002-idempotent-command-execution.md) requires business-intent idempotency when commands exist.
 - **Detective/recovery controls:** Durable outcome retrieval; duplicate/replay audit records; reconciliation for uncertain downstream outcomes; quarantine conflicting intent.
 - **Future negative test:** Repeat the same approval and command, retry after timeout, and replay after restart; verify one durable effect and no stale authority.
 - **Residual risk:** External systems may have independent retry or reconciliation behavior.
@@ -338,7 +334,7 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 - **Asset:** A-01, A-05, A-06, A-07.
 - **Actor and entry boundary:** P-11 or P-13 through event, command, proposal, receipt, storage, or asynchronous redelivery paths.
 - **Consequence:** A valid identity is reused for different content, producing corrupted state, false lineage, or unsafe execution.
-- **Preventive controls:** AUTH-03 validates trusted resource and command context; AUTH-10 protects audit and receipt integrity; reject conflicting event IDs or idempotency intent; bind approvals and receipts to material intent and target version; preserve EM-06 and CM-03 behavior.
+- **Preventive controls:** AUTH-03 validates trusted resource and command context; AUTH-10 protects audit and receipt integrity; reject conflicting event IDs or idempotency intent; bind approvals and receipts to material intent and target version; preserve EM-06 and [ADR-0002](../adrs/0002-idempotent-command-execution.md) conflict/receipt behavior.
 - **Detective/recovery controls:** Integrity failure, quarantine, reconciliation, and visible non-success outcome; preserve sanitized diagnostic context.
 - **Future negative test:** Reuse event, command, approval, receipt, proposal, and idempotency identities with changed payloads or versions.
 - **Residual risk:** Concrete integrity and storage verification are deferred.
@@ -396,15 +392,15 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 | T-02 | AUTH-03 | Issue #5, later API implementation |
 | T-03, T-08 | AUTH-12, AUTH-13 | Issue #5, later service/adapter implementation |
 | T-04 | AUTH-01, AUTH-07, AUTH-11 | Issue #5, later identity/workflow implementation |
-| T-05 | AUTH-06, AUTH-07, AUTH-10, AUTH-11; CM-02 through CM-04 | Issue #4, Issue #5, later adapters, Issue #7 |
+| T-05 | AUTH-06, AUTH-07, AUTH-10, AUTH-11; ADR-0002 | Issue #5, later adapters |
 | T-06 | AUTH-06, AUTH-07, AUTH-11; Section 7.2 approval binding | Issue #5, later workflow implementation |
-| T-07 | AUTH-01, AUTH-05, AUTH-07 | Later identity/operations implementation, Issue #7 |
-| T-09, T-10, T-13 | AUTH-08, AUTH-09 | Issue #5, Issue #6, later intelligence implementation |
-| T-11 | AUTH-02, AUTH-09 | Issue #5, Issue #6, later retrieval implementation |
-| T-12 | AUTH-09 | Issue #6 |
-| T-14, T-15 | AUTH-10; CM-07, CM-08 | Issue #4, Issue #5, Issue #7 |
+| T-07 | AUTH-01, AUTH-05, AUTH-07 | Later identity/operations implementation |
+| T-09, T-10, T-13 | AUTH-08, AUTH-09 | Issue #5, later intelligence implementation |
+| T-11 | AUTH-02, AUTH-09 | Issue #5, later retrieval implementation |
+| T-12 | AUTH-09 | Later intelligence implementation |
+| T-14, T-15 | AUTH-10; ADR-0002 | Issue #4, Issue #5 |
 | T-16 | AUTH-02, AUTH-03; EM-08 | Issue #4, Issue #5, later consumers |
-| T-17 | AUTH-03, AUTH-10; EM-06; CM-03 | Issue #4, Issue #5, Issue #7 |
+| T-17 | AUTH-03, AUTH-10; EM-06; ADR-0002 | Issue #4, Issue #5 |
 | T-18 | AUTH-02, AUTH-07, AUTH-10 | Issue #5, Issue #7, later governance implementation |
 | T-19 | AUTH-01, AUTH-02, AUTH-11 | Issue #7, later reliability implementation |
 | T-20 | AUTH-01, AUTH-02, AUTH-05, AUTH-07 | Issue #5, later identity/operations implementation, Issue #7 |
@@ -412,7 +408,7 @@ Each threat below identifies the asset, actor, entry boundary, consequence, prev
 
 ## 9. Assumptions, residual risks, and deferred decisions
 
-Decided for Identity & Operations design by [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) / [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md): OIDC protocol profile, Go-owned session model, tenant visibility via platform membership and tenant-scoped allow-list, allow-list policy representation, and service-delegation boundaries. The demo allow-list is [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md). Issue #45 session runtime is recorded in [OIDC_SESSION.md](OIDC_SESSION.md). Issue #46 inventory query-API default-deny is recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Issue #50 records the test-environment exit-gate suite in [IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md).
+Decided for Identity & Operations design by [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md): OIDC protocol profile, Go-owned session model, tenant visibility via platform membership and tenant-scoped allow-list, allow-list policy representation, and service-delegation boundaries. The demo allow-list is [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md). Issue #45 session runtime is recorded in [OIDC_SESSION.md](OIDC_SESSION.md). Issue #46 inventory query-API default-deny is recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Issue #50 records the test-environment exit-gate suite in [IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md).
 
 The following remain unresolved by design:
 
@@ -423,7 +419,7 @@ The following remain unresolved by design:
 - Availability limits, quotas, rate controls, SLOs, and recovery thresholds.
 - The full RAG evaluation protocol, corpus, metrics, and release gates.
 
-Issue #5 defines the conceptual security model and negative-test requirements. Issue #6 owns the complete forecasting/RAG evaluation protocol. Issue #7 owns reliability and security evidence protocols. Issue #10 owns integrated constitution review. Inventory query-API default-deny is library/test scope only ([QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)). Privileged-ops HTTP and privileged-decision audit are library/test scope. Service-identity credential runtime and production enforcement remain later work (`CAP-011` Planned).
+Issue #5 defined the conceptual security model. Forecasting, RAG, and reliability evidence belong to later capability sequences; they are not living protocol files in this repository. Inventory query-API default-deny is library/test scope only ([QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)). Privileged-ops HTTP and privileged-decision audit are library/test scope. Service-identity credential runtime and production enforcement remain later work (`CAP-011` Planned).
 
 The principal residual risk is that production authentication, production tenant isolation, penetration tests, and policy-engine verification do not exist. Issue #50 records a test-environment negative suite for Identity & Operations HTTP surfaces (`CLM-007`–`CLM-010` Observed with limitations). Isolation is not claimed for retrieval, citations, approvals, commands, exports, or backup/restore. `CAP-011` remains Planned.
 

@@ -1,10 +1,14 @@
 # Authorization Model - SeshatOps
 
-**Status:** Planned authorization design for Issue #5. This document defines decisions and invariants for future implementation. Issue #45 records OIDC/session library/test runtime in [OIDC_SESSION.md](OIDC_SESSION.md). Issue #46 records inventory query-API default-deny in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). This document does not claim production tenant isolation, approval enforcement, service-identity credentials, or that authentication is a verified production control. Issue #50 records the Identity & Operations HTTP exit-gate suite in [IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md); constitution-wide authorization across later surfaces remains Planned.
+**Status:** Authorization invariants for SeshatOps. Identity HTTP surfaces
+(OIDC session, default-deny query/privileged/audit) are implemented and
+Observed in the declared test environment (`CLM-007`–`CLM-010`). Approvals,
+commands, retrieval, citations, and service-identity credentials (`CAP-011`)
+remain Planned. This document does not claim production tenant isolation.
 
 **Owns:** Conceptual authorization semantics, default-deny behavior, tenant isolation, authorization checkpoints, service identity boundaries, confused-deputy protections, and the relationship between authorization and evidence.
 
-**Does not own:** An identity provider, token format, policy language, API schema, route, middleware, database table, database role, cryptographic protocol, authorization library, deployment topology, or the full RAG evaluation protocol owned by Issue #6.
+**Does not own:** An identity provider, token format, policy language, API schema, route, middleware, database table, database role, cryptographic protocol, authorization library, deployment topology, or later governed-RAG evaluation.
 
 ## 1. Purpose and scope
 
@@ -20,7 +24,13 @@ This model applies to:
 - audit records, receipts, exports, logs, traces, and evidence; and
 - administrative and operational actions.
 
-All authorization controls in this document remain Planned. Event Spine packages implement the event path. Issue #45 implements OIDC login and Go-owned session establishment at library/test scope; authorization runtime, tenant isolation enforcement, approval enforcement, and audit protection are not claimed as implemented.
+Event Spine packages implement the event path. Identity HTTP authorization
+runtime for implemented routes is recorded in
+[OIDC_SESSION.md](OIDC_SESSION.md),
+[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md),
+[PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md), and
+[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md). Approval enforcement and
+later surfaces are not implemented.
 
 ## 2. Four separate concepts
 
@@ -218,7 +228,7 @@ The security boundary for intelligence is:
 - Unsafe, unauthorized, stale, conflicting, or unverifiable results are refused or clearly marked unavailable.
 - Python has no write tools or command path.
 
-Issue #6 owns the complete RAG and forecasting evaluation protocol, including corpus design, adjudication, metrics, and release gates.
+Forecasting and governed-RAG evaluation belong to later capability sequences. They are not living protocol files in this repository.
 
 ## 11. Audit records and durable receipts
 
@@ -265,7 +275,7 @@ Detailed storage, retention, redaction, immutability, and cryptographic implemen
 | AUTH-12 | Service identity does not erase initiating tenant and principal context |
 | AUTH-13 | Service identities have explicitly granted least-privilege capabilities and cannot expand, replace, or erase initiating principal or tenant authority |
 
-These invariants complement, rather than replace, Issue #4 invariants CM-02 through CM-09 and EM-06 through EM-09.
+These invariants complement, rather than replace, [ADR-0002](../adrs/0002-idempotent-command-execution.md) command-idempotency principles (when commands exist) and [EVENT_MODEL.md](../architecture/EVENT_MODEL.md) EM-06 through EM-09.
 
 ## 13. Future negative-test themes
 
@@ -291,12 +301,12 @@ Future implementation tests must include at least:
 - sensitive data exposure through errors, logs, traces, exports, quarantine, and evidence;
 - authorization work amplification and availability abuse.
 
-The full test inventory and evidence ownership are recorded in the Issue #5 review document.
+The Identity HTTP negative suite is recorded in
+[IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md).
 
 ## 14. Deferred implementation decisions
 
-[ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) and
-[IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md) resolve the OIDC protocol
+[ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md) resolves the OIDC protocol
 profile (Authorization Code + PKCE; no custom IdP), Go-owned principal/session
 model, tenant visibility via platform membership and tenant-scoped allow-list,
 explicit allow-list policy representation, and service-identity delegation
@@ -327,7 +337,7 @@ The following remain deliberately not selected here:
 - external adapter contracts, reconciliation protocols, and retry schedules; and
 - RAG evaluation protocol and model/provider-specific safeguards.
 
-Issue #5 owns the conceptual security model. Issue #6 owns intelligence evaluation. Issue #7 owns security and reliability evidence protocols. Issue #10 owns integrated constitution review. Inventory and ops-visibility query-API default-deny is recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Privileged-ops HTTP evaluation is recorded in [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md). Service-identity runtime and production enforcement remain later identity/operations work.
+This file owns the conceptual authorization model. Intelligence evaluation and reliability evidence campaigns belong to later sequences. Inventory and ops-visibility query-API default-deny is recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Privileged-ops HTTP evaluation is recorded in [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md). Service-identity runtime and production enforcement remain later work (`CAP-011` Planned).
 
 ## 15. Clean-room boundary
 

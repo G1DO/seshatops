@@ -78,5 +78,5 @@ identity and content (`aggregate_version = 1`, quantity 10→8).
 
 This document does not claim broker-outage recovery, at-least-once publication,
 projection correctness, tenant-isolation enforcement beyond the source row key,
-performance, or production readiness. `CLM-003` remains Planned until broker
-outage evidence exists.
+performance, or production readiness. `CLM-003` is Observed for the
+Issue #30 test-environment campaign; see [EVIDENCE.md](../../EVIDENCE.md).

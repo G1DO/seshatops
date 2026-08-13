@@ -82,6 +82,6 @@ quarantined row to `pending` via `ReleaseQuarantined` after `MX-004`.
 
 This document does not claim exactly-once delivery, projection correctness,
 tenant-isolation enforcement beyond stored tenant fields, performance,
-availability SLOs, or production readiness. `CLM-003` and `CLM-005` remain
-Planned in `EVIDENCE.md` until formal claim promotion with required evidence
-artifacts.
+availability SLOs, or production readiness. `CLM-003` and `CLM-005` are
+Observed for the Issue #30 test-environment campaign; see
+[EVIDENCE.md](../../EVIDENCE.md).

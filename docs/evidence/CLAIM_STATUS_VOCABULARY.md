@@ -1,6 +1,7 @@
 # Claim Status Vocabulary
 
-**Status:** Planned evidence-governance vocabulary for Issue #7. This document defines how future claims and evidence records are classified. It is not evidence that any SeshatOps control, capability, experiment, or operational target exists.
+**Status:** Active vocabulary for SeshatOps claim records. It defines how
+claims are classified. It is not itself evidence that a control works.
 
 ## Purpose
 
@@ -18,7 +19,7 @@ The vocabulary below is the complete claim-status vocabulary for SeshatOps. Do n
 | **Reproduced** | A prior observation was repeated under the documented reproduction requirements and produced materially consistent results. | Reproduction does not broaden the claim beyond the documented conditions or remove recorded limitations. |
 | **Superseded** | A previous claim or evidence record is no longer the current basis for decision-making. | Superseded evidence is not deleted or silently replaced. |
 
-`Not executed` is an experiment or matrix result marker, not a claim status. Existing Issue #6 record dispositions such as `Not evaluated`, `TBD — evidence required`, `Unavailable`, and `Not applicable` are record-level dispositions, not additions to this claim-status vocabulary.
+`Not executed` is an experiment or matrix result marker, not a claim status. Record-level dispositions such as `Not evaluated`, `TBD — evidence required`, `Unavailable`, and `Not applicable` are not additions to this claim-status vocabulary.
 
 ## Promotion and withdrawal rules
 
@@ -82,8 +83,6 @@ No environment may be described as more realistic than its documented configurat
 
 ## Related documents
 
-- [Experiment report template](../evaluation/templates/EXPERIMENT_REPORT.md)
-- [Fault campaign matrix](../evaluation/FAULT_CAMPAIGN_MATRIX.md)
-- [Security evidence protocol](../evaluation/SECURITY_EVIDENCE_PROTOCOL.md)
-- [Reliability and recovery evidence protocol](../evaluation/RELIABILITY_RECOVERY_EVIDENCE_PROTOCOL.md)
-- [Performance evidence protocol](../evaluation/PERFORMANCE_EVIDENCE_PROTOCOL.md)
+- [EVIDENCE.md](../../EVIDENCE.md)
+- [Event Spine experiment report](../evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md)
+- [Identity experiment report](../evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md)

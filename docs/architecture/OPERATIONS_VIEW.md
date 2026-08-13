@@ -7,8 +7,9 @@ inventory and ops-visibility query-API default-deny is recorded in
 [QUERY_API_AUTHORIZATION.md](../security/QUERY_API_AUTHORIZATION.md). Privileged
 POSTs are recorded in
 [PRIVILEGED_OPS_AUTHORIZATION.md](../security/PRIVILEGED_OPS_AUTHORIZATION.md).
-No deployment service binary, SLO/alerting platform, or `CAP-008` / `CAP-009` /
-`CAP-010` / `CAP-012` / `CAP-013` claim promotion is asserted here.
+No deployment service binary or SLO/alerting platform is asserted here.
+`CAP-009` / `CAP-010` / `CAP-012` / `CAP-013` are Observed in the Identity
+test-environment campaign. `CAP-008` remains Planned.
 
 **Owns:** The minimum browser TypeScript operations screen that consumes the
 Issue #27 Go REST snapshot and SSE stream for the committed Northstar Foods
@@ -113,6 +114,6 @@ Audit read is recorded in
 
 This document does not claim production readiness, hosted CI success without a
 recorded GitHub Actions run, exactly-once SSE delivery, production
-authorization, Identity authentication as a production control, or promotion of
-`CAP-008` / `CAP-009` / `CAP-010` / `CAP-012` / `CAP-013` beyond Planned without the
-required evidence route.
+authorization, or Identity authentication as a production control. `CAP-008`
+remains Planned. `CAP-009` / `CAP-010` / `CAP-012` / `CAP-013` follow
+[EVIDENCE.md](../../EVIDENCE.md).

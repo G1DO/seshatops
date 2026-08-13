@@ -188,10 +188,8 @@ test-environment exit-gate suite in
 ## 10. Related documents
 
 - [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md)
-- [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md)
 - [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
 - [THREAT_MODEL.md](THREAT_MODEL.md)
 - [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)
 - [PRIVILEGED_OPS_AUTHORIZATION.md](PRIVILEGED_OPS_AUTHORIZATION.md)
 - [AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md)
-- [PRODUCT.md](../../PRODUCT.md) (personas)
