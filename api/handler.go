@@ -21,6 +21,7 @@ type Server struct {
 	db           *sql.DB
 	hub          *Hub
 	auth         identity.SessionLookup
+	policy       identity.Authorizer
 	now          func() time.Time
 	sseHeartbeat time.Duration
 }
@@ -28,8 +29,9 @@ type Server struct {
 // NewServer constructs a read-only API server. hub may be nil only when SSE is
 // unused; REST still works. Callers that run the consumer should
 // platform.SetAppliedNotifier(hub). auth is required: a nil lookup fails closed
-// with 401 rather than serving projection data.
-func NewServer(db *sql.DB, hub *Hub, auth identity.SessionLookup) *Server {
+// with 401 rather than serving projection data. policy is required: a nil
+// authorizer fails closed with 403 rather than serving tenant data.
+func NewServer(db *sql.DB, hub *Hub, auth identity.SessionLookup, policy identity.Authorizer) *Server {
 	if hub == nil {
 		hub = NewHub()
 	}
@@ -37,6 +39,7 @@ func NewServer(db *sql.DB, hub *Hub, auth identity.SessionLookup) *Server {
 		db:           db,
 		hub:          hub,
 		auth:         auth,
+		policy:       policy,
 		now:          func() time.Time { return time.Now().UTC() },
 		sseHeartbeat: 15 * time.Second,
 	}
@@ -51,8 +54,8 @@ func (s *Server) SetSSEHeartbeatForTest(d time.Duration) {
 }
 
 // Handler returns the HTTP handler for the Event Spine projection routes.
-// Every /v1 path requires a fresh Go-owned session (Issue #45). This is
-// authentication, not tenant authorization.
+// Every /v1 path requires a fresh Go-owned session (Issue #45). Inventory
+// reads also require MX-001 for the path tenant (Issue #46).
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/tenants/", s.serveTenant)
@@ -74,6 +77,9 @@ func (s *Server) serveTenant(w http.ResponseWriter, r *http.Request) {
 	case "inventory":
 		switch r.Method {
 		case http.MethodGet:
+			if !s.authorizeInventoryRead(w, r, tenantID) {
+				return
+			}
 			s.handleSnapshot(w, r, tenantID)
 		case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 			w.Header().Set("Allow", http.MethodGet)
@@ -85,6 +91,9 @@ func (s *Server) serveTenant(w http.ResponseWriter, r *http.Request) {
 	case "inventory/stream":
 		switch r.Method {
 		case http.MethodGet:
+			if !s.authorizeInventoryRead(w, r, tenantID) {
+				return
+			}
 			s.handleSSE(w, r, tenantID)
 		case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 			w.Header().Set("Allow", http.MethodGet)
@@ -182,7 +191,7 @@ func (s *Server) handleSSE(w http.ResponseWriter, r *http.Request, tenantID stri
 		case <-ctx.Done():
 			return
 		case <-heartbeat.C:
-			if !s.sessionFresh(r) {
+			if !s.stillAllowed(r, tenantID) {
 				return
 			}
 			if _, err := fmt.Fprintf(w, ": heartbeat\n\n"); err != nil {
@@ -193,7 +202,7 @@ func (s *Server) handleSSE(w http.ResponseWriter, r *http.Request, tenantID stri
 			if !ok {
 				return
 			}
-			if !s.sessionFresh(r) {
+			if !s.stillAllowed(r, tenantID) {
 				return
 			}
 			payload, err := s.projectionUpdatedPayload(ctx, update)
@@ -208,12 +217,31 @@ func (s *Server) handleSSE(w http.ResponseWriter, r *http.Request, tenantID stri
 	}
 }
 
-func (s *Server) sessionFresh(r *http.Request) bool {
+func (s *Server) authorizeInventoryRead(w http.ResponseWriter, r *http.Request, tenantID string) bool {
+	sess, ok := identity.FromContext(r.Context())
+	if !ok || sess == nil {
+		writeJSON(w, http.StatusUnauthorized, ErrorBody{Error: "unauthenticated"})
+		return false
+	}
+	if s.policy == nil || s.policy.Allow(sess.PrincipalID, tenantID, identity.ResInventoryProjection, identity.ActRead) != nil {
+		writeJSON(w, http.StatusForbidden, ErrorBody{Error: "forbidden"})
+		return false
+	}
+	return true
+}
+
+func (s *Server) stillAllowed(r *http.Request, tenantID string) bool {
 	if s.auth == nil {
 		return false
 	}
-	_, err := s.auth.Session(r)
-	return err == nil
+	sess, err := s.auth.Session(r)
+	if err != nil || sess == nil {
+		return false
+	}
+	if s.policy == nil {
+		return false
+	}
+	return s.policy.Allow(sess.PrincipalID, tenantID, identity.ResInventoryProjection, identity.ActRead) == nil
 }
 
 func (s *Server) projectionUpdatedPayload(ctx context.Context, update platform.AppliedUpdate) (ProjectionUpdated, error) {

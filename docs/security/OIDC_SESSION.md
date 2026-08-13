@@ -2,25 +2,26 @@
 
 **Status:** Implemented for Issue #45 library/test scope. This note records the
 OIDC Authorization Code + PKCE relying-party flow and Go-owned session gate.
-It does not claim that authorization, tenant isolation, production
-authentication, or `CAP-009` evidence promotion currently exist.
+It does not claim production authentication, production tenant isolation, or
+`CAP-009` evidence promotion. Inventory query-API default-deny is recorded in
+[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md).
 
 **Owns:** Configurable OIDC relying-party integration, opaque Go-owned
 sessions, unauthenticated refusal on projection `/v1` routes, logout, and
 session presentation for the operations UI.
 
-**Does not own:** Tenant/role/resource/action default-deny (Issue #46),
-permission-matrix evaluation, IdP vendor selection, durable session storage,
-secret management, a deployment service binary, or any `EVIDENCE.md` claim
-promotion.
+**Does not own:** Tenant/role/resource/action default-deny (Issue #46,
+recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)),
+IdP vendor selection, durable session storage, secret management, a
+deployment service binary, or any `EVIDENCE.md` claim promotion.
 
 ## Authentication is not authorization
 
 A validated OIDC assertion and a fresh Go session establish **identity only**.
 They do not grant tenant membership, role authority, approval authority, or
 command authority (AUTH-05). Client-supplied principal, tenant, or role
-headers are ignored. Authenticated callers may still name any well-formed
-tenant path; Issue #46 binds the session to the allow-list.
+headers are ignored. Inventory query authorization is recorded in
+[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md).
 
 ## Flow
 
@@ -52,6 +53,7 @@ Protected routes (`GET /v1/tenants/{tenant_id}/inventory` and
 revoked cookies return `401 {"error":"unauthenticated"}` before any projection
 body or SSE stream is written. An already-open SSE connection is rechecked on
 heartbeat and before each event; logout or expiry closes the stream.
+Issue #46 also re-checks `MX-001` on those intervals.
 
 ## Configuration
 
@@ -74,4 +76,5 @@ listener. The UI is not an enforcement point.
 - [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md)
 - [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md)
 - [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
-- [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md) (not evaluated here)
+- [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md)
+- [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)

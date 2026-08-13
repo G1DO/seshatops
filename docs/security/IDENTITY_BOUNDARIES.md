@@ -3,9 +3,10 @@
 **Status:** Accepted design activation for Issue #43 / ADR-0005. This note records
 identity boundaries so later Identity & Operations work does not invent
 architecture mid-flight. Issue #45 runtime is recorded in
-[OIDC_SESSION.md](OIDC_SESSION.md). This note does not claim that
-authorization, tenant isolation enforcement, service-identity controls, audit
-protection, or production authentication currently exist.
+[OIDC_SESSION.md](OIDC_SESSION.md). Issue #46 query-API default-deny is
+recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). This
+note does not claim production tenant isolation, privileged-ops enforcement,
+service-identity controls, audit protection, or production authentication.
 
 **Owns:** Short activation summary of the OIDC profile, Go-owned session model,
 service-identity boundaries, and explicit non-goals for this milestone slice.
@@ -13,8 +14,10 @@ service-identity boundaries, and explicit non-goals for this milestone slice.
 **Does not own:** Permission-matrix content (published by Issue #44 in
 [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md)), OIDC login or session
 runtime (Issue #45, recorded in [OIDC_SESSION.md](OIDC_SESSION.md)),
-default-deny API enforcement (Issue #46), operational visibility or
-quarantine/replay controls, or any `EVIDENCE.md` claim promotion.
+query-API default-deny (Issue #46, recorded in
+[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)), operational
+visibility or quarantine/replay controls, or any `EVIDENCE.md` claim
+promotion.
 
 ## Accepted profile summary
 
@@ -36,7 +39,7 @@ Full decisions are in [ADR-0005](../adrs/0005-identity-tenant-policy-and-service
 | --- | --- |
 | [#44](https://github.com/G1DO/seshatops/issues/44) | Frozen Northstar demo matrix: [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md) |
 | [#45](https://github.com/G1DO/seshatops/issues/45) | OIDC login integration and Go-owned session establishment runtime ([OIDC_SESSION.md](OIDC_SESSION.md)) |
-| [#46](https://github.com/G1DO/seshatops/issues/46) | Default-deny API enforcement |
+| [#46](https://github.com/G1DO/seshatops/issues/46) | Default-deny API enforcement ([QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)) |
 | Later Identity & Operations issues | Privileged-ops authz, audit, operational visibility, quarantine/replay |
 
 ## Non-goals for Issue #43
@@ -52,5 +55,7 @@ Full decisions are in [ADR-0005](../adrs/0005-identity-tenant-policy-and-service
 
 - [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md)
 - [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md)
+- [OIDC_SESSION.md](OIDC_SESSION.md)
+- [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)
 - [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
 - [THREAT_MODEL.md](THREAT_MODEL.md)
