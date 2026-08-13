@@ -197,6 +197,41 @@ func ReleaseTransient(ctx context.Context, db *sql.DB, eventID, owner, errCode s
 	return nil
 }
 
+// ErrQuarantineNotFound means no same-tenant quarantined outbox row matched.
+var ErrQuarantineNotFound = errors.New("relay: quarantined outbox row not found")
+
+// ReleaseQuarantined returns a same-tenant quarantined outbox row to pending
+// so the relay may retry publication. Event identity and bytes are unchanged.
+// A missing, wrong-tenant, or non-quarantined row is ErrQuarantineNotFound.
+func ReleaseQuarantined(ctx context.Context, db *sql.DB, tenantID, eventID string) error {
+	if db == nil {
+		return fmt.Errorf("relay: nil db")
+	}
+	if tenantID == "" || eventID == "" {
+		return ErrQuarantineNotFound
+	}
+	res, err := db.ExecContext(ctx, `
+		UPDATE erp.outbox
+		SET status = 'pending',
+			publish_lease_owner = NULL,
+			publish_lease_expires_at = NULL
+		WHERE event_id = $1
+			AND tenant_id = $2
+			AND status = 'quarantined'
+	`, eventID, tenantID)
+	if err != nil {
+		return fmt.Errorf("relay: release quarantined %s: %w", eventID, err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("relay: release quarantined rows: %w", err)
+	}
+	if n != 1 {
+		return ErrQuarantineNotFound
+	}
+	return nil
+}
+
 // Quarantine durably marks a non-retryable outbox failure. Rows are never deleted.
 func Quarantine(ctx context.Context, db *sql.DB, eventID, owner, errCode string) error {
 	res, err := db.ExecContext(ctx, `

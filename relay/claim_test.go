@@ -319,6 +319,48 @@ func TestQuarantineIsDurable(t *testing.T) {
 	}
 }
 
+func TestReleaseQuarantinedReturnsPendingForSameTenant(t *testing.T) {
+	db := openTestDB(t)
+	fx, res := seedAndAccept(t, db)
+	ctx := context.Background()
+	if _, err := ClaimDue(ctx, db, "worker-a", time.Minute, 1); err != nil {
+		t.Fatal(err)
+	}
+	if err := Quarantine(ctx, db, res.EventID, "worker-a", "malformed_envelope"); err != nil {
+		t.Fatal(err)
+	}
+	if err := ReleaseQuarantined(ctx, db, fx.TenantID, res.EventID); err != nil {
+		t.Fatal(err)
+	}
+	status, _, owner, exp := outboxStatus(t, db, res.EventID)
+	if status != StatusPending {
+		t.Fatalf("status = %s", status)
+	}
+	if owner.Valid || exp.Valid {
+		t.Fatalf("lease still set owner=%v exp=%v", owner, exp)
+	}
+}
+
+func TestReleaseQuarantinedRejectsWrongTenant(t *testing.T) {
+	db := openTestDB(t)
+	_, res := seedAndAccept(t, db)
+	ctx := context.Background()
+	if _, err := ClaimDue(ctx, db, "worker-a", time.Minute, 1); err != nil {
+		t.Fatal(err)
+	}
+	if err := Quarantine(ctx, db, res.EventID, "worker-a", "malformed_envelope"); err != nil {
+		t.Fatal(err)
+	}
+	err := ReleaseQuarantined(ctx, db, "22222222-2222-4222-8222-222222222222", res.EventID)
+	if !errors.Is(err, ErrQuarantineNotFound) {
+		t.Fatalf("err=%v", err)
+	}
+	status, _, _, _ := outboxStatus(t, db, res.EventID)
+	if status != StatusQuarantined {
+		t.Fatalf("status = %s", status)
+	}
+}
+
 func TestDrainOncePublishesExactBytes(t *testing.T) {
 	db := openTestDB(t)
 	fx, res := seedAndAccept(t, db)
