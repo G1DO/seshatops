@@ -48,6 +48,9 @@ func openTestDB(t *testing.T) *sql.DB {
 		if err := platform.Migrate(ctx, db); err != nil {
 			t.Fatal(err)
 		}
+		if err := identity.Migrate(ctx, db); err != nil {
+			t.Fatal(err)
+		}
 		return db
 	}
 
@@ -89,11 +92,17 @@ func openTestDB(t *testing.T) *sql.DB {
 	if err := platform.Migrate(ctx, db); err != nil {
 		t.Fatal(err)
 	}
+	if err := identity.Migrate(ctx, db); err != nil {
+		t.Fatal(err)
+	}
 	return db
 }
 
 func resetSchemas(t *testing.T, db *sql.DB) {
 	t.Helper()
+	if _, err := db.Exec(`DROP SCHEMA IF EXISTS identity CASCADE`); err != nil {
+		t.Fatalf("drop identity schema: %v", err)
+	}
 	if _, err := db.Exec(`DROP SCHEMA IF EXISTS platform CASCADE`); err != nil {
 		t.Fatalf("drop platform schema: %v", err)
 	}

@@ -18,7 +18,7 @@ import (
 const EventProjectionUpdated = "inventory_projection.updated"
 
 // Server is the Event Spine projection HTTP surface plus Issue #48
-// privileged quarantine/replay/rebuild controls.
+// privileged quarantine/replay/rebuild controls and Issue #49 audit read.
 type Server struct {
 	db           *sql.DB
 	hub          *Hub
@@ -60,7 +60,7 @@ func (s *Server) SetSSEHeartbeatForTest(d time.Duration) {
 // Every /v1 path requires a fresh Go-owned session (Issue #45). Inventory
 // reads also require MX-001 for the path tenant (Issue #46). Ops visibility
 // requires MX-002 or MX-003 (Issue #47). Privileged POSTs require MX-004,
-// MX-005, or MX-006 (Issue #48).
+// MX-005, or MX-006 (Issue #48). Audit read requires MX-007 (Issue #49).
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/tenants/", s.serveTenant)
@@ -127,6 +127,17 @@ func (s *Server) serveTenant(w http.ResponseWriter, r *http.Request) {
 		s.handleControlMethod(w, r, tenantID, http.MethodPost, s.handleReplay)
 	case "ops/rebuild":
 		s.handleControlMethod(w, r, tenantID, http.MethodPost, s.handleRebuild)
+	case "ops/audit":
+		switch r.Method {
+		case http.MethodGet:
+			s.handleAuditRead(w, r, tenantID)
+		case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
+			w.Header().Set("Allow", http.MethodGet)
+			writeJSON(w, http.StatusMethodNotAllowed, ErrorBody{Error: "method_not_allowed"})
+		default:
+			w.Header().Set("Allow", http.MethodGet)
+			writeJSON(w, http.StatusMethodNotAllowed, ErrorBody{Error: "method_not_allowed"})
+		}
 	default:
 		writeJSON(w, http.StatusNotFound, ErrorBody{Error: "not_found"})
 	}
