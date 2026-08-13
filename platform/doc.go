@@ -14,7 +14,9 @@
 //
 // Issue #29 adds ResetDerivedState and RebuildFromHistory so tests can clear
 // only derived platform state and replay retained event bytes through the same
-// projection handler, comparing CONTRACTS.md §8 checksums. This package does
-// not claim exactly-once delivery or processing, and does not own operator
-// recovery controls (Identity & Operations) or backup/restore (Traceability & Recovery).
+// projection handler, comparing CONTRACTS.md §8 checksums. Issue #48 adds
+// tenant-scoped ResetDerivedStateForTenant, ReplayTenantHistory, and
+// RebuildTenantFromHistory for authorized operator controls. This package does
+// not claim exactly-once delivery or processing, and does not own backup/restore
+// (Traceability & Recovery) or a durable audit product.
 package platform
