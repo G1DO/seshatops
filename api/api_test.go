@@ -147,20 +147,35 @@ func (allowAllAuth) Session(*http.Request) (*identity.Session, error) {
 	}, nil
 }
 
+func northstarReaderPolicy(principals ...string) identity.Authorizer {
+	if len(principals) == 0 {
+		principals = []string{"test-operator", "operator-northstar"}
+	}
+	as := make([]identity.Assignment, 0, len(principals))
+	for _, principal := range principals {
+		as = append(as, identity.Assignment{
+			PrincipalID: principal,
+			TenantID:    identity.TenantNS001UUID,
+			RoleID:      identity.RoleOpsReader,
+		})
+	}
+	return identity.NewPolicy(identity.NewDirectory(as...))
+}
+
 func newTestServer(t *testing.T, db *sql.DB) *api.Server {
 	t.Helper()
 	hub := api.NewHub()
 	platform.SetAppliedNotifier(hub)
 	t.Cleanup(func() { platform.SetAppliedNotifier(nil) })
-	return api.NewServer(db, hub, allowAllAuth{})
+	return api.NewServer(db, hub, allowAllAuth{}, northstarReaderPolicy())
 }
 
-func newGatedServer(t *testing.T, db *sql.DB, auth identity.SessionLookup) *api.Server {
+func newGatedServer(t *testing.T, db *sql.DB, auth identity.SessionLookup, policy identity.Authorizer) *api.Server {
 	t.Helper()
 	hub := api.NewHub()
 	platform.SetAppliedNotifier(hub)
 	t.Cleanup(func() { platform.SetAppliedNotifier(nil) })
-	return api.NewServer(db, hub, auth)
+	return api.NewServer(db, hub, auth, policy)
 }
 
 func inventoryPath(tenantID string) string {
@@ -479,7 +494,7 @@ func TestUnauthenticatedRefusedOnRESTAndSSE(t *testing.T) {
 	fx := mustFixture(t)
 	store := identity.NewStore(time.Hour, nil)
 	auth := identity.NewAuthenticator(store, identity.DefaultCookieName)
-	srv := newGatedServer(t, db, auth)
+	srv := newGatedServer(t, db, auth, northstarReaderPolicy())
 	ts := httptest.NewServer(srv.Handler())
 	t.Cleanup(ts.Close)
 
@@ -526,7 +541,7 @@ func TestAuthenticatedSessionCanReadInventory(t *testing.T) {
 		t.Fatal(err)
 	}
 	auth := identity.NewAuthenticator(store, identity.DefaultCookieName)
-	srv := newGatedServer(t, db, auth)
+	srv := newGatedServer(t, db, auth, northstarReaderPolicy())
 	ts := httptest.NewServer(srv.Handler())
 	t.Cleanup(ts.Close)
 
@@ -562,7 +577,7 @@ func TestSSEStopsAfterSessionRevoked(t *testing.T) {
 		t.Fatal(err)
 	}
 	auth := identity.NewAuthenticator(store, identity.DefaultCookieName)
-	srv := newGatedServer(t, db, auth)
+	srv := newGatedServer(t, db, auth, northstarReaderPolicy())
 	srv.SetSSEHeartbeatForTest(20 * time.Millisecond)
 	ts := httptest.NewServer(srv.Handler())
 	t.Cleanup(ts.Close)
@@ -614,7 +629,7 @@ func TestClientPrincipalHeaderDoesNotAuthenticate(t *testing.T) {
 	fx := mustFixture(t)
 	store := identity.NewStore(time.Hour, nil)
 	auth := identity.NewAuthenticator(store, identity.DefaultCookieName)
-	srv := newGatedServer(t, db, auth)
+	srv := newGatedServer(t, db, auth, northstarReaderPolicy())
 	ts := httptest.NewServer(srv.Handler())
 	t.Cleanup(ts.Close)
 
@@ -632,6 +647,198 @@ func TestClientPrincipalHeaderDoesNotAuthenticate(t *testing.T) {
 	_ = resp.Body.Close()
 	if resp.StatusCode != http.StatusUnauthorized {
 		t.Fatalf("status=%d body=%s", resp.StatusCode, body)
+	}
+}
+
+func TestCrossTenantInventoryReadDenied(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	_ = processEnvelope(t, db, fx.Event, 1)
+
+	ts, sess := gatedSession(t, db, "operator-northstar", northstarReaderPolicy("operator-northstar"))
+	resp := getWithSession(t, ts.URL+inventoryPath(identity.TenantNS002UUID), sess, nil)
+	assertForbiddenNoProjection(t, resp)
+
+	resp = getWithSession(t, ts.URL+streamPath(identity.TenantNS002UUID), sess, nil)
+	assertForbiddenNoProjection(t, resp)
+}
+
+func TestMissingRoleInventoryReadDenied(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	policy := identity.NewPolicy(identity.NewDirectory(identity.Assignment{
+		PrincipalID: "operator-northstar",
+		TenantID:    fx.TenantID,
+		RoleID:      "",
+	}))
+	ts, sess := gatedSession(t, db, "operator-northstar", policy)
+	resp := getWithSession(t, ts.URL+inventoryPath(fx.TenantID), sess, nil)
+	assertForbiddenNoProjection(t, resp)
+}
+
+func TestPlatformOperatorInventoryReadDenied(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	_ = processEnvelope(t, db, fx.Event, 1)
+	policy := identity.NewPolicy(identity.NewDirectory(identity.Assignment{
+		PrincipalID: "platform-operator",
+		TenantID:    fx.TenantID,
+		RoleID:      identity.RolePlatformOperator,
+	}))
+	ts, sess := gatedSession(t, db, "platform-operator", policy)
+	resp := getWithSession(t, ts.URL+inventoryPath(fx.TenantID), sess, nil)
+	assertForbiddenNoProjection(t, resp)
+}
+
+func TestUnassignedPrincipalInventoryReadDenied(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	ts, sess := gatedSession(t, db, "svc-relay", identity.NewPolicy(identity.NewDirectory()))
+	resp := getWithSession(t, ts.URL+inventoryPath(fx.TenantID), sess, nil)
+	assertForbiddenNoProjection(t, resp)
+}
+
+func TestForgedTenantHeaderAndQueryDoNotAuthorize(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	_ = processEnvelope(t, db, fx.Event, 1)
+	ts, sess := gatedSession(t, db, "operator-northstar", northstarReaderPolicy("operator-northstar"))
+
+	resp := getWithSession(t, ts.URL+inventoryPath(identity.TenantNS002UUID)+"?tenant_id="+fx.TenantID, sess, func(req *http.Request) {
+		req.Header.Set("X-Tenant-ID", fx.TenantID)
+		req.Header.Set("X-Role", identity.RoleOpsReader)
+	})
+	assertForbiddenNoProjection(t, resp)
+
+	resp = getWithSession(t, ts.URL+inventoryPath(fx.TenantID)+"?tenant_id="+identity.TenantNS002UUID, sess, func(req *http.Request) {
+		req.Header.Set("X-Tenant-ID", identity.TenantNS002UUID)
+	})
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		t.Fatalf("same-tenant path status=%d body=%s", resp.StatusCode, body)
+	}
+}
+
+func TestNilPolicyFailsClosed(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	ts, sess := gatedSession(t, db, "operator-northstar", nil)
+	resp := getWithSession(t, ts.URL+inventoryPath(fx.TenantID), sess, nil)
+	assertForbiddenNoProjection(t, resp)
+}
+
+func TestSSEStopsAfterAssignmentRevoked(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	dir := identity.NewDirectory(identity.Assignment{
+		PrincipalID: "operator-northstar",
+		TenantID:    fx.TenantID,
+		RoleID:      identity.RoleOpsReader,
+	})
+	store := identity.NewStore(time.Hour, nil)
+	sess, err := store.Create("operator-northstar", "https://idp.test", "operator-northstar", "corr")
+	if err != nil {
+		t.Fatal(err)
+	}
+	auth := identity.NewAuthenticator(store, identity.DefaultCookieName)
+	srv := newGatedServer(t, db, auth, identity.NewPolicy(dir))
+	srv.SetSSEHeartbeatForTest(20 * time.Millisecond)
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ts.URL+streamPath(fx.TenantID), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.AddCookie(&http.Cookie{Name: identity.DefaultCookieName, Value: sess.ID})
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status=%d", resp.StatusCode)
+	}
+
+	events := make(chan api.ProjectionUpdated, 4)
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- readSSEUpdates(resp.Body, events)
+	}()
+	time.Sleep(30 * time.Millisecond)
+
+	dir.Clear("operator-northstar")
+
+	select {
+	case err := <-errCh:
+		if err != nil {
+			t.Fatalf("sse reader: %v", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("SSE did not close after assignment revoke")
+	}
+
+	_ = processEnvelope(t, db, fx.Event, 1)
+	select {
+	case u := <-events:
+		t.Fatalf("SSE emitted after revoke: %+v", u)
+	case <-time.After(100 * time.Millisecond):
+	}
+}
+
+func gatedSession(t *testing.T, db *sql.DB, principalID string, policy identity.Authorizer) (*httptest.Server, identity.Session) {
+	t.Helper()
+	store := identity.NewStore(time.Hour, nil)
+	sess, err := store.Create(principalID, "https://idp.test", principalID, "corr")
+	if err != nil {
+		t.Fatal(err)
+	}
+	auth := identity.NewAuthenticator(store, identity.DefaultCookieName)
+	srv := newGatedServer(t, db, auth, policy)
+	ts := httptest.NewServer(srv.Handler())
+	t.Cleanup(ts.Close)
+	return ts, sess
+}
+
+func getWithSession(t *testing.T, rawURL string, sess identity.Session, mutate func(*http.Request)) *http.Response {
+	t.Helper()
+	req, err := http.NewRequest(http.MethodGet, rawURL, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.AddCookie(&http.Cookie{Name: identity.DefaultCookieName, Value: sess.ID})
+	if mutate != nil {
+		mutate(req)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return resp
+}
+
+func assertForbiddenNoProjection(t *testing.T, resp *http.Response) {
+	t.Helper()
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("status=%d body=%s", resp.StatusCode, body)
+	}
+	ct := resp.Header.Get("Content-Type")
+	if !strings.Contains(ct, "application/json") {
+		t.Fatalf("content-type=%q", ct)
+	}
+	if strings.Contains(ct, "text/event-stream") {
+		t.Fatalf("SSE started: content-type=%q", ct)
+	}
+	if !strings.Contains(string(body), "forbidden") {
+		t.Fatalf("body=%s", body)
+	}
+	if strings.Contains(string(body), `"items"`) || strings.Contains(string(body), `"checksum"`) {
+		t.Fatalf("leaked projection body=%s", body)
 	}
 }
 

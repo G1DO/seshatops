@@ -5,9 +5,10 @@ info:
   description: |
     Read-only Go surface for the committed Event Spine inventory projection (Issue #27).
     Authentication/RBAC remain Identity. Issue #45 requires a Go-owned session
-    on these routes (`401 unauthenticated` when missing). Tenant authorization
-    remains Issue #46. SSE is at-least-once and may drop for slow
-    clients; REST is the authoritative reconnect/catch-up path.
+    on these routes (`401 unauthenticated` when missing). Issue #46 requires
+    MX-001 for the path tenant (`403 forbidden` when unauthorized). SSE is
+    at-least-once and may drop for slow clients; REST is the authoritative
+    reconnect/catch-up path.
 servers:
   - url: /
 paths:
@@ -26,6 +27,12 @@ paths:
                 $ref: "#/components/schemas/InventorySnapshot"
         "401":
           description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller is not authorized for this tenant inventory read
           content:
             application/json:
               schema:
@@ -73,6 +80,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller is not authorized for this tenant inventory read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
         "400":
           description: Invalid tenant_id
           content:
@@ -94,7 +107,7 @@ components:
       schema:
         type: string
         format: uuid
-        description: Lowercase UUIDv4 tenant identifier (Event Spine validation only; not tenant authorization)
+        description: Lowercase UUIDv4 tenant identifier (path assertion; MX-001 is evaluated separately)
   schemas:
     InventoryItem:
       type: object

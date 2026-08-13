@@ -39,6 +39,7 @@ export class ApiError extends Error {
 }
 
 export const UNAUTHENTICATED = "unauthenticated";
+export const FORBIDDEN = "forbidden";
 
 /** Presentation-only session fields from GET /auth/session. Not authorization. */
 export interface SessionView {

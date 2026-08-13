@@ -1,6 +1,6 @@
 # ADR-0005: Identity, Tenant Policy, and Service Delegation
 
-- **Status:** Accepted Identity & Operations design decision; permission matrix published (#44); OIDC/session runtime implemented for Issue #45 library/test scope; default-deny API enforcement (#46) remains pending
+- **Status:** Accepted Identity & Operations design decision; permission matrix published (#44); OIDC/session runtime implemented for Issue #45 library/test scope; query-API default-deny implemented for Issue #46 library/test scope
 - **Date:** 2026-08-12
 - **Scope:** Issue #43 resolution of ADR-Q-004 — OIDC integration profile, Go-owned principal/session model, tenant visibility, policy representation, and service-identity delegation boundaries
 
@@ -8,7 +8,7 @@
 
 Identity & Operations must not invent authentication or authorization architecture while implementing enforcement. Project Constitution already requires default deny, tenant isolation, least privilege, and Go-owned authorization ([AUTHORIZATION_MODEL.md](../security/AUTHORIZATION_MODEL.md), [THREAT_MODEL.md](../security/THREAT_MODEL.md)). ADR-Q-004 remained open for the concrete identity profile, session ownership, tenant visibility, policy representation shape, and service-delegation boundaries.
 
-This ADR freezes those decisions so Issue #44 can publish a permission matrix and Issue #45 can integrate OIDC login and session establishment without selecting a custom IdP, treating client-supplied tenant or role as authority, or promoting runtime claims. Default-deny API enforcement remains Issue #46.
+This ADR freezes those decisions so Issue #44 can publish a permission matrix and Issue #45 can integrate OIDC login and session establishment without selecting a custom IdP, treating client-supplied tenant or role as authority, or promoting runtime claims. Query-API default-deny is recorded in [QUERY_API_AUTHORIZATION.md](../security/QUERY_API_AUTHORIZATION.md).
 
 ## Decision
 
@@ -87,7 +87,7 @@ Documentation review must confirm:
 
 - ADR-Q-004 disposition points to this ADR;
 - OIDC profile, session model, tenant visibility, policy allow-list representation, and service-identity boundaries are explicit;
-- Issue #44 (matrix), Issue #45 (OIDC/session runtime), and Issue #46 (default-deny enforcement) ownership remain clear;
+- Issue #44 (matrix), Issue #45 (OIDC/session runtime), and Issue #46 (query-API default-deny) ownership remain clear;
 - no runtime claim promotion appears in `EVIDENCE.md` from this change alone.
 
-This ADR does not claim that authentication is a verified production control, or that authorization, tenant isolation enforcement, service-identity controls, or audit protection currently exist. Issue #45 records OIDC/session library/test runtime in [OIDC_SESSION.md](../security/OIDC_SESSION.md). CAP-009–CAP-013 remain Planned until later implementation and evidence.
+This ADR does not claim that authentication is a verified production control, or that production tenant isolation, privileged-ops enforcement, service-identity controls, or audit protection currently exist. Issue #45 records OIDC/session library/test runtime in [OIDC_SESSION.md](../security/OIDC_SESSION.md). Issue #46 records inventory query-API default-deny in [QUERY_API_AUTHORIZATION.md](../security/QUERY_API_AUTHORIZATION.md). CAP-009–CAP-013 remain Planned until later implementation and evidence.

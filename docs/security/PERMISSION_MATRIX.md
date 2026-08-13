@@ -2,19 +2,22 @@
 
 **Status:** Frozen Identity & Operations demo allow-list for Issue #44 /
 CAP-010 design. This document names tenants, roles, resources, actions, and
-allow-list rows so later enforcement can cite stable IDs. It does not claim
-that authentication, authorization, tenant isolation, or privileged-ops
-controls currently exist.
+allow-list rows so later enforcement can cite stable IDs. Inventory query-API
+evaluation is recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md).
+This matrix does not claim production tenant isolation, privileged-ops
+controls, or `CAP-010` evidence.
 
 **Owns:** Northstar demo tenant identifiers, milestone role labels, resource
 and action IDs, explicit allow-list rows mapped to the AUTHORIZATION_MODEL
 tuple, privileged versus read classification, and default-deny gaps for this
 milestone.
 
-**Does not own:** Runtime enforcement (Issue #46), OIDC login or session
-runtime (Issue #45), ops-visibility API or UI (Issue #47), quarantine/replay
-controls (Issue #48), audit recording (Issue #49), a policy-engine product,
-assignment schema, or any `EVIDENCE.md` claim promotion.
+**Does not own:** Runtime enforcement (Issue #46 records inventory query-API
+evaluation in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)), OIDC
+login or session runtime (Issue #45), ops-visibility API or UI (Issue #47),
+quarantine/replay controls (Issue #48), audit recording (Issue #49), a
+policy-engine product, assignment schema, or any `EVIDENCE.md` claim
+promotion.
 
 ## 1. How to read this matrix
 
@@ -62,7 +65,7 @@ deny.
 | ID | Tenant UUID | Seeded in Event Spine | Purpose |
 | --- | --- | --- | --- |
 | `TENANT-NS-001` | `11111111-1111-4111-8111-111111111111` | Yes (`northstar` fixture) | Northstar Foods demo tenant for allow-list grants |
-| `TENANT-NS-002` | `22222222-2222-4222-8222-222222222222` | No | Named second tenant for later cross-tenant negative tests |
+| `TENANT-NS-002` | `22222222-2222-4222-8222-222222222222` | No | Named second tenant for cross-tenant negative tests |
 
 `TENANT-NS-002` is documentation only. This issue does not add ERP, projection,
 or fixture rows for it. There are **no** allow-list rows for `TENANT-NS-002`.
@@ -165,7 +168,9 @@ A demo must not add bypass rows to make operator work easier.
 
 Publishing this matrix does not implement authorization, does not promote
 `CAP-010`, `CLM-007`, or `CLM-008`, and does not select a policy-engine
-product. Runtime evaluation belongs to later Identity & Operations issues.
+product. Inventory query-API evaluation is recorded in
+[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Privileged-ops and
+ops-visibility HTTP surfaces remain later Identity & Operations issues.
 
 ## 10. Related documents
 
@@ -173,4 +178,5 @@ product. Runtime evaluation belongs to later Identity & Operations issues.
 - [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md)
 - [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
 - [THREAT_MODEL.md](THREAT_MODEL.md)
+- [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)
 - [PRODUCT.md](../../PRODUCT.md) (personas)

@@ -1,6 +1,6 @@
 # Authorization Model - SeshatOps
 
-**Status:** Planned authorization design for Issue #5. This document defines decisions and invariants for future implementation. Issue #45 records OIDC/session library/test runtime in [OIDC_SESSION.md](OIDC_SESSION.md). This document does not claim that authorization, tenant isolation, approval enforcement, service identity controls, or audit protection currently exist, or that authentication is a verified production control.
+**Status:** Planned authorization design for Issue #5. This document defines decisions and invariants for future implementation. Issue #45 records OIDC/session library/test runtime in [OIDC_SESSION.md](OIDC_SESSION.md). Issue #46 records inventory query-API default-deny in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). This document does not claim production tenant isolation, privileged-ops or approval enforcement, service-identity controls, audit protection, or that authentication is a verified production control. `CLM-007`, `CLM-008`, and `CAP-010` remain Planned.
 
 **Owns:** Conceptual authorization semantics, default-deny behavior, tenant isolation, authorization checkpoints, service identity boundaries, confused-deputy protections, and the relationship between authorization and evidence.
 
@@ -302,8 +302,10 @@ model, tenant visibility via platform membership and tenant-scoped allow-list,
 explicit allow-list policy representation, and service-identity delegation
 boundaries for Identity & Operations design. Issue #45 implements the OIDC
 login and session runtime recorded in [OIDC_SESSION.md](OIDC_SESSION.md).
-Vendor selection, durable session storage, and authorization enforcement
-remain deferred.
+Issue #46 records inventory query-API default-deny in
+[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Vendor selection,
+durable session storage, policy-engine product, assignment schema, and
+privileged-ops HTTP enforcement remain deferred.
 
 The Identity & Operations demo role catalog, resource/action IDs, and allow-list
 rows are published in [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md). A
@@ -313,14 +315,14 @@ The following remain deliberately not selected here:
 
 - identity-provider vendor/product, durable token/session storage format, and revocation product;
 - policy-engine product, assignment schema, and scope syntax;
-- authorization API evaluation, generated clients, and default-deny tenant enforcement (Issue #46);
+- generated authorization clients; ops-visibility and privileged-ops HTTP enforcement (Issues #47–#48);
 - database tables, indexes, database roles, row-level mechanisms, caches, and storage layout;
 - cryptographic receipt or audit protocols;
 - secret-management products, credential rotation mechanisms, and deployment topology;
 - external adapter contracts, reconciliation protocols, and retry schedules; and
 - RAG evaluation protocol and model/provider-specific safeguards.
 
-Issue #5 owns the conceptual security model. Issue #6 owns intelligence evaluation. Issue #7 owns security and reliability evidence protocols. Issue #10 owns integrated constitution review. Concrete enforcement belongs to later identity/operations and implementation capability sequences.
+Issue #5 owns the conceptual security model. Issue #6 owns intelligence evaluation. Issue #7 owns security and reliability evidence protocols. Issue #10 owns integrated constitution review. Inventory query-API default-deny is recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Privileged-ops, ops-visibility HTTP, service-identity runtime, and production enforcement remain later identity/operations work.
 
 ## 15. Clean-room boundary
 

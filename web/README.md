@@ -9,7 +9,7 @@ session state and sends cookies.
 
 - Node.js `24.14.0` and npm `11.9.0` (see `CONTRACTS.md` §9)
 - A process serving `identity` `/auth/*` and
-  `github.com/G1DO/seshatops/api` `NewServer(db, hub, auth).Handler()`
+  `github.com/G1DO/seshatops/api` `NewServer(db, hub, auth, policy).Handler()`
   on `http://127.0.0.1:8080` (no deployment binary is shipped in this issue)
 
 ## Setup
@@ -54,11 +54,12 @@ origin via CORS.
 6. If the stream drops, the banner shows disconnected/stale (not “live
    current”), then REST catch-up reconnects.
 
-A session is identity only. It does not grant tenant or action authorization.
+A session is identity only. Inventory reads also require `MX-001` for the
+path tenant (Go-owned; the UI cannot authorize).
 
 ## Explicit deferrals
 
-- No tenant/role default-deny in the UI or API (Issue #46)
+- No role-aware authorization UI (server default-deny is Issue #46)
 - No recovery/quarantine controls
 - No dashboard suite or design system
 
@@ -75,5 +76,6 @@ A session is identity only. It does not grant tenant or action authorization.
 
 - [OPERATIONS_VIEW.md](../docs/architecture/OPERATIONS_VIEW.md)
 - [OIDC_SESSION.md](../docs/security/OIDC_SESSION.md)
+- [QUERY_API_AUTHORIZATION.md](../docs/security/QUERY_API_AUTHORIZATION.md)
 - [PROJECTION_READ_API.md](../docs/architecture/PROJECTION_READ_API.md)
 - [EVENT_SPINE_COMPLETION_SUMMARY.md](../docs/reviews/EVENT_SPINE_COMPLETION_SUMMARY.md)

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fetchSnapshot } from "./client";
-import { ApiError, UNAUTHENTICATED } from "./types";
+import { ApiError, FORBIDDEN, UNAUTHENTICATED } from "./types";
 import {
   NORTHSTAR_TENANT_ID,
   sampleSnapshotBefore,
@@ -57,6 +57,22 @@ describe("fetchSnapshot", () => {
       name: "ApiError",
       code: UNAUTHENTICATED,
       status: 401,
+    } satisfies Partial<ApiError>);
+  });
+
+  it("maps forbidden without treating it as a snapshot", async () => {
+    const fetchImpl: typeof fetch = async () =>
+      new Response(JSON.stringify({ error: FORBIDDEN }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+
+    await expect(
+      fetchSnapshot("http://example.test", NORTHSTAR_TENANT_ID, fetchImpl),
+    ).rejects.toMatchObject({
+      name: "ApiError",
+      code: FORBIDDEN,
+      status: 403,
     } satisfies Partial<ApiError>);
   });
 
