@@ -34,6 +34,7 @@ flow exclusively through this Go surface.
 | --- | --- | --- |
 | `GET` | `/v1/tenants/{tenant_id}/inventory` | Authoritative committed snapshot |
 | `GET` | `/v1/tenants/{tenant_id}/inventory/stream` | SSE live updates after projection commit |
+| `GET` | `/v1/tenants/{tenant_id}/ops` | Authorized lag/poison/freshness (Issue #47; `MX-002`/`MX-003`) |
 
 `POST`, `PUT`, `PATCH`, and `DELETE` on these paths return `405 Method Not Allowed`
 and do not mutate projection state. Malformed or non-lowercase UUIDv4
@@ -43,9 +44,9 @@ mutating state.
 `tenant_id` validation follows the Event Spine lowercase UUIDv4 identifier rule. This is
 context validation only. Issue #45 requires a fresh Go-owned session on these routes.
 Missing, expired, forged, or revoked sessions return `401` `{"error":"unauthenticated"}`
-before any snapshot or SSE stream is written. Issue #46 requires `MX-001` for the
-path tenant; unauthorized callers return `403` `{"error":"forbidden"}` with no
-projection body.
+before any snapshot or SSE stream is written. Issue #46 requires `MX-001` for
+inventory; Issue #47 requires `MX-002` or `MX-003` for ops. Unauthorized
+callers return `403` `{"error":"forbidden"}` with no snapshot body.
 
 ## Snapshot DTO
 

@@ -124,7 +124,8 @@ Northstar-safe illustration only (not a production observation):
 retrying/quarantined counts, oldest gap and failure timestamps, and bounded
 sanitized samples (`LIMIT 20`) for Event Spine verification. Samples omit `event_bytes`
 and raw payloads. This is not an Identity & Operations metrics, alerting, or operator console
-surface.
+surface. Issue #47 product reads use tenant-scoped `InspectProcessingForTenant`
+through `GET /v1/tenants/{tenant_id}/ops`.
 
 Durable quarantine decisions acknowledge offsets so unrelated aggregates on the
 same consumer path can continue. Transient no-ack failures may still head-of-line

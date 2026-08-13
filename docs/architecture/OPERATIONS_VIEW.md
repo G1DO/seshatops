@@ -1,15 +1,17 @@
 # Event Spine Operations View (TypeScript)
 
 **Status:** Implemented for Issue #28 package/test scope plus Issue #45 session
-presentation. The TypeScript view does not authorize. Go inventory query-API
-default-deny is recorded in
+presentation and Issue #47 authorized ops-visibility presentation. The
+TypeScript view does not authorize. Go inventory and ops-visibility
+query-API default-deny is recorded in
 [QUERY_API_AUTHORIZATION.md](../security/QUERY_API_AUTHORIZATION.md). No
-recovery controls, deployment service binary, or `CAP-008` / `CAP-009` /
-`CAP-010` claim promotion is asserted here.
+recovery controls, deployment service binary, SLO/alerting platform, or
+`CAP-008` / `CAP-009` / `CAP-010` / `CAP-012` claim promotion is asserted here.
 
 **Owns:** The minimum browser TypeScript operations screen that consumes the
 Issue #27 Go REST snapshot and SSE stream for the committed Northstar Foods
-inventory projection, and presents Go-owned session state.
+inventory projection, presents Go-owned session state, and presents the
+Issue #47 lag/poison/freshness snapshot.
 
 **Does not own:** Dashboards, design systems, authorization decisions,
 quarantine/recovery controls, intelligence, commands, direct database or
@@ -33,10 +35,14 @@ Package `web/` talks exclusively to:
 | `GET` | `/auth/session` |
 | `GET` | `/v1/tenants/{tenant_id}/inventory` |
 | `GET` | `/v1/tenants/{tenant_id}/inventory/stream` |
+| `GET` | `/v1/tenants/{tenant_id}/ops` |
 
 Cookies are sent with REST and SSE. The UI presents principal and expiry; it
 does not authorize. Unauthenticated callers see Sign in and are not shown
-projection data. Authentication is not authorization.
+projection or ops-visibility data. Authentication is not authorization.
+Inventory reads require `MX-001`. Ops visibility requires `MX-002` or
+`MX-003`. Those fetches are independent so a 403 on one surface does not hide
+the other.
 
 ## Connection model
 
@@ -73,13 +79,23 @@ Rendered without business reinterpretation:
 - `observed_at` (snapshot as-of time from the server)
 - `last_applied_event_id` (from SSE when available; cleared on REST catch-up)
 
+## Library inspect vs product surface
+
+Event Spine library helpers `relay.InspectBacklog` and
+`platform.InspectProcessing` remain global verification surfaces. They are not
+the operator product. Issue #47 exposes tenant-scoped
+`InspectBacklogForTenant` / `InspectProcessingForTenant` through
+`GET /v1/tenants/{tenant_id}/ops` after Go evaluates `RES-OPS-VISIBILITY`
+`ACT-READ`. The UI renders those counts and timestamps without inventing SLOs
+or release/replay controls.
+
 ## Local demo
 
 See [web/README.md](../../web/README.md). Serve the Go `identity` `/auth/*`
 handler and `api.NewServer(db, hub, auth, policy).Handler()` on
 `http://127.0.0.1:8080` and run `npm run dev` with the default empty
 `VITE_API_BASE_URL` so Vite proxies `/auth` and `/v1` same-origin (no CORS
-required). Inventory query authorization is recorded in
+required). Inventory and ops-visibility query authorization is recorded in
 [QUERY_API_AUTHORIZATION.md](../security/QUERY_API_AUTHORIZATION.md).
 
 ## Non-claims
@@ -87,5 +103,5 @@ required). Inventory query authorization is recorded in
 This document does not claim production readiness, hosted CI success without a
 recorded GitHub Actions run, exactly-once SSE delivery, production
 authorization, Identity authentication as a production control, or promotion of
-`CAP-008` / `CAP-009` / `CAP-010` beyond Planned without the required evidence
-route.
+`CAP-008` / `CAP-009` / `CAP-010` / `CAP-012` beyond Planned without the
+required evidence route.

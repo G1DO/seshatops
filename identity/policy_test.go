@@ -14,6 +14,9 @@ func TestPolicyAllowsSameTenantInventoryRead(t *testing.T) {
 	if err := p.Allow("operator-northstar", TenantNS001UUID, ResInventoryProjection, ActRead); err != nil {
 		t.Fatalf("MX-001 allow: %v", err)
 	}
+	if err := p.Allow("operator-northstar", TenantNS001UUID, ResOpsVisibility, ActRead); err != nil {
+		t.Fatalf("MX-002 allow: %v", err)
+	}
 }
 
 func TestPolicyDeniesCrossTenantInventoryRead(t *testing.T) {
@@ -35,6 +38,9 @@ func TestPolicyDeniesPlatformOperatorInventoryRead(t *testing.T) {
 	}))
 	if err := p.Allow("platform-operator", TenantNS001UUID, ResInventoryProjection, ActRead); !errors.Is(err, ErrForbidden) {
 		t.Fatalf("operator inventory err=%v", err)
+	}
+	if err := p.Allow("platform-operator", TenantNS001UUID, ResOpsVisibility, ActRead); err != nil {
+		t.Fatalf("MX-003 allow: %v", err)
 	}
 }
 
@@ -88,6 +94,17 @@ func TestPolicyDeniesMissingOrAmbiguousMembership(t *testing.T) {
 			t.Fatalf("nil directory err=%v", err)
 		}
 	})
+}
+
+func TestPolicyDeniesCrossTenantOpsVisibility(t *testing.T) {
+	p := NewPolicy(NewDirectory(Assignment{
+		PrincipalID: "operator-northstar",
+		TenantID:    TenantNS001UUID,
+		RoleID:      RoleOpsReader,
+	}))
+	if err := p.Allow("operator-northstar", TenantNS002UUID, ResOpsVisibility, ActRead); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("cross-tenant ops err=%v", err)
+	}
 }
 
 func TestPolicyDeniesPrivilegedActionsForOpsReader(t *testing.T) {

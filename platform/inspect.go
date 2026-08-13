@@ -58,9 +58,32 @@ type ProcessingInspection struct {
 
 // InspectProcessing returns inbox disposition counts, failure counts, oldest
 // gap/failure timestamps, and bounded sanitized samples (LIMIT 20).
+// This is the Event Spine library surface (all tenants). Issue #47 product
+// reads use InspectProcessingForTenant.
 func InspectProcessing(ctx context.Context, db *sql.DB) (ProcessingInspection, error) {
+	return inspectProcessing(ctx, db, "")
+}
+
+// InspectProcessingForTenant returns the same processing signals as
+// InspectProcessing, scoped to one tenant. Empty tenantID fails closed.
+// processing_failures rows with NULL tenant_id are omitted (unattributed).
+func InspectProcessingForTenant(ctx context.Context, db *sql.DB, tenantID string) (ProcessingInspection, error) {
+	if tenantID == "" {
+		return ProcessingInspection{}, fmt.Errorf("platform: inspect processing: empty tenant_id")
+	}
+	return inspectProcessing(ctx, db, tenantID)
+}
+
+func inspectProcessing(ctx context.Context, db *sql.DB, tenantID string) (ProcessingInspection, error) {
 	if db == nil {
 		return ProcessingInspection{}, fmt.Errorf("%w: nil db", ErrTransient)
+	}
+
+	consumerPred := "WHERE consumer_name = $1"
+	args := []any{ConsumerName}
+	if tenantID != "" {
+		consumerPred += " AND tenant_id = $2"
+		args = append(args, tenantID)
 	}
 
 	var out ProcessingInspection
@@ -75,8 +98,7 @@ func InspectProcessing(ctx context.Context, db *sql.DB) (ProcessingInspection, e
 			COALESCE(SUM(CASE WHEN disposition = 'quarantined_mismatch' THEN 1 ELSE 0 END), 0),
 			COALESCE(SUM(CASE WHEN disposition = 'quarantined_transition' THEN 1 ELSE 0 END), 0)
 		FROM platform.inbox
-		WHERE consumer_name = $1
-	`, ConsumerName).Scan(
+	`+consumerPred, args...).Scan(
 		&out.Applied,
 		&out.DuplicateNoop,
 		&out.QuarantinedConflict,
@@ -95,18 +117,17 @@ func InspectProcessing(ctx context.Context, db *sql.DB) (ProcessingInspection, e
 			COALESCE(SUM(CASE WHEN quarantine_status = 'retrying' THEN 1 ELSE 0 END), 0),
 			COALESCE(SUM(CASE WHEN quarantine_status = 'quarantined' THEN 1 ELSE 0 END), 0)
 		FROM platform.processing_failures
-		WHERE consumer_name = $1
-	`, ConsumerName).Scan(&out.FailuresRetrying, &out.FailuresQuarantined)
+	`+consumerPred, args...).Scan(&out.FailuresRetrying, &out.FailuresQuarantined)
 	if err != nil {
 		return ProcessingInspection{}, fmt.Errorf("platform: inspect failure counts: %w", err)
 	}
 
+	gapPred := consumerPred + " AND disposition = 'quarantined_gap'"
 	var oldestGap sql.NullTime
 	err = db.QueryRowContext(ctx, `
 		SELECT MIN(created_at)
 		FROM platform.inbox
-		WHERE consumer_name = $1 AND disposition = 'quarantined_gap'
-	`, ConsumerName).Scan(&oldestGap)
+	`+gapPred, args...).Scan(&oldestGap)
 	if err != nil {
 		return ProcessingInspection{}, fmt.Errorf("platform: inspect oldest gap: %w", err)
 	}
@@ -118,8 +139,7 @@ func InspectProcessing(ctx context.Context, db *sql.DB) (ProcessingInspection, e
 	err = db.QueryRowContext(ctx, `
 		SELECT MIN(created_at)
 		FROM platform.processing_failures
-		WHERE consumer_name = $1
-	`, ConsumerName).Scan(&oldestFailure)
+	`+consumerPred, args...).Scan(&oldestFailure)
 	if err != nil {
 		return ProcessingInspection{}, fmt.Errorf("platform: inspect oldest failure: %w", err)
 	}
@@ -132,10 +152,10 @@ func InspectProcessing(ctx context.Context, db *sql.DB) (ProcessingInspection, e
 		       quarantine_status, source_topic, source_partition, source_offset,
 		       attempt_count, created_at
 		FROM platform.processing_failures
-		WHERE consumer_name = $1
+	`+consumerPred+`
 		ORDER BY created_at
 		LIMIT 20
-	`, ConsumerName)
+	`, args...)
 	if err != nil {
 		return ProcessingInspection{}, fmt.Errorf("platform: inspect failure sample: %w", err)
 	}
@@ -159,10 +179,10 @@ func InspectProcessing(ctx context.Context, db *sql.DB) (ProcessingInspection, e
 		SELECT event_id, tenant_id, aggregate_type, aggregate_id, aggregate_version,
 		       COALESCE(expected_version, 0), COALESCE(received_version, 0), created_at
 		FROM platform.inbox
-		WHERE consumer_name = $1 AND disposition = 'quarantined_gap'
+	`+gapPred+`
 		ORDER BY created_at
 		LIMIT 20
-	`, ConsumerName)
+	`, args...)
 	if err != nil {
 		return ProcessingInspection{}, fmt.Errorf("platform: inspect gap sample: %w", err)
 	}

@@ -1,6 +1,6 @@
 import { connectionLabel, type ConnectionState } from "../state/connection";
 import type { ProjectionViewState } from "../state/projectionStore";
-import type { SessionView } from "../api/types";
+import type { OpsSnapshot, SessionView } from "../api/types";
 
 export interface OperationsViewProps {
   connection: ConnectionState;
@@ -11,6 +11,8 @@ export interface OperationsViewProps {
   unauthenticated?: boolean;
   onSignIn?: () => void;
   onLogout?: () => void;
+  ops?: OpsSnapshot | null;
+  opsError?: string | null;
 }
 
 export function OperationsView(props: OperationsViewProps) {
@@ -23,8 +25,11 @@ export function OperationsView(props: OperationsViewProps) {
     unauthenticated,
     onSignIn,
     onLogout,
+    ops,
+    opsError,
   } = props;
   const live = !unauthenticated && connection === "live";
+  const showOps = ops !== undefined || opsError !== undefined;
 
   return (
     <main className="ops">
@@ -147,6 +152,84 @@ export function OperationsView(props: OperationsViewProps) {
               </table>
             )}
           </section>
+
+          {showOps ? (
+            <section className="ops__visibility" data-testid="ops-visibility">
+              <h2>Processing visibility</h2>
+              <p className="ops__visibility-note">
+                Lag, poison/quarantine, and projection freshness for this
+                tenant. Go authorizes; this screen does not. No release or
+                replay controls.
+              </p>
+              {opsError ? (
+                <p data-testid="ops-error" role="alert">
+                  Ops API error: {opsError}
+                </p>
+              ) : null}
+              {ops ? (
+                <dl>
+                  <div>
+                    <dt>Projection items</dt>
+                    <dd data-testid="ops-item-count">{ops.projection.item_count}</dd>
+                  </div>
+                  <div>
+                    <dt>Projection checksum</dt>
+                    <dd data-testid="ops-checksum">{ops.projection.checksum}</dd>
+                  </div>
+                  <div>
+                    <dt>Ops observed at</dt>
+                    <dd data-testid="ops-observed-at">{ops.observed_at}</dd>
+                  </div>
+                  <div>
+                    <dt>Outbox pending</dt>
+                    <dd data-testid="ops-pending">{ops.backlog.pending}</dd>
+                  </div>
+                  <div>
+                    <dt>Outbox quarantined</dt>
+                    <dd data-testid="ops-outbox-quarantined">
+                      {ops.backlog.quarantined}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Oldest unpublished</dt>
+                    <dd data-testid="ops-oldest-unpublished">
+                      {ops.backlog.oldest_unpublished || "—"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Processing applied</dt>
+                    <dd data-testid="ops-applied">{ops.processing.applied}</dd>
+                  </div>
+                  <div>
+                    <dt>Quarantined gaps</dt>
+                    <dd data-testid="ops-gaps">
+                      {ops.processing.quarantined_gap}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Failures quarantined</dt>
+                    <dd data-testid="ops-failures-quarantined">
+                      {ops.processing.failures_quarantined}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Oldest gap</dt>
+                    <dd data-testid="ops-oldest-gap">
+                      {ops.processing.oldest_gap || "—"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Oldest failure</dt>
+                    <dd data-testid="ops-oldest-failure">
+                      {ops.processing.oldest_failure || "—"}
+                    </dd>
+                  </div>
+                </dl>
+              ) : opsError ? null : (
+                <p data-testid="ops-loading">Loading processing signals.</p>
+              )}
+            </section>
+          ) : null}
         </>
       )}
     </main>

@@ -66,7 +66,9 @@ content. Duplicate publication is expected and safe; silent loss is not.
 `InspectBacklog` exposes pending, publishing, published, and quarantined
 counts, the oldest unpublished `created_at`, and a bounded quarantine sample.
 This is the Event Spine verification surface for unpublished intent and terminal
-publication failures. It is not an Identity & Operations metrics or alerting stack.
+publication failures. It is not an Identity & Operations metrics or alerting
+stack. Issue #47 product reads use tenant-scoped `InspectBacklogForTenant`
+through `GET /v1/tenants/{tenant_id}/ops`.
 
 ## Integration harness
 

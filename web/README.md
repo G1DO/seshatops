@@ -45,7 +45,8 @@ origin via CORS.
 2. Run `npm run dev` and open the Vite URL; Sign in redirects through
    `GET /auth/login` (OIDC Authorization Code + PKCE).
 3. After a Go-owned session cookie is set, the view loads
-   `GET /v1/tenants/{tenant}/inventory` (via proxy).
+   `GET /v1/tenants/{tenant}/inventory` and
+   `GET /v1/tenants/{tenant}/ops` (via proxy).
 4. Process the deterministic Northstar synthetic order through the Event Spine spine.
 5. The view applies `inventory_projection.updated` SSE frames and shows
    presentation before → after quantities (for example `item-flour-001`:
@@ -55,13 +56,14 @@ origin via CORS.
    current”), then REST catch-up reconnects.
 
 A session is identity only. Inventory reads also require `MX-001` for the
-path tenant (Go-owned; the UI cannot authorize).
+path tenant. Ops visibility requires `MX-002` or `MX-003` (Go-owned; the UI
+cannot authorize).
 
 ## Explicit deferrals
 
-- No role-aware authorization UI (server default-deny is Issue #46)
-- No recovery/quarantine controls
+- No recovery/quarantine controls (Issue #48)
 - No dashboard suite or design system
+- No SLO/alerting platform
 
 ## Scripts
 
@@ -79,3 +81,4 @@ path tenant (Go-owned; the UI cannot authorize).
 - [QUERY_API_AUTHORIZATION.md](../docs/security/QUERY_API_AUTHORIZATION.md)
 - [PROJECTION_READ_API.md](../docs/architecture/PROJECTION_READ_API.md)
 - [EVENT_SPINE_COMPLETION_SUMMARY.md](../docs/reviews/EVENT_SPINE_COMPLETION_SUMMARY.md)
+- [IDENTITY_OPS_VISIBILITY.md](../docs/reviews/IDENTITY_OPS_VISIBILITY.md)

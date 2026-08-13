@@ -2,8 +2,9 @@
 
 **Status:** Frozen Identity & Operations demo allow-list for Issue #44 /
 CAP-010 design. This document names tenants, roles, resources, actions, and
-allow-list rows so later enforcement can cite stable IDs. Inventory query-API
-evaluation is recorded in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md).
+allow-list rows so later enforcement can cite stable IDs. Inventory and
+ops-visibility query-API evaluation is recorded in
+[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md).
 This matrix does not claim production tenant isolation, privileged-ops
 controls, or `CAP-010` evidence.
 
@@ -13,11 +14,11 @@ tuple, privileged versus read classification, and default-deny gaps for this
 milestone.
 
 **Does not own:** Runtime enforcement (Issue #46 records inventory query-API
-evaluation in [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)), OIDC
-login or session runtime (Issue #45), ops-visibility API or UI (Issue #47),
-quarantine/replay controls (Issue #48), audit recording (Issue #49), a
-policy-engine product, assignment schema, or any `EVIDENCE.md` claim
-promotion.
+evaluation and Issue #47 records ops-visibility evaluation in
+[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)), OIDC login or
+session runtime (Issue #45), quarantine/replay controls (Issue #48), audit
+recording (Issue #49), a policy-engine product, assignment schema, or any
+`EVIDENCE.md` claim promotion.
 
 ## 1. How to read this matrix
 
@@ -27,7 +28,8 @@ A missing, unknown, or incomplete entry is deny. UI labels are not authority.
 
 A role name is never an allow-list hit by itself. Downstream work must match
 **tenant + role assignment + resource + action** (and the remaining tuple
-fields at runtime). Issues [#46](https://github.com/G1DO/seshatops/issues/46)
+fields at runtime). Issues [#46](https://github.com/G1DO/seshatops/issues/46),
+[#47](https://github.com/G1DO/seshatops/issues/47),
 and [#48](https://github.com/G1DO/seshatops/issues/48) must cite the `MX-*`,
 `RES-*`, and `ACT-*` IDs below rather than inventing names.
 
@@ -96,7 +98,7 @@ It is not a license for internal callers to skip the matrix.
 | ID | Meaning | Downstream owner |
 | --- | --- | --- |
 | `RES-INVENTORY-PROJECTION` | Committed inventory projection snapshot and SSE stream (`GET /v1/tenants/{tenant_id}/inventory` and `/stream`) | Issue #46 |
-| `RES-OPS-VISIBILITY` | Lag, poison, quarantine, and freshness signals | Issue #47 binds the product surface; ID reserved here |
+| `RES-OPS-VISIBILITY` | Lag, poison, quarantine, and freshness signals | Issue #47 binds `GET /v1/tenants/{tenant_id}/ops` |
 | `RES-QUARANTINE` | Quarantine-release control | Issue #48 |
 | `RES-REPLAY` | Controlled replay | Issue #48 |
 | `RES-REBUILD` | Derived-state rebuild | Issue #48 |
@@ -168,9 +170,9 @@ A demo must not add bypass rows to make operator work easier.
 
 Publishing this matrix does not implement authorization, does not promote
 `CAP-010`, `CLM-007`, or `CLM-008`, and does not select a policy-engine
-product. Inventory query-API evaluation is recorded in
-[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Privileged-ops and
-ops-visibility HTTP surfaces remain later Identity & Operations issues.
+product. Inventory and ops-visibility query-API evaluation is recorded in
+[QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md). Privileged-ops HTTP
+surfaces remain later Identity & Operations issues.
 
 ## 10. Related documents
 

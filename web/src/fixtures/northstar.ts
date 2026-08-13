@@ -53,3 +53,49 @@ export function sampleSseUpdate() {
     checksum: SAMPLE_CHECKSUM_AFTER,
   };
 }
+
+export function sampleOpsSnapshot() {
+  return {
+    tenant_id: NORTHSTAR_TENANT_ID,
+    observed_at: "2026-08-13T06:00:00.000Z",
+    projection: {
+      checksum: SAMPLE_CHECKSUM_AFTER,
+      item_count: 1,
+    },
+    backlog: {
+      pending: 1,
+      publishing: 0,
+      published: 0,
+      quarantined: 0,
+      oldest_unpublished: "2026-08-13T05:59:00.000Z",
+      quarantines: [],
+    },
+    processing: {
+      applied: 1,
+      duplicate_noop: 0,
+      quarantined_conflict: 0,
+      quarantined_gap: 1,
+      quarantined_stale: 0,
+      quarantined_invalid: 0,
+      quarantined_mismatch: 0,
+      quarantined_transition: 0,
+      failures_retrying: 0,
+      failures_quarantined: 0,
+      oldest_gap: "2026-08-13T05:58:00.000Z",
+      oldest_failure: null,
+      failures: [],
+      gaps: [
+        {
+          event_id: NORTHSTAR_EVENT_ID,
+          tenant_id: NORTHSTAR_TENANT_ID,
+          aggregate_type: "inventory_item",
+          aggregate_id: NORTHSTAR_ITEM_ID,
+          aggregate_version: 2,
+          expected_version: 1,
+          received_version: 2,
+          created_at: "2026-08-13T05:58:00.000Z",
+        },
+      ],
+    },
+  };
+}

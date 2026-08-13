@@ -186,6 +186,25 @@ func streamPath(tenantID string) string {
 	return "/v1/tenants/" + tenantID + "/inventory/stream"
 }
 
+func opsPath(tenantID string) string {
+	return "/v1/tenants/" + tenantID + "/ops"
+}
+
+func northstarOperatorPolicy(principals ...string) identity.Authorizer {
+	if len(principals) == 0 {
+		principals = []string{"platform-operator"}
+	}
+	as := make([]identity.Assignment, 0, len(principals))
+	for _, principal := range principals {
+		as = append(as, identity.Assignment{
+			PrincipalID: principal,
+			TenantID:    identity.TenantNS001UUID,
+			RoleID:      identity.RolePlatformOperator,
+		})
+	}
+	return identity.NewPolicy(identity.NewDirectory(as...))
+}
+
 func TestRESTReturnsCommittedProjection(t *testing.T) {
 	db := openTestDB(t)
 	fx := mustFixture(t)
@@ -432,7 +451,7 @@ func TestReadOnlyRejectsMutatingMethods(t *testing.T) {
 	}
 
 	for _, method := range []string{http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete} {
-		for _, path := range []string{inventoryPath(fx.TenantID), streamPath(fx.TenantID)} {
+		for _, path := range []string{inventoryPath(fx.TenantID), streamPath(fx.TenantID), opsPath(fx.TenantID)} {
 			req, err := http.NewRequest(method, ts.URL+path, bytes.NewReader([]byte(`{}`)))
 			if err != nil {
 				t.Fatal(err)
@@ -467,6 +486,8 @@ func TestMalformedTenantRejected(t *testing.T) {
 		"/v1/tenants/not-a-uuid/inventory",
 		"/v1/tenants/11111111-1111-4111-8111-11111111111F/inventory", // uppercase
 		"/v1/tenants//inventory",
+		"/v1/tenants/not-a-uuid/ops",
+		"/v1/tenants/11111111-1111-4111-8111-11111111111F/ops",
 	}
 	for _, path := range cases {
 		resp, err := http.Get(ts.URL + path)
@@ -528,6 +549,19 @@ func TestUnauthenticatedRefusedOnRESTAndSSE(t *testing.T) {
 	}
 	if !strings.Contains(string(body), "unauthenticated") {
 		t.Fatalf("SSE body=%s", body)
+	}
+
+	resp, err = http.Get(ts.URL + opsPath(fx.TenantID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ = io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("ops status=%d body=%s", resp.StatusCode, body)
+	}
+	if !strings.Contains(string(body), "unauthenticated") {
+		t.Fatalf("ops body=%s", body)
 	}
 }
 

@@ -974,3 +974,131 @@ func TestAppliedNotifierOnGapRedrive(t *testing.T) {
 		t.Fatalf("redrive update = %+v", n.updates[1])
 	}
 }
+
+func TestInspectProcessingForTenantRejectsEmptyTenant(t *testing.T) {
+	_, err := InspectProcessingForTenant(context.Background(), nil, "")
+	if err == nil {
+		t.Fatal("empty tenant_id must fail closed")
+	}
+}
+
+func TestInspectProcessingForTenantExcludesOtherAndNullTenant(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	ctx := context.Background()
+
+	malformed := []byte(`{"not":"an-envelope"`)
+	if _, err := ProcessRecord(ctx, db, []byte("k"), malformed, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 40,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	v2 := fx.Event
+	v2.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2142"
+	v2.AggregateVersion = 2
+	v2.Payload.QuantityBefore = 8
+	v2.Payload.QuantityDecremented = 1
+	v2.Payload.QuantityAfter = 7
+	v2.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2144"
+	v2.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2143"
+	raw2 := mustCanonical(t, v2)
+	keyA := []byte(relay.AggregateKey(v2.TenantID, v2.AggregateType, v2.AggregateID))
+	res, err := ProcessRecord(ctx, db, keyA, raw2, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 41,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Disposition != DispositionQuarantinedGap {
+		t.Fatalf("expected gap, got %s", res.Disposition)
+	}
+
+	otherTenant := "22222222-2222-4222-8222-222222222222"
+	other := fx.Event
+	other.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2141"
+	other.TenantID = otherTenant
+	other.AggregateID = "item-sugar-001"
+	other.Payload.ItemID = "item-sugar-001"
+	other.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2145"
+	other.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2146"
+	rawOther := mustCanonical(t, other)
+	keyB := []byte(relay.AggregateKey(other.TenantID, other.AggregateType, other.AggregateID))
+	res, err = ProcessRecord(ctx, db, keyB, rawOther, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 42,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Disposition != DispositionApplied {
+		t.Fatalf("other tenant result = %+v", res)
+	}
+
+	_, err = db.ExecContext(ctx, `
+		INSERT INTO platform.processing_failures (
+			failure_id, consumer_name, event_id, tenant_id,
+			failure_category, diagnostic_code, quarantine_status,
+			source_topic, source_partition, source_offset, attempt_count
+		) VALUES (
+			'fail-null-tenant', $1, '', NULL,
+			'malformed_envelope', 'unattributed_poison', 'quarantined',
+			$2, 0, 43, 1
+		)
+	`, ConsumerName, relay.Topic)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = db.ExecContext(ctx, `
+		INSERT INTO platform.processing_failures (
+			failure_id, consumer_name, event_id, tenant_id,
+			failure_category, diagnostic_code, quarantine_status,
+			source_topic, source_partition, source_offset, attempt_count
+		) VALUES (
+			'fail-same-tenant', $1, $2, $3,
+			'handler_poison', 'handler_poison', 'quarantined',
+			$4, 0, 44, 1
+		)
+	`, ConsumerName, fx.Event.EventID, fx.TenantID, relay.Topic)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	global, err := InspectProcessing(ctx, db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if global.Applied != 1 || global.QuarantinedGap != 1 || global.FailuresQuarantined < 3 {
+		t.Fatalf("global inspect = %+v", global)
+	}
+
+	scoped, err := InspectProcessingForTenant(ctx, db, fx.TenantID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if scoped.Applied != 0 || scoped.QuarantinedGap != 1 {
+		t.Fatalf("tenant inspect leaked counts = %+v", scoped)
+	}
+	if scoped.FailuresQuarantined != 1 || len(scoped.Failures) != 1 {
+		t.Fatalf("expected one attributed tenant failure, got %+v", scoped)
+	}
+	if scoped.Failures[0].DiagnosticCode != "handler_poison" {
+		t.Fatalf("attributed failure = %+v", scoped.Failures[0])
+	}
+	if len(scoped.Gaps) != 1 || scoped.Gaps[0].TenantID != fx.TenantID {
+		t.Fatalf("gaps sample = %+v", scoped.Gaps)
+	}
+	for _, f := range scoped.Failures {
+		if containsSubstring(f.DiagnosticCode, `"not"`) || containsSubstring(f.EventID, "an-envelope") {
+			t.Fatalf("failure sample leaked payload: %+v", f)
+		}
+	}
+
+	otherIns, err := InspectProcessingForTenant(ctx, db, otherTenant)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if otherIns.Applied != 1 || otherIns.QuarantinedGap != 0 {
+		t.Fatalf("other tenant inspect = %+v", otherIns)
+	}
+}

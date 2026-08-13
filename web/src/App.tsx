@@ -1,5 +1,6 @@
 import { OperationsView } from "./ui/OperationsView";
 import { useInventoryProjection } from "./state/useInventoryProjection";
+import { useOpsVisibility } from "./state/useOpsVisibility";
 import { useSession } from "./state/useSession";
 import { emptyProjectionView } from "./state/projectionStore";
 import { loginUrl } from "./api/session";
@@ -62,6 +63,10 @@ function AuthenticatedView(props: {
     baseUrl: API_BASE_URL,
     tenantId: TENANT_ID,
   });
+  const ops = useOpsVisibility({
+    baseUrl: API_BASE_URL,
+    tenantId: TENANT_ID,
+  });
 
   if (errorMessage === UNAUTHENTICATED) {
     return (
@@ -84,6 +89,8 @@ function AuthenticatedView(props: {
       tenantId={TENANT_ID}
       session={props.session}
       onLogout={props.onLogout}
+      ops={ops.snapshot}
+      opsError={ops.errorMessage}
     />
   );
 }
