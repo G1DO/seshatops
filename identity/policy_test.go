@@ -122,6 +122,9 @@ func TestPolicyAllowsPlatformOperatorPrivilegedOps(t *testing.T) {
 	if err := p.Allow("platform-operator", TenantNS001UUID, ResRebuild, ActRebuild); err != nil {
 		t.Fatalf("MX-006 allow: %v", err)
 	}
+	if err := p.Allow("platform-operator", TenantNS001UUID, ResAudit, ActAuditRead); err != nil {
+		t.Fatalf("MX-007 allow: %v", err)
+	}
 }
 
 func TestPolicyDeniesPrivilegedActionsForOpsReader(t *testing.T) {
@@ -139,6 +142,9 @@ func TestPolicyDeniesPrivilegedActionsForOpsReader(t *testing.T) {
 	if err := p.Allow("operator-northstar", TenantNS001UUID, ResRebuild, ActRebuild); !errors.Is(err, ErrForbidden) {
 		t.Fatalf("rebuild err=%v", err)
 	}
+	if err := p.Allow("operator-northstar", TenantNS001UUID, ResAudit, ActAuditRead); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("audit read err=%v", err)
+	}
 }
 
 func TestPolicyDeniesCrossTenantPrivilegedOps(t *testing.T) {
@@ -155,6 +161,9 @@ func TestPolicyDeniesCrossTenantPrivilegedOps(t *testing.T) {
 	}
 	if err := p.Allow("platform-operator", TenantNS002UUID, ResRebuild, ActRebuild); !errors.Is(err, ErrForbidden) {
 		t.Fatalf("cross-tenant rebuild err=%v", err)
+	}
+	if err := p.Allow("platform-operator", TenantNS002UUID, ResAudit, ActAuditRead); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("cross-tenant audit read err=%v", err)
 	}
 }
 
