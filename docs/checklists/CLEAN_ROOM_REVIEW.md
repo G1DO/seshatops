@@ -308,9 +308,9 @@ production context was found in the reviewed scope.
 | Field | Value |
 | --- | --- |
 | Author | G1DO |
-| Verified by | Local `go test ./...`, frozen identity/api filters, web Vitest/typecheck/build |
+| Verified by | Local `go test ./...`, frozen identity/api filters, web Vitest/typecheck/build, hosted CI on PR #61 `1f19c58` |
 | Date (UTC) | 2026-08-13 |
-| Commit / tip | Runtime verified at `173cedb`; evidence docs on Issue #50 branch `test/50-identity-negative-suite` |
+| Commit / tip | Runtime verified at `173cedb`; hosted CI recorded for PR #61 `1f19c58` |
 | Scope (paths / PR) | Issue #50 procedure, experiment report, campaign review, completion summary, EVIDENCE.md `CLM-007`–`CLM-010`, ROADMAP/README/AGENTS status, threat-model residual risks, #50 pointer notes |
 | Review type | identity exit-gate evidence, clean-room, and verification honesty review |
 | Result | Pass with recorded follow-ups |
@@ -338,8 +338,8 @@ production context was found in the reviewed scope.
    Operations HTTP surfaces with explicit limitations; retrieval, citations,
    approvals, commands, exports, and backup/restore remain untested.
 3. `CAP-011` remains Planned. `FC-015`/`FC-016` remain Not executed.
-4. Hosted CI run IDs are not recorded; they must not be claimed until GitHub
-   shows a successful run for the reviewed commit.
+4. Hosted CI run IDs recorded for PR #61 commit `1f19c58` after those workflows
+   completed successfully.
 
 #### Notes
 

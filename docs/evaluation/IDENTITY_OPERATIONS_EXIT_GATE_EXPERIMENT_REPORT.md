@@ -12,7 +12,7 @@
 | Experiment type | Security / authorization negative-test evidence |
 | Claim IDs under evaluation | `CLM-007`, `CLM-008`, `CLM-009`, `CLM-010` |
 | Prior claim status | Planned |
-| Report status | Complete for test-environment campaign; hosted CI not yet recorded |
+| Report status | Complete for test-environment campaign; hosted CI recorded for PR #61 `1f19c58` |
 
 ## Operator and run timing
 
@@ -53,7 +53,7 @@ implemented HTTP surfaces.
 | Field | Value/status |
 | --- | --- |
 | Repository | `github.com/G1DO/seshatops` |
-| Commit | Runtime packages verified at `173cedb82b2d7e4f6b8e25ae778d817811b9820a` (Issue #49 merged on `main`). Campaign docs added after the run on `test/50-identity-negative-suite`. Hosted CI not yet recorded. |
+| Commit | Runtime packages verified at `173cedb82b2d7e4f6b8e25ae778d817811b9820a` (Issue #49 merged on `main`). Campaign docs added after the run on `test/50-identity-negative-suite`. Hosted CI recorded for PR #61 commit `1f19c58`. |
 | Branch or tag | `test/50-identity-negative-suite` |
 | Dirty-working-tree state | Procedure file present as untracked at suite start; remaining campaign artifacts added after the run |
 | Configuration version and relevant values | Frozen matrix `MX-001`–`MX-007`; tenants `TENANT-NS-001` / `TENANT-NS-002`; seed `northstar-m1-order-line-v1` |
@@ -162,7 +162,7 @@ Policy denials in `./identity` return `identity.ErrForbidden` without an HTTP bo
 | 8 | Authorized quarantine/replay; gap not releasable | Pass |
 | 9 | Privileged allow/deny audit | Pass (append-only; deny without mutation; insert failure blocks mutation; operator MX-007 GET) |
 | 10 | UI 403 is presentation | Pass (Vitest; not isolation evidence) |
-| 11 | Docs/secret/clean-room | Pass (local category search). Hosted Documentation CI: **not executed** |
+| 11 | Docs/secret/clean-room | Pass (local category search). Hosted Documentation CI [31671557450](https://github.com/G1DO/seshatops/actions/runs/31671557450) on `1f19c58` |
 
 Package summary (`go test ./... -count=1 -timeout 25m`):
 
@@ -184,9 +184,12 @@ Not applicable: authorization negative suite, not a latency or capacity experime
 
 ## Failures and anomalies
 
-None observed in the recorded suite. Hosted GitHub Actions for the Issue #50
-PR head are **not recorded**; they must not be claimed until a green hosted run
-exists for the reviewed commit.
+None observed in the recorded suite. Hosted GitHub Actions for PR #61 commit
+`1f19c58`: Go CI
+[31671557442](https://github.com/G1DO/seshatops/actions/runs/31671557442),
+Web CI [31671557513](https://github.com/G1DO/seshatops/actions/runs/31671557513),
+Documentation CI
+[31671557450](https://github.com/G1DO/seshatops/actions/runs/31671557450).
 
 ## Data-integrity checks
 
@@ -243,7 +246,7 @@ executed.
 | --- | --- |
 | Reviewer | G1DO |
 | Review date | 2026-08-13 |
-| Evidence completeness | Complete for declared test-environment scope; hosted CI not yet recorded |
+| Evidence completeness | Complete for declared test-environment scope; hosted CI recorded for PR #61 `1f19c58` |
 | Documentation disposition | Pass with recorded limitations |
 | Runtime result disposition | Pass |
 
@@ -264,7 +267,6 @@ four claims only, scoped to Identity & Operations HTTP surfaces.
 ## Follow-up work
 
 - Maintainer review of claim promotion and clean-room record.
-- Record hosted Go/Web/Docs CI run IDs when the Issue #50 PR head is green.
 - Traceability owns backup/restore and authorized recovery product claims
   (ADR-Q-005). `CAP-011` remains Planned.
 - Retrieval, citations, approvals, commands, and exports remain later

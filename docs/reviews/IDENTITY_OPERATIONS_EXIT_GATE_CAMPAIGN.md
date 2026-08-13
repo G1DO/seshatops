@@ -44,7 +44,7 @@ parity, production IdP/revocation, service-identity credentials, Traceability
 | `cd web && npm run typecheck` | Passed |
 | `cd web && npm run build` | Passed |
 | Ahoy / secret-like category search | Passed; Ahoy only as exclusion; test DB password `seshatops` and mock OIDC tokens are synthetic |
-| Hosted Go / Web / Documentation CI | Not recorded; do not claim hosted-green until GitHub shows a successful run for the reviewed commit |
+| Hosted Go / Web / Documentation CI | Pass on PR #61 `1f19c58`: Go [31671557442](https://github.com/G1DO/seshatops/actions/runs/31671557442), Web [31671557513](https://github.com/G1DO/seshatops/actions/runs/31671557513), Docs [31671557450](https://github.com/G1DO/seshatops/actions/runs/31671557450) |
 | `EVIDENCE.md` | `CLM-007`–`CLM-010` promoted to Observed with limitations |
 
 ## Scenario → claim mapping

@@ -46,8 +46,11 @@ execution.
 - Web: `npm test` (36), `npm run typecheck`, and `npm run build` passed.
 - `CLM-007`–`CLM-010` promoted to **Observed** for the test-environment scope
   only; `CAP-011` and later-sequence claims remain Planned.
-- Hosted GitHub Actions are not recorded for this campaign; record them only
-  when a green run exists for the reviewed PR head.
+- Hosted GitHub Actions for PR #61 commit `1f19c58`: Go CI
+  [31671557442](https://github.com/G1DO/seshatops/actions/runs/31671557442),
+  Web CI [31671557513](https://github.com/G1DO/seshatops/actions/runs/31671557513),
+  Documentation CI
+  [31671557450](https://github.com/G1DO/seshatops/actions/runs/31671557450).
 
 ## Deviations and dispositions
 
