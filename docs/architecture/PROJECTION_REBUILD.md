@@ -1,9 +1,9 @@
 # Event Spine Projection Rebuild and Duplicate Proof
 
-**Status:** Implemented for Issue #29 library/integration scope. Local FC-001
-and FC-014-style proofs exist; hosted fault campaigns and claim promotion
-remain deferred. Traceability & Recovery backup/restore is not introduced.
-Issue #48 operator HTTP is recorded in
+**Status:** Implemented for Issue #29 library/integration scope. Issue #30
+records test-environment Observed evidence for `CLM-004` and `CLM-006`.
+Traceability & Recovery backup/restore is not introduced. Issue #48 operator
+HTTP is recorded in
 [PRIVILEGED_OPS_AUTHORIZATION.md](../security/PRIVILEGED_OPS_AUTHORIZATION.md).
 
 **Owns:** Controlled duplicate-injection harness coverage, the documented use of
@@ -94,13 +94,14 @@ emit an in-process read hint after an apply; that is not an external effect.
 
 | Later owner | Deferred behavior |
 | --- | --- |
-| Identity (`CAP-013`) | Authorized quarantine release and operator-controlled replay (Issue #48 library/test HTTP; claim remains Planned) |
+| Identity (`CAP-013`) | Authorized quarantine release and operator-controlled replay (Issue #48 HTTP; `CLM-010` Observed for authorization subset) |
 | Traceability (`CAP-015`–`CAP-017`, ADR-Q-005) | Authorized recovery/restore product and broader checksum reconstruction campaigns |
 
 ## Non-claims
 
 This document does not claim production readiness, staging parity, or
-exactly-once transport. Issue #30 records test-environment FC-001/FC-014
-campaign evidence and Observed decisions for `CLM-004`/`CLM-006`; see
+exactly-once transport. Issue #30 records test-environment duplicate-safety
+and retained-history rebuild evidence and Observed decisions for
+`CLM-004`/`CLM-006`; see
 [EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md).
 Traceability still owns authorized recovery/restore product scope.

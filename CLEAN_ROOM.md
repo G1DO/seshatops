@@ -49,7 +49,7 @@ This list is category-based. Do **not** commit a private denylist of real identi
 The following may be used when their provenance is clear:
 
 1. Independently authored SeshatOps documentation and code created inside this project.
-2. The **Northstar Foods** fictional public scenario defined in [PRODUCT.md](PRODUCT.md).
+2. The **Northstar Foods** fictional public scenario defined in [README.md](README.md).
 3. Generated synthetic data created for SeshatOps, with provenance recorded (see §5).
 4. Properly licensed public datasets, standards, RFCs, and documentation.
 5. Generic industry knowledge that does **not** encode a private system’s schema, identifiers, business rules, or proprietary structure.

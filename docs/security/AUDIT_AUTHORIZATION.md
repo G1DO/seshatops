@@ -57,3 +57,19 @@ policy, `TENANT-NS-002`, and forged tenant headers or body fields are `403`
 with no `records` body. Cross-tenant rows are never returned on an allow.
 
 TypeScript cannot authorize.
+
+## Sample audit timeline
+
+Reconstructed from Issue #49 library/test cases on `TENANT-NS-001`
+(`11111111-1111-4111-8111-111111111111`). Not hosted-CI or production
+evidence.
+
+| Sequence | Principal | Action | Resource | Outcome | Reason | Target |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `operator-northstar` | `ACT-QUARANTINE-RELEASE` | `RES-QUARANTINE` | deny | forbidden | quarantined `event_id` |
+| 2 | `platform-operator` | `ACT-QUARANTINE-RELEASE` | `RES-QUARANTINE` | allow | matrix_allow | same `event_id` |
+| 3 | `platform-operator` | `ACT-AUDIT-READ` | `RES-AUDIT` | allow | matrix_allow | (none) |
+
+Row 1 does not mutate outbox. Row 2 is recorded before release. Row 3 is the
+authorized inspection of that tenant's timeline. A seeded `TENANT-NS-002` row
+does not appear in the `TENANT-NS-001` GET.

@@ -1,7 +1,6 @@
 # Identity & Operations Exit-Gate Experiment Report
 
-> Filled from [templates/EXPERIMENT_REPORT.md](templates/EXPERIMENT_REPORT.md) for
-> Issue #50. Results below are from an actual authorized campaign run.
+> Issue #50 Identity & Operations exit-gate experiment. Results below are from an actual authorized campaign run.
 
 ## Experiment identity
 
@@ -73,7 +72,6 @@ implemented HTTP surfaces.
 ## Preconditions
 
 - Docker available for Testcontainers.
-- Procedure in [IDENTITY_OPERATIONS_EXIT_GATE_PROCEDURE.md](IDENTITY_OPERATIONS_EXIT_GATE_PROCEDURE.md).
 - Candidate commit includes Issues #43–#49 merged stack.
 
 ## Method
@@ -92,9 +90,22 @@ go test ./... -count=1 -timeout 25m
 cd web && npm test && npm run typecheck && npm run build
 ```
 
-Copy-paste scenario `-run` filters are the fenced `^(A|B)$` blocks in
-[IDENTITY_OPERATIONS_EXIT_GATE_PROCEDURE.md](IDENTITY_OPERATIONS_EXIT_GATE_PROCEDURE.md).
-Do not copy table-escaped `\|` strings.
+Do **not** copy `-run` strings from markdown tables: table `\|` is a literal
+pipe in the shell. Each pattern below is anchored `^(A|B|…)$`.
+
+```bash
+go test ./identity -count=1 -timeout 15m -run '^(TestForgedSessionCookieRejected|TestExpiredSessionRejected|TestForgedIDTokenRejected|TestSwappedAudienceRejected|TestSwappedIssuerRejected|TestExpiredIDTokenRejected|TestClientSuppliedPrincipalIgnored|TestLogoutRevokesSession|TestDirectoryClearRevokesMembership)$'
+go test ./api -count=1 -timeout 25m -run '^(TestUnauthenticatedRefusedOnRESTAndSSE|TestSSEStopsAfterSessionRevoked|TestSSEStopsAfterAssignmentRevoked|TestClientPrincipalHeaderDoesNotAuthenticate|TestUnauthenticatedControlFailsClosed|TestUnauthenticatedAuditReadFailsClosed)$'
+go test ./identity -count=1 -timeout 5m -run '^(TestPolicyDeniesCrossTenantInventoryRead|TestPolicyDeniesCrossTenantOpsVisibility|TestPolicyDeniesCrossTenantPrivilegedOps|TestPolicyDeniesMissingOrAmbiguousMembership)$'
+go test ./api -count=1 -timeout 25m -run '^(TestCrossTenantInventoryReadDenied|TestCrossTenantOpsReadDenied|TestPlatformOperatorCrossTenantOpsDenied|TestCrossTenantAndForgedContextControlDenied|TestOperatorRebuildLeavesOtherTenant|TestCrossTenantAndNilPolicyAuditReadDenied|TestAuditReadDoesNotLeakOtherTenant)$'
+go test ./api -count=1 -timeout 25m -run '^(TestForgedTenantHeaderAndQueryDoNotAuthorize|TestForgedTenantHeaderDoesNotAuthorizeOps|TestClientSuppliedActorAndTenantAreIgnored)$'
+go test ./identity -count=1 -timeout 5m -run '^(TestPolicyDeniesPlatformOperatorInventoryRead|TestPolicyDeniesPrivilegedActionsForOpsReader|TestPolicyDeniesUnassignedAndServicePrincipal)$'
+go test ./api -count=1 -timeout 25m -run '^(TestPlatformOperatorInventoryReadDenied|TestReaderCannotReleaseQuarantine|TestReaderCannotReplayOrRebuild|TestReaderCannotReadAudit|TestMissingRoleInventoryReadDenied|TestMissingRoleOpsReadDenied|TestMissingRoleControlDenied|TestUnassignedPrincipalInventoryReadDenied|TestUnassignedPrincipalOpsReadDenied|TestUnassignedAndNilPolicyControlDenied|TestNilPolicyFailsClosed|TestNilPolicyOpsFailsClosed)$'
+go test ./api -count=1 -timeout 25m -run '^(TestOpsReaderCanReadSameTenantOps|TestOpsSnapshotExcludesOtherTenantAndPayloadFragments)$'
+go test ./api -count=1 -timeout 25m -run '^(TestOperatorCanReleaseSameTenantQuarantine|TestReleaseGapIsNotReleasable|TestOperatorReplayIsDuplicateNoop)$'
+go test ./api -count=1 -timeout 25m -run '^(TestOperatorReleaseAllowPersistsAudit|TestReaderDenyPersistsAuditWithoutMutation|TestAuditInsertFailureBlocksPrivilegedMutation|TestAuthorizationDecisionsAreAppendOnly|TestOperatorCanReadSameTenantAudit)$'
+cd web && npm test -- src/ui/OperationsView.test.tsx src/state/useOpsControls.test.tsx src/state/useOpsVisibility.test.tsx src/api/client.test.ts
+```
 
 ## Safety and termination criteria
 
@@ -111,9 +122,7 @@ No production systems were targeted.
 | Go suite log | Operator host (not committed) | All packages `ok` |
 | Web test log | Operator host (not committed) | 8 files / 36 tests passed |
 | Typecheck/build logs | Operator host (not committed) | Passed |
-| Audit timeline citation | [IDENTITY_AUDIT.md](../reviews/IDENTITY_AUDIT.md) | Sample timeline from Issue #49 tests |
-| Procedure | [IDENTITY_OPERATIONS_EXIT_GATE_PROCEDURE.md](IDENTITY_OPERATIONS_EXIT_GATE_PROCEDURE.md) | N/A |
-| Review | [IDENTITY_OPERATIONS_EXIT_GATE_CAMPAIGN.md](../reviews/IDENTITY_OPERATIONS_EXIT_GATE_CAMPAIGN.md) | N/A |
+| Audit timeline citation | [AUDIT_AUTHORIZATION.md](../security/AUDIT_AUTHORIZATION.md) | Sample timeline from Issue #49 tests |
 
 Committed raw machine logs are omitted to avoid noisy Testcontainers output;
 package names, commands, and exit outcomes are the reproducible references.
@@ -207,9 +216,8 @@ Documentation CI
 
 ## Recovery observations
 
-Not a reliability recovery campaign. `FC-015` (replay of irreversible external
-effects) and `FC-016` (quarantine recovery failure) remain Planned / Not
-executed.
+Not a reliability recovery campaign. Replay of irreversible external effects
+and quarantine-recovery failure campaigns remain Planned / Not executed.
 
 ## Limitations
 
@@ -234,11 +242,10 @@ executed.
 
 ## Reproduction instructions
 
-1. Check out the reviewed campaign commit (PR head after Issue #50 docs land).
+1. Check out the reviewed campaign commit.
 2. Ensure Docker is available.
-3. Follow [IDENTITY_OPERATIONS_EXIT_GATE_PROCEDURE.md](IDENTITY_OPERATIONS_EXIT_GATE_PROCEDURE.md).
-4. Run the full suite gate commands above.
-5. Compare outcomes to this report; attach hosted CI run IDs when present.
+3. Run the full suite gate commands above.
+4. Compare outcomes to this report; attach hosted CI run IDs when present.
 
 ## Reviewer decision
 
@@ -256,7 +263,7 @@ executed.
 | --- | --- |
 | New claim status | `CLM-007`–`CLM-010` → **Observed** (test environment) |
 | Decision rationale | Named experiment, exact commands, package pass outcomes, and limitations recorded; constitution-era later surfaces remain untested rather than silently in-scope |
-| Evidence links | This report; [IDENTITY_OPERATIONS_EXIT_GATE_CAMPAIGN.md](../reviews/IDENTITY_OPERATIONS_EXIT_GATE_CAMPAIGN.md); [EVIDENCE.md](../../EVIDENCE.md) |
+| Evidence links | This report; [EVIDENCE.md](../../EVIDENCE.md) |
 
 ## Superseded evidence
 

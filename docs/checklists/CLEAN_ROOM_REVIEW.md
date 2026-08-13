@@ -337,7 +337,8 @@ production context was found in the reviewed scope.
 2. `CLM-007`–`CLM-010` promoted to Observed for test-environment Identity &
    Operations HTTP surfaces with explicit limitations; retrieval, citations,
    approvals, commands, exports, and backup/restore remain untested.
-3. `CAP-011` remains Planned. `FC-015`/`FC-016` remain Not executed.
+3. `CAP-011` remains Planned. Irreversible-effect replay and
+   quarantine-recovery campaigns remain Not executed.
 4. Hosted CI run IDs recorded for PR #61 commit `1f19c58` after those workflows
    completed successfully.
 

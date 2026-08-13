@@ -1,6 +1,6 @@
 # ADR-0003: Event Spine Event Envelope and Schema Compatibility
 
-- **Status:** Accepted Event Spine decision; JSON/JCS envelope library implemented in Issue #22 (`event`, `northstar`); outbox/broker/projection runtime remains pending
+- **Status:** Accepted Event Spine decision; JSON/JCS envelope library implemented in Issue #22 (`event`, `northstar`); outbox, broker, and projection runtime implemented in Issues #23–#29
 - **Date:** 2026-08-07
 - **Scope:** Issue #21 event identity, first event family, JSON representation, and schema compatibility
 

@@ -23,7 +23,9 @@ The platform needs one durable business outcome for equivalent repetitions witho
 9. A retry that could duplicate an irreversible downstream effect is not issued blindly; reconciliation precedes that retry.
 10. Python output, UI state, approval possession, and idempotency-key possession cannot authorize or execute a command.
 
-The full conceptual contract is in [COMMAND_MODEL.md](../architecture/COMMAND_MODEL.md).
+This ADR is the command-execution decision. Implementation waits for
+Approved Actions (ADR-Q-007). Do not treat this file as a current runtime
+surface.
 
 ## Consequences
 

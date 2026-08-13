@@ -2,57 +2,83 @@
 
 > Secure Operations Intelligence and Action Control Plane
 
-From business events to evidence-backed decisions and human-approved actions.
+SeshatOps is a clean-room, multi-tenant operations-intelligence platform for
+the fictional **Northstar Foods** scenario. It consumes synthetic ERP events,
+reconstructs replayable operational state, and exposes authorized operator
+views. Intelligence, human-approved commands, and production deployment are
+not built yet.
 
-## What it is
-
-SeshatOps is a clean-room, multi-tenant operations-intelligence platform that consumes ERP events, reconstructs replayable operational state, predicts stockout risk, explains recommendations with permission-aware evidence, and executes only authorized, human-approved, idempotent commands.
-
-The complete product loop is:
-
-> Observe → Reconstruct → Predict → Explain → Propose → Authorize → Approve → Execute → Audit → Replay
-
-## Public scenario
-
-All public narrative and demos use **Northstar Foods**, a fictional manufacturer and distributor, backed by a standalone synthetic ERP. The project must work with no private production system.
+Public artifacts must remain understandable and runnable without any private
+production system. **Ahoy is excluded.** See [CLEAN_ROOM.md](CLEAN_ROOM.md).
 
 ## Status
 
-Project Constitution is complete. Event Spine is complete for the declared test environment (`CLM-003`–`CLM-006` Observed). Identity & Operations is complete for the declared test environment (`CLM-007`–`CLM-010` Observed; `CAP-011` remains Planned). A long-running deployment service is not present yet; Planned capabilities are not measured results beyond linked evidence.
+| Capability | Status |
+| --- | --- |
+| Event Spine | Implemented. Test-environment Observed: `CLM-003`–`CLM-006`. |
+| Identity & Operations | Implemented. Test-environment Observed: `CLM-007`–`CLM-010`. `CAP-011` remains Planned. |
+| Traceability & Recovery and later | Planned. Not in this repository as runtime. |
+
+There is no deployment binary, hosted environment, or production evidence.
+Public wording must not exceed [EVIDENCE.md](EVIDENCE.md).
+
+## What is implemented
+
+A synthetic Northstar order commits with a transactional outbox, a Go relay
+publishes the exact bytes to Redpanda, a Go consumer updates a tenant-scoped
+inventory projection, and a TypeScript operations view reads that projection
+over REST and SSE. Go owns OIDC sessions, default-deny tenant authorization,
+ops visibility, authorized quarantine/replay/rebuild, and privileged-decision
+audit.
+
+```text
+Browser (Vite/React web/)
+        │  REST + SSE + cookies
+        ▼
+Go (identity/, api/, platform/, relay/, erp/, event/, northstar/)
+        │
+        ├── PostgreSQL   (source, outbox, inbox, projection, sessions, audit)
+        └── Redpanda     (at-least-once event transport)
+```
+
+Packages: `event/`, `northstar/`, `erp/`, `relay/`, `platform/`, `api/`,
+`identity/`, `web/`.
+
+## Develop
+
+This repository is libraries plus tests. There is no `cmd/` server to start.
+
+**Toolchain pins** (immutable image digests in [CONTRACTS.md](CONTRACTS.md) §9):
+Go `1.25.0`, Node.js `24.14.0`, npm `11.9.0`, PostgreSQL `16.14`, Redpanda
+`v25.2.1`. Docker is required for Testcontainers-backed Go tests; those tests
+skip if Docker is unavailable.
+
+```bash
+go test ./... -count=1 -timeout 15m
+cd web && npm ci && npm run typecheck && npm test && npm run build
+```
+
+Use `-timeout 25m` for the full Event Spine or Identity exit-gate campaigns.
+UI-only work: [web/README.md](web/README.md).
+
+Hosted checks on pull requests: Go CI, Web CI, Documentation CI (Markdown
+lint, link check, YAML lint, secret scan).
 
 ## Docs
 
 | Doc | Owns |
 | --- | --- |
-| [CONTRACTS.md](CONTRACTS.md) | Concrete Event Spine event-spine contract |
-| [ROADMAP.md](ROADMAP.md) | Capability-sequence ownership and sequencing |
-| [EVIDENCE.md](EVIDENCE.md) | Claim ledger and verification routes |
-| [EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md](docs/evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md) | Event Spine exit-gate experiment evidence |
-| [EVENT_SPINE_EXIT_GATE_CAMPAIGN.md](docs/reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN.md) | Event Spine exit-gate campaign acceptance matrix |
-| [EVENT_SPINE_COMPLETION_SUMMARY.md](docs/reviews/EVENT_SPINE_COMPLETION_SUMMARY.md) | Event Spine completion boundary |
-| [IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md](docs/evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md) | Identity & Operations exit-gate experiment evidence |
-| [IDENTITY_OPERATIONS_EXIT_GATE_CAMPAIGN.md](docs/reviews/IDENTITY_OPERATIONS_EXIT_GATE_CAMPAIGN.md) | Identity & Operations exit-gate campaign acceptance matrix |
-| [IDENTITY_OPERATIONS_COMPLETION_SUMMARY.md](docs/reviews/IDENTITY_OPERATIONS_COMPLETION_SUMMARY.md) | Identity & Operations completion boundary |
-| [AGENTS.md](AGENTS.md) | Contribution and verification rules |
-| [CLEAN_ROOM.md](CLEAN_ROOM.md) | Ahoy exclusion and provenance policy |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | As-built topology and trust boundaries |
+| [CONTRACTS.md](CONTRACTS.md) | Event Spine wire, persistence, and toolchain contract |
+| [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md) | Event meaning and correctness invariants |
+| [docs/adrs/](docs/adrs/) | Consequential technical decisions |
+| [docs/security/](docs/security/) | Threat model, authorization, identity surfaces |
+| [CLEAN_ROOM.md](CLEAN_ROOM.md) | Ahoy exclusion and provenance |
+| [EVIDENCE.md](EVIDENCE.md) | Claim ledger |
+| [AGENTS.md](AGENTS.md) | Agent and contributor contract |
 
-Contribution hygiene: [PR template](.github/pull_request_template.md), [Documentation CI](.github/workflows/documentation-ci.yml), [Go CI](.github/workflows/go-ci.yml).
-
-## Product
-
-See [PRODUCT.md](PRODUCT.md) for users, hero workflow, capability boundaries, success criteria, and non-goals.
-
-## Architecture
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for logical topology, language ownership, trust boundaries, and storage responsibilities. Event path packages: `event/`, `erp/`, `relay/`, `platform/`, `api/`, `web/`. Identity session package: `identity/`. Correctness model: [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md), [COMMAND_MODEL.md](docs/architecture/COMMAND_MODEL.md), [CONTRACTS.md](CONTRACTS.md), [ADRs](docs/adrs/).
-
-## Security, intelligence, and ops evidence
-
-Planned security model: [THREAT_MODEL.md](docs/security/THREAT_MODEL.md), [AUTHORIZATION_MODEL.md](docs/security/AUTHORIZATION_MODEL.md), [PERMISSION_MATRIX.md](docs/security/PERMISSION_MATRIX.md), [OIDC_SESSION.md](docs/security/OIDC_SESSION.md), [QUERY_API_AUTHORIZATION.md](docs/security/QUERY_API_AUTHORIZATION.md), [PRIVILEGED_OPS_AUTHORIZATION.md](docs/security/PRIVILEGED_OPS_AUTHORIZATION.md), [AUDIT_AUTHORIZATION.md](docs/security/AUDIT_AUTHORIZATION.md). Planned intelligence eval: [docs/intelligence/](docs/intelligence/). Evidence protocols and fault matrix: [docs/evaluation/](docs/evaluation/), including the [fault campaign matrix](docs/evaluation/FAULT_CAMPAIGN_MATRIX.md).
-
-## Clean-room boundary
-
-**Ahoy is not a dependency** and is not a source of public artifacts. See [CLEAN_ROOM.md](CLEAN_ROOM.md) and [docs/checklists/CLEAN_ROOM_REVIEW.md](docs/checklists/CLEAN_ROOM_REVIEW.md).
+Operating model: Career → Workflow. Notion owns product context and roadmap.
+GitHub owns execution. This repository owns implemented technical truth.
 
 ## License
 

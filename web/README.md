@@ -79,5 +79,3 @@ cannot authorize). Privileged POSTs require `MX-004`, `MX-005`, or `MX-006`.
 - [OIDC_SESSION.md](../docs/security/OIDC_SESSION.md)
 - [QUERY_API_AUTHORIZATION.md](../docs/security/QUERY_API_AUTHORIZATION.md)
 - [PROJECTION_READ_API.md](../docs/architecture/PROJECTION_READ_API.md)
-- [EVENT_SPINE_COMPLETION_SUMMARY.md](../docs/reviews/EVENT_SPINE_COMPLETION_SUMMARY.md)
-- [IDENTITY_OPS_VISIBILITY.md](../docs/reviews/IDENTITY_OPS_VISIBILITY.md)

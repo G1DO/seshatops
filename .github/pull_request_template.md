@@ -1,42 +1,20 @@
 # Pull request
 
-## Linked issue
-
-Closes #123
+Closes #
 
 ## Summary
 
-<!-- State the user-visible or governance outcome in a few sentences. -->
+<!-- What changed and why. -->
 
-## Scope and explicit non-goals
-
-- Scope:
-- Non-goals:
-
-## Verification performed
+## Verification
 
 | Command or check | Actual outcome |
 | ---------------- | -------------- |
 |                  |                |
 
-## Checks not run
+Checks not run (and why):
 
-<!-- Name each skipped check and give the concrete reason. Do not claim it passed. -->
+## Notes
 
-## Evidence and claim status
-
-- Claim IDs affected:
-- Status changes:
-- Evidence artifacts or limitations:
-
-## Clean-room
-
-- [ ] Clean-room provenance reviewed; no secrets, private identifiers, or excluded Ahoy material were added.
-
-## Residual risks
-
-<!-- State known limitations, uncertainty, and unverified behavior. -->
-
-## Follow-up work
-
-<!-- Link future issues or write "None" with a reason. -->
+<!-- Residual risk, follow-up, or EVIDENCE.md claim changes — only if any. -->
+<!-- Clean-room: no secrets, private identifiers, or excluded Ahoy material. -->

@@ -1,7 +1,6 @@
 # Event-Spine Exit-Gate Experiment Report
 
-> Filled from [templates/EXPERIMENT_REPORT.md](templates/EXPERIMENT_REPORT.md) for
-> Issue #30. Results below are from an actual authorized campaign run.
+> Issue #30 Event Spine exit-gate experiment. Results below are from an actual authorized campaign run.
 
 ## Experiment identity
 
@@ -72,12 +71,11 @@ required scenarios without new architecture, and evidence supports promoting
 ## Preconditions
 
 - Docker available for Testcontainers.
-- Procedure in [EVENT_SPINE_EXIT_GATE_PROCEDURE.md](EVENT_SPINE_EXIT_GATE_PROCEDURE.md).
 - Candidate commit includes Issues #21–#29 merged stack.
 
 ## Method
 
-Execute the Issue #30 scenario map via existing automated tests (injection
+Execute the Issue #30 scenarios via existing automated tests (injection
 method = library/integration fault hooks and Testcontainers broker
 stop/start). Capture package exit codes. Perform category searches for Ahoy,
 secret-like strings, and unsupported exactly-once claims. Do not invent hosted
@@ -90,8 +88,7 @@ go test ./... -count=1 -timeout 25m
 cd web && npm test && npm run typecheck && npm run build
 ```
 
-Scenario-focused entry points are listed in
-[EVENT_SPINE_EXIT_GATE_PROCEDURE.md](EVENT_SPINE_EXIT_GATE_PROCEDURE.md).
+Named scenario tests are listed in the results table below.
 
 ## Safety and termination criteria
 
@@ -108,8 +105,6 @@ were targeted.
 | Web test log | `/tmp/m1-exit-gate-npm-test.log` | 15/15 Vitest passed |
 | Typecheck/build logs | `/tmp/m1-exit-gate-typecheck.log`, `/tmp/m1-exit-gate-build.log` | Passed |
 | Duplicate/rebuild traces | Test names in `platform/rebuild_test.go`, `platform/consume_test.go` | Contract §8 equality asserted in-process |
-| Procedure | [EVENT_SPINE_EXIT_GATE_PROCEDURE.md](EVENT_SPINE_EXIT_GATE_PROCEDURE.md) | N/A |
-| Review | [EVENT_SPINE_EXIT_GATE_CAMPAIGN.md](../reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN.md) | N/A |
 
 Committed raw machine logs are omitted to avoid noisy binary/testcontainer
 output; package names, commands, and exit outcomes are the reproducible
@@ -191,11 +186,10 @@ Documentation CI
 
 ## Reproduction instructions
 
-1. Check out the reviewed campaign commit (PR head after Issue #30 docs land).
+1. Check out the reviewed campaign commit.
 2. Ensure Docker is available.
-3. Follow [EVENT_SPINE_EXIT_GATE_PROCEDURE.md](EVENT_SPINE_EXIT_GATE_PROCEDURE.md).
-4. Run the full suite gate commands above.
-5. Compare outcomes to this report; attach hosted CI run IDs when present.
+3. Run the full suite gate commands above.
+4. Compare outcomes to this report; attach hosted CI run IDs when present.
 
 ## Decision
 
@@ -214,7 +208,7 @@ Documentation CI
 | --- | --- |
 | New claim status | `CLM-003`–`CLM-006` → **Observed** (test environment) |
 | Decision rationale | Named experiment, exact commands, package pass outcomes, and limitations recorded; distinct from exactly-once or production claims |
-| Evidence links | This report; [EVENT_SPINE_EXIT_GATE_CAMPAIGN.md](../reviews/EVENT_SPINE_EXIT_GATE_CAMPAIGN.md); [FAULT_CAMPAIGN_MATRIX.md](FAULT_CAMPAIGN_MATRIX.md); [EVIDENCE.md](../../EVIDENCE.md) |
+| Evidence links | This report; [EVIDENCE.md](../../EVIDENCE.md) |
 
 ## Superseded evidence
 
@@ -225,6 +219,5 @@ four claims only.
 ## Follow-up work
 
 - Maintainer review of claim promotion and clean-room record.
-- Identity+ owns operator quarantine UI, auth, and operational health claims
-  (`CLM-007`+).
+- Identity HTTP claims `CLM-007`–`CLM-010` are Observed in a later milestone; `CAP-011` remains Planned.
 - Traceability owns backup/restore and authorized recovery product claims.

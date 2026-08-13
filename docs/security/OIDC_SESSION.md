@@ -76,7 +76,6 @@ listener. The UI is not an enforcement point.
 ## Related documents
 
 - [ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md)
-- [IDENTITY_BOUNDARIES.md](IDENTITY_BOUNDARIES.md)
 - [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
 - [PERMISSION_MATRIX.md](PERMISSION_MATRIX.md)
 - [QUERY_API_AUTHORIZATION.md](QUERY_API_AUTHORIZATION.md)
