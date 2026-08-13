@@ -2,9 +2,10 @@
 
 **Status:** Implemented for Issue #49 library/test scope. This note records
 append-only privileged authorization-decision audit and `MX-007` read.
-It does not claim that audit protection is a production control, that
-`CAP-010`, `CAP-013`, `CLM-007`, `CLM-008`, or `CLM-010` are promoted, or
-that a SIEM/export platform exists.
+It does not claim that audit protection is a production control or that a
+SIEM/export platform exists. Issue #50 records the Identity & Operations
+exit-gate suite in
+[IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md).
 
 **Owns:** Go persistence and evaluation of:
 
@@ -14,10 +15,9 @@ that a SIEM/export platform exists.
   `ACT-AUDIT-READ`)
 
 **Does not own:** Inventory or ops-visibility read auditing (`MX-001` /
-`MX-002` / `MX-003`), the Identity & Operations exit-gate suite (Issue #50),
-SIEM/export, retention, cryptographic audit logs, backup/restore, a TypeScript
-audit UI, service-identity credentials, a policy-engine product, or any
-`EVIDENCE.md` claim promotion.
+`MX-002` / `MX-003`), SIEM/export, retention, cryptographic audit logs,
+backup/restore, a TypeScript audit UI, service-identity credentials, a
+policy-engine product, or the Issue #50 exit-gate campaign itself.
 
 ## Authentication is not authorization
 

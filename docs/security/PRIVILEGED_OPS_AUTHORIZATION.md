@@ -4,8 +4,9 @@
 tenant-scoped default-deny on quarantine release, replay, and rebuild
 controls. Durable privileged-decision audit is recorded in
 [AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md). It does not claim that
-privileged ops are a production control, or that `CAP-013` or `CLM-010`
-are promoted.
+privileged ops are a production control. Issue #50 records the Identity &
+Operations exit-gate suite in
+[IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md](../evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md).
 
 **Owns:** Go evaluation of the frozen permission matrix for:
 
@@ -17,10 +18,9 @@ are promoted.
   `ACT-REBUILD`)
 
 **Does not own:** Audit recording or `MX-007` read (Issue #49,
-[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md)), the
-Identity & Operations exit-gate suite (Issue #50), backup/restore, service
-identity credentials, a policy-engine product, or any `EVIDENCE.md` claim
-promotion.
+[AUDIT_AUTHORIZATION.md](AUDIT_AUTHORIZATION.md)), backup/restore, service
+identity credentials, a policy-engine product, or the Issue #50 exit-gate
+campaign itself.
 
 ## Authentication is not authorization
 

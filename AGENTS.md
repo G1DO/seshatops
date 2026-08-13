@@ -8,7 +8,7 @@ Behavioral and project guidance for the SeshatOps repository.
 
 SeshatOps is a clean-room, multi-tenant operations-intelligence platform for the fictional Northstar Foods scenario. It consumes ERP events, reconstructs replayable operational state, produces evidence-backed intelligence, and executes only authorized, human-approved actions.
 
-Project Constitution documentation is complete. Event Spine is implemented (`event/`, `northstar/`, `erp/`, `relay/`, `platform/`, `api/`, `web/`) with test-environment Observed evidence for `CLM-003`–`CLM-006`. Identity & Operations is the next active capability sequence on GitHub.
+Project Constitution documentation is complete. Event Spine is implemented (`event/`, `northstar/`, `erp/`, `relay/`, `platform/`, `api/`, `web/`) with test-environment Observed evidence for `CLM-003`–`CLM-006`. Identity & Operations is implemented (`identity/` plus authorized `api/`/`web/` surfaces) with test-environment Observed evidence for `CLM-007`–`CLM-010`. Traceability & Recovery is the next Planned capability sequence.
 
 No deployment, model, or production environment exists here yet. Do not invent evidence. Planned behavior must not be described as observed, reproduced, secure, reliable, performant, or production-ready without the required artifacts.
 
@@ -83,7 +83,7 @@ Future implementation must preserve these boundaries:
 | Rust | Measurement-gated performance or specialized components only after evidence justifies it | Speculative Event Spine scaffolding |
 | C | Excluded unless a later reviewed capability sequence explicitly changes the boundary | Any Event Spine implementation |
 
-The root Go module is `github.com/G1DO/seshatops` (Go `1.25.0`) with Event Spine packages `event`, `northstar`, `erp`, `relay`, `platform`, and `api`, plus the TypeScript `web/` operations view. Later capability sequences may extend platform packages without inventing a second module or a general ERP schema.
+The root Go module is `github.com/G1DO/seshatops` (Go `1.25.0`) with Event Spine packages `event`, `northstar`, `erp`, `relay`, `platform`, and `api`, identity package `identity`, plus the TypeScript `web/` operations view. Later capability sequences may extend platform packages without inventing a second module or a general ERP schema.
 
 ## 8. Evidence and claim governance
 
