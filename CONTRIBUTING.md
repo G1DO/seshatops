@@ -1,7 +1,7 @@
 # Contributing
 
-Notion owns product context. GitHub owns execution. This repository owns
-implemented technical truth.
+This repository owns implemented technical truth. GitHub owns execution
+(issues, PRs, CI).
 
 ## Issues
 

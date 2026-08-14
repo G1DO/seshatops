@@ -5,7 +5,6 @@ implemented Event Spine. Why: [ADR-0001](docs/adrs/0001-transactional-outbox-and
 and [ADR-0003](docs/adrs/0003-event-envelope-and-schema-compatibility.md).
 Executable helpers: `event`. Fixture: `northstar`. HTTP/SSE:
 [openapi-projection.yaml](docs/architecture/openapi-projection.yaml).
-This is not production evidence.
 
 ## 1. Event Spine vertical slice
 
@@ -128,7 +127,7 @@ an ordinary duplicate.
 
 ## 4. PostgreSQL ownership and transaction boundaries
 
-Event Spine uses one PostgreSQL database with separate logical schemas and credentials:
+Event Spine uses one PostgreSQL database with separate logical schemas:
 
 | Schema | Owns | Must not own |
 | --- | --- | --- |
@@ -276,11 +275,6 @@ The checksum definition itself remains this section.
 
 ## 9. Minimum local toolchain
 
-The first runtime issue must pin these toolchain choices to immutable artifacts
-and record the resolved artifact digests. Version strings alone are not
-immutable image pins. In particular, PostgreSQL and Redpanda image tags must be
-resolved to immutable digests before runtime implementation begins.
-
 - Go `1.25.0`
 - Node.js `24.14.0`
 - npm `11.9.0`
@@ -295,14 +289,3 @@ resolved to immutable digests before runtime implementation begins.
 Reference release records: [PostgreSQL 16.14](https://www.postgresql.org/docs/release/16.14/),
 [Redpanda 25.2 upgrade documentation](https://docs.redpanda.com/streaming/25.2/upgrade/rolling-upgrade/),
 and [TypeScript releases](https://github.com/microsoft/TypeScript/releases).
-
-Local PostgreSQL and Redpanda use one development/test instance each. No Python,
-schema registry, extra database, Redis, CDC system, Kubernetes, or generalized
-event-bus package is introduced by this contract.
-
-## 10. Explicit non-claims
-
-This contract does not claim exactly-once delivery, exactly-once processing,
-runtime correctness, performance, availability, or production readiness.
-Identity HTTP is documented in
-[AUTHORIZATION.md](docs/security/AUTHORIZATION.md), not here.

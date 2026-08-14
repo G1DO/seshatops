@@ -2,11 +2,13 @@
 
 - **Status:** Accepted; Event Spine implements this for the first inventory family
 - **Date:** 2026-08-06
-- **Scope:** Event publication, consumption, quarantine, and replay correctness
 
 ## Context
 
-SeshatOps must preserve accepted business state during broker outages, tolerate duplicate delivery, detect unsafe aggregate-version gaps, and support replayable derived state. PostgreSQL is authoritative transactional state. Redpanda is asynchronous transport and replay input. Delivery is at least once. Exactly-once delivery is not claimed.
+SeshatOps must preserve accepted business state during broker outages, tolerate
+duplicate delivery, detect unsafe aggregate-version gaps, and support replayable
+derived state. PostgreSQL is authoritative transactional state. Redpanda is
+asynchronous transport and replay input.
 
 ## Decision
 
@@ -18,102 +20,37 @@ SeshatOps must preserve accepted business state during broker outages, tolerate 
 6. Missing aggregate versions, unsupported schemas, malformed envelopes, impossible transitions, and repeated processing failures are quarantined or routed for controlled reconciliation. Later versions are not silently applied across a required gap.
 7. Replay is deterministic for replay-safe projections and must suppress, simulate, or separately reconcile irreversible external effects.
 8. PostgreSQL remains transactional authority. Redpanda remains asynchronous transport and replay input; SeshatOps is not silently redefined as event sourced.
-9. The platform makes no unsupported claim of exactly-once delivery or exactly-once business effects.
-
-| ID | Invariant |
-| --- | --- |
-| EM-01 | An event records an accepted state change; it is not a substitute for committing that change. |
-| EM-02 | The authoritative change and its outbox intent are atomic; an accepted transaction cannot disappear during broker outage. |
-| EM-03 | Retries and re-publication retain the same logical event identity and content. |
-| EM-04 | Duplicate delivery cannot duplicate a required durable business effect. |
-| EM-05 | Aggregate versions are checked per aggregate; missing versions are not silently skipped. |
-| EM-06 | Same event identity with conflicting content is an integrity violation. |
-| EM-07 | Acknowledgement follows the required durable processing decision. |
-| EM-08 | Unsafe, poison, incompatible, and cross-tenant events are quarantined or reconciled without unsafe application. Unrelated aggregates are not blocked by default. |
-| EM-09 | Replay is deterministic and does not repeat irreversible external effects. |
-| EM-10 | Exactly-once delivery or business effects are not claimed. |
+9. Exactly-once delivery and exactly-once business effects are not claimed.
 
 Wire, checksum, and dispositions: [CONTRACTS.md](../../CONTRACTS.md).
-
-## Event Spine amendment
-
-For the first Event Spine event family, the source-owned relay publishes to the
-`seshatops.m1.events` topic using the canonical aggregate key
-`tenant_id/aggregate_type/aggregate_id`. It publishes the exact immutable JSON
-bytes recorded in the `erp` outbox and marks the row `published` only after a
-broker acknowledgement.
-
-Outbox states are `pending`, `publishing`, `published`, and `quarantined`.
-Transient publication failures use a 1-second exponential backoff capped at 60
-seconds. A crash after broker acknowledgement and before the PostgreSQL update
-may publish a duplicate with the same event identity and content.
-An expired `publishing` lease is reclaimable for retry; a live lease
-is not claimed by another relay worker.
-
-The Go consumer uses manual offset commits and acknowledges only after the
-required `platform` inbox, projection, or quarantine transaction commits.
-Deterministic poison, schema, tenant, content-conflict, and version-gap cases
-become durable quarantine decisions rather than silent skips. These choices do
-not change the at-least-once delivery model or introduce an exactly-once claim.
-
-## Consequences
-
-### Benefits
-
-- Accepted source transactions remain durable when the broker is down.
-- Duplicate publication and delivery become expected, testable behaviors rather than data-loss assumptions.
-- Consumers can protect local business effects with stable event identity.
-- Unsafe events become visible investigation and reconciliation cases.
-- Projection rebuilds can be deterministic without treating the transport as the system of record.
-- The consistency claim stays honest and evidence-compatible.
-
-### Costs and trade-offs
-
-- Outbox records and quarantine cases require durable storage, monitoring, and eventual operational decisions.
-- Consumers must implement idempotent behavior and aggregate-version checks.
-- Publication lag can make projections, notifications, and intelligence inputs stale.
-- Replay requires versioned handler logic and identifiable reference inputs.
-- External side effects need separate suppression or reconciliation paths during replay.
-- Backpressure or temporary rejection may be necessary when safe durable capacity is exhausted.
 
 ## Alternatives considered
 
 ### Direct broker publication in the source transaction
 
-Rejected as the primary correctness model because a broker or network failure could leave accepted business state without durable publication intent. A broker acknowledgement is not a substitute for the authoritative transaction.
+Rejected because a broker or network failure could leave accepted business
+state without durable publication intent.
 
 ### Independent database and broker writes without an outbox
 
-Rejected because a process crash between the two writes creates an untracked publication gap that cannot be resolved reliably from the accepted state alone.
+Rejected because a crash between the two writes creates an untracked
+publication gap.
 
 ### Broker as the transactional system of record
 
-Rejected. Redpanda is transport and replay input; PostgreSQL owns authoritative transactional state and governance records.
+Rejected. Redpanda is transport and replay input.
 
 ### Broker-provided exactly-once features
 
-Rejected as an unsupported business guarantee. Transport-level features cannot by themselves prove exactly-once effects across consumers, databases, external systems, retries, and human workflows.
+Rejected as a business guarantee. Transport-level features cannot prove
+exactly-once effects across consumers, databases, retries, and external systems.
 
 ### Event sourcing for all business state
 
-Rejected for the Event Spine. Events support replayable projections and integrations, but authoritative business state is not silently reconstructed solely from the event stream.
+Rejected. Events support replayable projections; authoritative business state
+is not reconstructed solely from the stream.
 
 ### Dropping events during outage or poison handling
 
-Rejected. Controlled backpressure, quarantine, and reconciliation are preferable to silent loss or silent version skipping.
-
-## Risks
-
-- Outbox growth or broker lag can create stale projections and operational pressure.
-- Quarantine can become a data graveyard without ownership and reconciliation procedures.
-- Incorrect deduplication can suppress legitimate events or apply duplicates.
-- Handler changes or mutable reference data can undermine replay determinism.
-- An external side effect may be uncertain even when local event processing succeeds.
-- Event contract evolution can create unsupported versions if later compatibility governance is weak.
-
-These risks require later operational evidence and implementation-specific controls; this ADR does not invent thresholds or algorithms.
-
-## Deferred implementation choices
-
-Retention, partition sizing, process layout, alerting, credentials, and later
-event families remain open.
+Rejected. Quarantine and reconciliation are preferable to silent loss or silent
+version skipping.

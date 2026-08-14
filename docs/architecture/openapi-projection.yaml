@@ -69,11 +69,14 @@ paths:
         - $ref: "#/components/parameters/TenantID"
       responses:
         "200":
-          description: text/event-stream of inventory_projection.updated events
+          description: >
+            text/event-stream. Event name inventory_projection.updated;
+            data is ProjectionUpdated JSON. SSE is at-least-once; REST is
+            the reconnect/catch-up path.
           content:
             text/event-stream:
               schema:
-                type: string
+                $ref: "#/components/schemas/ProjectionUpdated"
         "401":
           description: Missing, expired, forged, or revoked Go-owned session
           content:
@@ -190,6 +193,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Control or audit persist failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
   /v1/tenants/{tenant_id}/ops/replay:
     post:
       operationId: postReplay
@@ -220,6 +229,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No same-tenant replay target
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Control or audit persist failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
   /v1/tenants/{tenant_id}/ops/rebuild:
     post:
       operationId: postRebuild
@@ -241,6 +262,12 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "403":
           description: Authenticated caller is not authorized for rebuild
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Control or audit persist failed
           content:
             application/json:
               schema:
@@ -393,7 +420,13 @@ components:
           type: object
           required:
             - applied
+            - duplicate_noop
+            - quarantined_conflict
             - quarantined_gap
+            - quarantined_stale
+            - quarantined_invalid
+            - quarantined_mismatch
+            - quarantined_transition
             - failures_retrying
             - failures_quarantined
             - oldest_gap
@@ -403,7 +436,19 @@ components:
           properties:
             applied:
               type: integer
+            duplicate_noop:
+              type: integer
+            quarantined_conflict:
+              type: integer
             quarantined_gap:
+              type: integer
+            quarantined_stale:
+              type: integer
+            quarantined_invalid:
+              type: integer
+            quarantined_mismatch:
+              type: integer
+            quarantined_transition:
               type: integer
             failures_retrying:
               type: integer

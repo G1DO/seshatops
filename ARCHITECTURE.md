@@ -1,12 +1,9 @@
 # Architecture
 
-Implemented topology. Event Spine lives in `event/`, `northstar/`, `erp/`,
-`relay/`, `platform/`, `api/`, `web/`. Identity lives in `identity/` plus
-authorized HTTP. Not a deployment diagram.
-
-Public demo uses **Northstar Foods** and a synthetic ERP. **Ahoy is excluded**
-([CLEAN_ROOM.md](CLEAN_ROOM.md)). Authorization is default-deny; the UI is not
-a security boundary.
+Event Spine lives in `event/`, `northstar/`, `erp/`, `relay/`, `platform/`,
+`api/`, `web/`. Identity lives in `identity/` plus authorized HTTP. Public
+demo uses **Northstar Foods**. **Ahoy is excluded**
+([CLEAN_ROOM.md](CLEAN_ROOM.md)).
 
 ```mermaid
 flowchart TB
@@ -40,9 +37,9 @@ flowchart TB
 | `erp/` | Go | Order accept, inventory, immutable outbox | SeshatOps policy |
 | `event/`, `northstar/` | Go | JSON/JCS envelope, Northstar fixture | Transport or HTTP |
 
-Python, object storage, gRPC, Next.js, approvals, and ERP command dispatch
-beyond order accept are not present. TypeScript must not own authorization.
-Go module: `github.com/G1DO/seshatops`.
+Go module: `github.com/G1DO/seshatops`. Privileged operator POSTs (quarantine
+release, replay, rebuild) are in [AUTHORIZATION.md](docs/security/AUTHORIZATION.md).
+There is no Python, object storage, or ERP command API beyond `erp.AcceptOrder`.
 
 | Store | Responsibility |
 | --- | --- |
@@ -57,12 +54,7 @@ OIDC sessions are process-local (`identity.Store`).
 | ERP → PostgreSQL | Source and outbox in one transaction |
 | Relay → Redpanda | Exact stored outbox bytes after commit |
 | Browser → PostgreSQL or Redpanda | Prohibited |
-| Exactly-once delivery | Not claimed |
 
-An accepted source transaction survives broker outage. Duplicate delivery
-cannot duplicate the inventory effect. Poison and version-gap events do not
-halt unrelated aggregates. Missing identity context fails closed.
-
-Wire and pins: [CONTRACTS.md](CONTRACTS.md). HTTP:
-[openapi-projection.yaml](docs/architecture/openapi-projection.yaml). Authz:
-[AUTHORIZATION.md](docs/security/AUTHORIZATION.md).
+Wire and pins: [CONTRACTS.md](CONTRACTS.md). `/v1` HTTP/SSE:
+[openapi-projection.yaml](docs/architecture/openapi-projection.yaml). `/auth`
+and allow-list: [AUTHORIZATION.md](docs/security/AUTHORIZATION.md).

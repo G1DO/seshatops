@@ -4,8 +4,6 @@ SeshatOps must stay understandable, buildable, and demonstrable without any
 private production system. **Ahoy is excluded** — never a source, schema,
 dataset, screenshot, or runtime dependency.
 
-Checklist: [docs/checklists/CLEAN_ROOM_REVIEW.md](docs/checklists/CLEAN_ROOM_REVIEW.md).
-
 ## Forbidden
 
 Do not inspect, copy, paraphrase, or commit:
@@ -54,4 +52,4 @@ Secret placeholders only (`REPLACE_ME`), never real credentials.
 
 Stop distribution. Remove it from the working tree and, if committed, from
 history with explicit maintainer approval. Redact hosted artifacts. Rotate
-exposed credentials. Re-run the checklist before continuing.
+exposed credentials. Re-check this policy before continuing.

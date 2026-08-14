@@ -1,26 +1,12 @@
 # AGENTS.md
 
 Durable constraints for AI coding agents. Humans: [CONTRIBUTING.md](CONTRIBUTING.md).
-Do not copy Notion roadmap or Career Workflow into this file.
-
-## Source of truth
-
-| Source | Owns |
-| --- | --- |
-| Notion | Product context, roadmap, milestone context |
-| GitHub | Execution (issues, PRs, CI) |
-| Repository docs and ADRs | How the implemented system works |
-| [EVIDENCE.md](EVIDENCE.md) | Claim status |
-
-When sources conflict, inspect GitHub and the repository. Record the
-contradiction. Never hide it with a silent rewrite.
 
 ## Architecture
 
 - One Go module: `github.com/G1DO/seshatops`.
 - TypeScript owns UI only. Go owns transactional state, authorization, and
-  durable writes. Python, if added later, is advisory and must not write,
-  authorize, or execute commands. Rust is measurement-gated. C is excluded.
+  durable writes.
 - PostgreSQL is transactional authority. Redpanda is at-least-once transport.
   Do not claim exactly-once delivery.
 - Browser talks only to Go public APIs. The UI cannot authorize.
@@ -71,9 +57,7 @@ Docker is required for Testcontainers tests. CI Go timeout is `15m`. Pins:
 
 Report commands actually run and their outcomes. Name checks not run and why.
 Do not claim a hosted GitHub workflow passed until that run exists. If a
-checkpoint fails, stop. Do not invent evidence. `Planned` is intended, not
-built. `Implemented` means code exists. `Observed` requires a named
-environment and artifact in [EVIDENCE.md](EVIDENCE.md).
+checkpoint fails, stop. Do not invent evidence.
 
 ## Change discipline
 
@@ -83,9 +67,3 @@ environment and artifact in [EVIDENCE.md](EVIDENCE.md).
 - Do not commit, push, merge, open a pull request, or change GitHub/Notion
   settings unless asked.
 - Do not commit secrets.
-
-## Done
-
-Acceptance criteria, architecture/invariants, named verification, affected
-docs in the same change, claims within [EVIDENCE.md](EVIDENCE.md). GitHub
-loop: [CONTRIBUTING.md](CONTRIBUTING.md).

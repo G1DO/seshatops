@@ -6,8 +6,10 @@ A session is identity only. The UI cannot authorize. Path `{tenant_id}` is an
 assertion to validate, not authority. Client headers, query, body, and IdP
 claims are not authorization.
 
-Test-environment evidence: [EVIDENCE.md](../../EVIDENCE.md) `CLM-007`–`CLM-010`.
-Not production isolation. Service-identity credentials are not implemented.
+Test-environment evidence: [EVIDENCE.md](../../EVIDENCE.md). Not production
+isolation. Service-identity credentials are not implemented. Residual risk:
+library/test OIDC (not production revocation), process-local sessions and
+assignments, no pentest.
 
 ## Invariants
 
@@ -31,10 +33,14 @@ access tokens.
 | `GET` | `/auth/session` | Presentation fields for the UI, or `401` |
 
 Go validates issuer, audience, signature, subject, nonce, and expiry before
-`identity.Store` creates a session. Cookie `seshatops_session` is httpOnly,
-SameSite=Lax, opaque. Sessions are process-local memory — not a PostgreSQL
-table. Missing, expired, forged, or revoked cookies return
-`401 {"error":"unauthenticated"}` before any `/v1` body or SSE stream.
+`identity.Store` creates a session. Constructor fields (`identity.Config` in
+`identity/service.go`): `Issuer`, `ClientID`, `RedirectURL` required;
+`Audience` defaults to `ClientID`; `ClientSecret` optional; `SessionTTL`;
+`CookieSecure` (false for local HTTP); `CookieName` (default
+`seshatops_session`). Cookie is httpOnly, SameSite=Lax, opaque. Sessions are
+process-local memory — not a PostgreSQL table. Missing, expired, forged, or
+revoked cookies return `401 {"error":"unauthenticated"}` before any `/v1` body
+or SSE stream.
 
 ## Allow-list
 
@@ -82,9 +88,9 @@ Assignments are process-local memory, not a PostgreSQL policy schema.
 
 After a valid session, Go evaluates `Allow` for the path tenant. Unmatched
 membership, unassigned or service-like principals, nil policy, and
-cross-tenant paths return `403 {"error":"forbidden"}` with no body and without
-starting SSE. Open inventory SSE re-checks session and `MX-001` on heartbeat
-and before each event.
+cross-tenant paths return `403 {"error":"forbidden"}` with no projection, ops,
+or audit payload and without starting SSE. Open inventory SSE re-checks
+session and `MX-001` on heartbeat and before each event.
 
 Routes and SSE reconnect/catch-up: [openapi-projection.yaml](../architecture/openapi-projection.yaml).
 

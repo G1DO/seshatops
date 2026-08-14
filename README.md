@@ -1,12 +1,12 @@
 # SeshatOps
 
-Clean-room operations intelligence for the fictional **Northstar Foods**
-scenario. A synthetic ERP order flows through a transactional outbox and
-Redpanda into a tenant-scoped inventory projection. Operators see that
-projection over REST/SSE after a Go-owned OIDC session. **Ahoy is excluded.**
+A synthetic ERP order for fictional **Northstar Foods** flows through a
+transactional outbox and Redpanda into a tenant-scoped inventory projection.
+Operators see that projection over REST/SSE after a Go-owned OIDC session.
+**Ahoy is excluded** ([CLEAN_ROOM.md](CLEAN_ROOM.md)).
 
 Libraries plus tests. There is no deployment binary or production environment.
-Public claims may not exceed [EVIDENCE.md](EVIDENCE.md).
+What the test campaigns measured: [EVIDENCE.md](EVIDENCE.md).
 
 ```text
 Browser (Vite/React web/)
@@ -43,7 +43,6 @@ UI: [web/README.md](web/README.md). How we work: [CONTRIBUTING.md](CONTRIBUTING.
 - [docs/security/AUTHORIZATION.md](docs/security/AUTHORIZATION.md) — default-deny HTTP
 - [docs/adrs/](docs/adrs/) — why those decisions
 - [CLEAN_ROOM.md](CLEAN_ROOM.md) — Ahoy exclusion
-- [AGENTS.md](AGENTS.md) — coding-agent contract
 
 ## License
 
