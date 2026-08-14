@@ -23,19 +23,11 @@
 | Clock and time-zone assumptions | UTC wall clock on the operator host |
 | Experiment duration | Approximately 7 minutes wall time for frozen filters + full Go suite + web checks |
 
-## Objective and hypothesis
-
-Decide whether the implemented Identity & Operations surfaces from Issues
-43 through 49 satisfy the Issue #50 exit gate under a declared **Test environment**:
-forged/stale identity fail-closed, cross-tenant HTTP leakage fail-closed,
-privilege escalation fail-closed, authorized same-tenant ops visibility, and
-authorized same-tenant quarantine/replay/rebuild with append-only privileged
-audit.
-
-Hypothesis: existing package-level Go Testcontainers, mock-OIDC, and Vitest
-suites cover the required scenarios without new architecture, and evidence
-supports promoting `CLM-007`–`CLM-010` to **Observed** scoped to those
-implemented HTTP surfaces.
+Measured: forged/stale identity fail-closed, cross-tenant HTTP leakage
+fail-closed, privilege escalation fail-closed, authorized same-tenant ops
+visibility, and authorized same-tenant quarantine/replay/rebuild with
+append-only privileged audit. Scoped to implemented HTTP in this Test
+environment.
 
 ## Environment class and topology
 
@@ -63,7 +55,7 @@ implemented HTTP surfaces.
 | Field | Value/status |
 | --- | --- |
 | Dataset, fixture, corpus, or workload identity | Deterministic Northstar Foods Event Spine order-line fixture plus Identity demo tenants |
-| Provenance and clean-room independence | Synthetic; see `docs/events/SYNTHETIC_DATA_PROVENANCE.md` and [PERMISSION_MATRIX.md](../security/PERMISSION_MATRIX.md) |
+| Provenance and clean-room independence | Synthetic Northstar fixture and demo allow-list; [CLEAN_ROOM.md](../../CLEAN_ROOM.md), [AUTHORIZATION.md](../security/AUTHORIZATION.md) |
 | Version or snapshot | Seed `northstar-m1-order-line-v1`; matrix Issue #44 |
 | Generation or preparation method | `northstar.Generate` / package test helpers / in-memory platform assignments |
 | Tenant distribution and data boundaries | `TENANT-NS-001` allow-list grants; `TENANT-NS-002` has no `MX-*` rows |
@@ -122,7 +114,7 @@ No production systems were targeted.
 | Go suite log | Operator host (not committed) | All packages `ok` |
 | Web test log | Operator host (not committed) | 8 files / 36 tests passed |
 | Typecheck/build logs | Operator host (not committed) | Passed |
-| Audit timeline citation | [AUDIT_AUTHORIZATION.md](../security/AUDIT_AUTHORIZATION.md) | Sample timeline from Issue #49 tests |
+| Audit timeline citation | [AUTHORIZATION.md](../security/AUTHORIZATION.md) | Sample timeline from library tests |
 
 Committed raw machine logs are omitted to avoid noisy Testcontainers output;
 package names, commands, and exit outcomes are the reproducible references.
@@ -232,10 +224,9 @@ and quarantine-recovery failure campaigns remain Planned / Not executed.
 - `TestSSEStopsAfterSessionRevoked` uses a short sleep plus a two-second close
   window; it is not a load/timing SLO.
 - Isolation is **not** claimed for retrieval, citations, approvals, commands,
-  exports, caches, indexes, or backup/restore. Those constitution-era
-  `CLM-007` categories remain Not applicable because the surfaces do not exist.
-- `CAP-011` service-identity credential runtime is not implemented; tests only
-  deny unassigned/service principals on user paths.
+  exports, caches, indexes, or backup/restore; those surfaces do not exist.
+- Service-identity credentials are not implemented; tests only deny
+  unassigned/service principals on user paths.
 - Assignments are process-local memory, not a durable policy schema.
 - Claims do **not** establish production authentication, pentest coverage, SLO,
   or Traceability restore.
@@ -262,7 +253,7 @@ and quarantine-recovery failure campaigns remain Planned / Not executed.
 | Field | Value/status |
 | --- | --- |
 | New claim status | `CLM-007`–`CLM-010` → **Observed** (test environment) |
-| Decision rationale | Named experiment, exact commands, package pass outcomes, and limitations recorded; constitution-era later surfaces remain untested rather than silently in-scope |
+| Decision rationale | Named experiment, exact commands, package pass outcomes, and limitations recorded; unimplemented surfaces remain out of scope |
 | Evidence links | This report; [EVIDENCE.md](../../EVIDENCE.md) |
 
 ## Superseded evidence
@@ -270,11 +261,3 @@ and quarantine-recovery failure campaigns remain Planned / Not executed.
 Prior Issue #45–#49 review notes that left `CLM-007`–`CLM-010` Planned are
 historical support notes; this experiment is the promotion evidence for those
 four claims only, scoped to Identity & Operations HTTP surfaces.
-
-## Follow-up work
-
-- Maintainer review of claim promotion and clean-room record.
-- Traceability owns backup/restore and authorized recovery product claims
-  (ADR-Q-005). `CAP-011` remains Planned.
-- Retrieval, citations, approvals, commands, and exports remain later
-  capability-sequence isolation work.

@@ -1,14 +1,12 @@
 # ADR-0001: Transactional Outbox and At-Least-Once Delivery
 
-- **Status:** Accepted design principle with accepted Event Spine amendment; source/outbox persistence implemented in Issue #23; source-owned relay publication implemented for Event Spine library/integration scope in Issue #24; projection consumer and bounded failure/restart safety implemented in Issues #25–#26
+- **Status:** Accepted; Event Spine implements this for the first inventory family
 - **Date:** 2026-08-06
-- **Scope:** Issue #4 event publication, consumption, quarantine, and replay correctness
+- **Scope:** Event publication, consumption, quarantine, and replay correctness
 
 ## Context
 
-SeshatOps must preserve accepted business state during broker outages, tolerate duplicate delivery, detect unsafe aggregate-version gaps, and support replayable derived state. The repository architecture establishes PostgreSQL as authoritative transactional state and Redpanda as asynchronous transport and replay input. The product constitution requires at-least-once delivery with idempotent business effects and explicitly rejects exactly-once delivery marketing.
-
-The system must also remain a clean-room public platform. This ADR therefore records principles without introducing a broker configuration, event schema, database table, topic, process layout, or dependency choice.
+SeshatOps must preserve accepted business state during broker outages, tolerate duplicate delivery, detect unsafe aggregate-version gaps, and support replayable derived state. PostgreSQL is authoritative transactional state. Redpanda is asynchronous transport and replay input. Delivery is at least once. Exactly-once delivery is not claimed.
 
 ## Decision
 
@@ -22,10 +20,22 @@ The system must also remain a clean-room public platform. This ADR therefore rec
 8. PostgreSQL remains transactional authority. Redpanda remains asynchronous transport and replay input; SeshatOps is not silently redefined as event sourced.
 9. The platform makes no unsupported claim of exactly-once delivery or exactly-once business effects.
 
-The full conceptual contract is in [EVENT_MODEL.md](../architecture/EVENT_MODEL.md).
-The concrete Event Spine contract is in [CONTRACTS.md](../../CONTRACTS.md).
+| ID | Invariant |
+| --- | --- |
+| EM-01 | An event records an accepted state change; it is not a substitute for committing that change. |
+| EM-02 | The authoritative change and its outbox intent are atomic; an accepted transaction cannot disappear during broker outage. |
+| EM-03 | Retries and re-publication retain the same logical event identity and content. |
+| EM-04 | Duplicate delivery cannot duplicate a required durable business effect. |
+| EM-05 | Aggregate versions are checked per aggregate; missing versions are not silently skipped. |
+| EM-06 | Same event identity with conflicting content is an integrity violation. |
+| EM-07 | Acknowledgement follows the required durable processing decision. |
+| EM-08 | Unsafe, poison, incompatible, and cross-tenant events are quarantined or reconciled without unsafe application. Unrelated aggregates are not blocked by default. |
+| EM-09 | Replay is deterministic and does not repeat irreversible external effects. |
+| EM-10 | Exactly-once delivery or business effects are not claimed. |
 
-## Event Spine concrete amendment from ADR-Q-002
+Wire, checksum, and dispositions: [CONTRACTS.md](../../CONTRACTS.md).
+
+## Event Spine amendment
 
 For the first Event Spine event family, the source-owned relay publishes to the
 `seshatops.m1.events` topic using the canonical aggregate key
@@ -86,7 +96,7 @@ Rejected as an unsupported business guarantee. Transport-level features cannot b
 
 ### Event sourcing for all business state
 
-Rejected for Issue #4. Events support replayable projections and integrations, but authoritative business state is not silently reconstructed solely from the event stream.
+Rejected for the Event Spine. Events support replayable projections and integrations, but authoritative business state is not silently reconstructed solely from the event stream.
 
 ### Dropping events during outage or poison handling
 
@@ -105,8 +115,5 @@ These risks require later operational evidence and implementation-specific contr
 
 ## Deferred implementation choices
 
-Retention and archival, partition sizing, publisher/consumer process layout,
-alerting, credentials, libraries, deployment topology, and later event families
-remain open. Issue #7 owns reliability evidence; completed Issue #9 established
-repository workflow and documentation CI; Event Spine and later capability sequences own the
-corresponding runtime choices.
+Retention, partition sizing, process layout, alerting, credentials, and later
+event families remain open.

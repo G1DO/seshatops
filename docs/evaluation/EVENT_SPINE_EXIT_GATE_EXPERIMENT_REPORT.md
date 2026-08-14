@@ -23,18 +23,11 @@
 | Clock and time-zone assumptions | UTC wall clock on the operator host |
 | Experiment duration | Approximately 3 minutes wall time for Go suite + web checks |
 
-## Objective and hypothesis
-
-Decide whether the implemented Event Spine vertical slice satisfies the Issue #30 exit
-gate under a declared **Test environment**: synthetic Northstar order → outbox →
-Redpanda → consumer → projection → REST/SSE → TypeScript view, including
-rollback, broker outage, ambiguous publish, duplicates, both consumer crash
-windows, poison/unsupported/gap handling, deterministic rebuild checksum
-equality, and UI reconnect convergence.
-
-Hypothesis: existing package-level Go Testcontainers and Vitest suites cover the
-required scenarios without new architecture, and evidence supports promoting
-`CLM-003`–`CLM-006` to **Observed** scoped to this environment.
+Measured: synthetic Northstar order → outbox → Redpanda → consumer →
+projection → REST/SSE → TypeScript view, including rollback, broker outage,
+ambiguous publish, duplicates, both consumer crash windows,
+poison/unsupported/gap handling, deterministic rebuild checksum equality, and
+UI reconnect convergence. Scoped to this Test environment.
 
 ## Environment class and topology
 
@@ -62,7 +55,7 @@ required scenarios without new architecture, and evidence supports promoting
 | Field | Value/status |
 | --- | --- |
 | Dataset, fixture, corpus, or workload identity | Deterministic Northstar Foods Event Spine order-line fixture |
-| Provenance and clean-room independence | Synthetic; see `docs/events/SYNTHETIC_DATA_PROVENANCE.md` |
+| Provenance and clean-room independence | Synthetic Northstar fixture; [CLEAN_ROOM.md](../../CLEAN_ROOM.md) |
 | Version or snapshot | Seed `northstar-m1-order-line-v1` |
 | Generation or preparation method | `northstar.Generate` / package test helpers |
 | Tenant distribution and data boundaries | Single fictional tenant used by Event Spine fixtures |
@@ -181,8 +174,7 @@ Documentation CI
 - Operator Go toolchain (`1.26.2`) differs from CI Go `1.25.0`.
 - Claims do **not** establish exactly-once delivery, SLO, capacity, or
   multi-tenant authorization (Identity).
-- `CLM-006` is Event Spine rebuild proof only; Traceability owns authorized recovery/restore
-  product scope (ADR-Q-005).
+- `CLM-006` is Event Spine rebuild proof only, not backup/restore.
 
 ## Reproduction instructions
 
@@ -215,9 +207,3 @@ Documentation CI
 Prior Issue #23–#29 review notes that left `CLM-003`–`CLM-006` Planned are
 historical support notes; this experiment is the promotion evidence for those
 four claims only.
-
-## Follow-up work
-
-- Maintainer review of claim promotion and clean-room record.
-- Identity HTTP claims `CLM-007`–`CLM-010` are Observed in a later milestone; `CAP-011` remains Planned.
-- Traceability owns backup/restore and authorized recovery product claims.

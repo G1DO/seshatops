@@ -1,12 +1,12 @@
 # ADR-0004: Event Spine PostgreSQL Inbox and Projection Consistency
 
-- **Status:** Accepted Event Spine decision; source/outbox persistence implemented in Issue #23; inbox/projection consumer implemented in Issue #25; bounded failure/backlog inspection and poison escalation in Issue #26
+- **Status:** Accepted; Event Spine implements this for inbox and inventory projection
 - **Date:** 2026-08-07
-- **Scope:** Issue #21 source/outbox ownership, inbox identity, projection transactions, gaps, and failure records
+- **Scope:** Source/outbox ownership, inbox identity, projection transactions, gaps, and failure records
 
 ## Context
 
-Constitution requires PostgreSQL authority, atomic source/outbox recording, at-least-once
+[ADR-0001](0001-transactional-outbox-and-at-least-once-delivery.md) requires PostgreSQL authority, atomic source/outbox recording, at-least-once
 delivery, stable identity, transactional deduplication, per-aggregate version
 checks, quarantine, and deterministic replay. Event Spine needs concrete persistence
 boundaries without introducing another database or implying a distributed
@@ -68,7 +68,6 @@ produce an unsafe projection and breaks deterministic reconstruction.
 
 ## Verification route and limitations
 
-The Event Spine contract review must verify transaction-boundary wording, uniqueness,
-acknowledgement order, failure dispositions, checksum scope, and no extra
-runtime infrastructure. Runtime integration and fault tests belong to later
-Event Spine implementation issues.
+The Event Spine contract review must verify transaction-boundary wording,
+uniqueness, acknowledgement order, failure dispositions, checksum scope, and
+no extra runtime infrastructure. This ADR does not claim production reliability.

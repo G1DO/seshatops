@@ -2,7 +2,7 @@
 // order acceptance, authoritative inventory update, and immutable outbox
 // insert in a single PostgreSQL transaction (CONTRACTS.md §4).
 //
-// Broker publication is performed asynchronously by package relay (Issue #24).
+// Broker publication is performed asynchronously by package relay.
 // AcceptOrder does not call or require Redpanda; outbox rows remain pending
 // until the relay publishes them.
 package erp

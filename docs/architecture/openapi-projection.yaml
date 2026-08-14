@@ -1,16 +1,14 @@
 openapi: 3.0.3
 info:
-  title: SeshatOps Event Spine Inventory Projection Read API
+  title: SeshatOps Event Spine HTTP API
   version: "1.0.0"
   description: |
-    Read-only Go surface for the committed Event Spine inventory projection (Issue #27).
-    Authentication/RBAC remain Identity. Issue #45 requires a Go-owned session
-    on these routes (`401 unauthenticated` when missing). Issue #46 requires
-    MX-001 for inventory (`403 forbidden` when unauthorized). Issue #47
-    requires MX-002 or MX-003 for ops visibility. Issue #48 requires MX-004,
-    MX-005, or MX-006 for privileged POSTs. SSE is
-    at-least-once and may drop for slow clients; REST is the authoritative
-    reconnect/catch-up path.
+    Go HTTP/SSE for the committed inventory projection, ops visibility,
+    privileged controls, and privileged-decision audit. A Go-owned session is
+    required (`401 unauthenticated`). Allow-list rows are in
+    docs/security/AUTHORIZATION.md (`403 forbidden` when unauthorized).
+    SSE is at-least-once and may drop for slow clients; REST is the
+    authoritative reconnect/catch-up path.
 servers:
   - url: /
 paths:
@@ -247,6 +245,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+  /v1/tenants/{tenant_id}/ops/audit:
+    get:
+      operationId: getOpsAudit
+      summary: Authorized same-tenant privileged-decision timeline (MX-007)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "200":
+          description: Same-tenant audit records only
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditSnapshot"
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller is not authorized for audit read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Audit query failed (`audit_failed`); no records body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
 components:
   parameters:
     TenantID:
@@ -435,6 +464,44 @@ components:
           type: array
           items:
             type: string
+    AuditSnapshot:
+      type: object
+      required: [tenant_id, observed_at, records]
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+        observed_at:
+          type: string
+          format: date-time
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/ControlDecision"
+    ControlDecision:
+      type: object
+      required: [principal_id, tenant_id, resource, action, outcome, reason, at]
+      properties:
+        decision_id:
+          type: string
+        principal_id:
+          type: string
+        tenant_id:
+          type: string
+          format: uuid
+        resource:
+          type: string
+        action:
+          type: string
+        outcome:
+          type: string
+        reason:
+          type: string
+        target_id:
+          type: string
+        at:
+          type: string
+          format: date-time
     ErrorBody:
       type: object
       required: [error]

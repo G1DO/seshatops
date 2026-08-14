@@ -23,9 +23,8 @@ The platform needs one durable business outcome for equivalent repetitions witho
 9. A retry that could duplicate an irreversible downstream effect is not issued blindly; reconciliation precedes that retry.
 10. Python output, UI state, approval possession, and idempotency-key possession cannot authorize or execute a command.
 
-This ADR is the command-execution decision. Implementation waits for
-Approved Actions (ADR-Q-007). Do not treat this file as a current runtime
-surface.
+This ADR is the command-execution decision. Commands are not implemented.
+Do not treat this file as a current runtime surface.
 
 ## Consequences
 
@@ -82,8 +81,10 @@ Rejected without evidence across the Go boundary, retries, external systems, and
 - Receipt retention and redaction require later governance decisions.
 - External systems may not support idempotency or reliable reconciliation.
 - A command can remain uncertain for an operationally significant period.
-- Authorization, approval, and target-version policy remain incomplete until Issue #5.
+- Authorization, approval, and target-version policy remain incomplete until commands exist.
 
 ## Deferred implementation choices
 
-Concrete API shapes, storage schema, uniqueness constraints, locking or claim algorithms, receipt retention, approval policy details, identity integration, external adapter protocols, reconciliation queries, retry schedules, and operational thresholds remain open. Issue #5 owns the detailed authorization model; Issue #7 owns reliability evidence; completed Issue #9 established repository workflow and documentation CI; Approvals and later capability sequences own the corresponding runtime choices.
+Concrete API shapes, storage schema, uniqueness constraints, locking, receipt
+retention, approval policy, and reconciliation remain open until commands are
+implemented.

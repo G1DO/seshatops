@@ -8,9 +8,14 @@ session state and sends cookies.
 ## Prerequisites
 
 - Node.js `24.14.0` and npm `11.9.0` (see `CONTRACTS.md` §9)
-- A process serving `identity` `/auth/*` and
-  `github.com/G1DO/seshatops/api` `NewServer(db, hub, auth, policy).Handler()`
-  on `http://127.0.0.1:8080` (no deployment binary is shipped in this issue)
+- Optional: a process serving `identity.Service.Handler()` (`/auth/*`) and
+  `api.NewServer(...).Handler()` (`/v1/*`) on `http://127.0.0.1:8080`
+
+There is no `cmd/` binary. Packages are exercised by tests (`api.NewServer`
+and `identity` constructors in `api/*_test.go` and `identity/*_test.go`).
+Serving them together on `:8080` is optional for a local UI walkthrough.
+A typical wiring is `api.NewHub()`, `platform.SetAppliedNotifier(hub)`, then
+`api.NewServer(db, hub, auth, policy)` plus `identity.Service.Handler()`.
 
 ## Setup
 
@@ -47,7 +52,7 @@ origin via CORS.
 3. After a Go-owned session cookie is set, the view loads
    `GET /v1/tenants/{tenant}/inventory` and
    `GET /v1/tenants/{tenant}/ops` (via proxy).
-4. Process the deterministic Northstar synthetic order through the Event Spine spine.
+4. Process the deterministic Northstar synthetic order through the Event Spine.
 5. The view applies `inventory_projection.updated` SSE frames and shows
    presentation before → after quantities (for example `item-flour-001`:
    `10` → `8`) plus checksum / observed_at / aggregate_version /
@@ -58,6 +63,21 @@ origin via CORS.
 A session is identity only. Inventory reads also require `MX-001` for the
 path tenant. Ops visibility requires `MX-002` or `MX-003` (Go-owned; the UI
 cannot authorize). Privileged POSTs require `MX-004`, `MX-005`, or `MX-006`.
+
+The view talks only to Go:
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/auth/login`, `/auth/callback`, `/auth/session` |
+| `POST` | `/auth/logout` |
+| `GET` | `/v1/tenants/{tenant_id}/inventory` and `.../inventory/stream` |
+| `GET` | `/v1/tenants/{tenant_id}/ops` |
+| `POST` | `/v1/tenants/{tenant_id}/ops/quarantine/release`, `.../replay`, `.../rebuild` |
+
+Connection states: `loading`, `live`, `stale`, `disconnected`, `error`. On SSE
+loss the UI re-GETs the snapshot, replaces local state, then reopens the
+stream. SSE is a live hint, not a gapless history. The API exposes current
+`quantity_on_hand`; previous → current is presentation state.
 
 ## Explicit deferrals
 
@@ -75,7 +95,5 @@ cannot authorize). Privileged POSTs require `MX-004`, `MX-005`, or `MX-006`.
 
 ## Docs
 
-- [OPERATIONS_VIEW.md](../docs/architecture/OPERATIONS_VIEW.md)
-- [OIDC_SESSION.md](../docs/security/OIDC_SESSION.md)
-- [QUERY_API_AUTHORIZATION.md](../docs/security/QUERY_API_AUTHORIZATION.md)
-- [PROJECTION_READ_API.md](../docs/architecture/PROJECTION_READ_API.md)
+- [AUTHORIZATION.md](../docs/security/AUTHORIZATION.md)
+- [openapi-projection.yaml](../docs/architecture/openapi-projection.yaml)

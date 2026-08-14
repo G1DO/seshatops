@@ -1,16 +1,16 @@
 # ADR-0003: Event Spine Event Envelope and Schema Compatibility
 
-- **Status:** Accepted Event Spine decision; JSON/JCS envelope library implemented in Issue #22 (`event`, `northstar`); outbox, broker, and projection runtime implemented in Issues #23–#29
+- **Status:** Accepted; JSON/JCS envelope is implemented in `event` and `northstar`
 - **Date:** 2026-08-07
 - **Scope:** Issue #21 event identity, first event family, JSON representation, and schema compatibility
 
 ## Context
 
-Constitution defines the required event identity, tenant context, aggregate ordering,
-lineage, at-least-once delivery, quarantine, and no-exactly-once claim. It does
-not define a wire representation or compatibility policy. Event Spine needs one narrow
-contract that can be implemented without a schema registry or future-domain
-breadth.
+[ADR-0001](0001-transactional-outbox-and-at-least-once-delivery.md) requires
+event identity, tenant context, aggregate ordering, lineage, at-least-once
+delivery, quarantine, and no exactly-once claim. It does not define a wire
+representation or compatibility policy. Event Spine needs one narrow contract
+that can be implemented without a schema registry.
 
 ## Decision
 
@@ -54,6 +54,6 @@ event content to detect tampering or conflicting publication.
 
 ## Verification route and limitations
 
-The Event Spine contract review must verify required-field coverage, canonicalization
-rules, rejection dispositions, and absence of unsupported exactly-once claims.
-No runtime compatibility result is claimed by this ADR.
+The Event Spine contract review must verify required-field coverage,
+canonicalization rules, rejection dispositions, and absence of unsupported
+exactly-once claims. Runtime compatibility is not claimed by this ADR alone.

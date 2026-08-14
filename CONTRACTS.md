@@ -1,31 +1,11 @@
 # Event Spine Contracts
 
-**Status:** Accepted Event Spine implementation contract. Issue #22 provides the
-executable JSON/JCS library and Northstar fixture. Issue #23 implements the
-`erp` source transaction and pending outbox persistence. Issue #24 implements
-the source-owned outbox relay. Issue #25 implements the Go inbox/inventory
-projection consumer. Issue #26 implements bounded consumer failure/backlog
-observability and handler-poison escalation on that consumer. Issue #27
-implements the Go-owned projection REST/SSE read surface documented in
-[PROJECTION_READ_API.md](docs/architecture/PROJECTION_READ_API.md).
-
-**Owns:** The concrete Event Spine event envelope, first event family, JSON compatibility
-rules, PostgreSQL ownership boundaries, Redpanda topic and key policy, outbox
-publication, inbox and projection consistency, failure dispositions, checksum
-canonicalization, and the minimum local toolchain.
-
-**Does not own:** HTTP route design (see
-[PROJECTION_READ_API.md](docs/architecture/PROJECTION_READ_API.md)), UI
-component design, authentication or RBAC, operator recovery controls,
-deployment topology, observability targets, data retention policy, or later
-event families.
-
-This contract implements Project Constitution principles in [EVENT_MODEL.md](docs/architecture/EVENT_MODEL.md)
-and [ADR-0001](docs/adrs/0001-transactional-outbox-and-at-least-once-delivery.md).
-Executable JSON/JCS helpers are in the Go `event` package; the deterministic
-fixture is in `northstar`. This document remains documentation truth for Event Spine
-behavior. Library tests do not prove broker delivery, projection correctness,
-security, reliability, performance, or production readiness.
+Wire, persistence, failure dispositions, checksum, and toolchain pins for the
+implemented Event Spine. Why: [ADR-0001](docs/adrs/0001-transactional-outbox-and-at-least-once-delivery.md)
+and [ADR-0003](docs/adrs/0003-event-envelope-and-schema-compatibility.md).
+Executable helpers: `event`. Fixture: `northstar`. HTTP/SSE:
+[openapi-projection.yaml](docs/architecture/openapi-projection.yaml).
+This is not production evidence.
 
 ## 1. Event Spine vertical slice
 
@@ -35,12 +15,13 @@ Event Spine supports one synthetic order line for one tenant and one inventory i
 > Redpanda -> Go consumer -> transactional inbox and inventory projection ->
 > Go-owned read surface for the TypeScript operations view
 
-The Go-owned read surface for that final step is defined by
-[PROJECTION_READ_API.md](docs/architecture/PROJECTION_READ_API.md) (Issue #27).
-This contracts document does not redefine HTTP routes or SSE frames.
+HTTP/SSE for that last step is
+[openapi-projection.yaml](docs/architecture/openapi-projection.yaml).
+This document does not redefine routes or SSE frames.
 
-Multi-line orders, additional event families, commands, approvals, identity,
-operator recovery, and intelligence are outside this contract.
+Multi-line orders, additional event families, commands, approvals, and
+intelligence are outside this contract. Identity HTTP is
+[AUTHORIZATION.md](docs/security/AUTHORIZATION.md).
 
 ## 2. Event envelope
 
@@ -162,17 +143,9 @@ and its authoritative inventory row, records the accepted order, and inserts the
 immutable outbox event and content hash. These changes commit or roll back
 together. No Redpanda call occurs inside this transaction.
 
-The Issue #23 persistence contract, migration, seed, and PostgreSQL image pin
-are recorded in
-[SOURCE_OUTBOX_PERSISTENCE.md](docs/architecture/SOURCE_OUTBOX_PERSISTENCE.md).
-The Issue #24 relay behavior, Redpanda pin, lease/backoff, and backlog
-visibility are recorded in
-[OUTBOX_RELAY.md](docs/architecture/OUTBOX_RELAY.md).
-The Issue #25 consumer, inbox/projection schema, acknowledgement ordering, and
-checksum helper are recorded in
-[INVENTORY_PROJECTION_CONSUMER.md](docs/architecture/INVENTORY_PROJECTION_CONSUMER.md).
-Issue #29 duplicate-injection and deterministic rebuild proofs are recorded in
-[PROJECTION_REBUILD.md](docs/architecture/PROJECTION_REBUILD.md).
+Schema and image pins live in `erp/migrate.sql` / `erp.PostgresImage`,
+`relay.RedpandaImage`, and `platform` migrations. Rebuild helpers are
+`platform.ResetDerivedState` and `platform.RebuildFromHistory`.
 
 ### Outbox relay
 
@@ -180,9 +153,9 @@ The source-owned relay claims due outbox rows with a lease, publishes the exact
 stored event bytes, and marks the row `published` only after broker acknowledgement.
 A crash after broker acknowledgement and before the PostgreSQL update may
 publish a duplicate with the same identity and content.
-An expired `publishing` lease is reclaimable for retry (claimed again as
-`publishing` under a new lease); a live lease is not claimed by another relay
-worker.
+An expired `publishing` lease (`relay.DefaultLeaseTTL`, 30s) is reclaimable
+for retry (claimed again as `publishing` under a new lease); a live lease is
+not claimed by another relay worker.
 
 Outbox states are `pending`, `publishing`, `published`, and `quarantined`.
 Transient publication failures use a 1-second exponential backoff capped at
@@ -298,10 +271,8 @@ Canonicalization is:
 Timestamps, database row order, offsets, inbox IDs, failure records, and mutable
 metadata are excluded. The empty projection hashes the empty byte sequence.
 
-Issue #29 records the isolated derived-state reset, retained-history rebuild
-procedure, duplicate-injection harness, and reproduction metadata in
-[PROJECTION_REBUILD.md](docs/architecture/PROJECTION_REBUILD.md). The checksum
-definition itself remains this section.
+Rebuild uses `platform.ResetDerivedState` and `platform.RebuildFromHistory`.
+The checksum definition itself remains this section.
 
 ## 9. Minimum local toolchain
 
@@ -316,12 +287,10 @@ resolved to immutable digests before runtime implementation begins.
 - TypeScript `6.0.3`
 - PostgreSQL `16.14` pinned as
   `postgres@sha256:95206741a5b214807675e14165369d05b93a9cf692223b616d07cca227e74b0b`
-  (`erp.PostgresImage`; see
-  [SOURCE_OUTBOX_PERSISTENCE.md](docs/architecture/SOURCE_OUTBOX_PERSISTENCE.md))
+  (`erp.PostgresImage`)
 - Redpanda `v25.2.1` pinned as
   `docker.redpanda.com/redpandadata/redpanda@sha256:218469e5d088757bb2c3ff4c5e272f7eebdc4e94c933e6e15aff10b845cbcd07`
-  (`relay.RedpandaImage`; see
-  [OUTBOX_RELAY.md](docs/architecture/OUTBOX_RELAY.md))
+  (`relay.RedpandaImage`)
 
 Reference release records: [PostgreSQL 16.14](https://www.postgresql.org/docs/release/16.14/),
 [Redpanda 25.2 upgrade documentation](https://docs.redpanda.com/streaming/25.2/upgrade/rolling-upgrade/),
@@ -329,13 +298,11 @@ and [TypeScript releases](https://github.com/microsoft/TypeScript/releases).
 
 Local PostgreSQL and Redpanda use one development/test instance each. No Python,
 schema registry, extra database, Redis, CDC system, Kubernetes, or generalized
-event-bus package is introduced. #21 does not add runtime files or install any
-of these tools.
+event-bus package is introduced by this contract.
 
-## 10. Explicit non-claims and later decisions
+## 10. Explicit non-claims
 
 This contract does not claim exactly-once delivery, exactly-once processing,
-runtime correctness, tenant-isolation enforcement, performance, availability,
-or production readiness. Later Event Spine issues may define Go API routes, UI details,
-deployment, observability, retention, and authentication/RBAC while preserving
-this contract and Project Constitution invariants.
+runtime correctness, performance, availability, or production readiness.
+Identity HTTP is documented in
+[AUTHORIZATION.md](docs/security/AUTHORIZATION.md), not here.
