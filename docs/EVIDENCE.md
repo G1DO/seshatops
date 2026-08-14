@@ -1,10 +1,10 @@
 # Evidence
 
-What the test campaigns measured. Not production evidence.
+What the recorded test runs measured. Not production evidence.
 
 ## Event Spine
 
-[Report](docs/evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md).
+[Report](evaluation/EVENT_SPINE_EXIT_GATE_EXPERIMENT_REPORT.md).
 Runtime commit `a4e5d47`; hosted CI on PR #41 `b59b760`.
 
 On a single-host Testcontainers topology: accepted orders survive broker
@@ -20,7 +20,7 @@ Docs [31588310157](https://github.com/G1DO/seshatops/actions/runs/31588310157).
 
 ## Identity HTTP
 
-[Report](docs/evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md).
+[Report](evaluation/IDENTITY_OPERATIONS_EXIT_GATE_EXPERIMENT_REPORT.md).
 Runtime commit `173cedb`; hosted CI on PR #61 `1f19c58`. Operator = reviewer.
 
 On implemented HTTP: tenant isolation, default-deny privileged routes,

@@ -22,7 +22,7 @@ asynchronous transport and replay input.
 8. PostgreSQL remains transactional authority. Redpanda remains asynchronous transport and replay input; SeshatOps is not silently redefined as event sourced.
 9. Exactly-once delivery and exactly-once business effects are not claimed.
 
-Wire, checksum, and dispositions: [CONTRACTS.md](../../CONTRACTS.md).
+Wire, checksum, and dispositions: [CONTRACTS.md](../CONTRACTS.md).
 
 ## Alternatives considered
 

@@ -14,7 +14,7 @@ Durable constraints for AI coding agents. Humans: [CONTRIBUTING.md](CONTRIBUTING
   scaffolding unless the issue requires them.
 - Do not reorganize working packages for aesthetics.
 
-Topology: [ARCHITECTURE.md](ARCHITECTURE.md). Wire: [CONTRACTS.md](CONTRACTS.md).
+Topology: [Architecture](docs/architecture/README.md). Wire: [CONTRACTS.md](docs/CONTRACTS.md).
 
 ## Clean-room and secrets
 
@@ -30,7 +30,7 @@ Topology: [ARCHITECTURE.md](ARCHITECTURE.md). Wire: [CONTRACTS.md](CONTRACTS.md)
 - If provenance is uncertain, exclude the material. Do not sanitize and keep
   it.
 
-Policy: [CLEAN_ROOM.md](CLEAN_ROOM.md).
+Policy: [CLEAN_ROOM.md](docs/CLEAN_ROOM.md).
 
 ## Invariants
 
@@ -51,7 +51,7 @@ cd web && npm ci && npm run typecheck && npm test && npm run build
 ```
 
 Docker is required for Testcontainers tests. CI Go timeout is `15m`. Pins:
-[CONTRACTS.md](CONTRACTS.md) §9.
+[CONTRACTS.md](docs/CONTRACTS.md) §9.
 
 ## Verification honesty
 

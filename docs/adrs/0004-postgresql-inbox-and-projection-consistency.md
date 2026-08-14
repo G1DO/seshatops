@@ -21,7 +21,7 @@ distributed transaction with Redpanda.
 6. The consumer commits an offset only after the durable processing or quarantine transaction commits.
 
 Concrete fields, topic, retry rules, failure categories, and checksum:
-[CONTRACTS.md](../../CONTRACTS.md).
+[CONTRACTS.md](../CONTRACTS.md).
 
 ## Alternatives rejected
 

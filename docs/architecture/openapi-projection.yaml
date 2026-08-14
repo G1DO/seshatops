@@ -341,7 +341,7 @@ components:
             $ref: "#/components/schemas/InventoryItem"
         checksum:
           type: string
-          description: CONTRACTS.md §8 SHA-256 hex of the tenant projection
+          description: docs/CONTRACTS.md §8 SHA-256 hex of the tenant projection
         observed_at:
           type: string
           format: date-time

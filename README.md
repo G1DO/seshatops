@@ -3,10 +3,10 @@
 A synthetic ERP order for fictional **Northstar Foods** flows through a
 transactional outbox and Redpanda into a tenant-scoped inventory projection.
 Operators see that projection over REST/SSE after a Go-owned OIDC session.
-**Ahoy is excluded** ([CLEAN_ROOM.md](CLEAN_ROOM.md)).
+**Ahoy is excluded** ([CLEAN_ROOM.md](docs/CLEAN_ROOM.md)).
 
 Libraries plus tests. There is no deployment binary or production environment.
-What the test campaigns measured: [EVIDENCE.md](EVIDENCE.md).
+What the tests measured: [EVIDENCE.md](docs/EVIDENCE.md).
 
 ```text
 Browser (Vite/React web/)
@@ -23,7 +23,7 @@ audit, not sessions.
 
 ## Develop
 
-Toolchain pins (immutable image digests in [CONTRACTS.md](CONTRACTS.md) §9):
+Toolchain pins (immutable image digests in [CONTRACTS.md](docs/CONTRACTS.md) §9):
 Go `1.25.0`, Node.js `24.14.0`, npm `11.9.0`, PostgreSQL `16.14`, Redpanda
 `v25.2.1`. Docker is required for Testcontainers-backed Go tests. To reuse a
 running Postgres instead, set `SESHATOPS_TEST_DATABASE_URL`.
@@ -37,12 +37,12 @@ UI: [web/README.md](web/README.md). How we work: [CONTRIBUTING.md](CONTRIBUTING.
 
 ## Docs
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — as-built topology
-- [CONTRACTS.md](CONTRACTS.md) — event wire, checksum, toolchain pins
+- [Architecture](docs/architecture/README.md) — as-built topology
+- [CONTRACTS.md](docs/CONTRACTS.md) — event wire, checksum, toolchain pins
 - [docs/architecture/openapi-projection.yaml](docs/architecture/openapi-projection.yaml) — HTTP/SSE
 - [docs/security/AUTHORIZATION.md](docs/security/AUTHORIZATION.md) — default-deny HTTP
 - [docs/adrs/](docs/adrs/) — why those decisions
-- [CLEAN_ROOM.md](CLEAN_ROOM.md) — Ahoy exclusion
+- [CLEAN_ROOM.md](docs/CLEAN_ROOM.md) — Ahoy exclusion
 
 ## License
 
