@@ -1,4 +1,4 @@
-/** DTOs aligned with Go api package JSON tags and openapi-projection.yaml. */
+/** DTOs aligned with Go api package JSON tags and docs/api/openapi-projection.yaml. */
 
 export interface InventoryItem {
   item_id: string;

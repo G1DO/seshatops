@@ -1,7 +1,7 @@
 # Authorization
 
 Default-deny authorization for implemented Identity HTTP. Go evaluates an
-explicit allow-list ([ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md)).
+explicit allow-list ([ADR-0005](../decisions/0005-identity-tenant-policy-and-service-delegation.md)).
 A session is identity only. The UI cannot authorize. Path `{tenant_id}` is an
 assertion to validate, not authority. Client headers, query, body, and IdP
 claims are not authorization.
@@ -105,7 +105,7 @@ cross-tenant paths return `403 {"error":"forbidden"}` with no projection, ops,
 or audit payload and without starting SSE. Open inventory SSE re-checks
 session and `MX-001` on heartbeat and before each event.
 
-Routes and SSE reconnect/catch-up: [openapi-projection.yaml](../architecture/openapi-projection.yaml).
+Routes and SSE reconnect/catch-up: [openapi-projection.yaml](../api/openapi-projection.yaml).
 
 Privileged POSTs: outbox `quarantined` rows return to `pending`; poison may be
 re-driven only with retained same-tenant outbox bytes. Inbox gap/conflict/

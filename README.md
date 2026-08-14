@@ -23,7 +23,8 @@ audit, not sessions.
 
 ## Develop
 
-Toolchain pins (immutable image digests in [CONTRACTS.md](docs/CONTRACTS.md) §9):
+Toolchain pins (immutable image digests in
+[event-spine.md](docs/design/specifications/event-spine.md) §9):
 Go `1.25.0`, Node.js `24.14.0`, npm `11.9.0`, PostgreSQL `16.14`, Redpanda
 `v25.2.1`. Docker is required for Testcontainers-backed Go tests. To reuse a
 running Postgres instead, set `SESHATOPS_TEST_DATABASE_URL`.

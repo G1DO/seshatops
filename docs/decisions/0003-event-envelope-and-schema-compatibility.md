@@ -12,9 +12,9 @@ needs one narrow contract without a schema registry.
 
 ## Decision
 
-1. Event Spine uses strict UTF-8 JSON and the repository-owned contract in [CONTRACTS.md](../CONTRACTS.md). Duplicate object member names, non-JCS-compatible values, and non-integer or out-of-range v1 numeric forms are rejected before canonicalization.
+1. Event Spine uses strict UTF-8 JSON and the repository-owned contract in [event-spine.md](../design/specifications/event-spine.md). Duplicate object member names, non-JCS-compatible values, and non-integer or out-of-range v1 numeric forms are rejected before canonicalization.
 2. The first event family is inventory.quantity_decremented for a one-line synthetic order.
-3. The envelope contains the fields defined in [CONTRACTS.md](../CONTRACTS.md).
+3. The envelope contains the fields defined in [event-spine.md](../design/specifications/event-spine.md).
 4. Event Spine accepts exactly event schema version 1; unknown fields, missing fields, invalid values, unknown event types, and unsupported versions are quarantined.
 5. Event content identity is the SHA-256 of the JCS canonical JSON envelope without transport and processing metadata. The stored event bytes and Redpanda value are those canonical UTF-8 bytes.
 6. The same event ID with different canonical content is an integrity failure, not a duplicate.

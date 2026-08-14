@@ -1,7 +1,7 @@
 // Package platform implements the Event Spine Go consumer that validates Redpanda
 // events, commits inbox/deduplication state with the inventory projection in
 // one PostgreSQL transaction, and acknowledges broker offsets only after that
-// durable decision commits (docs/CONTRACTS.md §§4–8).
+// durable decision commits (docs/design/specifications/event-spine.md §§4–8).
 //
 // Delivery is at least once. Identical redelivery is a durable no-op.
 // Conflicting reuse of event_id is an integrity failure. Malformed,
@@ -14,7 +14,7 @@
 //
 // ResetDerivedState and RebuildFromHistory clear only derived platform state
 // and replay retained event bytes through the same projection handler,
-// comparing docs/CONTRACTS.md §8 checksums. ResetDerivedStateForTenant,
+// comparing docs/design/specifications/event-spine.md §8 checksums. ResetDerivedStateForTenant,
 // ReplayTenantHistory, and RebuildTenantFromHistory are the tenant-scoped
 // operator helpers. This package does not claim exactly-once delivery or
 // processing, and does not own backup/restore.

@@ -14,7 +14,8 @@ Durable constraints for AI coding agents. Humans: [CONTRIBUTING.md](CONTRIBUTING
   scaffolding unless the issue requires them.
 - Do not reorganize working packages for aesthetics.
 
-Topology: [Architecture](docs/architecture/README.md). Wire: [CONTRACTS.md](docs/CONTRACTS.md).
+Topology: [Architecture](docs/architecture/overview.md). Wire:
+[event-spine.md](docs/design/specifications/event-spine.md).
 
 ## Clean-room and secrets
 
@@ -51,7 +52,7 @@ cd web && npm ci && npm run typecheck && npm test && npm run build
 ```
 
 Docker is required for Testcontainers tests. CI Go timeout is `15m`. Pins:
-[CONTRACTS.md](docs/CONTRACTS.md) §9.
+[event-spine.md](docs/design/specifications/event-spine.md) §9.
 
 ## Verification honesty
 

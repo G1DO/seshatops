@@ -12,7 +12,7 @@ import (
 )
 
 // HandlerVersion identifies the Event Spine inventory-projection handler logic used for
-// reproduction metadata (docs/CONTRACTS.md checksum / rebuild). It is distinct from
+// reproduction metadata (docs/design/specifications/event-spine.md checksum / rebuild). It is distinct from
 // event_schema_version.
 const HandlerVersion = "m1-inventory-projection-v1"
 

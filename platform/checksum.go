@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// ChecksumTenant returns the docs/CONTRACTS.md §8 SHA-256 hex checksum of one
+// ChecksumTenant returns the docs/design/specifications/event-spine.md §8 SHA-256 hex checksum of one
 // tenant's complete inventory projection at the current committed snapshot.
 // The empty projection hashes the empty byte sequence.
 func ChecksumTenant(ctx context.Context, db *sql.DB, tenantID string) (string, error) {
