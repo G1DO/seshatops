@@ -20,6 +20,19 @@ assignments, no pentest.
 - Privileged audit rows are append-only and must persist before a privileged
   mutation; insert failure blocks the mutation.
 
+Implemented Identity HTTP only. Not a production threat model.
+
+| Threat | Control |
+| --- | --- |
+| Cross-tenant read or mutate | Path tenant is an assertion; allow-list match required; other-tenant payloads are not returned |
+| Cookie or session forgery or expiry | Opaque httpOnly cookie; missing, expired, forged, or revoked → `401` before `/v1` |
+| UI treated as authorization | Go evaluates the allow-list; the browser cannot authorize |
+| Missing, stale, or contradictory context | Deny |
+| Privileged mutate without audit | Audit insert must succeed before mutation; insert failure blocks the mutation |
+
+Out of scope here: production IdP revocation, pentest, service-identity
+credentials, and deployed network isolation.
+
 ## Authentication
 
 Browser operators authenticate through Go (BFF). The browser never holds ID or

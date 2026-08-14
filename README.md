@@ -37,12 +37,8 @@ UI: [web/README.md](web/README.md). How we work: [CONTRIBUTING.md](CONTRIBUTING.
 
 ## Docs
 
-- [Architecture](docs/architecture/README.md) — as-built topology
-- [CONTRACTS.md](docs/CONTRACTS.md) — event wire, checksum, toolchain pins
-- [docs/architecture/openapi-projection.yaml](docs/architecture/openapi-projection.yaml) — HTTP/SSE
-- [docs/security/AUTHORIZATION.md](docs/security/AUTHORIZATION.md) — default-deny HTTP
-- [docs/adrs/](docs/adrs/) — why those decisions
-- [CLEAN_ROOM.md](docs/CLEAN_ROOM.md) — Ahoy exclusion
+[docs/README.md](docs/README.md) — architecture, contracts, authorization, ADRs,
+evidence.
 
 ## License
 

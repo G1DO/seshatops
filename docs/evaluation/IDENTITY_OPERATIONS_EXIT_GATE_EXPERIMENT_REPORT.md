@@ -18,23 +18,6 @@ go test ./... -count=1 -timeout 25m
 cd web && npm test && npm run typecheck && npm run build
 ```
 
-Do **not** copy `-run` strings from markdown tables: table `\|` is a literal
-pipe in the shell. Each pattern below is anchored `^(A|B|…)$`.
-
-```bash
-go test ./identity -count=1 -timeout 15m -run '^(TestForgedSessionCookieRejected|TestExpiredSessionRejected|TestForgedIDTokenRejected|TestSwappedAudienceRejected|TestSwappedIssuerRejected|TestExpiredIDTokenRejected|TestClientSuppliedPrincipalIgnored|TestLogoutRevokesSession|TestDirectoryClearRevokesMembership)$'
-go test ./api -count=1 -timeout 25m -run '^(TestUnauthenticatedRefusedOnRESTAndSSE|TestSSEStopsAfterSessionRevoked|TestSSEStopsAfterAssignmentRevoked|TestClientPrincipalHeaderDoesNotAuthenticate|TestUnauthenticatedControlFailsClosed|TestUnauthenticatedAuditReadFailsClosed)$'
-go test ./identity -count=1 -timeout 5m -run '^(TestPolicyDeniesCrossTenantInventoryRead|TestPolicyDeniesCrossTenantOpsVisibility|TestPolicyDeniesCrossTenantPrivilegedOps|TestPolicyDeniesMissingOrAmbiguousMembership)$'
-go test ./api -count=1 -timeout 25m -run '^(TestCrossTenantInventoryReadDenied|TestCrossTenantOpsReadDenied|TestPlatformOperatorCrossTenantOpsDenied|TestCrossTenantAndForgedContextControlDenied|TestOperatorRebuildLeavesOtherTenant|TestCrossTenantAndNilPolicyAuditReadDenied|TestAuditReadDoesNotLeakOtherTenant)$'
-go test ./api -count=1 -timeout 25m -run '^(TestForgedTenantHeaderAndQueryDoNotAuthorize|TestForgedTenantHeaderDoesNotAuthorizeOps|TestClientSuppliedActorAndTenantAreIgnored)$'
-go test ./identity -count=1 -timeout 5m -run '^(TestPolicyDeniesPlatformOperatorInventoryRead|TestPolicyDeniesPrivilegedActionsForOpsReader|TestPolicyDeniesUnassignedAndServicePrincipal)$'
-go test ./api -count=1 -timeout 25m -run '^(TestPlatformOperatorInventoryReadDenied|TestReaderCannotReleaseQuarantine|TestReaderCannotReplayOrRebuild|TestReaderCannotReadAudit|TestMissingRoleInventoryReadDenied|TestMissingRoleOpsReadDenied|TestMissingRoleControlDenied|TestUnassignedPrincipalInventoryReadDenied|TestUnassignedPrincipalOpsReadDenied|TestUnassignedAndNilPolicyControlDenied|TestNilPolicyFailsClosed|TestNilPolicyOpsFailsClosed)$'
-go test ./api -count=1 -timeout 25m -run '^(TestOpsReaderCanReadSameTenantOps|TestOpsSnapshotExcludesOtherTenantAndPayloadFragments)$'
-go test ./api -count=1 -timeout 25m -run '^(TestOperatorCanReleaseSameTenantQuarantine|TestReleaseGapIsNotReleasable|TestOperatorReplayIsDuplicateNoop)$'
-go test ./api -count=1 -timeout 25m -run '^(TestOperatorReleaseAllowPersistsAudit|TestReaderDenyPersistsAuditWithoutMutation|TestAuditInsertFailureBlocksPrivilegedMutation|TestAuthorizationDecisionsAreAppendOnly|TestOperatorCanReadSameTenantAudit)$'
-cd web && npm test -- src/ui/OperationsView.test.tsx src/state/useOpsControls.test.tsx src/state/useOpsVisibility.test.tsx src/api/client.test.ts
-```
-
 ## Denials
 
 Fail-closed HTTP outcomes asserted by `api` tests:

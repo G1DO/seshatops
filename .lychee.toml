@@ -1,3 +1,5 @@
 timeout = 20
 max_retries = 2
 retry_wait_time = 2
+# Career Workflow and other workspace pages require login.
+exclude = ['^https://app\\.notion\\.com/']

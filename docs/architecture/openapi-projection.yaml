@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: SeshatOps Event Spine HTTP API
+  title: SeshatOps HTTP API
   version: "1.0.0"
   description: |
     Go HTTP/SSE for the committed inventory projection, ops visibility,

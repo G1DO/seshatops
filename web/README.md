@@ -1,4 +1,4 @@
-# SeshatOps web — Event Spine operations view
+# SeshatOps web — operations view
 
 Minimal TypeScript screen for the committed Northstar Foods inventory
 projection. Business authority stays in the Go `api` / `platform` packages.
