@@ -9,7 +9,7 @@ import (
 	"unicode/utf8"
 )
 
-// Event Spine fixed contract values from docs/CONTRACTS.md.
+// Event Spine fixed contract values from docs/design/specifications/event-spine.md.
 const (
 	EventTypeQuantityDecremented = "inventory.quantity_decremented"
 	AggregateTypeInventoryItem   = "inventory_item"
@@ -20,7 +20,7 @@ const (
 const maxSafeInt = int64(9007199254740991) // 2^53 - 1
 
 var (
-	// UUIDv4 with RFC 4122 variant bits (docs/CONTRACTS.md event_id rule).
+	// UUIDv4 with RFC 4122 variant bits (docs/design/specifications/event-spine.md event_id rule).
 	uuidV4Regexp = regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
 	timeZRegexp  = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$`)
 )

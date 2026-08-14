@@ -11,7 +11,7 @@ import (
 var migrateSQL embed.FS
 
 // PostgresImage is the immutable PostgreSQL 16.14 image pin for Event Spine local and
-// integration tooling (docs/CONTRACTS.md §9).
+// integration tooling (docs/design/specifications/event-spine.md §9).
 const PostgresImage = "postgres@sha256:95206741a5b214807675e14165369d05b93a9cf692223b616d07cca227e74b0b"
 
 // PostgresVersionLabel records the human-readable version paired with PostgresImage.

@@ -9,5 +9,5 @@
 // and privileged allow/deny rows persist before mutation. Unauthorized
 // callers receive 403. SSE notifications are at-least-once and may be
 // dropped for slow clients; REST is the authoritative reconnect/catch-up path.
-// Routes: docs/architecture/openapi-projection.yaml.
+// Routes: docs/api/openapi-projection.yaml.
 package api

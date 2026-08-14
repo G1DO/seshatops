@@ -41,7 +41,7 @@ func AggregateKey(tenantID, aggregateType, aggregateID string) string {
 }
 
 // BackoffAfterAttempts returns the transient-failure delay after n publish
-// attempts: 1s exponential growth capped at 60s (docs/CONTRACTS.md §4).
+// attempts: 1s exponential growth capped at 60s (docs/design/specifications/event-spine.md §4).
 func BackoffAfterAttempts(attempts int) time.Duration {
 	if attempts < 1 {
 		attempts = 1

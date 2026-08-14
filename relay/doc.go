@@ -1,6 +1,6 @@
 // Package relay implements the Event Spine source-owned outbox publisher: claim durable
 // erp.outbox rows, publish exact stored event bytes to Redpanda, and record
-// publication status only after broker acknowledgement (docs/CONTRACTS.md §§4–5).
+// publication status only after broker acknowledgement (docs/design/specifications/event-spine.md §§4–5).
 //
 // Delivery is at least once. Duplicate publication with the same event identity
 // and content is expected after the acknowledgement-before-status crash window.

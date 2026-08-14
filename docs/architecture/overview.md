@@ -42,7 +42,7 @@ flowchart TB
 | `event/`, `northstar/` | Go | JSON/JCS envelope, Northstar fixture | Transport or HTTP |
 
 Go module: `github.com/G1DO/seshatops`. Privileged operator POSTs (quarantine
-release, replay, rebuild) are in [AUTHORIZATION.md](../security/AUTHORIZATION.md).
+release, replay, rebuild) are in [authorization.md](../security/authorization.md).
 There is no Python, object storage, or ERP command API beyond `erp.AcceptOrder`.
 
 | Store | Responsibility |
@@ -59,6 +59,6 @@ OIDC sessions are process-local (`identity.Store`).
 | Relay → Redpanda | Exact stored outbox bytes after commit |
 | Browser → PostgreSQL or Redpanda | Prohibited |
 
-Wire and pins: [CONTRACTS.md](../CONTRACTS.md). `/v1` HTTP/SSE:
-[openapi-projection.yaml](openapi-projection.yaml). `/auth`
-and allow-list: [AUTHORIZATION.md](../security/AUTHORIZATION.md).
+Wire and pins: [event-spine.md](../design/specifications/event-spine.md).
+`/v1` HTTP/SSE: [openapi-projection.yaml](../api/openapi-projection.yaml).
+`/auth` and allow-list: [authorization.md](../security/authorization.md).

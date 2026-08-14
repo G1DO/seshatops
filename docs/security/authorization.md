@@ -1,7 +1,7 @@
 # Authorization
 
 Default-deny authorization for implemented Identity HTTP. Go evaluates an
-explicit allow-list ([ADR-0005](../adrs/0005-identity-tenant-policy-and-service-delegation.md)).
+explicit allow-list ([ADR-0005](../decisions/0005-identity-tenant-policy-and-service-delegation.md)).
 A session is identity only. The UI cannot authorize. Path `{tenant_id}` is an
 assertion to validate, not authority. Client headers, query, body, and IdP
 claims are not authorization.
@@ -19,6 +19,19 @@ assignments, no pentest.
 - Browser visibility never grants authority.
 - Privileged audit rows are append-only and must persist before a privileged
   mutation; insert failure blocks the mutation.
+
+Implemented Identity HTTP only. Not a production threat model.
+
+| Threat | Control |
+| --- | --- |
+| Cross-tenant read or mutate | Path tenant is an assertion; allow-list match required; other-tenant payloads are not returned |
+| Cookie or session forgery or expiry | Opaque httpOnly cookie; missing, expired, forged, or revoked → `401` before `/v1` |
+| UI treated as authorization | Go evaluates the allow-list; the browser cannot authorize |
+| Missing, stale, or contradictory context | Deny |
+| Privileged mutate without audit | Audit insert must succeed before mutation; insert failure blocks the mutation |
+
+Out of scope here: production IdP revocation, pentest, service-identity
+credentials, and deployed network isolation.
 
 ## Authentication
 
@@ -92,7 +105,7 @@ cross-tenant paths return `403 {"error":"forbidden"}` with no projection, ops,
 or audit payload and without starting SSE. Open inventory SSE re-checks
 session and `MX-001` on heartbeat and before each event.
 
-Routes and SSE reconnect/catch-up: [openapi-projection.yaml](../architecture/openapi-projection.yaml).
+Routes and SSE reconnect/catch-up: [openapi-projection.yaml](../api/openapi-projection.yaml).
 
 Privileged POSTs: outbox `quarantined` rows return to `pending`; poison may be
 re-driven only with retained same-tenant outbox bytes. Inbox gap/conflict/

@@ -1,12 +1,12 @@
 openapi: 3.0.3
 info:
-  title: SeshatOps Event Spine HTTP API
+  title: SeshatOps HTTP API
   version: "1.0.0"
   description: |
     Go HTTP/SSE for the committed inventory projection, ops visibility,
     privileged controls, and privileged-decision audit. A Go-owned session is
     required (`401 unauthenticated`). Allow-list rows are in
-    docs/security/AUTHORIZATION.md (`403 forbidden` when unauthorized).
+    docs/security/authorization.md (`403 forbidden` when unauthorized).
     SSE is at-least-once and may drop for slow clients; REST is the
     authoritative reconnect/catch-up path.
 servers:
@@ -341,7 +341,7 @@ components:
             $ref: "#/components/schemas/InventoryItem"
         checksum:
           type: string
-          description: docs/CONTRACTS.md §8 SHA-256 hex of the tenant projection
+          description: docs/design/specifications/event-spine.md §8 SHA-256 hex of the tenant projection
         observed_at:
           type: string
           format: date-time

@@ -1,7 +1,8 @@
 # Contributing
 
-GitHub owns execution (issues, PRs, CI). This repository owns implemented
-technical truth.
+Operating model: [Career → Workflow](https://app.notion.com/p/3bb0a821b3cc817394cdf93a936a3612)
+(Notion). This file is repository-specific contribution practice. GitHub owns
+execution (issues, PRs, CI). This repository owns implemented technical truth.
 
 ```text
 GitHub issue → short-lived branch → implement + tests → PR → CI/review → main
@@ -27,7 +28,9 @@ in the same PR when practical.
 ## Checks
 
 Commands: [README.md](README.md). Docker is required for Testcontainers Go
-tests. Hosted checks: Go CI, Web CI, Documentation CI.
+tests. Hosted checks: Go CI, Web CI, Documentation CI. Branch protection and
+rulesets are unavailable on the current GitHub private plan; CI still runs on
+pull requests and `main`.
 
 ## Boundaries
 
