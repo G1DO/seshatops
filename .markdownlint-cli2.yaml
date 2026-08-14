@@ -1,0 +1,5 @@
+# GitHub issue and PR templates are pre-filled bodies, not documents.
+# Career Workflow requires they start with Closes # / section headings, not an H1.
+ignores:
+  - ".github/pull_request_template.md"
+  - ".github/ISSUE_TEMPLATE/**"

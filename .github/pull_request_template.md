@@ -1,20 +1,13 @@
-# Pull request
-
 Closes #
 
-## Summary
+## What changed
 
-<!-- What changed and why. -->
+## Why
 
 ## Verification
 
-| Command or check | Actual outcome |
-| ---------------- | -------------- |
-|                  |                |
-
-Checks not run (and why):
+Checks not run and why:
 
 ## Notes
 
-<!-- Residual risk, follow-up, or EVIDENCE.md claim changes — only if any. -->
-<!-- Clean-room: no secrets, private identifiers, or excluded Ahoy material. -->
+<!-- Optional: residual risk, claim/evidence changes, clean-room concerns, or follow-up. -->
