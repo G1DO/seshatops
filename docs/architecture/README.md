@@ -1,9 +1,13 @@
 # Architecture
 
+Packages below are the as-built Event Spine and Identity HTTP. Tests compose
+`http.Handler` values and call `relay.DrainOnce` / `platform.ConsumeOnce`.
+There is no deployment binary or long-running daemon in this repository.
+
 Event Spine lives in `event/`, `northstar/`, `erp/`, `relay/`, `platform/`,
 `api/`, `web/`. Identity lives in `identity/` plus authorized HTTP. Public
 demo uses **Northstar Foods**. **Ahoy is excluded**
-([CLEAN_ROOM.md](CLEAN_ROOM.md)).
+([CLEAN_ROOM.md](../CLEAN_ROOM.md)).
 
 ```mermaid
 flowchart TB
@@ -38,7 +42,7 @@ flowchart TB
 | `event/`, `northstar/` | Go | JSON/JCS envelope, Northstar fixture | Transport or HTTP |
 
 Go module: `github.com/G1DO/seshatops`. Privileged operator POSTs (quarantine
-release, replay, rebuild) are in [AUTHORIZATION.md](docs/security/AUTHORIZATION.md).
+release, replay, rebuild) are in [AUTHORIZATION.md](../security/AUTHORIZATION.md).
 There is no Python, object storage, or ERP command API beyond `erp.AcceptOrder`.
 
 | Store | Responsibility |
@@ -55,6 +59,6 @@ OIDC sessions are process-local (`identity.Store`).
 | Relay → Redpanda | Exact stored outbox bytes after commit |
 | Browser → PostgreSQL or Redpanda | Prohibited |
 
-Wire and pins: [CONTRACTS.md](CONTRACTS.md). `/v1` HTTP/SSE:
-[openapi-projection.yaml](docs/architecture/openapi-projection.yaml). `/auth`
-and allow-list: [AUTHORIZATION.md](docs/security/AUTHORIZATION.md).
+Wire and pins: [CONTRACTS.md](../CONTRACTS.md). `/v1` HTTP/SSE:
+[openapi-projection.yaml](openapi-projection.yaml). `/auth`
+and allow-list: [AUTHORIZATION.md](../security/AUTHORIZATION.md).

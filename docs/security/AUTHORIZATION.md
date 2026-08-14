@@ -6,7 +6,7 @@ A session is identity only. The UI cannot authorize. Path `{tenant_id}` is an
 assertion to validate, not authority. Client headers, query, body, and IdP
 claims are not authorization.
 
-Test-environment evidence: [EVIDENCE.md](../../EVIDENCE.md). Not production
+Test-environment evidence: [EVIDENCE.md](../EVIDENCE.md). Not production
 isolation. Service-identity credentials are not implemented. Residual risk:
 library/test OIDC (not production revocation), process-local sessions and
 assignments, no pentest.

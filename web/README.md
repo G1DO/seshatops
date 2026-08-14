@@ -7,7 +7,7 @@ session state and sends cookies.
 
 ## Prerequisites
 
-- Node.js `24.14.0` and npm `11.9.0` (see `CONTRACTS.md` §9)
+- Node.js `24.14.0` and npm `11.9.0` (see [CONTRACTS.md](../docs/CONTRACTS.md) §9)
 
 There is no `cmd/` binary. `identity.Service.Handler()` serves `/auth/*` and
 `api.NewServer(...).Handler()` serves `/v1/*`; they are separate `http.Handler`

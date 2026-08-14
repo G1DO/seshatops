@@ -17,7 +17,7 @@ import (
 // ConsumerName is the inbox consumer identity and Redpanda consumer group.
 const ConsumerName = "seshatops-m1-inventory-projection"
 
-// ConsumerGroup is the Event Spine inventory-projection consumer group (CONTRACTS.md §5).
+// ConsumerGroup is the Event Spine inventory-projection consumer group (docs/CONTRACTS.md §5).
 const ConsumerGroup = ConsumerName
 
 // MaxHandlerAttempts is the poison threshold before durable failure + ack.

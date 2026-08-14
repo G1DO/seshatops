@@ -1,10 +1,10 @@
 # Event Spine Contracts
 
 Wire, persistence, failure dispositions, checksum, and toolchain pins for the
-implemented Event Spine. Why: [ADR-0001](docs/adrs/0001-transactional-outbox-and-at-least-once-delivery.md)
-and [ADR-0003](docs/adrs/0003-event-envelope-and-schema-compatibility.md).
+implemented Event Spine. Why: [ADR-0001](adrs/0001-transactional-outbox-and-at-least-once-delivery.md)
+and [ADR-0003](adrs/0003-event-envelope-and-schema-compatibility.md).
 Executable helpers: `event`. Fixture: `northstar`. HTTP/SSE:
-[openapi-projection.yaml](docs/architecture/openapi-projection.yaml).
+[openapi-projection.yaml](architecture/openapi-projection.yaml).
 
 ## 1. Event Spine vertical slice
 
@@ -15,12 +15,12 @@ Event Spine supports one synthetic order line for one tenant and one inventory i
 > Go-owned read surface for the TypeScript operations view
 
 HTTP/SSE for that last step is
-[openapi-projection.yaml](docs/architecture/openapi-projection.yaml).
+[openapi-projection.yaml](architecture/openapi-projection.yaml).
 This document does not redefine routes or SSE frames.
 
 Multi-line orders, additional event families, commands, approvals, and
 intelligence are outside this contract. Identity HTTP is
-[AUTHORIZATION.md](docs/security/AUTHORIZATION.md).
+[AUTHORIZATION.md](security/AUTHORIZATION.md).
 
 ## 2. Event envelope
 
@@ -222,7 +222,9 @@ with expected and received versions; once the missing event applies, the
 consumer may automatically re-drive contiguous `quarantined_gap` inbox rows
 from their retained canonical event bytes. Re-drive revalidates the content
 hash and applies each event transactionally before changing its disposition.
-Event Spine adds no recovery UI.
+Operator quarantine, replay, and rebuild HTTP plus the TypeScript operations
+view: [AUTHORIZATION.md](security/AUTHORIZATION.md) and
+[openapi-projection.yaml](architecture/openapi-projection.yaml).
 
 ## 7. Failure and quarantine contract
 
