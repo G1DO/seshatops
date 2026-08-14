@@ -1,7 +1,7 @@
 package identity
 
-// Stable identifiers from docs/security/PERMISSION_MATRIX.md. Query APIs
-// evaluate MX-001 for inventory and MX-002/MX-003 for ops visibility.
+// Stable MX-* identifiers. Human-readable matrix: docs/security/AUTHORIZATION.md.
+// Query APIs evaluate MX-001 for inventory and MX-002/MX-003 for ops visibility.
 // Privileged HTTP controls evaluate MX-004/MX-005/MX-006. MX-007 is the
 // privileged audit-read row served by GET .../ops/audit.
 const (

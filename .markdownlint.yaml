@@ -1,5 +1,4 @@
-# Existing Project Constitution documents intentionally contain wide tables and evidence rows.
-# Preserve their readable layout instead of mass-wrapping the documentation.
+# Wide tables and evidence rows stay readable; do not mass-wrap Markdown.
 default: true
 MD013: false
 MD024:

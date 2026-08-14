@@ -1,16 +1,14 @@
 openapi: 3.0.3
 info:
-  title: SeshatOps Event Spine Inventory Projection Read API
+  title: SeshatOps Event Spine HTTP API
   version: "1.0.0"
   description: |
-    Read-only Go surface for the committed Event Spine inventory projection (Issue #27).
-    Authentication/RBAC remain Identity. Issue #45 requires a Go-owned session
-    on these routes (`401 unauthenticated` when missing). Issue #46 requires
-    MX-001 for inventory (`403 forbidden` when unauthorized). Issue #47
-    requires MX-002 or MX-003 for ops visibility. Issue #48 requires MX-004,
-    MX-005, or MX-006 for privileged POSTs. SSE is
-    at-least-once and may drop for slow clients; REST is the authoritative
-    reconnect/catch-up path.
+    Go HTTP/SSE for the committed inventory projection, ops visibility,
+    privileged controls, and privileged-decision audit. A Go-owned session is
+    required (`401 unauthenticated`). Allow-list rows are in
+    docs/security/AUTHORIZATION.md (`403 forbidden` when unauthorized).
+    SSE is at-least-once and may drop for slow clients; REST is the
+    authoritative reconnect/catch-up path.
 servers:
   - url: /
 paths:
@@ -71,11 +69,14 @@ paths:
         - $ref: "#/components/parameters/TenantID"
       responses:
         "200":
-          description: text/event-stream of inventory_projection.updated events
+          description: >
+            text/event-stream. Event name inventory_projection.updated;
+            data is ProjectionUpdated JSON. SSE is at-least-once; REST is
+            the reconnect/catch-up path.
           content:
             text/event-stream:
               schema:
-                type: string
+                $ref: "#/components/schemas/ProjectionUpdated"
         "401":
           description: Missing, expired, forged, or revoked Go-owned session
           content:
@@ -192,6 +193,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Control or audit persist failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
   /v1/tenants/{tenant_id}/ops/replay:
     post:
       operationId: postReplay
@@ -222,6 +229,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No same-tenant replay target
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Control or audit persist failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
   /v1/tenants/{tenant_id}/ops/rebuild:
     post:
       operationId: postRebuild
@@ -243,6 +262,43 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "403":
           description: Authenticated caller is not authorized for rebuild
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Control or audit persist failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /v1/tenants/{tenant_id}/ops/audit:
+    get:
+      operationId: getOpsAudit
+      summary: Authorized same-tenant privileged-decision timeline (MX-007)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "200":
+          description: Same-tenant audit records only
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditSnapshot"
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller is not authorized for audit read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Audit query failed (`audit_failed`); no records body
           content:
             application/json:
               schema:
@@ -364,7 +420,13 @@ components:
           type: object
           required:
             - applied
+            - duplicate_noop
+            - quarantined_conflict
             - quarantined_gap
+            - quarantined_stale
+            - quarantined_invalid
+            - quarantined_mismatch
+            - quarantined_transition
             - failures_retrying
             - failures_quarantined
             - oldest_gap
@@ -374,7 +436,19 @@ components:
           properties:
             applied:
               type: integer
+            duplicate_noop:
+              type: integer
+            quarantined_conflict:
+              type: integer
             quarantined_gap:
+              type: integer
+            quarantined_stale:
+              type: integer
+            quarantined_invalid:
+              type: integer
+            quarantined_mismatch:
+              type: integer
+            quarantined_transition:
               type: integer
             failures_retrying:
               type: integer
@@ -435,6 +509,44 @@ components:
           type: array
           items:
             type: string
+    AuditSnapshot:
+      type: object
+      required: [tenant_id, observed_at, records]
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+        observed_at:
+          type: string
+          format: date-time
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/ControlDecision"
+    ControlDecision:
+      type: object
+      required: [principal_id, tenant_id, resource, action, outcome, reason, at]
+      properties:
+        decision_id:
+          type: string
+        principal_id:
+          type: string
+        tenant_id:
+          type: string
+          format: uuid
+        resource:
+          type: string
+        action:
+          type: string
+        outcome:
+          type: string
+        reason:
+          type: string
+        target_id:
+          type: string
+        at:
+          type: string
+          format: date-time
     ErrorBody:
       type: object
       required: [error]

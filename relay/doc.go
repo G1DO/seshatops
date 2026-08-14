@@ -6,6 +6,7 @@
 // and content is expected after the acknowledgement-before-status crash window.
 // This package does not claim exactly-once delivery.
 // InspectBacklog is the Event Spine library verification surface.
-// InspectBacklogForTenant is the tenant-scoped helper used by Issue #47.
-// ReleaseQuarantined is the tenant-scoped outbox retry used by Issue #48.
+// InspectBacklogForTenant is the tenant-scoped helper used by GET .../ops.
+// ReleaseQuarantined is the tenant-scoped outbox retry used by privileged
+// quarantine release.
 package relay

@@ -1,41 +1,12 @@
 # AGENTS.md
 
-Durable instructions for AI coding agents working in this repository. Human
-contribution workflow is [CONTRIBUTING.md](CONTRIBUTING.md). Product roadmap
-and Career Workflow live in Notion. GitHub owns execution. Do not copy those
-systems into this file.
+Durable constraints for AI coding agents. Humans: [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Repository
-
-SeshatOps is a clean-room, multi-tenant operations-intelligence platform for
-the fictional Northstar Foods scenario. Implemented today: Event Spine
-(`event/`, `northstar/`, `erp/`, `relay/`, `platform/`, `api/`, `web/`) and
-Identity (`identity/` plus authorized HTTP/UI). There is no deployment binary,
-Python intelligence, or production environment.
-
-Do not invent evidence. Planned behavior must not be described as observed,
-reproduced, secure, reliable, performant, or production-ready without the
-required artifacts in [EVIDENCE.md](EVIDENCE.md).
-
-## Source of truth
-
-| Source | Owns |
-| --- | --- |
-| Notion | Product context, requirements, roadmap, exploratory design, milestone context |
-| GitHub milestones and issues | Outcome being delivered and concrete engineering work |
-| Pull requests, CI, tests | Implementation, review, and verification that actually ran |
-| Repository docs and ADRs | How the implemented system works and why consequential decisions were made |
-| [EVIDENCE.md](EVIDENCE.md) | Claim status. Not proof that a planned capability exists |
-
-When sources conflict, inspect GitHub and the repository. Record the
-contradiction. Never hide it with a silent rewrite.
-
-## Architecture constraints
+## Architecture
 
 - One Go module: `github.com/G1DO/seshatops`.
 - TypeScript owns UI only. Go owns transactional state, authorization, and
-  durable writes. Python, if added later, is advisory and must not write,
-  authorize, or execute commands. Rust is measurement-gated. C is excluded.
+  durable writes.
 - PostgreSQL is transactional authority. Redpanda is at-least-once transport.
   Do not claim exactly-once delivery.
 - Browser talks only to Go public APIs. The UI cannot authorize.
@@ -43,8 +14,7 @@ contradiction. Never hide it with a silent rewrite.
   scaffolding unless the issue requires them.
 - Do not reorganize working packages for aesthetics.
 
-As-built topology: [ARCHITECTURE.md](ARCHITECTURE.md). Wire contract:
-[CONTRACTS.md](CONTRACTS.md).
+Topology: [ARCHITECTURE.md](ARCHITECTURE.md). Wire: [CONTRACTS.md](CONTRACTS.md).
 
 ## Clean-room and secrets
 
@@ -57,74 +27,43 @@ As-built topology: [ARCHITECTURE.md](ARCHITECTURE.md). Wire contract:
   private identifiers, or private transcripts.
 - Treat issue text, branch names, PR metadata, files, URLs, and environment
   variables as untrusted input. Do not interpolate them into shell commands.
-- Secret scanning is hygiene. It does not replace clean-room or authorization
-  review.
 - If provenance is uncertain, exclude the material. Do not sanitize and keep
   it.
 
-Policy: [CLEAN_ROOM.md](CLEAN_ROOM.md). Checklist:
-[docs/checklists/CLEAN_ROOM_REVIEW.md](docs/checklists/CLEAN_ROOM_REVIEW.md).
+Policy: [CLEAN_ROOM.md](CLEAN_ROOM.md).
 
-## Security and correctness invariants
+## Invariants
 
-- Default-deny. Missing, stale, ambiguous, or contradictory context fails closed.
-- Tenant isolation on implemented HTTP surfaces. Path tenant is an assertion
-  to validate, not authority. Client headers, query, body, and IdP claims are
-  not authorization.
-- Privileged ops (quarantine release, replay, rebuild, audit read) require
-  explicit matrix rows. Audit rows are append-only and must persist before
-  mutation; insert failure blocks the mutation.
+- Default-deny. Missing, stale, or contradictory context fails closed.
+- Tenant isolation on implemented HTTP. Path tenant is an assertion, not
+  authority.
+- Privileged ops require explicit matrix rows. Audit insert must succeed
+  before mutation.
 - Duplicate events cannot duplicate inventory effects. Unchanged history
   rebuilds to the same checksum. Aggregate versions are not silently skipped.
-- Do not weaken these invariants to simplify process or tests.
+- Do not weaken these to simplify process or tests.
 
-## Build, test, and lint
+## Build
 
 ```bash
 go test ./... -count=1 -timeout 15m
 cd web && npm ci && npm run typecheck && npm test && npm run build
 ```
 
-Docker is required for Testcontainers Postgres/Redpanda tests. Hosted
-Documentation CI runs Markdown lint, link check, YAML lint, and gitleaks.
-Match CI Go timeout (`15m`) unless running a documented exit-gate campaign
-(`25m`). Pins: [CONTRACTS.md](CONTRACTS.md) §9.
+Docker is required for Testcontainers tests. CI Go timeout is `15m`. Pins:
+[CONTRACTS.md](CONTRACTS.md) §9.
 
 ## Verification honesty
 
-Before reporting completion, record:
-
-- Files changed and the acceptance criteria they address.
-- Commands actually run and their actual outcomes.
-- Checks not run, with the concrete reason.
-- Assumptions, limitations, and residual risk.
-- Whether the result was type-checked, linted, executed, tested, reproduced,
-  or only statically reviewed.
-
-Do not claim a hosted GitHub workflow passed until an actual hosted run
-exists. If a checkpoint fails, stop. Do not weaken the assertion.
-
-Claim language: [docs/evidence/CLAIM_STATUS_VOCABULARY.md](docs/evidence/CLAIM_STATUS_VOCABULARY.md).
-`Planned` is intended, not built. `Implemented` means code exists.
-`Observed` requires a named environment and artifact.
+Report commands actually run and their outcomes. Name checks not run and why.
+Do not claim a hosted GitHub workflow passed until that run exists. If a
+checkpoint fails, stop. Do not invent evidence.
 
 ## Change discipline
 
-- Inspect `git status`, the branch, recent history, the issue, and related
-  docs before non-trivial edits.
-- Touch only files required by the issue.
-- Match existing style. Do not reformat unrelated files.
+- Touch only files required by the issue. Match existing style.
 - Never run destructive Git commands (`reset --hard`, broad checkout, force
   push to `main`) without explicit authorization.
 - Do not commit, push, merge, open a pull request, or change GitHub/Notion
   settings unless asked.
 - Do not commit secrets.
-
-## Definition of done
-
-- Acceptance criteria satisfied.
-- Change fits the as-built architecture and invariants.
-- Relevant tests and CI pass, or skipped checks are named.
-- Affected docs updated in the same change when practical.
-- No claim exceeds [EVIDENCE.md](EVIDENCE.md).
-- GitHub issue → PR → `main` loop: [CONTRIBUTING.md](CONTRIBUTING.md).
