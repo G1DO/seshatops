@@ -14,6 +14,9 @@ goal, acceptance criteria, important constraints, verification. Non-goals are
 optional. Add failure, security, or recovery detail only when the change is
 high-risk.
 
+Work the issue assigned to you. If you want an unassigned issue, request
+assignment first. Do not start work on an issue that already has an assignee.
+
 ## Pull requests
 
 Use [.github/pull_request_template.md](.github/pull_request_template.md).
