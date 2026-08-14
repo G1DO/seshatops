@@ -37,7 +37,7 @@ Browser (Vite/React web/)
         ▼
 Go (identity/, api/, platform/, relay/, erp/, event/, northstar/)
         │
-        ├── PostgreSQL   (source, outbox, inbox, projection, sessions, audit)
+        ├── PostgreSQL   (source, outbox, inbox, projection, audit)
         └── Redpanda     (at-least-once event transport)
 ```
 
@@ -64,6 +64,9 @@ UI-only work: [web/README.md](web/README.md).
 Hosted checks on pull requests: Go CI, Web CI, Documentation CI (Markdown
 lint, link check, YAML lint, secret scan).
 
+How we work: [CONTRIBUTING.md](CONTRIBUTING.md). Career loop is Notion product
+context → GitHub issue → short-lived branch → PR → `main`.
+
 ## Docs
 
 | Doc | Owns |
@@ -75,7 +78,8 @@ lint, link check, YAML lint, secret scan).
 | [docs/security/](docs/security/) | Threat model, authorization, identity surfaces |
 | [CLEAN_ROOM.md](CLEAN_ROOM.md) | Ahoy exclusion and provenance |
 | [EVIDENCE.md](EVIDENCE.md) | Claim ledger |
-| [AGENTS.md](AGENTS.md) | Agent and contributor contract |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Human GitHub issue → PR → `main` loop |
+| [AGENTS.md](AGENTS.md) | Coding-agent contract |
 
 Operating model: Career → Workflow. Notion owns product context and roadmap.
 GitHub owns execution. This repository owns implemented technical truth.

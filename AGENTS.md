@@ -1,8 +1,9 @@
 # AGENTS.md
 
-Durable instructions for humans and AI coding agents working in this
-repository. Product roadmap and Career Workflow live in Notion. GitHub owns
-execution. Do not copy those systems into this file.
+Durable instructions for AI coding agents working in this repository. Human
+contribution workflow is [CONTRIBUTING.md](CONTRIBUTING.md). Product roadmap
+and Career Workflow live in Notion. GitHub owns execution. Do not copy those
+systems into this file.
 
 ## Repository
 
@@ -126,6 +127,4 @@ Claim language: [docs/evidence/CLAIM_STATUS_VOCABULARY.md](docs/evidence/CLAIM_S
 - Relevant tests and CI pass, or skipped checks are named.
 - Affected docs updated in the same change when practical.
 - No claim exceeds [EVIDENCE.md](EVIDENCE.md).
-- For GitHub work: one issue, short-lived branch, one reviewable PR, squash
-  merge preferred. Title states why. Body states what changed and how it was
-  verified. Link with `Closes #N`.
+- GitHub issue → PR → `main` loop: [CONTRIBUTING.md](CONTRIBUTING.md).
