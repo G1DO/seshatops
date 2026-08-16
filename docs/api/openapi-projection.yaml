@@ -532,6 +532,36 @@ components:
               type: array
               items:
                 type: object
+                properties:
+                  failure_id:
+                    type: string
+                  event_id:
+                    type: string
+                  tenant_id:
+                    type: string
+                  aggregate_type:
+                    type: string
+                  aggregate_id:
+                    type: string
+                  event_type:
+                    type: string
+                  failure_category:
+                    type: string
+                  diagnostic_code:
+                    type: string
+                  quarantine_status:
+                    type: string
+                  source_topic:
+                    type: string
+                  source_partition:
+                    type: integer
+                  source_offset:
+                    type: integer
+                  attempt_count:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
             gaps:
               type: array
               items:

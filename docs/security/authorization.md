@@ -112,8 +112,9 @@ Routes and SSE reconnect/catch-up: [openapi-projection.yaml](../api/openapi-proj
 
 Privileged POSTs: outbox `quarantined` rows return to `pending`; poison may be
 re-driven only with retained same-tenant outbox bytes. Inbox gap/conflict/
-stale rows are not force-applied (`409 not_releasable`). Replay is
-same-tenant; rebuild resets that tenant's derived platform state only.
+stale/invalid/mismatch rows (inventory or lineage) are not force-applied
+(`409 not_releasable`). Replay is same-tenant; rebuild resets that tenant's
+derived platform state only.
 Wrong-tenant `event_id` after an allow is `404` and does not mutate the other
 tenant.
 

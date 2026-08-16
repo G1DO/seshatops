@@ -84,6 +84,10 @@ type OpsProcessing struct {
 type OpsFailureSample struct {
 	FailureID        string `json:"failure_id"`
 	EventID          string `json:"event_id"`
+	TenantID         string `json:"tenant_id"`
+	AggregateType    string `json:"aggregate_type"`
+	AggregateID      string `json:"aggregate_id"`
+	EventType        string `json:"event_type"`
 	FailureCategory  string `json:"failure_category"`
 	DiagnosticCode   string `json:"diagnostic_code"`
 	QuarantineStatus string `json:"quarantine_status"`

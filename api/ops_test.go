@@ -233,10 +233,12 @@ func insertProcessingFailure(t *testing.T, db *sql.DB, failureID, tenantID, even
 	_, err := db.Exec(`
 		INSERT INTO platform.processing_failures (
 			failure_id, consumer_name, event_id, tenant_id,
+			aggregate_type, aggregate_id, event_type,
 			failure_category, diagnostic_code, quarantine_status,
 			source_topic, source_partition, source_offset, attempt_count
 		) VALUES (
 			$1, $2, $3, $4,
+			'inventory_item', 'item-flour-001', 'inventory.quantity_decremented',
 			'handler_poison', $5, 'quarantined',
 			$6, 0, $7, 1
 		)
@@ -269,6 +271,9 @@ func assertTenantOpsSnapshot(t *testing.T, snap api.OpsSnapshot, tenantID, event
 	fail := snap.Processing.Failures[0]
 	if fail.DiagnosticCode != "handler_poison" || fail.EventID != eventID {
 		t.Fatalf("attributed failure = %+v", fail)
+	}
+	if fail.TenantID != tenantID || fail.AggregateType != "inventory_item" || fail.AggregateID == "" {
+		t.Fatalf("failure identity = %+v", fail)
 	}
 	if strings.Contains(fail.DiagnosticCode, `"not"`) || strings.Contains(fail.EventID, "an-envelope") {
 		t.Fatalf("failure sample leaked payload: %+v", fail)

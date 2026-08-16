@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -578,6 +579,8 @@ func redriveGaps(ctx context.Context, db *sql.DB, tenantID, aggregateType, aggre
 	}
 }
 
+// persistParseFailure quarantines bytes that failed Parse. Recovered JSON
+// identity is stored when present; payload bytes are not.
 func persistParseFailure(ctx context.Context, db *sql.DB, value []byte, pos SourcePosition, parseErr error) (Result, error) {
 	category := "malformed_envelope"
 	code := "malformed_envelope"
@@ -595,14 +598,21 @@ func persistParseFailure(ctx context.Context, db *sql.DB, value []byte, pos Sour
 	}
 	defer func() { _ = tx.Rollback() }()
 
+	eventID, tenantID, aggType, aggID, aggVer, schemaVer, eventType := recoveredParseIdentity(value)
 	if err := upsertFailure(ctx, tx, failureRow{
-		EventID:           nil,
-		FailureCategory:   category,
-		DiagnosticCode:    code,
-		ReceivedBytesHash: receivedBytesHash(value),
-		Source:            pos,
-		AttemptCount:      1,
-		QuarantineStatus:  "quarantined",
+		EventID:            eventID,
+		TenantID:           tenantID,
+		AggregateType:      aggType,
+		AggregateID:        aggID,
+		AggregateVersion:   aggVer,
+		EventSchemaVersion: schemaVer,
+		EventType:          eventType,
+		FailureCategory:    category,
+		DiagnosticCode:     code,
+		ReceivedBytesHash:  receivedBytesHash(value),
+		Source:             pos,
+		AttemptCount:       1,
+		QuarantineStatus:   "quarantined",
 	}); err != nil {
 		return Result{}, err
 	}
@@ -651,6 +661,42 @@ func persistConsumerUnsupported(ctx context.Context, db *sql.DB, env event.Envel
 		Disposition: DispositionQuarantinedInvalid,
 		ShouldAck:   true,
 	}, nil
+}
+
+// recoveredParseIdentity copies envelope identity fields from JSON that failed
+// Parse. Payload is ignored. Unparseable input leaves every field nil.
+func recoveredParseIdentity(value []byte) (eventID, tenantID, aggType, aggID *string, aggVer, schemaVer *int64, eventType *string) {
+	var probe struct {
+		EventID            string `json:"event_id"`
+		TenantID           string `json:"tenant_id"`
+		EventType          string `json:"event_type"`
+		EventSchemaVersion *int64 `json:"event_schema_version"`
+		AggregateType      string `json:"aggregate_type"`
+		AggregateID        string `json:"aggregate_id"`
+		AggregateVersion   *int64 `json:"aggregate_version"`
+	}
+	if json.Unmarshal(value, &probe) != nil {
+		return
+	}
+	eventID = nonEmptyPtr(probe.EventID)
+	tenantID = nonEmptyPtr(probe.TenantID)
+	eventType = nonEmptyPtr(probe.EventType)
+	aggType = nonEmptyPtr(probe.AggregateType)
+	aggID = nonEmptyPtr(probe.AggregateID)
+	if probe.AggregateVersion != nil && *probe.AggregateVersion > 0 {
+		aggVer = probe.AggregateVersion
+	}
+	if probe.EventSchemaVersion != nil && *probe.EventSchemaVersion > 0 {
+		schemaVer = probe.EventSchemaVersion
+	}
+	return
+}
+
+func nonEmptyPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
 }
 
 func failureIdentity(env *event.Envelope) (eventID, tenantID, aggType, aggID *string, aggVer, schemaVer *int64, eventType, hash *string) {
