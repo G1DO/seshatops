@@ -1,6 +1,6 @@
 # ADR-0004: Event Spine PostgreSQL Inbox and Projection Consistency
 
-- **Status:** Accepted; Event Spine implements this for inbox and inventory projection
+- **Status:** Accepted; Event Spine implements this for inbox, inventory projection, and lineage projection
 - **Date:** 2026-08-07
 
 ## Context
@@ -16,7 +16,7 @@ distributed transaction with Redpanda.
 1. One PostgreSQL database with logical `erp` and `platform` schemas.
 2. The source transaction records the accepted source hop (lineage or one-line order), any required inventory update, and the immutable outbox row atomically.
 3. The source-owned outbox relay publishes after commit and records published only after broker acknowledgement.
-4. The platform inbox is unique on `(consumer_name, event_id)`. Inbox state and inventory projection changes commit in one transaction.
+4. The platform inbox is unique on `(consumer_name, event_id)`. Inbox state and inventory or lineage projection changes commit in one transaction.
 5. Matching duplicate content is a durable no-op. Conflicting content and missing aggregate versions are quarantined, not silently skipped.
 6. The consumer commits an offset only after the durable processing or quarantine transaction commits.
 

@@ -16,7 +16,8 @@ import (
 const OperatorReplayPartition int32 = 1
 
 // ResetDerivedStateForTenant deletes derived platform state for one tenant:
-// inbox, inventory_projection, and processing_failures rows with that tenant_id.
+// inbox, inventory_projection, lineage projection, and processing_failures
+// rows with that tenant_id.
 // Unattributed processing_failures (tenant_id NULL) and other tenants are
 // untouched. It never mutates the erp schema or broker history.
 func ResetDerivedStateForTenant(ctx context.Context, db *sql.DB, tenantID string) error {
@@ -46,6 +47,11 @@ func ResetDerivedStateForTenant(ctx context.Context, db *sql.DB, tenantID string
 		DELETE FROM platform.inventory_projection WHERE tenant_id = $1
 	`, tenantID); err != nil {
 		return fmt.Errorf("platform: reset tenant projection: %w", err)
+	}
+	for _, q := range derivedLineageDeletesForTenant() {
+		if _, err := tx.ExecContext(ctx, q, tenantID); err != nil {
+			return fmt.Errorf("platform: reset tenant lineage: %w", err)
+		}
 	}
 	if err := tx.Commit(); err != nil {
 		return fmt.Errorf("platform: commit tenant reset: %w", err)

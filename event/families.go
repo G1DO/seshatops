@@ -242,6 +242,30 @@ func AsQuantityDecremented(env Envelope) (QuantityDecremented, bool) {
 	return p, ok
 }
 
+// AsSupplierRegistered returns the supplier payload when env is that family.
+func AsSupplierRegistered(env Envelope) (SupplierRegistered, bool) {
+	p, ok := env.Payload.(SupplierRegistered)
+	return p, ok
+}
+
+// AsIngredientLotReceived returns the ingredient-lot payload when env is that family.
+func AsIngredientLotReceived(env Envelope) (IngredientLotReceived, bool) {
+	p, ok := env.Payload.(IngredientLotReceived)
+	return p, ok
+}
+
+// AsProductionBatchProduced returns the production-batch payload when env is that family.
+func AsProductionBatchProduced(env Envelope) (ProductionBatchProduced, bool) {
+	p, ok := env.Payload.(ProductionBatchProduced)
+	return p, ok
+}
+
+// AsShipmentDispatched returns the shipment payload when env is that family.
+func AsShipmentDispatched(env Envelope) (ShipmentDispatched, bool) {
+	p, ok := env.Payload.(ShipmentDispatched)
+	return p, ok
+}
+
 // WithQuantityDecremented returns a copy of env after applying fn to the inventory payload.
 func WithQuantityDecremented(env Envelope, fn func(*QuantityDecremented)) Envelope {
 	p, ok := AsQuantityDecremented(env)
