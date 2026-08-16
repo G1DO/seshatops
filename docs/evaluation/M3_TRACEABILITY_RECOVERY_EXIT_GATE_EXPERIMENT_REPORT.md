@@ -6,9 +6,8 @@ of unchanged history to matching inventory and lineage checksums, and
 fail-closed tenant-negative traceability HTTP. Test environment only. Not
 production behavior.
 
-Operator G1DO on `feat/77-m3-exit-gate`, 2026-08-16. Measured on a working tree
-based on `557d906` plus this campaign's named gate test and report. Hosted CI is
-not claimed until this pull request's workflow runs exist. Matrix `MX-002` /
+Operator G1DO on `feat/77-m3-exit-gate`, 2026-08-16. Runtime packages at
+`a43e8a5`. Hosted CI on PR #84 `a43e8a5`. Matrix `MX-002` /
 `MX-003`; tenants `TENANT-NS-001` / `TENANT-NS-002`; seed
 `northstar-m3-lineage-v1`. Single Linux host with Docker Testcontainers
 (PostgreSQL 16.14) and in-process sessions. Operator = reviewer. Operator Go
@@ -50,6 +49,11 @@ ok  github.com/G1DO/seshatops/relay     456.227s
 
 Web: 9 files / 44 tests passed; typecheck passed; Vite production-mode
 `npm run build` passed. That build is not a production environment.
+
+Hosted CI on `a43e8a5`: Go
+[31947491770](https://github.com/G1DO/seshatops/actions/runs/31947491770),
+Web [31947491792](https://github.com/G1DO/seshatops/actions/runs/31947491792),
+Docs [31947491781](https://github.com/G1DO/seshatops/actions/runs/31947491781).
 
 The named gate test applies canonical envelope bytes through
 `platform.ProcessRecord` and authorized `httptest`. Full `go test ./...` still

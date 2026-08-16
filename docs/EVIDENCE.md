@@ -26,8 +26,7 @@ assignments. Not production revocation, pentest, or restore.
 ## M3 traceability and recovery
 
 [Report](evaluation/M3_TRACEABILITY_RECOVERY_EXIT_GATE_EXPERIMENT_REPORT.md).
-Measured on a working tree based on `557d906`. Hosted CI is not claimed until
-the pull request that lands this campaign has workflow runs.
+Runtime commit `a43e8a5`; hosted CI on PR #84 `a43e8a5`. Operator = reviewer.
 
 On a single-host Testcontainers topology: an authorized same-tenant batch trace
 returns upstream supplier/lot and downstream shipment/order hops with
