@@ -1,9 +1,11 @@
 import {
   ApiError,
+  type BatchTraceSnapshot,
   type ControlResult,
   type ErrorBody,
   type InventoryItem,
   type InventorySnapshot,
+  type LineageHop,
   type OpsSnapshot,
 } from "./types";
 
@@ -171,6 +173,83 @@ export async function fetchOps(
   }
 
   if (!isOpsSnapshot(body)) {
+    throw new ApiError(response.status, "malformed_response");
+  }
+
+  return body;
+}
+
+function isLineageHop(value: unknown): value is LineageHop {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+  const row = value as Record<string, unknown>;
+  return (
+    typeof row.id === "string" &&
+    typeof row.parent_id === "string" &&
+    typeof row.item_id === "string" &&
+    typeof row.order_id === "string" &&
+    isFiniteNumber(row.aggregate_version) &&
+    typeof row.source_event_id === "string" &&
+    isFiniteNumber(row.event_schema_version) &&
+    typeof row.occurred_at === "string" &&
+    typeof row.recorded_at === "string" &&
+    typeof row.correlation_id === "string" &&
+    (row.causation_id === null || typeof row.causation_id === "string") &&
+    typeof row.trace_id === "string"
+  );
+}
+
+function isBatchTraceSnapshot(value: unknown): value is BatchTraceSnapshot {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+  const body = value as Record<string, unknown>;
+  return (
+    typeof body.tenant_id === "string" &&
+    typeof body.observed_at === "string" &&
+    isLineageHop(body.supplier) &&
+    isLineageHop(body.lot) &&
+    isLineageHop(body.batch) &&
+    isLineageHop(body.shipment)
+  );
+}
+
+/** Authorized batch lineage. Does not authorize or interpret lineage rules. */
+export async function fetchBatchTrace(
+  baseUrl: string,
+  tenantId: string,
+  batchId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<BatchTraceSnapshot> {
+  const root = baseUrl.replace(/\/$/, "");
+  const url = `${root}/v1/tenants/${encodeURIComponent(tenantId)}/ops/lineage/batches/${encodeURIComponent(batchId)}`;
+  let response: Response;
+  try {
+    response = await fetchImpl(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      credentials: "include",
+    });
+  } catch {
+    throw new ApiError(0, "network_error");
+  }
+
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    throw new ApiError(response.status, "malformed_response");
+  }
+
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      errorCodeFromBody(body) ?? "request_failed",
+    );
+  }
+
+  if (!isBatchTraceSnapshot(body)) {
     throw new ApiError(response.status, "malformed_response");
   }
 

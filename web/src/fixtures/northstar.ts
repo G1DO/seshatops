@@ -3,6 +3,11 @@
 export const NORTHSTAR_TENANT_ID = "11111111-1111-4111-8111-111111111111";
 export const NORTHSTAR_ITEM_ID = "item-flour-001";
 export const NORTHSTAR_EVENT_ID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20a1";
+export const NORTHSTAR_BATCH_ID = "batch-bread-001";
+export const NORTHSTAR_SUPPLIER_ID = "mill-northstar-001";
+export const NORTHSTAR_LOT_ID = "lot-flour-2026-001";
+export const NORTHSTAR_SHIPMENT_ID = "ship-northstar-001";
+export const NORTHSTAR_LINEAGE_ORDER_ID = "218f5d78-6e64-4f5f-bd16-8e9f7c4a3020";
 
 /** Demo-only expected quantities from the deterministic Event Spine fixture narrative. */
 export const NORTHSTAR_QUANTITY_BEFORE = 10;
@@ -96,6 +101,57 @@ export function sampleOpsSnapshot() {
           created_at: "2026-08-13T05:58:00.000Z",
         },
       ],
+    },
+  };
+}
+
+export function sampleBatchTrace() {
+  const hop = {
+    id: NORTHSTAR_SUPPLIER_ID,
+    parent_id: "",
+    item_id: "",
+    order_id: "",
+    aggregate_version: 1,
+    source_event_id: "218f5d78-6e64-4f5f-bd16-8e9f7c4a3011",
+    event_schema_version: 1,
+    occurred_at: "2026-08-07T10:00:00Z",
+    recorded_at: "2026-08-07T10:00:00Z",
+    correlation_id: "218f5d78-6e64-4f5f-bd16-8e9f7c4a3001",
+    causation_id: null as string | null,
+    trace_id: "218f5d78-6e64-4f5f-bd16-8e9f7c4a3002",
+  };
+  return {
+    tenant_id: NORTHSTAR_TENANT_ID,
+    observed_at: "2026-08-16T10:00:00.000Z",
+    supplier: hop,
+    lot: {
+      ...hop,
+      id: NORTHSTAR_LOT_ID,
+      parent_id: NORTHSTAR_SUPPLIER_ID,
+      item_id: NORTHSTAR_ITEM_ID,
+      source_event_id: "218f5d78-6e64-4f5f-bd16-8e9f7c4a3012",
+      occurred_at: "2026-08-07T10:01:00Z",
+      recorded_at: "2026-08-07T10:01:00Z",
+      causation_id: hop.source_event_id,
+    },
+    batch: {
+      ...hop,
+      id: NORTHSTAR_BATCH_ID,
+      parent_id: NORTHSTAR_LOT_ID,
+      source_event_id: "218f5d78-6e64-4f5f-bd16-8e9f7c4a3013",
+      occurred_at: "2026-08-07T10:02:00Z",
+      recorded_at: "2026-08-07T10:02:00Z",
+      causation_id: "218f5d78-6e64-4f5f-bd16-8e9f7c4a3012",
+    },
+    shipment: {
+      ...hop,
+      id: NORTHSTAR_SHIPMENT_ID,
+      parent_id: NORTHSTAR_BATCH_ID,
+      order_id: NORTHSTAR_LINEAGE_ORDER_ID,
+      source_event_id: "218f5d78-6e64-4f5f-bd16-8e9f7c4a3014",
+      occurred_at: "2026-08-07T10:03:00Z",
+      recorded_at: "2026-08-07T10:03:00Z",
+      causation_id: "218f5d78-6e64-4f5f-bd16-8e9f7c4a3013",
     },
   };
 }

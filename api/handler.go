@@ -59,7 +59,7 @@ func (s *Server) SetSSEHeartbeatForTest(d time.Duration) {
 // Handler returns the HTTP handler for the Event Spine projection routes.
 // Every /v1 path requires a fresh Go-owned session (Issue #45). Inventory
 // reads also require MX-001 for the path tenant (Issue #46). Ops visibility
-// requires MX-002 or MX-003 (Issue #47). Privileged POSTs require MX-004,
+// and batch lineage reads require MX-002 or MX-003 (Issue #47 / #74). Privileged POSTs require MX-004,
 // MX-005, or MX-006 (Issue #48). Audit read requires MX-007 (Issue #49).
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
@@ -75,6 +75,11 @@ func (s *Server) serveTenant(w http.ResponseWriter, r *http.Request) {
 	}
 	if !validTenantID(tenantID) {
 		writeJSON(w, http.StatusBadRequest, ErrorBody{Error: "invalid_tenant_id"})
+		return
+	}
+
+	if batchID, ok := lineageBatchID(rest); ok {
+		s.serveBatchLineage(w, r, tenantID, batchID)
 		return
 	}
 

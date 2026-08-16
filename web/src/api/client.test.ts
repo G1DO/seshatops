@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { fetchOps, fetchSnapshot, postQuarantineRelease } from "./client";
+import { fetchBatchTrace, fetchOps, fetchSnapshot, postQuarantineRelease } from "./client";
 import { ApiError, FORBIDDEN, UNAUTHENTICATED } from "./types";
 import {
+  NORTHSTAR_BATCH_ID,
   NORTHSTAR_TENANT_ID,
+  sampleBatchTrace,
   sampleOpsSnapshot,
   sampleSnapshotBefore,
 } from "../fixtures/northstar";
@@ -179,5 +181,97 @@ describe("postQuarantineRelease", () => {
         credentials: "include",
       }),
     );
+  });
+});
+
+describe("fetchBatchTrace", () => {
+  it("returns a validated lineage snapshot on success and sends cookies", async () => {
+    const snapshot = sampleBatchTrace();
+    const fetchImpl = vi.fn<typeof fetch>(async () =>
+      new Response(JSON.stringify(snapshot), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await expect(
+      fetchBatchTrace(
+        "http://example.test",
+        NORTHSTAR_TENANT_ID,
+        NORTHSTAR_BATCH_ID,
+        fetchImpl,
+      ),
+    ).resolves.toEqual(snapshot);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      `http://example.test/v1/tenants/${NORTHSTAR_TENANT_ID}/ops/lineage/batches/${NORTHSTAR_BATCH_ID}`,
+      expect.objectContaining({
+        method: "GET",
+        credentials: "include",
+      }),
+    );
+  });
+
+  it("maps unauthenticated, forbidden, and not_found without treating them as snapshots", async () => {
+    const unauth: typeof fetch = async () =>
+      new Response(JSON.stringify({ error: UNAUTHENTICATED }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    await expect(
+      fetchBatchTrace(
+        "http://example.test",
+        NORTHSTAR_TENANT_ID,
+        NORTHSTAR_BATCH_ID,
+        unauth,
+      ),
+    ).rejects.toMatchObject({
+      name: "ApiError",
+      code: UNAUTHENTICATED,
+      status: 401,
+    } satisfies Partial<ApiError>);
+
+    const forbidden: typeof fetch = async () =>
+      new Response(JSON.stringify({ error: FORBIDDEN }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    await expect(
+      fetchBatchTrace(
+        "http://example.test",
+        NORTHSTAR_TENANT_ID,
+        NORTHSTAR_BATCH_ID,
+        forbidden,
+      ),
+    ).rejects.toMatchObject({ code: FORBIDDEN, status: 403 });
+
+    const missing: typeof fetch = async () =>
+      new Response(JSON.stringify({ error: "not_found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    await expect(
+      fetchBatchTrace(
+        "http://example.test",
+        NORTHSTAR_TENANT_ID,
+        NORTHSTAR_BATCH_ID,
+        missing,
+      ),
+    ).rejects.toMatchObject({ code: "not_found", status: 404 });
+  });
+
+  it("rejects malformed success bodies", async () => {
+    const fetchImpl: typeof fetch = async () =>
+      new Response(JSON.stringify({ tenant_id: "x" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    await expect(
+      fetchBatchTrace(
+        "http://example.test",
+        NORTHSTAR_TENANT_ID,
+        NORTHSTAR_BATCH_ID,
+        fetchImpl,
+      ),
+    ).rejects.toMatchObject({ code: "malformed_response" });
   });
 });

@@ -147,3 +147,29 @@ type AuditSnapshot struct {
 	ObservedAt string            `json:"observed_at"`
 	Records    []ControlDecision `json:"records"`
 }
+
+// LineageHop is one projected lineage node plus source provenance.
+type LineageHop struct {
+	ID                 string  `json:"id"`
+	ParentID           string  `json:"parent_id"`
+	ItemID             string  `json:"item_id"`
+	OrderID            string  `json:"order_id"`
+	AggregateVersion   int64   `json:"aggregate_version"`
+	SourceEventID      string  `json:"source_event_id"`
+	EventSchemaVersion int64   `json:"event_schema_version"`
+	OccurredAt         string  `json:"occurred_at"`
+	RecordedAt         string  `json:"recorded_at"`
+	CorrelationID      string  `json:"correlation_id"`
+	CausationID        *string `json:"causation_id"`
+	TraceID            string  `json:"trace_id"`
+}
+
+// BatchTraceSnapshot is the authorized supplier → order chain for one batch.
+type BatchTraceSnapshot struct {
+	TenantID   string     `json:"tenant_id"`
+	ObservedAt string     `json:"observed_at"`
+	Supplier   LineageHop `json:"supplier"`
+	Lot        LineageHop `json:"lot"`
+	Batch      LineageHop `json:"batch"`
+	Shipment   LineageHop `json:"shipment"`
+}

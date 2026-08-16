@@ -4,9 +4,9 @@ info:
   version: "1.0.0"
   description: |
     Go HTTP/SSE for the committed inventory projection, ops visibility,
-    privileged controls, and privileged-decision audit. A Go-owned session is
-    required (`401 unauthenticated`). Allow-list rows are in
-    docs/security/authorization.md (`403 forbidden` when unauthorized).
+    batch lineage, privileged controls, and privileged-decision audit. A
+    Go-owned session is required (`401 unauthenticated`). Allow-list rows are
+    in docs/security/authorization.md (`403 forbidden` when unauthorized).
     SSE is at-least-once and may drop for slow clients; REST is the
     authoritative reconnect/catch-up path.
 servers:
@@ -143,6 +143,65 @@ paths:
       summary: Rejected write (read-only)
       parameters:
         - $ref: "#/components/parameters/TenantID"
+      responses:
+        "405":
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /v1/tenants/{tenant_id}/ops/lineage/batches/{batch_id}:
+    get:
+      operationId: getBatchLineage
+      summary: Authorized upstream and downstream lineage for one production batch
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+        - $ref: "#/components/parameters/BatchID"
+      responses:
+        "200":
+          description: Tenant-scoped lineage hops with source provenance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchTraceSnapshot"
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller is not authorized for this tenant lineage read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "400":
+          description: Invalid tenant_id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: >
+            Authorized caller, but the batch is missing in this tenant
+            (including a batch id that only exists under another tenant)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "405":
+          description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    post:
+      operationId: postBatchLineageRejected
+      summary: Rejected write (read-only)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+        - $ref: "#/components/parameters/BatchID"
       responses:
         "405":
           description: Method not allowed
@@ -313,6 +372,13 @@ components:
         type: string
         format: uuid
         description: Lowercase UUIDv4 tenant identifier (path assertion; matrix row evaluated separately)
+    BatchID:
+      name: batch_id
+      in: path
+      required: true
+      schema:
+        type: string
+        description: Production batch aggregate id (path assertion; tenant comes from tenant_id)
   schemas:
     InventoryItem:
       type: object
@@ -553,3 +619,64 @@ components:
       properties:
         error:
           type: string
+    LineageHop:
+      type: object
+      required:
+        - id
+        - parent_id
+        - item_id
+        - order_id
+        - aggregate_version
+        - source_event_id
+        - event_schema_version
+        - occurred_at
+        - recorded_at
+        - correlation_id
+        - causation_id
+        - trace_id
+      properties:
+        id:
+          type: string
+        parent_id:
+          type: string
+        item_id:
+          type: string
+        order_id:
+          type: string
+        aggregate_version:
+          type: integer
+          format: int64
+        source_event_id:
+          type: string
+        event_schema_version:
+          type: integer
+          format: int64
+        occurred_at:
+          type: string
+        recorded_at:
+          type: string
+        correlation_id:
+          type: string
+        causation_id:
+          type: string
+          nullable: true
+        trace_id:
+          type: string
+    BatchTraceSnapshot:
+      type: object
+      required: [tenant_id, observed_at, supplier, lot, batch, shipment]
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+        observed_at:
+          type: string
+          format: date-time
+        supplier:
+          $ref: "#/components/schemas/LineageHop"
+        lot:
+          $ref: "#/components/schemas/LineageHop"
+        batch:
+          $ref: "#/components/schemas/LineageHop"
+        shipment:
+          $ref: "#/components/schemas/LineageHop"

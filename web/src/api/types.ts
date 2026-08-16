@@ -126,5 +126,31 @@ export interface ControlResult {
   duplicate_noop: number;
   quarantined: number;
   checksum?: string;
-  incomplete_reasons?: string[];
+	incomplete_reasons?: string[];
+}
+
+/** One hop in the authorized batch lineage chain. */
+export interface LineageHop {
+  id: string;
+  parent_id: string;
+  item_id: string;
+  order_id: string;
+  aggregate_version: number;
+  source_event_id: string;
+  event_schema_version: number;
+  occurred_at: string;
+  recorded_at: string;
+  correlation_id: string;
+  causation_id: string | null;
+  trace_id: string;
+}
+
+/** Authorized GET .../ops/lineage/batches/{batch_id} snapshot. */
+export interface BatchTraceSnapshot {
+  tenant_id: string;
+  observed_at: string;
+  supplier: LineageHop;
+  lot: LineageHop;
+  batch: LineageHop;
+  shipment: LineageHop;
 }

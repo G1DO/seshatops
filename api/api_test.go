@@ -473,7 +473,7 @@ func TestReadOnlyRejectsMutatingMethods(t *testing.T) {
 	}
 
 	for _, method := range []string{http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete} {
-		for _, path := range []string{inventoryPath(fx.TenantID), streamPath(fx.TenantID), opsPath(fx.TenantID)} {
+		for _, path := range []string{inventoryPath(fx.TenantID), streamPath(fx.TenantID), opsPath(fx.TenantID), lineagePath(fx.TenantID, "batch-bread-001")} {
 			req, err := http.NewRequest(method, ts.URL+path, bytes.NewReader([]byte(`{}`)))
 			if err != nil {
 				t.Fatal(err)
@@ -510,6 +510,7 @@ func TestMalformedTenantRejected(t *testing.T) {
 		"/v1/tenants//inventory",
 		"/v1/tenants/not-a-uuid/ops",
 		"/v1/tenants/11111111-1111-4111-8111-11111111111F/ops",
+		"/v1/tenants/not-a-uuid/ops/lineage/batches/batch-bread-001",
 	}
 	for _, path := range cases {
 		resp, err := http.Get(ts.URL + path)
@@ -584,6 +585,19 @@ func TestUnauthenticatedRefusedOnRESTAndSSE(t *testing.T) {
 	}
 	if !strings.Contains(string(body), "unauthenticated") {
 		t.Fatalf("ops body=%s", body)
+	}
+
+	resp, err = http.Get(ts.URL + lineagePath(fx.TenantID, "batch-bread-001"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ = io.ReadAll(resp.Body)
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("lineage status=%d body=%s", resp.StatusCode, body)
+	}
+	if !strings.Contains(string(body), "unauthenticated") {
+		t.Fatalf("lineage body=%s", body)
 	}
 }
 

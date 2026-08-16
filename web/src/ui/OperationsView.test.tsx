@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { OperationsView } from "./OperationsView";
-import { NORTHSTAR_ITEM_ID, NORTHSTAR_TENANT_ID } from "../fixtures/northstar";
+import { NORTHSTAR_ITEM_ID, NORTHSTAR_TENANT_ID, sampleBatchTrace } from "../fixtures/northstar";
 
 describe("OperationsView", () => {
   it("renders loading without claiming live currency", () => {
@@ -141,6 +141,90 @@ describe("OperationsView", () => {
     );
     expect(screen.getByTestId("ops-error")).toHaveTextContent("forbidden");
     expect(screen.queryByTestId("ops-pending")).toBeNull();
+  });
+
+  it("renders batch lineage and provenance", () => {
+    const trace = sampleBatchTrace();
+    render(
+      <OperationsView
+        connection="live"
+        projection={{
+          items: [],
+          checksum: "abc",
+          observed_at: "2026-08-12T07:00:00Z",
+          last_applied_event_id: null,
+        }}
+        errorMessage={null}
+        tenantId={NORTHSTAR_TENANT_ID}
+        lineage={trace}
+        lineageError={null}
+        lineageBatchId={trace.batch.id}
+      />,
+    );
+    expect(screen.getByTestId("lineage-supplier")).toHaveTextContent(
+      trace.supplier.id,
+    );
+    expect(screen.getByTestId("lineage-lot")).toHaveTextContent(trace.lot.id);
+    expect(screen.getByTestId("lineage-batch")).toHaveTextContent(trace.batch.id);
+    expect(screen.getByTestId("lineage-shipment")).toHaveTextContent(
+      trace.shipment.id,
+    );
+    expect(screen.getByTestId("lineage-order")).toHaveTextContent(
+      trace.shipment.order_id,
+    );
+    expect(screen.getByTestId("lineage-supplier-event")).toHaveTextContent(
+      trace.supplier.source_event_id,
+    );
+  });
+
+  it("renders lineage forbidden without hiding inventory", () => {
+    render(
+      <OperationsView
+        connection="live"
+        projection={{
+          items: [
+            {
+              item_id: NORTHSTAR_ITEM_ID,
+              quantity_on_hand: 8,
+              aggregate_version: 1,
+              previous_quantity_on_hand: 10,
+            },
+          ],
+          checksum: "abc",
+          observed_at: "2026-08-12T07:00:00Z",
+          last_applied_event_id: "evt-1",
+        }}
+        errorMessage={null}
+        tenantId={NORTHSTAR_TENANT_ID}
+        lineage={null}
+        lineageError="forbidden"
+      />,
+    );
+    expect(screen.getByTestId(`after-${NORTHSTAR_ITEM_ID}`)).toHaveTextContent(
+      "8",
+    );
+    expect(screen.getByTestId("lineage-error")).toHaveTextContent("forbidden");
+    expect(screen.queryByTestId("lineage-supplier")).toBeNull();
+  });
+
+  it("renders empty lineage without inventing a chain", () => {
+    render(
+      <OperationsView
+        connection="live"
+        projection={{
+          items: [],
+          checksum: "",
+          observed_at: "",
+          last_applied_event_id: null,
+        }}
+        errorMessage={null}
+        tenantId={NORTHSTAR_TENANT_ID}
+        lineage={null}
+        lineageError={null}
+      />,
+    );
+    expect(screen.getByTestId("lineage-empty")).toBeTruthy();
+    expect(screen.queryByTestId("lineage-supplier")).toBeNull();
   });
 
   it("shows control 403 as a request error, not a grant", () => {
