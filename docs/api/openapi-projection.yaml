@@ -601,6 +601,10 @@ components:
           type: integer
         checksum:
           type: string
+          description: Inventory projection checksum (event-spine.md §8)
+        lineage_checksum:
+          type: string
+          description: Lineage projection checksum; independent of inventory
         incomplete_reasons:
           type: array
           items:

@@ -128,6 +128,7 @@ type ControlResult struct {
 	DuplicateNoop     int      `json:"duplicate_noop"`
 	Quarantined       int      `json:"quarantined"`
 	Checksum          string   `json:"checksum,omitempty"`
+	LineageChecksum   string   `json:"lineage_checksum,omitempty"`
 	IncompleteReasons []string `json:"incomplete_reasons,omitempty"`
 }
 

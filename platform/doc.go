@@ -14,8 +14,8 @@
 //
 // ResetDerivedState and RebuildFromHistory clear only derived platform state
 // and replay retained event bytes through the same projection handler,
-// comparing docs/design/specifications/event-spine.md §8 checksums. ResetDerivedStateForTenant,
-// ReplayTenantHistory, and RebuildTenantFromHistory are the tenant-scoped
-// operator helpers. This package does not claim exactly-once delivery or
-// processing, and does not own backup/restore.
+// comparing event-spine.md §8 inventory and lineage checksums.
+// ResetDerivedStateForTenant, ReplayTenantHistory, and RebuildTenantFromHistory
+// are the tenant-scoped operator helpers. This package does not claim
+// exactly-once delivery or processing, and does not own backup/restore.
 package platform

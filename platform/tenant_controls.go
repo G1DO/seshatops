@@ -377,7 +377,12 @@ func replayTenantRecords(ctx context.Context, db *sql.DB, tenantID string, recor
 	if err != nil {
 		return out, err
 	}
+	lin, err := ChecksumLineage(ctx, db, tenantID)
+	if err != nil {
+		return out, err
+	}
 	out.Checksum = sum
+	out.LineageChecksum = lin
 	out.Metadata.Checksum = sum
 	out.Metadata.RebuildStatus = out.Status
 	return out, nil
