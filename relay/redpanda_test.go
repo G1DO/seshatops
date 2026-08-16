@@ -203,44 +203,40 @@ func TestRedpandaBrokerOutagePersistenceAndRecovery(t *testing.T) {
 
 func TestRedpandaLineageBrokerOutagePersistenceAndRecovery(t *testing.T) {
 	db := openTestDB(t)
-	fx, err := northstar.GenerateLineage(northstar.LineageSeed)
-	if err != nil {
-		t.Fatal(err)
-	}
+	fx, hops, orderRes := seedAndAcceptLineage(t, db)
 	ctx := context.Background()
-	if err := erp.SeedLineageInventory(ctx, db, fx); err != nil {
-		t.Fatal(err)
-	}
-	cmd, err := erp.SupplierCommandFromLineage(fx)
-	if err != nil {
-		t.Fatal(err)
+
+	wantBytes := map[string][]byte{
+		hops[0].EventID:  hops[0].EventBytes,
+		hops[1].EventID:  hops[1].EventBytes,
+		hops[2].EventID:  hops[2].EventBytes,
+		hops[3].EventID:  hops[3].EventBytes,
+		orderRes.EventID: orderRes.EventBytes,
 	}
 
-	res, err := erp.RegisterSupplier(ctx, db, cmd)
-	if err != nil {
-		t.Fatal(err)
-	}
 	badPub, err := NewFranzPublisher("127.0.0.1:1")
 	if err != nil {
 		t.Fatal(err)
 	}
-	out, err := DrainOnce(ctx, db, badPub, "relay-lineage-outage", DefaultLeaseTTL, 1)
+	outageCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	out, err := DrainOnce(outageCtx, db, badPub, "relay-lineage-outage", DefaultLeaseTTL, 10)
+	cancel()
 	badPub.Close()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if out.Transient != 1 {
-		t.Fatalf("expected transient publish failure, got %+v", out)
+	if out.Claimed != 5 || out.Transient != 5 {
+		t.Fatalf("expected five transient publish failures, got %+v", out)
 	}
-	status, _, _, _ := outboxStatus(t, db, res.EventID)
-	if status != StatusPending {
-		t.Fatalf("status = %s want pending", status)
-	}
-	if countRows(t, db, `SELECT COUNT(*) FROM erp.suppliers`) != 1 {
-		t.Fatal("accepted supplier disappeared during broker outage")
+	assertFullLineageSourceRetained(t, db)
+	for id := range wantBytes {
+		status, _, _, _ := outboxStatus(t, db, id)
+		if status != StatusPending {
+			t.Fatalf("status = %s want pending for %s", status, id)
+		}
 	}
 
-	clearBackoff(t, db, res.EventID)
+	clearAllPendingBackoff(t, db)
 
 	seed, stop := startRedpanda(t)
 	t.Cleanup(stop)
@@ -250,23 +246,34 @@ func TestRedpandaLineageBrokerOutagePersistenceAndRecovery(t *testing.T) {
 	}
 	t.Cleanup(pub.Close)
 
-	out, err = DrainOnce(ctx, db, pub, "relay-lineage-recovery", DefaultLeaseTTL, 1)
+	out, err = DrainOnce(ctx, db, pub, "relay-lineage-recovery", DefaultLeaseTTL, 10)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if out.Published != 1 {
+	if out.Published != 5 {
 		t.Fatalf("recovery drain %+v", out)
 	}
-	recs := consumeAll(t, seed, 1, 30*time.Second)
-	if string(recs[0].Value) != string(res.EventBytes) {
-		t.Fatal("recovery publication rewrote event content")
+	recs := consumeAll(t, seed, 5, 30*time.Second)
+	seen := map[string]bool{}
+	for _, rec := range recs {
+		parsed, err := event.Parse(rec.Value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		stored, ok := wantBytes[parsed.EventID]
+		if !ok {
+			t.Fatalf("unexpected event_id %s", parsed.EventID)
+		}
+		if string(rec.Value) != string(stored) {
+			t.Fatal("recovery publication rewrote event content")
+		}
+		if err := event.CheckIdentityConflict(parsed, lineageEnvelope(t, fx, parsed.EventID)); err != nil {
+			t.Fatal(err)
+		}
+		seen[parsed.EventID] = true
 	}
-	parsed, err := event.Parse(recs[0].Value)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := event.CheckIdentityConflict(parsed, fx.Events[0]); err != nil {
-		t.Fatal(err)
+	if len(seen) != 5 {
+		t.Fatalf("recovered identities = %d", len(seen))
 	}
 }
 

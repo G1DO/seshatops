@@ -756,50 +756,79 @@ func lineageEnvelope(t *testing.T, fx northstar.LineageFixture, eventID string) 
 
 func TestAcceptLineageSurvivesUnreachableBroker(t *testing.T) {
 	db := openTestDB(t)
-	fx, err := northstar.GenerateLineage(northstar.LineageSeed)
-	if err != nil {
-		t.Fatal(err)
-	}
+	_, hops, orderRes := seedAndAcceptLineage(t, db)
 	ctx := context.Background()
-	if err := erp.SeedLineageInventory(ctx, db, fx); err != nil {
-		t.Fatal(err)
-	}
-	cmd, err := erp.SupplierCommandFromLineage(fx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	res, err := erp.RegisterSupplier(ctx, db, cmd)
-	if err != nil {
-		t.Fatal(err)
-	}
 	pub, err := NewFranzPublisher("127.0.0.1:1")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(pub.Close)
 
-	drainCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	drainCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
-	out, err := DrainOnce(drainCtx, db, pub, "worker-lineage", time.Minute, 1)
+	out, err := DrainOnce(drainCtx, db, pub, "worker-lineage", time.Minute, 10)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if out.Transient != 1 {
-		t.Fatalf("expected transient failure, got %+v", out)
+	if out.Claimed != 5 || out.Transient != 5 {
+		t.Fatalf("expected five transient failures, got %+v", out)
 	}
-	status, _, _, _ := outboxStatus(t, db, res.EventID)
-	if status != StatusPending {
-		t.Fatalf("status = %s", status)
-	}
-	if countRows(t, db, `SELECT COUNT(*) FROM erp.suppliers`) != 1 {
-		t.Fatal("accepted supplier disappeared during broker outage")
+	assertFullLineageSourceRetained(t, db)
+	ids := append(lineageHopIDs(hops), orderRes.EventID)
+	for _, id := range ids {
+		status, _, _, _ := outboxStatus(t, db, id)
+		if status != StatusPending {
+			t.Fatalf("status = %s for %s", status, id)
+		}
 	}
 	b, err := InspectBacklog(ctx, db)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if b.Pending != 1 {
+	if b.Pending != 5 {
 		t.Fatalf("backlog %+v", b)
+	}
+}
+
+func assertFullLineageSourceRetained(t *testing.T, db *sql.DB) {
+	t.Helper()
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.suppliers`) != 1 {
+		t.Fatal("accepted supplier disappeared")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.ingredient_lots`) != 1 {
+		t.Fatal("accepted lot disappeared")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.production_batches`) != 1 {
+		t.Fatal("accepted batch disappeared")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.shipments`) != 1 {
+		t.Fatal("accepted shipment disappeared")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.orders`) != 1 {
+		t.Fatal("accepted order disappeared")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 5 {
+		t.Fatal("expected five outbox rows")
+	}
+}
+
+func lineageHopIDs(hops []erp.SourceAcceptResult) []string {
+	ids := make([]string, 0, len(hops))
+	for _, hop := range hops {
+		ids = append(ids, hop.EventID)
+	}
+	return ids
+}
+
+func clearAllPendingBackoff(t *testing.T, db *sql.DB) {
+	t.Helper()
+	_, err := db.Exec(`
+		UPDATE erp.outbox
+		SET publish_lease_expires_at = NULL
+		WHERE status = 'pending'
+	`)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 

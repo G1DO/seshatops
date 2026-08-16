@@ -16,6 +16,11 @@ const (
 	otherEventID2 = "318f5d78-6e64-4f5f-bd16-8e9f7c4a4012"
 	otherEventID3 = "318f5d78-6e64-4f5f-bd16-8e9f7c4a4013"
 	otherCorrID   = "318f5d78-6e64-4f5f-bd16-8e9f7c4a4001"
+	otherOrderID  = "318f5d78-6e64-4f5f-bd16-8e9f7c4a4020"
+	chain2Event1  = "418f5d78-6e64-4f5f-bd16-8e9f7c4a5011"
+	chain2Event2  = "418f5d78-6e64-4f5f-bd16-8e9f7c4a5012"
+	chain2Event3  = "418f5d78-6e64-4f5f-bd16-8e9f7c4a5013"
+	chain2Event4  = "418f5d78-6e64-4f5f-bd16-8e9f7c4a5014"
 )
 
 func ptr(s string) *string { return &s }
@@ -579,5 +584,436 @@ func TestLineageCommandBuildersRejectWrongFamily(t *testing.T) {
 	wrong.Events = []event.Envelope{fx.Events[1]}
 	if _, err := SupplierCommandFromLineage(wrong); !errors.Is(err, ErrInvalidFixture) {
 		t.Fatalf("wrong family: %v", err)
+	}
+}
+
+func TestLineageHopRollbackLeavesNoPartialState(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	seedLineageDB(t, db, fx)
+	ctx := context.Background()
+
+	if _, err := RegisterSupplier(ctx, db, mustSupplierCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+	forceFailBeforeCommit(t)
+	if _, err := ReceiveIngredientLot(ctx, db, mustLotCmd(t, fx)); err == nil {
+		t.Fatal("expected lot rollback")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.ingredient_lots`) != 0 {
+		t.Fatal("lot should not be committed")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.suppliers`) != 1 {
+		t.Fatal("supplier must remain")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 1 {
+		t.Fatal("expected only supplier outbox")
+	}
+
+	setTestFailBeforeCommitForTest(nil)
+	if _, err := ReceiveIngredientLot(ctx, db, mustLotCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+	forceFailBeforeCommit(t)
+	if _, err := ProduceProductionBatch(ctx, db, mustBatchCmd(t, fx)); err == nil {
+		t.Fatal("expected batch rollback")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.production_batches`) != 0 {
+		t.Fatal("batch should not be committed")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.ingredient_lots`) != 1 {
+		t.Fatal("lot must remain")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 2 {
+		t.Fatal("expected supplier and lot outbox")
+	}
+
+	setTestFailBeforeCommitForTest(nil)
+	if _, err := ProduceProductionBatch(ctx, db, mustBatchCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+	forceFailBeforeCommit(t)
+	if _, err := DispatchShipment(ctx, db, mustShipCmd(t, fx)); err == nil {
+		t.Fatal("expected shipment rollback")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.shipments`) != 0 {
+		t.Fatal("shipment should not be committed")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.production_batches`) != 1 {
+		t.Fatal("batch must remain")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 3 {
+		t.Fatal("expected three prior outbox rows")
+	}
+}
+
+func TestLineageOrderIDUniqueness(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	seedLineageDB(t, db, fx)
+	ctx := context.Background()
+	acceptThroughShipment(t, db, fx)
+
+	supplier := mustSupplierCmd(t, fx)
+	supplier.SupplierID = "mill-northstar-002"
+	supplier.EventID = chain2Event1
+	second, err := RegisterSupplier(ctx, db, supplier)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lot := mustLotCmd(t, fx)
+	lot.LotID = "lot-flour-2026-002"
+	lot.SupplierID = "mill-northstar-002"
+	lot.EventID = chain2Event2
+	lot.CausationID = ptr(second.EventID)
+	if _, err := ReceiveIngredientLot(ctx, db, lot); err != nil {
+		t.Fatal(err)
+	}
+
+	batch := mustBatchCmd(t, fx)
+	batch.BatchID = "batch-bread-002"
+	batch.LotID = "lot-flour-2026-002"
+	batch.EventID = chain2Event3
+	batch.CausationID = ptr(chain2Event2)
+	if _, err := ProduceProductionBatch(ctx, db, batch); err != nil {
+		t.Fatal(err)
+	}
+
+	ship := mustShipCmd(t, fx)
+	ship.ShipmentID = "ship-northstar-002"
+	ship.BatchID = "batch-bread-002"
+	ship.EventID = chain2Event4
+	ship.CausationID = ptr(chain2Event3)
+	if _, err := DispatchShipment(ctx, db, ship); !errors.Is(err, ErrDuplicateSource) {
+		t.Fatalf("reused order_id: %v", err)
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.shipments`) != 1 {
+		t.Fatal("expected one shipment")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 7 {
+		t.Fatal("failed shipment must not insert outbox")
+	}
+}
+
+func TestLineageWrongTenantBatchAndShipmentAreUnknownSource(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	seedLineageDB(t, db, fx)
+	ctx := context.Background()
+	if _, err := RegisterSupplier(ctx, db, mustSupplierCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ReceiveIngredientLot(ctx, db, mustLotCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+
+	batch := mustBatchCmd(t, fx)
+	batch.TenantID = otherTenantID
+	batch.EventID = otherEventID
+	batch.CorrelationID = otherCorrID
+	if _, err := ProduceProductionBatch(ctx, db, batch); !errors.Is(err, ErrUnknownSource) {
+		t.Fatalf("batch wrong tenant: %v", err)
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.production_batches`) != 0 {
+		t.Fatal("batch inserted for wrong tenant")
+	}
+
+	if _, err := ProduceProductionBatch(ctx, db, mustBatchCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+
+	ship := mustShipCmd(t, fx)
+	ship.TenantID = otherTenantID
+	ship.EventID = otherEventID2
+	ship.CorrelationID = otherCorrID
+	if _, err := DispatchShipment(ctx, db, ship); !errors.Is(err, ErrUnknownSource) {
+		t.Fatalf("shipment wrong tenant: %v", err)
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.shipments`) != 0 {
+		t.Fatal("shipment inserted for wrong tenant")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 3 {
+		t.Fatal("expected only tenant-A hops in outbox")
+	}
+}
+
+func TestLineageOrphanParentIsUnknownSource(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	seedLineageDB(t, db, fx)
+	ctx := context.Background()
+	if _, err := db.ExecContext(ctx, `
+		INSERT INTO erp.suppliers (
+			tenant_id, supplier_id, aggregate_version, registered_at, correlation_id, trace_id
+		) VALUES ($1, $2, 1, $3, $4, $5)
+	`, fx.TenantID, fx.SupplierID, "2026-08-07T10:00:00Z", fx.Events[0].CorrelationID, fx.Events[0].TraceID); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := ReceiveIngredientLot(ctx, db, mustLotCmd(t, fx)); !errors.Is(err, ErrUnknownSource) {
+		t.Fatalf("orphan supplier: %v", err)
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.ingredient_lots`) != 0 {
+		t.Fatal("lot inserted against orphan parent")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 0 {
+		t.Fatal("outbox inserted against orphan parent")
+	}
+}
+
+func TestLineageBatchAndShipmentCausation(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	seedLineageDB(t, db, fx)
+	ctx := context.Background()
+	if _, err := RegisterSupplier(ctx, db, mustSupplierCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ReceiveIngredientLot(ctx, db, mustLotCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+
+	batch := mustBatchCmd(t, fx)
+	batch.CausationID = nil
+	if _, err := ProduceProductionBatch(ctx, db, batch); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("nil batch causation: %v", err)
+	}
+	batch = mustBatchCmd(t, fx)
+	batch.CausationID = ptr("not-a-uuid")
+	if _, err := ProduceProductionBatch(ctx, db, batch); !errors.Is(err, ErrTenantMismatch) {
+		t.Fatalf("malformed batch causation: %v", err)
+	}
+	batch = mustBatchCmd(t, fx)
+	batch.CausationID = ptr(otherEventID)
+	if _, err := ProduceProductionBatch(ctx, db, batch); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("wrong batch causation: %v", err)
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.production_batches`) != 0 {
+		t.Fatal("batch inserted on causation failure")
+	}
+
+	if _, err := ProduceProductionBatch(ctx, db, mustBatchCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+
+	ship := mustShipCmd(t, fx)
+	ship.CausationID = nil
+	if _, err := DispatchShipment(ctx, db, ship); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("nil shipment causation: %v", err)
+	}
+	ship = mustShipCmd(t, fx)
+	ship.CausationID = ptr("not-a-uuid")
+	if _, err := DispatchShipment(ctx, db, ship); !errors.Is(err, ErrTenantMismatch) {
+		t.Fatalf("malformed shipment causation: %v", err)
+	}
+	ship = mustShipCmd(t, fx)
+	ship.CausationID = ptr(otherEventID)
+	if _, err := DispatchShipment(ctx, db, ship); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("wrong shipment causation: %v", err)
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.shipments`) != 0 {
+		t.Fatal("shipment inserted on causation failure")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 3 {
+		t.Fatal("expected only successful hops in outbox")
+	}
+}
+
+func TestLineageShipmentBeforeOrder(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	seedLineageDB(t, db, fx)
+	acceptThroughShipment(t, db, fx)
+
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.shipments`) != 1 {
+		t.Fatal("expected one shipment")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.orders`) != 0 {
+		t.Fatal("order must not exist before AcceptOrder")
+	}
+
+	if _, err := AcceptOrder(context.Background(), db, mustLineageOrderCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.orders`) != 1 {
+		t.Fatal("expected one order after accept")
+	}
+}
+
+func TestLineageInsufficientInventoryWithShipmentCausation(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	seedLineageDB(t, db, fx)
+	acceptThroughShipment(t, db, fx)
+	ctx := context.Background()
+	if _, err := db.ExecContext(ctx, `
+		UPDATE erp.inventory_items
+		SET quantity_on_hand = 1
+		WHERE tenant_id = $1 AND item_id = $2
+	`, fx.TenantID, fx.ItemID); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := AcceptOrder(ctx, db, mustLineageOrderCmd(t, fx)); !errors.Is(err, ErrInvalidTransition) {
+		t.Fatalf("insufficient inventory: %v", err)
+	}
+	qty, version := inventoryState(t, db, fx.TenantID, fx.ItemID)
+	if qty != 1 || version != 0 {
+		t.Fatalf("inventory mutated: qty=%d version=%d", qty, version)
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.orders`) != 0 {
+		t.Fatal("order inserted on insufficient inventory")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.shipments`) != 1 {
+		t.Fatal("shipment must remain")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 4 {
+		t.Fatal("expected four lineage outbox rows")
+	}
+}
+
+func TestLineageConcurrentOneToOne(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	seedLineageDB(t, db, fx)
+	ctx := context.Background()
+	if _, err := RegisterSupplier(ctx, db, mustSupplierCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+
+	lotA := mustLotCmd(t, fx)
+	lotB := mustLotCmd(t, fx)
+	lotB.LotID = "lot-flour-2026-002"
+	lotB.EventID = otherEventID
+	assertExclusiveInsert(t, func() error {
+		_, err := ReceiveIngredientLot(ctx, db, lotA)
+		return err
+	}, func() error {
+		_, err := ReceiveIngredientLot(ctx, db, lotB)
+		return err
+	})
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.ingredient_lots`) != 1 {
+		t.Fatal("expected one lot")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 2 {
+		t.Fatal("expected supplier and one lot outbox")
+	}
+
+	winnerLotID := fx.LotID
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.ingredient_lots WHERE lot_id = $1`, "lot-flour-2026-002") == 1 {
+		winnerLotID = "lot-flour-2026-002"
+	}
+	lotEventID := outboxEventID(t, db, fx.TenantID, event.AggregateTypeIngredientLot, winnerLotID)
+
+	batchA := mustBatchCmd(t, fx)
+	batchA.LotID = winnerLotID
+	batchA.CausationID = ptr(lotEventID)
+	batchB := batchA
+	batchB.BatchID = "batch-bread-002"
+	batchB.EventID = otherEventID2
+	assertExclusiveInsert(t, func() error {
+		_, err := ProduceProductionBatch(ctx, db, batchA)
+		return err
+	}, func() error {
+		_, err := ProduceProductionBatch(ctx, db, batchB)
+		return err
+	})
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.production_batches`) != 1 {
+		t.Fatal("expected one batch")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 3 {
+		t.Fatal("expected three outbox rows")
+	}
+
+	winnerBatchID := fx.BatchID
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.production_batches WHERE batch_id = $1`, "batch-bread-002") == 1 {
+		winnerBatchID = "batch-bread-002"
+	}
+	batchEventID := outboxEventID(t, db, fx.TenantID, event.AggregateTypeProductionBatch, winnerBatchID)
+
+	shipA := mustShipCmd(t, fx)
+	shipA.BatchID = winnerBatchID
+	shipA.CausationID = ptr(batchEventID)
+	shipB := shipA
+	shipB.ShipmentID = "ship-northstar-002"
+	shipB.EventID = otherEventID3
+	shipB.OrderID = otherOrderID
+	assertExclusiveInsert(t, func() error {
+		_, err := DispatchShipment(ctx, db, shipA)
+		return err
+	}, func() error {
+		_, err := DispatchShipment(ctx, db, shipB)
+		return err
+	})
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.shipments`) != 1 {
+		t.Fatal("expected one shipment")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 4 {
+		t.Fatal("expected four outbox rows")
+	}
+}
+
+func TestOutboxRejectsDuplicateAggregateIdentity(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	seedLineageDB(t, db, fx)
+	if _, err := RegisterSupplier(context.Background(), db, mustSupplierCmd(t, fx)); err != nil {
+		t.Fatal(err)
+	}
+	_, err := db.Exec(`
+		INSERT INTO erp.outbox (
+			event_id, tenant_id, aggregate_type, aggregate_id, aggregate_version,
+			content_hash, event_bytes, status, recorded_at
+		) VALUES ($1, $2, $3, $4, 1, 'aa', '{}', 'pending', now())
+	`, otherEventID, fx.TenantID, event.AggregateTypeSupplier, fx.SupplierID)
+	if err == nil {
+		t.Fatal("expected unique violation on aggregate identity")
+	}
+	if !isUniqueViolation(err) {
+		t.Fatalf("err = %v, want unique violation", err)
+	}
+}
+
+func forceFailBeforeCommit(t *testing.T) {
+	t.Helper()
+	setTestFailBeforeCommitForTest(func(context.Context) error {
+		return errors.New("forced failure before commit")
+	})
+	t.Cleanup(func() { setTestFailBeforeCommitForTest(nil) })
+}
+
+func outboxEventID(t *testing.T, db *sql.DB, tenantID, aggregateType, aggregateID string) string {
+	t.Helper()
+	var eventID string
+	err := db.QueryRow(`
+		SELECT event_id FROM erp.outbox
+		WHERE tenant_id = $1 AND aggregate_type = $2 AND aggregate_id = $3
+	`, tenantID, aggregateType, aggregateID).Scan(&eventID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return eventID
+}
+
+func assertExclusiveInsert(t *testing.T, a, b func() error) {
+	t.Helper()
+	ch := make(chan error, 2)
+	go func() { ch <- a() }()
+	go func() { ch <- b() }()
+	var success, failure int
+	for i := 0; i < 2; i++ {
+		err := <-ch
+		if err == nil {
+			success++
+			continue
+		}
+		if !errors.Is(err, ErrDuplicateSource) {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		failure++
+	}
+	if success != 1 || failure != 1 {
+		t.Fatalf("success=%d failure=%d, want 1 and 1", success, failure)
 	}
 }

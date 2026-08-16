@@ -90,7 +90,8 @@ CREATE TABLE erp.outbox (
     publish_lease_expires_at TIMESTAMPTZ,
     publish_attempts INTEGER NOT NULL DEFAULT 0,
     last_error_code TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (tenant_id, aggregate_type, aggregate_id, aggregate_version)
 );
 
 CREATE INDEX erp_outbox_pending_idx

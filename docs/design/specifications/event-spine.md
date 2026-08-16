@@ -195,8 +195,10 @@ to equal the shipment outbox event when a shipment already exists for that
 order, and requires `causation_id` to be null otherwise.
 
 Schema and image pins live in `erp/migrate.sql` / `erp.PostgresImage`,
-`relay.RedpandaImage`, and `platform` migrations. Rebuild helpers are
-`platform.ResetDerivedState` and `platform.RebuildFromHistory`.
+`relay.RedpandaImage`, and `platform` migrations. `erp.outbox` is unique on
+`event_id` and on `(tenant_id, aggregate_type, aggregate_id, aggregate_version)`.
+Rebuild helpers are `platform.ResetDerivedState` and
+`platform.RebuildFromHistory`.
 
 ### Outbox relay
 
