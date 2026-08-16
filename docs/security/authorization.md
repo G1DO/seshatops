@@ -94,6 +94,7 @@ Assignments are process-local memory, not a PostgreSQL policy schema.
 | --- | --- | --- |
 | `GET` | `/v1/tenants/{tenant_id}/inventory` and `.../inventory/stream` | `MX-001` |
 | `GET` | `/v1/tenants/{tenant_id}/ops` | `MX-002` or `MX-003` |
+| `GET` | `/v1/tenants/{tenant_id}/ops/lineage/batches/{batch_id}` | `MX-002` or `MX-003` |
 | `POST` | `/v1/tenants/{tenant_id}/ops/quarantine/release` | `MX-004` |
 | `POST` | `/v1/tenants/{tenant_id}/ops/replay` | `MX-005` |
 | `POST` | `/v1/tenants/{tenant_id}/ops/rebuild` | `MX-006` |
@@ -102,7 +103,9 @@ Assignments are process-local memory, not a PostgreSQL policy schema.
 After a valid session, Go evaluates `Allow` for the path tenant. Unmatched
 membership, unassigned or service-like principals, nil policy, and
 cross-tenant paths return `403 {"error":"forbidden"}` with no projection, ops,
-or audit payload and without starting SSE. Open inventory SSE re-checks
+lineage, or audit payload and without starting SSE. After an allow, a missing
+batch or a batch id that only exists under another tenant returns
+`404 {"error":"not_found"}` and does not distinguish those cases. Open inventory SSE re-checks
 session and `MX-001` on heartbeat and before each event.
 
 Routes and SSE reconnect/catch-up: [openapi-projection.yaml](../api/openapi-projection.yaml).

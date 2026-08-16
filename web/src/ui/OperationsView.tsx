@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { connectionLabel, type ConnectionState } from "../state/connection";
 import type { ProjectionViewState } from "../state/projectionStore";
-import type { OpsSnapshot, SessionView } from "../api/types";
+import type { BatchTraceSnapshot, LineageHop, OpsSnapshot, SessionView } from "../api/types";
 
 export interface OperationsViewProps {
   connection: ConnectionState;
@@ -14,6 +14,9 @@ export interface OperationsViewProps {
   onLogout?: () => void;
   ops?: OpsSnapshot | null;
   opsError?: string | null;
+  lineage?: BatchTraceSnapshot | null;
+  lineageError?: string | null;
+  lineageBatchId?: string;
   onRelease?: (eventId: string) => void;
   onReplay?: (eventId?: string) => void;
   onRebuild?: () => void;
@@ -34,6 +37,9 @@ export function OperationsView(props: OperationsViewProps) {
     onLogout,
     ops,
     opsError,
+    lineage,
+    lineageError,
+    lineageBatchId,
     onRelease,
     onReplay,
     onRebuild,
@@ -43,6 +49,7 @@ export function OperationsView(props: OperationsViewProps) {
   } = props;
   const live = !unauthenticated && connection === "live";
   const showOps = ops !== undefined || opsError !== undefined;
+  const showLineage = lineage !== undefined || lineageError !== undefined;
   const showControls = Boolean(onRelease || onReplay || onRebuild);
   const [eventId, setEventId] = useState("");
 
@@ -245,6 +252,53 @@ export function OperationsView(props: OperationsViewProps) {
             </section>
           ) : null}
 
+          {showLineage ? (
+            <section className="ops__visibility" data-testid="batch-lineage">
+              <h2>Batch lineage</h2>
+              <p className="ops__visibility-note">
+                Upstream supplier/lot and downstream shipment/order for batch
+                {lineageBatchId ? ` ${lineageBatchId}` : ""}. Go authorizes;
+                this screen does not.
+              </p>
+              {lineageError ? (
+                <p data-testid="lineage-error" role="alert">
+                  Lineage API error: {lineageError}
+                </p>
+              ) : lineage ? (
+                <dl>
+                  <LineageHopRows
+                    label="Supplier"
+                    testId="lineage-supplier"
+                    hop={lineage.supplier}
+                  />
+                  <LineageHopRows
+                    label="Ingredient lot"
+                    testId="lineage-lot"
+                    hop={lineage.lot}
+                  />
+                  <LineageHopRows
+                    label="Production batch"
+                    testId="lineage-batch"
+                    hop={lineage.batch}
+                  />
+                  <LineageHopRows
+                    label="Shipment"
+                    testId="lineage-shipment"
+                    hop={lineage.shipment}
+                  />
+                  <div>
+                    <dt>Order</dt>
+                    <dd data-testid="lineage-order">
+                      {lineage.shipment.order_id || "—"}
+                    </dd>
+                  </div>
+                </dl>
+              ) : (
+                <p data-testid="lineage-empty">No batch lineage loaded.</p>
+              )}
+            </section>
+          ) : null}
+
           {showControls ? (
             <section className="ops__controls" data-testid="ops-controls">
               <h2>Privileged controls</h2>
@@ -308,5 +362,29 @@ export function OperationsView(props: OperationsViewProps) {
         </>
       )}
     </main>
+  );
+}
+
+function LineageHopRows(props: {
+  label: string;
+  testId: string;
+  hop: LineageHop;
+}) {
+  const { label, testId, hop } = props;
+  return (
+    <>
+      <div>
+        <dt>{label}</dt>
+        <dd data-testid={testId}>{hop.id || "—"}</dd>
+      </div>
+      <div>
+        <dt>{label} event</dt>
+        <dd data-testid={`${testId}-event`}>{hop.source_event_id || "—"}</dd>
+      </div>
+      <div>
+        <dt>{label} occurred</dt>
+        <dd data-testid={`${testId}-occurred`}>{hop.occurred_at || "—"}</dd>
+      </div>
+    </>
   );
 }
