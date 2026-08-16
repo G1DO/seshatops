@@ -8,9 +8,15 @@ import (
 )
 
 // FailureSample is one sanitized processing_failures row for Event Spine inspection.
+// Tenant and aggregate identity are included when those columns are populated;
+// raw payloads are never included.
 type FailureSample struct {
 	FailureID        string
 	EventID          string
+	TenantID         string
+	AggregateType    string
+	AggregateID      string
+	EventType        string
 	FailureCategory  string
 	DiagnosticCode   string
 	QuarantineStatus string
@@ -148,7 +154,9 @@ func inspectProcessing(ctx context.Context, db *sql.DB, tenantID string) (Proces
 	}
 
 	failRows, err := db.QueryContext(ctx, `
-		SELECT failure_id, COALESCE(event_id, ''), failure_category, diagnostic_code,
+		SELECT failure_id, COALESCE(event_id, ''), COALESCE(tenant_id, ''),
+		       COALESCE(aggregate_type, ''), COALESCE(aggregate_id, ''),
+		       COALESCE(event_type, ''), failure_category, diagnostic_code,
 		       quarantine_status, source_topic, source_partition, source_offset,
 		       attempt_count, created_at
 		FROM platform.processing_failures
@@ -163,7 +171,8 @@ func inspectProcessing(ctx context.Context, db *sql.DB, tenantID string) (Proces
 	for failRows.Next() {
 		var s FailureSample
 		if err := failRows.Scan(
-			&s.FailureID, &s.EventID, &s.FailureCategory, &s.DiagnosticCode,
+			&s.FailureID, &s.EventID, &s.TenantID, &s.AggregateType, &s.AggregateID,
+			&s.EventType, &s.FailureCategory, &s.DiagnosticCode,
 			&s.QuarantineStatus, &s.SourceTopic, &s.SourcePartition, &s.SourceOffset,
 			&s.AttemptCount, &s.CreatedAt,
 		); err != nil {

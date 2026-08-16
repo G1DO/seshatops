@@ -316,6 +316,10 @@ view: [authorization.md](../../security/authorization.md) and
 | Failure-record persistence unavailable | Do not acknowledge |
 | Replay | Projection-only; no commands, notifications, or irreversible effects |
 
+Traceability hops use this same contract. A quarantined M3 delivery has no
+lineage effect. Replay and quarantine release revalidate through `ProcessRecord`
+and never force-apply a terminal inbox quarantine.
+
 The minimal `platform.processing_failures` record contains:
 
 `failure_id`, `consumer_name`, nullable `event_id`, nullable tenant and
@@ -324,9 +328,14 @@ hash, source topic/partition/offset, attempt count, timestamps, sanitized
 diagnostic code, and quarantine status. `content_hash` is nullable when a
 canonical envelope cannot be formed. When Parse succeeded, event id, tenant,
 aggregate, schema version, event type, and content hash are available and must
-be recorded. Unparseable input may leave those fields null. A separate received-bytes hash may be
+be recorded. When Parse failed but the JSON still carries those identity
+fields, they may be recorded without a content hash. Completely unparseable
+input leaves those fields null. A separate received-bytes hash may be
 recorded only under a distinct field name and is never treated as event content
 identity. Raw payloads, secrets, and unrestricted diagnostics are not stored.
+Inspect failure samples expose stored event id, tenant, aggregate type/id, and
+event type when those columns are populated. Correlation remains on retained
+outbox bytes and applied lineage hops.
 
 ## 8. Projection checksum
 

@@ -562,6 +562,23 @@ func TestUnsupportedSchemaQuarantined(t *testing.T) {
 	if category != "unsupported_contract" || code != "unsupported_contract" {
 		t.Fatalf("category=%q code=%q", category, code)
 	}
+	var tenantID, eventType, aggType, aggID sql.NullString
+	if err := db.QueryRow(`
+		SELECT tenant_id, event_type, aggregate_type, aggregate_id
+		FROM platform.processing_failures
+		WHERE source_offset = 6
+	`).Scan(&tenantID, &eventType, &aggType, &aggID); err != nil {
+		t.Fatal(err)
+	}
+	if !tenantID.Valid || tenantID.String != fx.TenantID {
+		t.Fatalf("unsupported identity tenant=%v", tenantID)
+	}
+	if !eventType.Valid || eventType.String != fx.Event.EventType {
+		t.Fatalf("unsupported identity type=%v", eventType)
+	}
+	if !aggType.Valid || aggType.String != fx.Event.AggregateType || !aggID.Valid || aggID.String != fx.Event.AggregateID {
+		t.Fatalf("unsupported identity aggregate=%v/%v", aggType, aggID)
+	}
 	_, _, ok, err := ProjectionState(context.Background(), db, fx.TenantID, fx.ItemID)
 	if err != nil || ok {
 		t.Fatalf("projection must be empty: ok=%v err=%v", ok, err)

@@ -61,6 +61,10 @@ export interface OpsQuarantineSample {
 export interface OpsFailureSample {
   failure_id: string;
   event_id: string;
+  tenant_id: string;
+  aggregate_type: string;
+  aggregate_id: string;
+  event_type: string;
   failure_category: string;
   diagnostic_code: string;
   quarantine_status: string;

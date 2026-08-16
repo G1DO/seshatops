@@ -2,6 +2,7 @@ package platform
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"testing"
 
@@ -219,6 +220,150 @@ func TestLoadTenantOutboxHistoryRejectsEnvelopeTenantMismatch(t *testing.T) {
 	if !errors.Is(err, ErrTenantMismatch) {
 		t.Fatalf("err=%v", err)
 	}
+}
+
+func insertTenantOutbox(t *testing.T, db *sql.DB, env event.Envelope) {
+	t.Helper()
+	raw := mustCanonical(t, env)
+	hash, err := event.ContentHash(env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = db.Exec(`
+		INSERT INTO erp.outbox (
+			event_id, tenant_id, aggregate_type, aggregate_id, aggregate_version,
+			content_hash, event_bytes, status, recorded_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, 'published', $8)
+	`, env.EventID, env.TenantID, env.AggregateType, env.AggregateID, env.AggregateVersion,
+		hash, raw, env.RecordedAt)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestReplayLineageAppliedIsDuplicateNoop(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	ctx := context.Background()
+	for i, env := range fx.Events[:4] {
+		insertTenantOutbox(t, db, env)
+		if res := processRecordEnv(t, db, env, int64(i+1)); res.Disposition != DispositionApplied {
+			t.Fatalf("apply[%d]: %+v", i, res)
+		}
+	}
+	assertLineageCounts(t, db, fx.TenantID, 1, 1, 1, 1)
+
+	replay, err := ReplayTenantHistory(ctx, db, fx.TenantID, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if replay.DuplicateNoop != 4 || replay.Applied != 0 {
+		t.Fatalf("replay = %+v", replay)
+	}
+	assertLineageCounts(t, db, fx.TenantID, 1, 1, 1, 1)
+	sum, err := ChecksumTenant(ctx, db, fx.TenantID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sum != sha256Empty() {
+		t.Fatalf("inventory checksum mutated by lineage replay: %s", sum)
+	}
+}
+
+func TestReplayLineageConflictingBytesRemainRejected(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	ctx := context.Background()
+	supplier := fx.Events[0]
+	insertTenantOutbox(t, db, supplier)
+	if res := processRecordEnv(t, db, supplier, 1); res.Disposition != DispositionApplied {
+		t.Fatalf("apply: %+v", res)
+	}
+
+	conflict := supplier
+	conflict.OccurredAt = "2026-08-07T11:00:00Z"
+	conflictRaw := mustCanonical(t, conflict)
+	conflictHash, err := event.ContentHash(conflict)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := db.ExecContext(ctx, `
+		UPDATE erp.outbox SET event_bytes = $1, content_hash = $2 WHERE event_id = $3
+	`, conflictRaw, conflictHash, supplier.EventID); err != nil {
+		t.Fatal(err)
+	}
+
+	replay, err := ReplayTenantHistory(ctx, db, fx.TenantID, supplier.EventID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if replay.Applied != 0 || replay.Quarantined != 1 || replay.Status == RebuildStatusComplete {
+		t.Fatalf("replay = %+v", replay)
+	}
+	assertLineageCounts(t, db, fx.TenantID, 1, 0, 0, 0)
+
+	if err := ReleaseTenantQuarantine(ctx, db, fx.TenantID, supplier.EventID); !errors.Is(err, ErrNotReleasable) {
+		t.Fatalf("release err=%v", err)
+	}
+	disp, _, ok, err := InboxDisposition(ctx, db, supplier.EventID)
+	if err != nil || !ok || disp != DispositionQuarantinedConflict {
+		t.Fatalf("inbox disp=%s ok=%v err=%v", disp, ok, err)
+	}
+	assertLineageCounts(t, db, fx.TenantID, 1, 0, 0, 0)
+}
+
+func TestReplayLineageUnsupportedSchemaIsRejected(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	ctx := context.Background()
+	supplier := fx.Events[0]
+	insertTenantOutbox(t, db, supplier)
+	if res := processRecordEnv(t, db, supplier, 1); res.Disposition != DispositionApplied {
+		t.Fatalf("apply: %+v", res)
+	}
+	if _, err := db.ExecContext(ctx, `
+		UPDATE erp.outbox SET event_bytes = $1 WHERE event_id = $2
+	`, schemaV2Bytes(t, supplier), supplier.EventID); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := ReplayTenantHistory(ctx, db, fx.TenantID, supplier.EventID)
+	if err == nil {
+		t.Fatal("expected parse rejection")
+	}
+	if !errors.Is(err, event.ErrUnsupported) {
+		t.Fatalf("err=%v", err)
+	}
+	assertLineageCounts(t, db, fx.TenantID, 1, 0, 0, 0)
+}
+
+func TestReleaseLineagePoisonRedrivesFromRetainedBytes(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustLineage(t)
+	ctx := context.Background()
+	supplier := fx.Events[0]
+	insertTenantOutbox(t, db, supplier)
+	if _, err := db.ExecContext(ctx, `
+		INSERT INTO platform.processing_failures (
+			failure_id, consumer_name, event_id, tenant_id,
+			aggregate_type, aggregate_id, event_type,
+			failure_category, diagnostic_code, quarantine_status,
+			source_topic, source_partition, source_offset, attempt_count
+		) VALUES (
+			'fail-lineage-poison', $1, $2, $3,
+			$4, $5, $6,
+			'handler_poison', 'handler_poison', 'quarantined',
+			$7, 0, 70, 5
+		)
+	`, ConsumerName, supplier.EventID, fx.TenantID,
+		supplier.AggregateType, supplier.AggregateID, supplier.EventType, relay.Topic); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ReleaseTenantQuarantine(ctx, db, fx.TenantID, supplier.EventID); err != nil {
+		t.Fatal(err)
+	}
+	assertLineageCounts(t, db, fx.TenantID, 1, 0, 0, 0)
 }
 
 func TestReleaseTenantQuarantineRedrivesPoisonFromRetainedBytes(t *testing.T) {

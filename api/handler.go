@@ -299,6 +299,10 @@ func (s *Server) loadOps(ctx context.Context, tenantID string) (OpsSnapshot, err
 		failures = append(failures, OpsFailureSample{
 			FailureID:        f.FailureID,
 			EventID:          f.EventID,
+			TenantID:         f.TenantID,
+			AggregateType:    f.AggregateType,
+			AggregateID:      f.AggregateID,
+			EventType:        f.EventType,
 			FailureCategory:  f.FailureCategory,
 			DiagnosticCode:   f.DiagnosticCode,
 			QuarantineStatus: f.QuarantineStatus,

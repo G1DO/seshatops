@@ -93,7 +93,18 @@ func applyLineage(ctx context.Context, tx *sql.Tx, env event.Envelope, hash stri
 	}
 	if found {
 		disp := lineageExistingDisposition(current, env.AggregateVersion)
-		if err := upsertInbox(ctx, tx, inboxRow{
+		if disp == DispositionQuarantinedStale {
+			existingID, ok, err := lineageSourceEventID(ctx, tx, env)
+			if err != nil {
+				return "", err
+			}
+			if ok && existingID == env.EventID {
+				// Concurrent identical delivery: the other transaction already
+				// inserted this hop and inbox after our first lockInbox miss.
+				disp = DispositionDuplicateNoop
+			}
+		}
+		row := inboxRow{
 			EventID:          env.EventID,
 			TenantID:         env.TenantID,
 			ContentHash:      hash,
@@ -101,10 +112,13 @@ func applyLineage(ctx context.Context, tx *sql.Tx, env event.Envelope, hash stri
 			AggregateID:      env.AggregateID,
 			AggregateVersion: env.AggregateVersion,
 			Disposition:      disp,
-			ExpectedVersion:  ptrInt64(current + 1),
-			ReceivedVersion:  ptrInt64(env.AggregateVersion),
-			EventBytes:       gapBytes(disp, canonical),
-		}); err != nil {
+		}
+		if disp != DispositionDuplicateNoop {
+			row.ExpectedVersion = ptrInt64(current + 1)
+			row.ReceivedVersion = ptrInt64(env.AggregateVersion)
+			row.EventBytes = gapBytes(disp, canonical)
+		}
+		if err := upsertInbox(ctx, tx, row); err != nil {
 			return "", err
 		}
 		return disp, nil
