@@ -39,13 +39,13 @@ Pass.
 | 6 | UI lineage is presentation | Pass (Vitest `fetchBatchTrace` / `useBatchTrace` / `OperationsView`; not isolation evidence) |
 
 ```text
-ok  	github.com/G1DO/seshatops/api	400.646s
-ok  	github.com/G1DO/seshatops/erp	219.837s
-ok  	github.com/G1DO/seshatops/event	0.015s
-ok  	github.com/G1DO/seshatops/identity	2.759s
-ok  	github.com/G1DO/seshatops/northstar	0.016s
-ok  	github.com/G1DO/seshatops/platform	441.794s
-ok  	github.com/G1DO/seshatops/relay	456.227s
+ok  github.com/G1DO/seshatops/api       400.646s
+ok  github.com/G1DO/seshatops/erp       219.837s
+ok  github.com/G1DO/seshatops/event       0.015s
+ok  github.com/G1DO/seshatops/identity    2.759s
+ok  github.com/G1DO/seshatops/northstar   0.016s
+ok  github.com/G1DO/seshatops/platform  441.794s
+ok  github.com/G1DO/seshatops/relay     456.227s
 ```
 
 Web: 9 files / 44 tests passed; typecheck passed; Vite production-mode
