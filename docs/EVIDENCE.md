@@ -22,3 +22,16 @@ On implemented HTTP: tenant isolation, default-deny privileged routes,
 authorized same-tenant ops visibility, and fail-closed quarantine/replay/rebuild
 with audit-insert-before-mutate. Library/test OIDC; process-local sessions and
 assignments. Not production revocation, pentest, or restore.
+
+## M3 traceability and recovery
+
+[Report](evaluation/M3_TRACEABILITY_RECOVERY_EXIT_GATE_EXPERIMENT_REPORT.md).
+Runtime commit `a43e8a5`; hosted CI on PR #84 `a43e8a5`. Operator = reviewer.
+
+On a single-host Testcontainers topology: an authorized same-tenant batch trace
+returns upstream supplier/lot and downstream shipment/order hops with
+provenance; duplicate delivery does not duplicate lineage effects; an
+incompatible traceability event is quarantined while unrelated valid work
+applies; unchanged history rebuilds to the same inventory and lineage
+checksums. Tenant-negative trace HTTP is fail-closed. Not production, not
+backup/restore.
