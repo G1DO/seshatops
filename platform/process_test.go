@@ -142,12 +142,16 @@ func TestMigrateCreatesPlatformSchema(t *testing.T) {
 	if err := db.QueryRow(`
 		SELECT COUNT(*) FROM information_schema.tables
 		WHERE table_schema = 'platform'
-		  AND table_name IN ('inbox', 'inventory_projection', 'processing_failures')
+		  AND table_name IN (
+			'inbox', 'inventory_projection', 'processing_failures',
+			'lineage_suppliers', 'lineage_ingredient_lots',
+			'lineage_production_batches', 'lineage_shipments'
+		  )
 	`).Scan(&n); err != nil {
 		t.Fatal(err)
 	}
-	if n != 3 {
-		t.Fatalf("expected 3 platform tables, got %d", n)
+	if n != 7 {
+		t.Fatalf("expected 7 platform tables, got %d", n)
 	}
 }
 
@@ -564,7 +568,7 @@ func TestUnsupportedSchemaQuarantined(t *testing.T) {
 	}
 }
 
-func TestTraceabilityFamilyNotAppliedToInventory(t *testing.T) {
+func TestTraceabilityFamilyDoesNotMutateInventory(t *testing.T) {
 	db := openTestDB(t)
 	fx := mustFixture(t)
 	lin, err := northstar.GenerateLineage(northstar.LineageSeed)
@@ -580,26 +584,28 @@ func TestTraceabilityFamilyNotAppliedToInventory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !res.ShouldAck || res.Disposition != DispositionQuarantinedInvalid {
-		t.Fatalf("expected unsupported quarantine, got %+v", res)
+	if !res.ShouldAck || res.Disposition != DispositionApplied {
+		t.Fatalf("expected lineage apply, got %+v", res)
 	}
-	var category, code, eventID, tenantID, eventType string
+	var n int
 	if err := db.QueryRow(`
-		SELECT failure_category, diagnostic_code, event_id, tenant_id, event_type
-		FROM platform.processing_failures
-		WHERE source_offset = 7
-	`).Scan(&category, &code, &eventID, &tenantID, &eventType); err != nil {
+		SELECT COUNT(*) FROM platform.processing_failures WHERE source_offset = 7
+	`).Scan(&n); err != nil {
 		t.Fatal(err)
 	}
-	if category != "unsupported_contract" || code != "unsupported_contract" {
-		t.Fatalf("category=%q code=%q", category, code)
-	}
-	if eventID != supplier.EventID || tenantID != supplier.TenantID || eventType != event.EventTypeSupplierRegistered {
-		t.Fatalf("identity event_id=%q tenant_id=%q event_type=%q", eventID, tenantID, eventType)
+	if n != 0 {
+		t.Fatalf("supplier must not be unsupported_contract, failures=%d", n)
 	}
 	_, _, ok, err := ProjectionState(context.Background(), db, fx.TenantID, fx.ItemID)
 	if err != nil || ok {
 		t.Fatalf("inventory projection must be unchanged/empty: ok=%v err=%v", ok, err)
+	}
+	sum, err := ChecksumTenant(context.Background(), db, lin.TenantID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sum != sha256Empty() {
+		t.Fatalf("inventory checksum mutated by supplier hop: %s", sum)
 	}
 }
 

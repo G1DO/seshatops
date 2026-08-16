@@ -12,7 +12,8 @@ The implemented Event Spine source path records Northstar M1 order/inventory
 and M3 lineage hops for one tenant:
 
 > accepted source hop -> PostgreSQL source transaction and outbox ->
-> Redpanda -> Go consumer -> transactional inbox and inventory projection ->
+> Redpanda -> Go consumer -> transactional inbox, inventory projection, and
+> lineage projection ->
 > Go-owned read surface for the TypeScript operations view
 
 HTTP/SSE for that last step is
@@ -24,12 +25,14 @@ section 2. `event.Parse` / `event.Validate` accept those families. The
 implemented ERP outbox path emits `supplier.registered`,
 `ingredient_lot.received`, `production_batch.produced`,
 `shipment.dispatched`, and `inventory.quantity_decremented`.
-The implemented inventory consumer does not project other accepted families;
-it quarantines them as an unsupported contract until the lineage consumer
-lands. That quarantine records available event identity (event id, tenant,
-aggregate, schema version, event type, and content hash) so tenant-scoped
-inspect can see it. The Northstar lineage fixture is `northstar.GenerateLineage`
-with seed `northstar-m3-lineage-v1`.
+The projection consumer applies `inventory.quantity_decremented` to the
+inventory projection and the four M3 traceability families to tenant-scoped
+relational lineage tables. Those families are not coerced into inventory
+projection. An accepted family this consumer does not apply is still
+quarantined as an unsupported contract, with available event identity
+(event id, tenant, aggregate, schema version, event type, and content hash)
+recorded so tenant-scoped inspect can see it. The Northstar lineage fixture is
+`northstar.GenerateLineage` with seed `northstar-m3-lineage-v1`.
 
 Multi-line orders, commands, approvals, and intelligence remain outside this
 contract. Identity HTTP is
@@ -139,7 +142,7 @@ Version compatibility is exact and explicit:
 - The parser accepts only the families and schema version `1` listed in section 2.
 - Unknown event types, unknown schema versions, missing fields, unknown fields, duplicate object member names, invalid types, and invalid values are rejected. An unknown event type fails as unsupported even when the payload matches a known family.
 - The implemented ERP producer emits the accepted families in section 2 at schema version `1` through `erp.RegisterSupplier`, `erp.ReceiveIngredientLot`, `erp.ProduceProductionBatch`, `erp.DispatchShipment`, and `erp.AcceptOrder`.
-- The implemented inventory consumer applies only `inventory.quantity_decremented`. Other accepted families are quarantined as an unsupported contract for that consumer and are not coerced into inventory projection. The failure record keeps the identity Parse recovered; it is not an unattributed parse failure.
+- The implemented inventory consumer applies `inventory.quantity_decremented` to inventory projection. The four M3 traceability families are applied to tenant-scoped relational lineage tables and are not coerced into inventory projection. An accepted family this consumer does not apply is quarantined as an unsupported contract. The failure record keeps the identity Parse recovered; it is not an unattributed parse failure.
 - There is no implicit coercion, defaulting, fallback handler, or schema-registry service.
 - Any semantic, required-field, or interpretation change requires a new schema version and handler.
 
@@ -177,7 +180,7 @@ Event Spine uses one PostgreSQL database with separate logical schemas:
 | Schema | Owns | Must not own |
 | --- | --- | --- |
 | `erp` | Source orders, lineage hops, authoritative inventory, and outbox rows | Platform projection state |
-| `platform` | Inbox records, inventory projection, and processing failures | Source inventory or order state |
+| `platform` | Inbox records, inventory projection, lineage projection, and processing failures | Source inventory or order state |
 
 ### Source transaction
 
@@ -223,8 +226,9 @@ The Go consumer validates the event before taking the duplicate no-op path:
 2. Recompute the expected key as the UTF-8 bytes of
    `tenant_id/aggregate_type/aggregate_id` and require byte-for-byte equality
    with the Redpanda key.
-3. Require `payload.item_id == aggregate_id`; the consumer never infers a
-   tenant from `item_id`.
+3. Require the family payload self-id to equal `aggregate_id`
+   (`item_id`, `supplier_id`, `lot_id`, `batch_id`, or `shipment_id`).
+   The consumer never infers a tenant from a resource identifier.
 4. Check inbox identity and content, applying the disposition rules in section
    6.
 5. Validate tenant and aggregate version rules, then insert or update the
@@ -250,7 +254,7 @@ committed only after that transaction commits.
 The key is never `event_id`. Event Spine does not use or claim Redpanda exactly-once
 features.
 
-## 6. Inbox and inventory projection
+## 6. Inbox, inventory projection, and lineage projection
 
 The inbox has a unique constraint on `(consumer_name, event_id)` and stores
 tenant, content hash, aggregate identity, aggregate version, and disposition.
@@ -269,6 +273,19 @@ The inventory projection has primary key `(tenant_id, item_id)` and stores
 - Matching event identity and content is a durable no-op only when the existing
   disposition is `applied` or `duplicate_noop`.
 - Conflicting content, stale versions, and conflicting same-version events are quarantined.
+
+The lineage projection is four tenant-scoped relational tables
+(`lineage_suppliers`, `lineage_ingredient_lots`, `lineage_production_batches`,
+`lineage_shipments`) sufficient for supplier → ingredient lot → production
+batch → shipment → order traversal. Each row stores source event identity,
+schema version, source timestamps, and correlation/causation/trace identifiers.
+Parent identifiers are stored under the envelope tenant; they are never used
+to infer tenant. Cross-tenant joins are not performed. Child hops may arrive
+before parents because broker ordering is per aggregate only. Version `1`
+inserts a hop; a later version for the same aggregate is quarantined rather
+than silently skipped. Matching duplicate delivery is a durable no-op and
+cannot duplicate lineage rows. Conflicting 1:1 parent edges in the same tenant
+are quarantined.
 
 Inbox insertion and projection update are one transaction. A later event is
 never applied across a missing aggregate version. A gap is durably quarantined

@@ -1,7 +1,7 @@
 // Package platform implements the Event Spine Go consumer that validates Redpanda
-// events, commits inbox/deduplication state with the inventory projection in
-// one PostgreSQL transaction, and acknowledges broker offsets only after that
-// durable decision commits (docs/design/specifications/event-spine.md §§4–8).
+// events, commits inbox/deduplication state with the inventory and lineage
+// projections in one PostgreSQL transaction, and acknowledges broker offsets
+// only after that durable decision commits (docs/design/specifications/event-spine.md §§4–8).
 //
 // Delivery is at least once. Identical redelivery is a durable no-op.
 // Conflicting reuse of event_id is an integrity failure. Malformed,

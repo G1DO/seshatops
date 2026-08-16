@@ -36,7 +36,7 @@ flowchart TB
 | `web/` | TypeScript | Presentation, REST/SSE clients | Authorization, datastore, broker |
 | `identity/` | Go | OIDC Auth Code + PKCE, session, allow-list, audit | UI, IdP vendor as a runtime claim |
 | `api/` | Go | HTTP/SSE, default-deny, privileged POSTs | Broker publication |
-| `platform/` | Go | Inbox, inventory projection, rebuild | Outbox publication, authentication |
+| `platform/` | Go | Inbox, inventory and lineage projection, rebuild | Outbox publication, authentication |
 | `relay/` | Go | Publish exact outbox bytes to Redpanda | Inbox, authorization |
 | `erp/` | Go | Lineage hops, order accept, inventory, immutable outbox | SeshatOps policy |
 | `event/`, `northstar/` | Go | JSON/JCS envelope, Northstar fixture | Transport or HTTP |

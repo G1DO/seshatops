@@ -76,8 +76,8 @@ type RebuildResult struct {
 }
 
 // ResetDerivedState deletes only derived Event Spine platform processing state:
-// inbox, inventory_projection, and processing_failures. It never mutates the
-// erp schema or broker history.
+// inbox, inventory_projection, lineage projection, and processing_failures.
+// It never mutates the erp schema or broker history.
 func ResetDerivedState(ctx context.Context, db *sql.DB) error {
 	if db == nil {
 		return fmt.Errorf("platform: nil db")
@@ -88,11 +88,13 @@ func ResetDerivedState(ctx context.Context, db *sql.DB) error {
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	for _, q := range []string{
+	queries := []string{
 		`DELETE FROM platform.processing_failures`,
 		`DELETE FROM platform.inbox`,
 		`DELETE FROM platform.inventory_projection`,
-	} {
+	}
+	queries = append(queries, derivedLineageDeletes()...)
+	for _, q := range queries {
 		if _, err := tx.ExecContext(ctx, q); err != nil {
 			return fmt.Errorf("platform: reset derived state: %w", err)
 		}

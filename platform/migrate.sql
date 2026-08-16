@@ -1,6 +1,7 @@
--- Event Spine platform inbox and inventory projection schema (Issue #25).
--- Owns inbox/deduplication, inventory projection, and sanitized processing failures.
--- Must not own erp source inventory or outbox state.
+-- Event Spine platform inbox, inventory projection, and lineage projection schema.
+-- Owns inbox/deduplication, inventory projection, tenant-scoped lineage
+-- projection, and sanitized processing failures.
+-- Must not own erp source inventory, lineage source hops, or outbox state.
 
 CREATE SCHEMA IF NOT EXISTS platform;
 
@@ -40,6 +41,75 @@ CREATE TABLE platform.inventory_projection (
     quantity_on_hand BIGINT NOT NULL CHECK (quantity_on_hand >= 0),
     aggregate_version BIGINT NOT NULL CHECK (aggregate_version >= 0),
     PRIMARY KEY (tenant_id, item_id)
+);
+
+-- Relational lineage projection for supplier → lot → batch → shipment → order.
+-- No graph store. No cross-table FKs: broker ordering is per aggregate only,
+-- so a child hop may arrive before its parent. Traversal always filters by
+-- envelope tenant_id; parent ids are never used to infer tenant.
+CREATE TABLE platform.lineage_suppliers (
+    tenant_id TEXT NOT NULL,
+    supplier_id TEXT NOT NULL,
+    aggregate_version BIGINT NOT NULL CHECK (aggregate_version >= 1),
+    source_event_id TEXT NOT NULL,
+    event_schema_version BIGINT NOT NULL,
+    occurred_at TEXT NOT NULL,
+    recorded_at TEXT NOT NULL,
+    correlation_id TEXT NOT NULL,
+    causation_id TEXT,
+    trace_id TEXT NOT NULL,
+    PRIMARY KEY (tenant_id, supplier_id)
+);
+
+CREATE TABLE platform.lineage_ingredient_lots (
+    tenant_id TEXT NOT NULL,
+    lot_id TEXT NOT NULL,
+    supplier_id TEXT NOT NULL,
+    item_id TEXT NOT NULL,
+    aggregate_version BIGINT NOT NULL CHECK (aggregate_version >= 1),
+    source_event_id TEXT NOT NULL,
+    event_schema_version BIGINT NOT NULL,
+    occurred_at TEXT NOT NULL,
+    recorded_at TEXT NOT NULL,
+    correlation_id TEXT NOT NULL,
+    causation_id TEXT,
+    trace_id TEXT NOT NULL,
+    PRIMARY KEY (tenant_id, lot_id),
+    UNIQUE (tenant_id, supplier_id)
+);
+
+CREATE TABLE platform.lineage_production_batches (
+    tenant_id TEXT NOT NULL,
+    batch_id TEXT NOT NULL,
+    lot_id TEXT NOT NULL,
+    aggregate_version BIGINT NOT NULL CHECK (aggregate_version >= 1),
+    source_event_id TEXT NOT NULL,
+    event_schema_version BIGINT NOT NULL,
+    occurred_at TEXT NOT NULL,
+    recorded_at TEXT NOT NULL,
+    correlation_id TEXT NOT NULL,
+    causation_id TEXT,
+    trace_id TEXT NOT NULL,
+    PRIMARY KEY (tenant_id, batch_id),
+    UNIQUE (tenant_id, lot_id)
+);
+
+CREATE TABLE platform.lineage_shipments (
+    tenant_id TEXT NOT NULL,
+    shipment_id TEXT NOT NULL,
+    batch_id TEXT NOT NULL,
+    order_id TEXT NOT NULL,
+    aggregate_version BIGINT NOT NULL CHECK (aggregate_version >= 1),
+    source_event_id TEXT NOT NULL,
+    event_schema_version BIGINT NOT NULL,
+    occurred_at TEXT NOT NULL,
+    recorded_at TEXT NOT NULL,
+    correlation_id TEXT NOT NULL,
+    causation_id TEXT,
+    trace_id TEXT NOT NULL,
+    PRIMARY KEY (tenant_id, shipment_id),
+    UNIQUE (tenant_id, batch_id),
+    UNIQUE (tenant_id, order_id)
 );
 
 CREATE TABLE platform.processing_failures (

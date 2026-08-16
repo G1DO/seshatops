@@ -80,16 +80,16 @@ func ProcessRecord(ctx context.Context, db *sql.DB, key, value []byte, pos Sourc
 		return persistParseFailure(ctx, db, value, pos, err)
 	}
 
-	if env.EventType != event.EventTypeQuantityDecremented {
+	if !isProjectionFamily(env.EventType) {
 		return persistConsumerUnsupported(ctx, db, env, value, pos)
 	}
-	payload, ok := event.AsQuantityDecremented(env)
+	selfID, ok := projectionSelfID(env)
 	if !ok {
 		return persistParseFailure(ctx, db, value, pos, fmt.Errorf("%w: payload type mismatch", event.ErrMalformed))
 	}
 
 	expectedKey := []byte(relay.AggregateKey(env.TenantID, env.AggregateType, env.AggregateID))
-	if !bytes.Equal(key, expectedKey) || payload.ItemID != env.AggregateID {
+	if !bytes.Equal(key, expectedKey) || selfID != env.AggregateID {
 		return quarantineInbox(ctx, db, env, value, DispositionQuarantinedMismatch, nil, nil)
 	}
 
@@ -204,14 +204,14 @@ func processValidated(ctx context.Context, db *sql.DB, env event.Envelope, raw [
 		}
 	}
 
-	disp, err := applyProjection(ctx, tx, env, hash, canonical)
+	disp, err := applyEvent(ctx, tx, env, hash, canonical)
 	if err != nil {
 		return Result{}, err
 	}
 	if err := commitWithHook(ctx, tx); err != nil {
 		return Result{}, err
 	}
-	if disp == DispositionApplied {
+	if disp == DispositionApplied && env.EventType == event.EventTypeQuantityDecremented {
 		payload, ok := event.AsQuantityDecremented(env)
 		if !ok {
 			return Result{}, fmt.Errorf("%w: payload type mismatch", event.ErrMalformed)
@@ -616,7 +616,7 @@ func persistParseFailure(ctx context.Context, db *sql.DB, value []byte, pos Sour
 }
 
 // persistConsumerUnsupported quarantines an envelope that parsed as an accepted
-// family this inventory consumer does not apply. Identity fields Parse recovered
+// family this projection consumer does not apply. Identity fields Parse recovered
 // are recorded so tenant-scoped inspect can see the quarantine.
 func persistConsumerUnsupported(ctx context.Context, db *sql.DB, env event.Envelope, value []byte, pos SourcePosition) (Result, error) {
 	tx, err := db.BeginTx(ctx, nil)
