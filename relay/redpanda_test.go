@@ -201,6 +201,82 @@ func TestRedpandaBrokerOutagePersistenceAndRecovery(t *testing.T) {
 	}
 }
 
+func TestRedpandaLineageBrokerOutagePersistenceAndRecovery(t *testing.T) {
+	db := openTestDB(t)
+	fx, hops, orderRes := seedAndAcceptLineage(t, db)
+	ctx := context.Background()
+
+	wantBytes := map[string][]byte{
+		hops[0].EventID:  hops[0].EventBytes,
+		hops[1].EventID:  hops[1].EventBytes,
+		hops[2].EventID:  hops[2].EventBytes,
+		hops[3].EventID:  hops[3].EventBytes,
+		orderRes.EventID: orderRes.EventBytes,
+	}
+
+	badPub, err := NewFranzPublisher("127.0.0.1:1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	outageCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	out, err := DrainOnce(outageCtx, db, badPub, "relay-lineage-outage", DefaultLeaseTTL, 10)
+	cancel()
+	badPub.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Claimed != 5 || out.Transient != 5 {
+		t.Fatalf("expected five transient publish failures, got %+v", out)
+	}
+	assertFullLineageSourceRetained(t, db)
+	for id := range wantBytes {
+		status, _, _, _ := outboxStatus(t, db, id)
+		if status != StatusPending {
+			t.Fatalf("status = %s want pending for %s", status, id)
+		}
+	}
+
+	clearAllPendingBackoff(t, db)
+
+	seed, stop := startRedpanda(t)
+	t.Cleanup(stop)
+	pub, err := NewFranzPublisher(seed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(pub.Close)
+
+	out, err = DrainOnce(ctx, db, pub, "relay-lineage-recovery", DefaultLeaseTTL, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Published != 5 {
+		t.Fatalf("recovery drain %+v", out)
+	}
+	recs := consumeAll(t, seed, 5, 30*time.Second)
+	seen := map[string]bool{}
+	for _, rec := range recs {
+		parsed, err := event.Parse(rec.Value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		stored, ok := wantBytes[parsed.EventID]
+		if !ok {
+			t.Fatalf("unexpected event_id %s", parsed.EventID)
+		}
+		if string(rec.Value) != string(stored) {
+			t.Fatal("recovery publication rewrote event content")
+		}
+		if err := event.CheckIdentityConflict(parsed, lineageEnvelope(t, fx, parsed.EventID)); err != nil {
+			t.Fatal(err)
+		}
+		seen[parsed.EventID] = true
+	}
+	if len(seen) != 5 {
+		t.Fatalf("recovered identities = %d", len(seen))
+	}
+}
+
 func TestRedpandaAmbiguousWindowDuplicate(t *testing.T) {
 	db := openTestDB(t)
 	seed, stop := startRedpanda(t)

@@ -8,10 +8,10 @@ Executable helpers: `event`. Fixture: `northstar`. HTTP/SSE:
 
 ## 1. Event Spine vertical slice
 
-The implemented Event Spine source/consumer path still supports one synthetic
-order line for one tenant and one inventory item:
+The implemented Event Spine source path records Northstar M1 order/inventory
+and M3 lineage hops for one tenant:
 
-> accepted synthetic order -> PostgreSQL source transaction and outbox ->
+> accepted source hop -> PostgreSQL source transaction and outbox ->
 > Redpanda -> Go consumer -> transactional inbox and inventory projection ->
 > Go-owned read surface for the TypeScript operations view
 
@@ -19,9 +19,11 @@ HTTP/SSE for that last step is
 [openapi-projection.yaml](../../api/openapi-projection.yaml).
 This document does not redefine routes or SSE frames.
 
-The **accepted event contract** also includes the M3 traceability families in
+The **accepted event contract** includes the M3 traceability families in
 section 2. `event.Parse` / `event.Validate` accept those families. The
-implemented ERP outbox path still emits only `inventory.quantity_decremented`.
+implemented ERP outbox path emits `supplier.registered`,
+`ingredient_lot.received`, `production_batch.produced`,
+`shipment.dispatched`, and `inventory.quantity_decremented`.
 The implemented inventory consumer does not project other accepted families;
 it quarantines them as an unsupported contract until the lineage consumer
 lands. That quarantine records available event identity (event id, tenant,
@@ -136,8 +138,8 @@ Version compatibility is exact and explicit:
 
 - The parser accepts only the families and schema version `1` listed in section 2.
 - Unknown event types, unknown schema versions, missing fields, unknown fields, duplicate object member names, invalid types, and invalid values are rejected. An unknown event type fails as unsupported even when the payload matches a known family.
-- The implemented ERP producer still emits only `inventory.quantity_decremented` schema version `1`.
-- The implemented inventory consumer applies only that family. Other accepted families are quarantined as an unsupported contract for that consumer and are not coerced into inventory projection. The failure record keeps the identity Parse recovered; it is not an unattributed parse failure.
+- The implemented ERP producer emits the accepted families in section 2 at schema version `1` through `erp.RegisterSupplier`, `erp.ReceiveIngredientLot`, `erp.ProduceProductionBatch`, `erp.DispatchShipment`, and `erp.AcceptOrder`.
+- The implemented inventory consumer applies only `inventory.quantity_decremented`. Other accepted families are quarantined as an unsupported contract for that consumer and are not coerced into inventory projection. The failure record keeps the identity Parse recovered; it is not an unattributed parse failure.
 - There is no implicit coercion, defaulting, fallback handler, or schema-registry service.
 - Any semantic, required-field, or interpretation change requires a new schema version and handler.
 
@@ -174,20 +176,29 @@ Event Spine uses one PostgreSQL database with separate logical schemas:
 
 | Schema | Owns | Must not own |
 | --- | --- | --- |
-| `erp` | Source orders, authoritative inventory, and outbox rows | Platform projection state |
+| `erp` | Source orders, lineage hops, authoritative inventory, and outbox rows | Platform projection state |
 | `platform` | Inbox records, inventory projection, and processing failures | Source inventory or order state |
 
 ### Source transaction
 
-The source transaction validates the one-line order, locks and updates the
-authoritative inventory row, derives the event tenant from the accepted order
-and its authoritative inventory row, records the accepted order, and inserts the
+Each source transaction records one accepted hop: supplier registration,
+ingredient-lot receipt, production-batch production, shipment dispatch, or a
+one-line order. It locks required parent source rows and, for the order hop,
+the authoritative inventory row. It derives the event tenant from the command
+and locked parent or inventory row, writes the source row, and inserts the
 immutable outbox event and content hash. These changes commit or roll back
 together. No Redpanda call occurs inside this transaction.
 
+Shipment stores `order_id` without requiring `erp.orders` to exist; the M3
+fixture dispatches before the order hop. `AcceptOrder` requires `causation_id`
+to equal the shipment outbox event when a shipment already exists for that
+order, and requires `causation_id` to be null otherwise.
+
 Schema and image pins live in `erp/migrate.sql` / `erp.PostgresImage`,
-`relay.RedpandaImage`, and `platform` migrations. Rebuild helpers are
-`platform.ResetDerivedState` and `platform.RebuildFromHistory`.
+`relay.RedpandaImage`, and `platform` migrations. `erp.outbox` is unique on
+`event_id` and on `(tenant_id, aggregate_type, aggregate_id, aggregate_version)`.
+Rebuild helpers are `platform.ResetDerivedState` and
+`platform.RebuildFromHistory`.
 
 ### Outbox relay
 

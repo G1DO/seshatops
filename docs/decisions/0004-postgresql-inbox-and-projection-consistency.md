@@ -14,7 +14,7 @@ distributed transaction with Redpanda.
 ## Decision
 
 1. One PostgreSQL database with logical `erp` and `platform` schemas.
-2. The source transaction updates the accepted order, authoritative inventory, and immutable outbox row atomically.
+2. The source transaction records the accepted source hop (lineage or one-line order), any required inventory update, and the immutable outbox row atomically.
 3. The source-owned outbox relay publishes after commit and records published only after broker acknowledgement.
 4. The platform inbox is unique on `(consumer_name, event_id)`. Inbox state and inventory projection changes commit in one transaction.
 5. Matching duplicate content is a durable no-op. Conflicting content and missing aggregate versions are quarantined, not silently skipped.

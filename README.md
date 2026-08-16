@@ -1,9 +1,9 @@
 # SeshatOps
 
-A synthetic ERP order for fictional **Northstar Foods** flows through a
-transactional outbox and Redpanda into a tenant-scoped inventory projection.
-Operators see that projection over REST/SSE after a Go-owned OIDC session.
-**Ahoy is excluded** ([CLEAN_ROOM.md](docs/CLEAN_ROOM.md)).
+A synthetic ERP for fictional **Northstar Foods** records one-line orders and
+M3 supplier-to-order lineage hops through a transactional outbox and Redpanda.
+Operators see the inventory projection over REST/SSE after a Go-owned OIDC
+session. **Ahoy is excluded** ([CLEAN_ROOM.md](docs/CLEAN_ROOM.md)).
 
 Libraries plus tests. There is no deployment binary or production environment.
 What the tests measured: [EVIDENCE.md](docs/EVIDENCE.md).

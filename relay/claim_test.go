@@ -104,6 +104,64 @@ func seedAndAccept(t *testing.T, db *sql.DB) (northstar.Fixture, erp.AcceptResul
 	return fx, res
 }
 
+func seedAndAcceptLineage(t *testing.T, db *sql.DB) (northstar.LineageFixture, []erp.SourceAcceptResult, erp.AcceptResult) {
+	t.Helper()
+	fx, err := northstar.GenerateLineage(northstar.LineageSeed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	if err := erp.SeedLineageInventory(ctx, db, fx); err != nil {
+		t.Fatal(err)
+	}
+	supplierCmd, err := erp.SupplierCommandFromLineage(fx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lotCmd, err := erp.IngredientLotCommandFromLineage(fx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	batchCmd, err := erp.ProductionBatchCommandFromLineage(fx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	shipCmd, err := erp.ShipmentCommandFromLineage(fx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	orderCmd, err := erp.OrderCommandFromLineage(fx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hops := make([]erp.SourceAcceptResult, 0, 4)
+	supplier, err := erp.RegisterSupplier(ctx, db, supplierCmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hops = append(hops, supplier)
+	lot, err := erp.ReceiveIngredientLot(ctx, db, lotCmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hops = append(hops, lot)
+	batch, err := erp.ProduceProductionBatch(ctx, db, batchCmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hops = append(hops, batch)
+	ship, err := erp.DispatchShipment(ctx, db, shipCmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hops = append(hops, ship)
+	res, err := erp.AcceptOrder(ctx, db, orderCmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return fx, hops, res
+}
+
 func outboxStatus(t *testing.T, db *sql.DB, eventID string) (status string, attempts int, leaseOwner sql.NullString, leaseExp sql.NullTime) {
 	t.Helper()
 	err := db.QueryRow(`
@@ -615,6 +673,162 @@ func TestAcceptSurvivesUnreachableBroker(t *testing.T) {
 	}
 	if b.Pending != 1 {
 		t.Fatalf("backlog %+v", b)
+	}
+}
+
+func TestDrainOncePublishesLineageExactBytes(t *testing.T) {
+	db := openTestDB(t)
+	fx, hops, orderRes := seedAndAcceptLineage(t, db)
+	ctx := context.Background()
+	pub := &recordingPublisher{}
+	out, err := DrainOnce(ctx, db, pub, "worker-lineage", time.Minute, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Claimed != 5 || out.Published != 5 {
+		t.Fatalf("drain result %+v", out)
+	}
+	msgs := pub.snapshot()
+	if len(msgs) != 5 {
+		t.Fatalf("published %d", len(msgs))
+	}
+	wantBytes := map[string][]byte{
+		hops[0].EventID:  hops[0].EventBytes,
+		hops[1].EventID:  hops[1].EventBytes,
+		hops[2].EventID:  hops[2].EventBytes,
+		hops[3].EventID:  hops[3].EventBytes,
+		orderRes.EventID: orderRes.EventBytes,
+	}
+	seen := map[string]bool{}
+	for _, msg := range msgs {
+		if msg.Topic != Topic {
+			t.Fatalf("topic = %s", msg.Topic)
+		}
+		parsed, err := event.Parse(msg.Value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		wantKey := AggregateKey(fx.TenantID, parsed.AggregateType, parsed.AggregateID)
+		if string(msg.Key) != wantKey {
+			t.Fatalf("key = %q want %q", msg.Key, wantKey)
+		}
+		if string(msg.Key) == AggregateKey(fx.TenantID, parsed.AggregateType, parsed.EventID) && parsed.AggregateID != parsed.EventID {
+			t.Fatal("key must not be event_id")
+		}
+		want, ok := wantBytes[parsed.EventID]
+		if !ok {
+			t.Fatalf("unexpected event_id %s", parsed.EventID)
+		}
+		if string(msg.Value) != string(want) {
+			t.Fatal("value bytes rewritten")
+		}
+		if err := event.CheckIdentityConflict(parsed, lineageEnvelope(t, fx, parsed.EventID)); err != nil {
+			t.Fatal(err)
+		}
+		status, _, _, _ := outboxStatus(t, db, parsed.EventID)
+		if status != StatusPublished {
+			t.Fatalf("status = %s", status)
+		}
+		seen[parsed.EventID] = true
+	}
+	if len(seen) != 5 {
+		t.Fatalf("published identities = %d", len(seen))
+	}
+	b, err := InspectBacklog(ctx, db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b.Published != 5 || b.Pending != 0 {
+		t.Fatalf("backlog %+v", b)
+	}
+}
+
+func lineageEnvelope(t *testing.T, fx northstar.LineageFixture, eventID string) event.Envelope {
+	t.Helper()
+	for _, env := range fx.Events {
+		if env.EventID == eventID {
+			return env
+		}
+	}
+	t.Fatalf("fixture missing event %s", eventID)
+	return event.Envelope{}
+}
+
+func TestAcceptLineageSurvivesUnreachableBroker(t *testing.T) {
+	db := openTestDB(t)
+	_, hops, orderRes := seedAndAcceptLineage(t, db)
+	ctx := context.Background()
+	pub, err := NewFranzPublisher("127.0.0.1:1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(pub.Close)
+
+	drainCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+	defer cancel()
+	out, err := DrainOnce(drainCtx, db, pub, "worker-lineage", time.Minute, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Claimed != 5 || out.Transient != 5 {
+		t.Fatalf("expected five transient failures, got %+v", out)
+	}
+	assertFullLineageSourceRetained(t, db)
+	ids := append(lineageHopIDs(hops), orderRes.EventID)
+	for _, id := range ids {
+		status, _, _, _ := outboxStatus(t, db, id)
+		if status != StatusPending {
+			t.Fatalf("status = %s for %s", status, id)
+		}
+	}
+	b, err := InspectBacklog(ctx, db)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b.Pending != 5 {
+		t.Fatalf("backlog %+v", b)
+	}
+}
+
+func assertFullLineageSourceRetained(t *testing.T, db *sql.DB) {
+	t.Helper()
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.suppliers`) != 1 {
+		t.Fatal("accepted supplier disappeared")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.ingredient_lots`) != 1 {
+		t.Fatal("accepted lot disappeared")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.production_batches`) != 1 {
+		t.Fatal("accepted batch disappeared")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.shipments`) != 1 {
+		t.Fatal("accepted shipment disappeared")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.orders`) != 1 {
+		t.Fatal("accepted order disappeared")
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox`) != 5 {
+		t.Fatal("expected five outbox rows")
+	}
+}
+
+func lineageHopIDs(hops []erp.SourceAcceptResult) []string {
+	ids := make([]string, 0, len(hops))
+	for _, hop := range hops {
+		ids = append(ids, hop.EventID)
+	}
+	return ids
+}
+
+func clearAllPendingBackoff(t *testing.T, db *sql.DB) {
+	t.Helper()
+	_, err := db.Exec(`
+		UPDATE erp.outbox
+		SET publish_lease_expires_at = NULL
+		WHERE status = 'pending'
+	`)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
