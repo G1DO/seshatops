@@ -1,0 +1,18 @@
+{
+  "event_id": "418f5d78-6e64-4f5f-bd16-8e9f7c4a4101",
+  "tenant_id": "11111111-1111-4111-8111-111111111111",
+  "event_type": "supplier.registered",
+  "event_schema_version": 1,
+  "aggregate_type": "supplier",
+  "aggregate_id": "mill-northstar-001",
+  "aggregate_version": 1,
+  "occurred_at": "2026-08-07T10:00:00Z",
+  "recorded_at": "2026-08-07T10:00:00Z",
+  "producer": "synthetic-erp",
+  "correlation_id": "418f5d78-6e64-4f5f-bd16-8e9f7c4a4100",
+  "causation_id": null,
+  "trace_id": "418f5d78-6e64-4f5f-bd16-8e9f7c4a41ff",
+  "payload": {
+    "supplier_id": "mill-northstar-001"
+  }
+}

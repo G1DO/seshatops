@@ -78,6 +78,15 @@ func openTestDB(t *testing.T) *sql.DB {
 	return db
 }
 
+func mustOrderCommand(t *testing.T, fx northstar.Fixture) erp.OrderCommand {
+	t.Helper()
+	cmd, err := erp.OrderCommandFromFixture(fx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return cmd
+}
+
 func seedAndAccept(t *testing.T, db *sql.DB) (northstar.Fixture, erp.AcceptResult) {
 	t.Helper()
 	fx, err := northstar.Generate(northstar.DefaultSeed)
@@ -88,7 +97,7 @@ func seedAndAccept(t *testing.T, db *sql.DB) (northstar.Fixture, erp.AcceptResul
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	res, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx))
+	res, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -577,7 +586,7 @@ func TestAcceptSurvivesUnreachableBroker(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	res, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx))
+	res, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx))
 	if err != nil {
 		t.Fatal(err)
 	}

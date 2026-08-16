@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/G1DO/seshatops/api"
+	"github.com/G1DO/seshatops/event"
 	"github.com/G1DO/seshatops/identity"
 	"github.com/G1DO/seshatops/northstar"
 	"github.com/G1DO/seshatops/platform"
@@ -170,11 +171,13 @@ func seedOpsSignals(t *testing.T, db *sql.DB, fx northstar.Fixture) {
 	gap.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2152"
 	gap.AggregateID = "item-yeast-001"
 	gap.AggregateVersion = 2
-	gap.Payload.ItemID = "item-yeast-001"
-	gap.Payload.QuantityBefore = 8
-	gap.Payload.QuantityDecremented = 1
-	gap.Payload.QuantityAfter = 7
-	gap.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2154"
+	gap = event.WithQuantityDecremented(gap, func(p *event.QuantityDecremented) {
+		p.ItemID = "item-yeast-001"
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2154"
+	})
 	gap.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2153"
 	gapped := processEnvelope(t, db, gap, 51)
 	if gapped.Disposition != platform.DispositionQuarantinedGap {
@@ -185,8 +188,10 @@ func seedOpsSignals(t *testing.T, db *sql.DB, fx northstar.Fixture) {
 	other.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2151"
 	other.TenantID = identity.TenantNS002UUID
 	other.AggregateID = "item-sugar-001"
-	other.Payload.ItemID = "item-sugar-001"
-	other.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2155"
+	other = event.WithQuantityDecremented(other, func(p *event.QuantityDecremented) {
+		p.ItemID = "item-sugar-001"
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2155"
+	})
 	other.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2156"
 	otherApplied := processEnvelope(t, db, other, 52)
 	if otherApplied.Disposition != platform.DispositionApplied {

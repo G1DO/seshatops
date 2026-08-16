@@ -194,48 +194,12 @@ func envelopeFromObject(obj map[string]any) (Envelope, error) {
 	if !ok {
 		return Envelope{}, fmt.Errorf("%w: payload must be an object", ErrMalformed)
 	}
-	payload, err := payloadFromObject(payloadObj)
+	payload, err := payloadFromObject(env.EventType, env.EventSchemaVersion, payloadObj)
 	if err != nil {
 		return Envelope{}, err
 	}
 	env.Payload = payload
 	return env, nil
-}
-
-func payloadFromObject(obj map[string]any) (QuantityDecremented, error) {
-	required := []string{
-		"order_id", "item_id", "quantity_decremented", "quantity_before", "quantity_after",
-	}
-	for _, k := range required {
-		if _, ok := obj[k]; !ok {
-			return QuantityDecremented{}, fmt.Errorf("%w: missing payload.%s", ErrMalformed, k)
-		}
-	}
-	for k := range obj {
-		switch k {
-		case "order_id", "item_id", "quantity_decremented", "quantity_before", "quantity_after":
-		default:
-			return QuantityDecremented{}, fmt.Errorf("%w: unknown payload field %q", ErrMalformed, k)
-		}
-	}
-	var p QuantityDecremented
-	var err error
-	if p.OrderID, err = asString(obj["order_id"], "payload.order_id"); err != nil {
-		return QuantityDecremented{}, err
-	}
-	if p.ItemID, err = asString(obj["item_id"], "payload.item_id"); err != nil {
-		return QuantityDecremented{}, err
-	}
-	if p.QuantityDecremented, err = asInt(obj["quantity_decremented"], "payload.quantity_decremented"); err != nil {
-		return QuantityDecremented{}, err
-	}
-	if p.QuantityBefore, err = asInt(obj["quantity_before"], "payload.quantity_before"); err != nil {
-		return QuantityDecremented{}, err
-	}
-	if p.QuantityAfter, err = asInt(obj["quantity_after"], "payload.quantity_after"); err != nil {
-		return QuantityDecremented{}, err
-	}
-	return p, nil
 }
 
 func asString(v any, field string) (string, error) {

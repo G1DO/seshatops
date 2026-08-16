@@ -115,7 +115,7 @@ func TestResetDerivedStatePreservesERPAndBrokerInputs(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 	_ = processNorthstar(t, db, fx)
@@ -161,7 +161,7 @@ func TestDuplicateInjectionLeavesProjectionUnchanged(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 	pub, err := relay.NewFranzPublisher(seed)
@@ -254,7 +254,7 @@ func TestDeterministicRebuildChecksumEquality(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -320,10 +320,12 @@ func TestRebuildIncompleteOnGap(t *testing.T) {
 	v2 := fx.Event
 	v2.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b2"
 	v2.AggregateVersion = 2
-	v2.Payload.QuantityBefore = 8
-	v2.Payload.QuantityDecremented = 1
-	v2.Payload.QuantityAfter = 7
-	v2.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	v2 = event.WithQuantityDecremented(v2, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	})
 	v2.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b3"
 
 	raw2 := mustCanonical(t, v2)
@@ -350,10 +352,12 @@ func TestRebuildCompleteWhenGapResolvesInSameBatch(t *testing.T) {
 	v2 := fx.Event
 	v2.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b2"
 	v2.AggregateVersion = 2
-	v2.Payload.QuantityBefore = 8
-	v2.Payload.QuantityDecremented = 1
-	v2.Payload.QuantityAfter = 7
-	v2.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	v2 = event.WithQuantityDecremented(v2, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	})
 	v2.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b3"
 
 	raw1 := mustCanonical(t, fx.Event)
@@ -411,8 +415,10 @@ func TestRebuildIncompleteOnConflictingIdentity(t *testing.T) {
 	rec1 := historyFromFixture(t, fx, 1)
 
 	conflict := fx.Event
-	conflict.Payload.QuantityAfter = 7
-	conflict.Payload.QuantityDecremented = 3
+	conflict = event.WithQuantityDecremented(conflict, func(p *event.QuantityDecremented) {
+		p.QuantityAfter = 7
+		p.QuantityDecremented = 3
+	})
 	raw2 := mustCanonical(t, conflict)
 	rec2 := HistoryRecord{
 		Key:   append([]byte(nil), rec1.Key...),
@@ -449,7 +455,7 @@ func TestRebuildHasNoExternalSideEffectPath(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 	inv, orders, outbox, outHash := snapshotERP(t, db)

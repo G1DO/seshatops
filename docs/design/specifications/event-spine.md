@@ -8,7 +8,8 @@ Executable helpers: `event`. Fixture: `northstar`. HTTP/SSE:
 
 ## 1. Event Spine vertical slice
 
-Event Spine supports one synthetic order line for one tenant and one inventory item:
+The implemented Event Spine source/consumer path still supports one synthetic
+order line for one tenant and one inventory item:
 
 > accepted synthetic order -> PostgreSQL source transaction and outbox ->
 > Redpanda -> Go consumer -> transactional inbox and inventory projection ->
@@ -18,8 +19,18 @@ HTTP/SSE for that last step is
 [openapi-projection.yaml](../../api/openapi-projection.yaml).
 This document does not redefine routes or SSE frames.
 
-Multi-line orders, additional event families, commands, approvals, and
-intelligence are outside this contract. Identity HTTP is
+The **accepted event contract** also includes the M3 traceability families in
+section 2. `event.Parse` / `event.Validate` accept those families. The
+implemented ERP outbox path still emits only `inventory.quantity_decremented`.
+The implemented inventory consumer does not project other accepted families;
+it quarantines them as an unsupported contract until the lineage consumer
+lands. That quarantine records available event identity (event id, tenant,
+aggregate, schema version, event type, and content hash) so tenant-scoped
+inspect can see it. The Northstar lineage fixture is `northstar.GenerateLineage`
+with seed `northstar-m3-lineage-v1`.
+
+Multi-line orders, commands, approvals, and intelligence remain outside this
+contract. Identity HTTP is
 [authorization.md](../../security/authorization.md).
 
 ## 2. Event envelope
@@ -30,23 +41,42 @@ The wire value is UTF-8 JSON. The v1 envelope contains exactly these fields:
 | --- | --- |
 | `event_id` | UUIDv4 string; stable identity of one logical event |
 | `tenant_id` | Canonical lowercase UUID string |
-| `event_type` | Exactly `inventory.quantity_decremented` |
-| `event_schema_version` | Positive integer; Event Spine accepts exactly `1` |
-| `aggregate_type` | Exactly `inventory_item` |
-| `aggregate_id` | Canonical lowercase inventory-item identifier |
-| `aggregate_version` | Positive integer; per-tenant, per-item sequence beginning at `1` |
+| `event_type` | One of the accepted families in the table below |
+| `event_schema_version` | Positive integer; Event Spine accepts exactly `1` for every accepted family |
+| `aggregate_type` | Exact aggregate type required by that family |
+| `aggregate_id` | Canonical lowercase identifier for that aggregate |
+| `aggregate_version` | Positive integer; per-tenant, per-aggregate sequence beginning at `1` |
 | `occurred_at` | RFC 3339 UTC timestamp for the source business occurrence |
 | `recorded_at` | RFC 3339 UTC timestamp for durable source/outbox recording |
 | `producer` | Exactly `synthetic-erp` |
 | `correlation_id` | Stable UUID string for order/workflow lineage |
 | `causation_id` | Nullable UUID string; `null` for the initial source transaction |
 | `trace_id` | Stable opaque lineage string; it is not a distributed-tracing claim |
-| `payload` | Strict `inventory.quantity_decremented` v1 payload |
+| `payload` | Strict payload for that family and schema version |
 
 Event Spine does not permit free-form metadata. Future metadata requires a reviewed
 schema version.
 
-The normative v1 payload is:
+Accepted families, all at `event_schema_version` `1`:
+
+| `event_type` | `aggregate_type` | Payload fields |
+| --- | --- | --- |
+| `inventory.quantity_decremented` | `inventory_item` | `order_id`, `item_id`, `quantity_decremented`, `quantity_before`, `quantity_after` |
+| `supplier.registered` | `supplier` | `supplier_id` |
+| `ingredient_lot.received` | `ingredient_lot` | `lot_id`, `supplier_id`, `item_id` |
+| `production_batch.produced` | `production_batch` | `batch_id`, `lot_id` |
+| `shipment.dispatched` | `shipment` | `shipment_id`, `batch_id`, `order_id` |
+
+The self-id in each payload (`item_id`, `supplier_id`, `lot_id`, `batch_id`,
+`shipment_id`) must equal `aggregate_id`. Canonical lowercase identifiers use
+the existing `aggregate_id` rule. `order_id` is a UUID string.
+
+The M3 chain is 1:1. Arrays are not permitted in the event contract, so a
+production batch references one lot and a shipment references one batch.
+Shipment joins to the order hop by `shipment.payload.order_id` equal to
+`inventory.quantity_decremented` `payload.order_id`.
+
+The normative `inventory.quantity_decremented` v1 payload is:
 
 | Field | Type and invariant |
 | --- | --- |
@@ -56,11 +86,22 @@ The normative v1 payload is:
 | `quantity_before` | Non-negative integer |
 | `quantity_after` | Non-negative integer |
 
-The payload must satisfy:
+The inventory payload must satisfy:
 
 `quantity_before - quantity_decremented = quantity_after`.
 
-Example shape:
+Traceability payload invariants:
+
+| Field | Type and invariant |
+| --- | --- |
+| `supplier_id` | Canonical lowercase identifier; equals `aggregate_id` on `supplier.registered` |
+| `lot_id` | Canonical lowercase identifier; equals `aggregate_id` on `ingredient_lot.received` |
+| `batch_id` | Canonical lowercase identifier; equals `aggregate_id` on `production_batch.produced` |
+| `shipment_id` | Canonical lowercase identifier; equals `aggregate_id` on `shipment.dispatched` |
+| `item_id` on `ingredient_lot.received` | Canonical inventory-item identifier |
+| `order_id` on `shipment.dispatched` | UUID string for the synthetic order |
+
+Example inventory shape:
 
 ```json
 {
@@ -93,8 +134,10 @@ The identifiers in this example are synthetic and illustrative only.
 
 Version compatibility is exact and explicit:
 
-- Event Spine producers emit only event type `inventory.quantity_decremented` and schema version `1`.
-- Event Spine consumers reject unknown event types, unknown schema versions, missing fields, unknown fields, duplicate object member names, invalid types, and invalid values.
+- The parser accepts only the families and schema version `1` listed in section 2.
+- Unknown event types, unknown schema versions, missing fields, unknown fields, duplicate object member names, invalid types, and invalid values are rejected. An unknown event type fails as unsupported even when the payload matches a known family.
+- The implemented ERP producer still emits only `inventory.quantity_decremented` schema version `1`.
+- The implemented inventory consumer applies only that family. Other accepted families are quarantined as an unsupported contract for that consumer and are not coerced into inventory projection. The failure record keeps the identity Parse recovered; it is not an unattributed parse failure.
 - There is no implicit coercion, defaulting, fallback handler, or schema-registry service.
 - Any semantic, required-field, or interpretation change requires a new schema version and handler.
 
@@ -233,6 +276,7 @@ view: [authorization.md](../../security/authorization.md) and
 | Malformed envelope | Durable quarantine; no projection effect |
 | Unsupported schema/version | Durable quarantine; no downgrade |
 | Unknown event family | Durable quarantine |
+| Accepted family not applied by this consumer | Durable `unsupported_contract` quarantine; record available event identity; no inventory projection |
 | Tenant, key, or aggregate mismatch | Durable quarantine; never reinterpret tenant |
 | Same ID with conflicting content | Integrity quarantine |
 | Aggregate-version gap | Quarantine and defer application |
@@ -250,7 +294,9 @@ The minimal `platform.processing_failures` record contains:
 aggregate identity, available schema and event type, failure category, content
 hash, source topic/partition/offset, attempt count, timestamps, sanitized
 diagnostic code, and quarantine status. `content_hash` is nullable when a
-canonical envelope cannot be formed. A separate received-bytes hash may be
+canonical envelope cannot be formed. When Parse succeeded, event id, tenant,
+aggregate, schema version, event type, and content hash are available and must
+be recorded. Unparseable input may leave those fields null. A separate received-bytes hash may be
 recorded only under a distinct field name and is never treated as event content
 identity. Raw payloads, secrets, and unrestricted diagnostics are not stored.
 

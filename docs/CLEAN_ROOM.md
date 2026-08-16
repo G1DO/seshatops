@@ -33,10 +33,11 @@ Do not commit a private denylist of real identifiers.
 If material could only have been produced by studying a private system, exclude
 it. If provenance is uncertain, exclude it. Do not sanitize and keep.
 
-Northstar Event Spine fixture: `northstar.Generate` with seed
-`northstar-m1-order-line-v1`. Goldens under `northstar/testdata/` and
+Northstar Event Spine fixtures: `northstar.Generate` with seed
+`northstar-m1-order-line-v1`, and `northstar.GenerateLineage` with seed
+`northstar-m3-lineage-v1`. Goldens under `northstar/testdata/` and
 `event/testdata/`. Reproduce with `go test ./event ./northstar ./erp`.
-Identifiers such as `item-flour-001` are fictional.
+Identifiers such as `item-flour-001` and `mill-northstar-001` are fictional.
 
 ## AI-assisted work
 

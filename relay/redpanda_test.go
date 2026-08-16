@@ -143,7 +143,7 @@ func TestRedpandaBrokerOutagePersistenceAndRecovery(t *testing.T) {
 	}
 
 	// Source transaction commits while Redpanda is unavailable.
-	res, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx))
+	res, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx))
 	if err != nil {
 		t.Fatal(err)
 	}

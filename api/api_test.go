@@ -120,6 +120,15 @@ func mustFixture(t *testing.T) northstar.Fixture {
 	return fx
 }
 
+func mustOrderCommand(t *testing.T, fx northstar.Fixture) erp.OrderCommand {
+	t.Helper()
+	cmd, err := erp.OrderCommandFromFixture(fx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return cmd
+}
+
 func mustCanonical(t *testing.T, env event.Envelope) []byte {
 	t.Helper()
 	b, err := event.CanonicalBytes(env)
@@ -390,10 +399,12 @@ func TestSSEDisconnectReconnectRESTConverge(t *testing.T) {
 	v2 := fx.Event
 	v2.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b2"
 	v2.AggregateVersion = 2
-	v2.Payload.QuantityBefore = 8
-	v2.Payload.QuantityDecremented = 1
-	v2.Payload.QuantityAfter = 7
-	v2.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	v2 = event.WithQuantityDecremented(v2, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	})
 	v2.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b3"
 	_ = processEnvelope(t, db, v2, 2)
 
@@ -429,10 +440,12 @@ func TestSSEDisconnectReconnectRESTConverge(t *testing.T) {
 	v3 := v2
 	v3.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20c2"
 	v3.AggregateVersion = 3
-	v3.Payload.QuantityBefore = 7
-	v3.Payload.QuantityDecremented = 1
-	v3.Payload.QuantityAfter = 6
-	v3.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20c4"
+	v3 = event.WithQuantityDecremented(v3, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 7
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 6
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20c4"
+	})
 	v3.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20c3"
 	_ = processEnvelope(t, db, v3, 3)
 
