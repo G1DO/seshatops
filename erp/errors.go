@@ -25,4 +25,8 @@ var (
 
 	// ErrDuplicateEvent is returned when the outbox already holds event_id.
 	ErrDuplicateEvent = errors.New("erp: duplicate outbox event")
+
+	// ErrInvalidFixture is returned when a Northstar fixture envelope is not
+	// inventory.quantity_decremented.
+	ErrInvalidFixture = errors.New("erp: fixture event is not inventory.quantity_decremented")
 )

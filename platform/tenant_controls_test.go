@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/G1DO/seshatops/erp"
+	"github.com/G1DO/seshatops/event"
 	"github.com/G1DO/seshatops/identity"
 	"github.com/G1DO/seshatops/relay"
 )
@@ -24,8 +25,10 @@ func TestResetDerivedStateForTenantLeavesOtherTenant(t *testing.T) {
 	other.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2181"
 	other.TenantID = identity.TenantNS002UUID
 	other.AggregateID = "item-sugar-001"
-	other.Payload.ItemID = "item-sugar-001"
-	other.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2182"
+	other = event.WithQuantityDecremented(other, func(p *event.QuantityDecremented) {
+		p.ItemID = "item-sugar-001"
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2182"
+	})
 	other.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2183"
 	raw := mustCanonical(t, other)
 	key := []byte(relay.AggregateKey(other.TenantID, other.AggregateType, other.AggregateID))
@@ -76,7 +79,7 @@ func TestReplayTenantHistoryIsDuplicateNoop(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 	applied := processNorthstar(t, db, fx)
@@ -112,7 +115,7 @@ func TestRebuildTenantFromHistoryLeavesOtherTenant(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 	if processNorthstar(t, db, fx).Disposition != DispositionApplied {
@@ -123,8 +126,10 @@ func TestRebuildTenantFromHistoryLeavesOtherTenant(t *testing.T) {
 	other.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2184"
 	other.TenantID = identity.TenantNS002UUID
 	other.AggregateID = "item-sugar-001"
-	other.Payload.ItemID = "item-sugar-001"
-	other.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2185"
+	other = event.WithQuantityDecremented(other, func(p *event.QuantityDecremented) {
+		p.ItemID = "item-sugar-001"
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2185"
+	})
 	other.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2186"
 	raw := mustCanonical(t, other)
 	key := []byte(relay.AggregateKey(other.TenantID, other.AggregateType, other.AggregateID))
@@ -162,10 +167,12 @@ func TestReleaseTenantQuarantineRejectsGap(t *testing.T) {
 	gap := fx.Event
 	gap.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2187"
 	gap.AggregateVersion = 2
-	gap.Payload.QuantityBefore = 8
-	gap.Payload.QuantityDecremented = 1
-	gap.Payload.QuantityAfter = 7
-	gap.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2188"
+	gap = event.WithQuantityDecremented(gap, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2188"
+	})
 	gap.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2189"
 	raw := mustCanonical(t, gap)
 	key := []byte(relay.AggregateKey(gap.TenantID, gap.AggregateType, gap.AggregateID))
@@ -195,7 +202,7 @@ func TestLoadTenantOutboxHistoryRejectsEnvelopeTenantMismatch(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -221,7 +228,7 @@ func TestReleaseTenantQuarantineRedrivesPoisonFromRetainedBytes(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := db.ExecContext(ctx, `

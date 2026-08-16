@@ -14,6 +14,7 @@ import (
 
 	"github.com/G1DO/seshatops/api"
 	"github.com/G1DO/seshatops/erp"
+	"github.com/G1DO/seshatops/event"
 	"github.com/G1DO/seshatops/identity"
 	"github.com/G1DO/seshatops/northstar"
 	"github.com/G1DO/seshatops/platform"
@@ -83,7 +84,7 @@ func seedQuarantinedOutbox(t *testing.T, db *sql.DB) northstar.Fixture {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	res, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx))
+	res, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -264,10 +265,12 @@ func TestReleaseGapIsNotReleasable(t *testing.T) {
 	gap := fx.Event
 	gap.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a21ab"
 	gap.AggregateVersion = 2
-	gap.Payload.QuantityBefore = 8
-	gap.Payload.QuantityDecremented = 1
-	gap.Payload.QuantityAfter = 7
-	gap.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a21ac"
+	gap = event.WithQuantityDecremented(gap, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a21ac"
+	})
 	gap.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a21ad"
 	res := processEnvelope(t, db, gap, 80)
 	if res.Disposition != platform.DispositionQuarantinedGap {
@@ -301,7 +304,7 @@ func TestOperatorReplayIsDuplicateNoop(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 	applied := processEnvelope(t, db, fx.Event, 1)
@@ -343,7 +346,7 @@ func TestOperatorRebuildLeavesOtherTenant(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 	if processEnvelope(t, db, fx.Event, 1).Disposition != platform.DispositionApplied {
@@ -354,8 +357,10 @@ func TestOperatorRebuildLeavesOtherTenant(t *testing.T) {
 	other.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a21ae"
 	other.TenantID = identity.TenantNS002UUID
 	other.AggregateID = "item-sugar-001"
-	other.Payload.ItemID = "item-sugar-001"
-	other.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a21af"
+	other = event.WithQuantityDecremented(other, func(p *event.QuantityDecremented) {
+		p.ItemID = "item-sugar-001"
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a21af"
+	})
 	other.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a21b0"
 	if processEnvelope(t, db, other, 2).Disposition != platform.DispositionApplied {
 		t.Fatal("ns002 apply failed")

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/G1DO/seshatops/event"
 	"github.com/G1DO/seshatops/northstar"
 )
 
@@ -24,16 +25,20 @@ func SeedNorthstarInventory(ctx context.Context, db *sql.DB, fx northstar.Fixtur
 
 // OrderCommandFromFixture builds the AcceptOrder command that reproduces the
 // Issue #22 Northstar logical event when inventory is seeded from the same fixture.
-func OrderCommandFromFixture(fx northstar.Fixture) OrderCommand {
+func OrderCommandFromFixture(fx northstar.Fixture) (OrderCommand, error) {
+	p, ok := event.AsQuantityDecremented(fx.Event)
+	if !ok {
+		return OrderCommand{}, ErrInvalidFixture
+	}
 	return OrderCommand{
 		EventID:       fx.Event.EventID,
 		TenantID:      fx.TenantID,
 		OrderID:       fx.OrderID,
 		ItemID:        fx.ItemID,
-		Quantity:      fx.Event.Payload.QuantityDecremented,
+		Quantity:      p.QuantityDecremented,
 		OccurredAt:    fx.Event.OccurredAt,
 		RecordedAt:    fx.Event.RecordedAt,
 		CorrelationID: fx.Event.CorrelationID,
 		TraceID:       fx.Event.TraceID,
-	}
+	}, nil
 }

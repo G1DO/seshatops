@@ -9,14 +9,6 @@ import (
 	"unicode/utf8"
 )
 
-// Event Spine fixed contract values from docs/design/specifications/event-spine.md.
-const (
-	EventTypeQuantityDecremented = "inventory.quantity_decremented"
-	AggregateTypeInventoryItem   = "inventory_item"
-	ProducerSyntheticERP         = "synthetic-erp"
-	SchemaVersionV1              = int64(1)
-)
-
 const maxSafeInt = int64(9007199254740991) // 2^53 - 1
 
 var (
@@ -41,16 +33,7 @@ type Envelope struct {
 	CorrelationID      string
 	CausationID        *string
 	TraceID            string
-	Payload            QuantityDecremented
-}
-
-// QuantityDecremented is the inventory.quantity_decremented v1 payload.
-type QuantityDecremented struct {
-	OrderID             string
-	ItemID              string
-	QuantityDecremented int64
-	QuantityBefore      int64
-	QuantityAfter       int64
+	Payload            Payload
 }
 
 // Validate checks envelope and payload invariants without parsing JSON.
@@ -96,13 +79,11 @@ func Validate(env Envelope) error {
 	if err := requireLowerUUID(env.TenantID, "tenant_id"); err != nil {
 		return err
 	}
-	if env.EventType != EventTypeQuantityDecremented {
-		return fmt.Errorf("%w: event_type %q", ErrUnsupported, env.EventType)
+	wantAgg, err := familyAggregateType(env.EventType, env.EventSchemaVersion)
+	if err != nil {
+		return err
 	}
-	if env.EventSchemaVersion != SchemaVersionV1 {
-		return fmt.Errorf("%w: event_schema_version %d", ErrUnsupported, env.EventSchemaVersion)
-	}
-	if env.AggregateType != AggregateTypeInventoryItem {
+	if env.AggregateType != wantAgg {
 		return fmt.Errorf("%w: aggregate_type %q", ErrMalformed, env.AggregateType)
 	}
 	if err := requireCanonicalID(env.AggregateID, "aggregate_id"); err != nil {
@@ -135,35 +116,10 @@ func Validate(env Envelope) error {
 }
 
 func validatePayload(env Envelope) error {
-	p := env.Payload
-	if err := requireUTF8(p.OrderID, "payload.order_id"); err != nil {
-		return err
+	if env.Payload == nil {
+		return fmt.Errorf("%w: missing payload", ErrMalformed)
 	}
-	if err := requireUTF8(p.ItemID, "payload.item_id"); err != nil {
-		return err
-	}
-	if err := requireUUID(p.OrderID, "payload.order_id"); err != nil {
-		return err
-	}
-	if err := requireCanonicalID(p.ItemID, "payload.item_id"); err != nil {
-		return err
-	}
-	if p.ItemID != env.AggregateID {
-		return fmt.Errorf("%w: payload.item_id must equal aggregate_id", ErrMalformed)
-	}
-	if p.QuantityDecremented < 1 || p.QuantityDecremented > maxSafeInt {
-		return fmt.Errorf("%w: quantity_decremented %d", ErrMalformed, p.QuantityDecremented)
-	}
-	if p.QuantityBefore < 0 || p.QuantityBefore > maxSafeInt {
-		return fmt.Errorf("%w: quantity_before %d", ErrMalformed, p.QuantityBefore)
-	}
-	if p.QuantityAfter < 0 || p.QuantityAfter > maxSafeInt {
-		return fmt.Errorf("%w: quantity_after %d", ErrMalformed, p.QuantityAfter)
-	}
-	if p.QuantityBefore-p.QuantityDecremented != p.QuantityAfter {
-		return fmt.Errorf("%w: quantity arithmetic invariant failed", ErrMalformed)
-	}
-	return nil
+	return env.Payload.validateAgainst(env)
 }
 
 func requireUTF8(v, field string) error {

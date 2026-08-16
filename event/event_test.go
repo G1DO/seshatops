@@ -26,8 +26,12 @@ func TestParseValidV1(t *testing.T) {
 	if env.CausationID != nil {
 		t.Fatalf("causation_id want nil, got %v", env.CausationID)
 	}
-	if env.Payload.QuantityAfter != 8 {
-		t.Fatalf("quantity_after = %d", env.Payload.QuantityAfter)
+	p, ok := event.AsQuantityDecremented(env)
+	if !ok {
+		t.Fatal("payload is not inventory.quantity_decremented")
+	}
+	if p.QuantityAfter != 8 {
+		t.Fatalf("quantity_after = %d", p.QuantityAfter)
 	}
 }
 
@@ -164,8 +168,13 @@ func TestIdentityConflict(t *testing.T) {
 		t.Fatal(err)
 	}
 	b := a
-	b.Payload.QuantityAfter = 7
-	b.Payload.QuantityBefore = 9
+	bp, ok := event.AsQuantityDecremented(b)
+	if !ok {
+		t.Fatal("payload is not inventory.quantity_decremented")
+	}
+	bp.QuantityAfter = 7
+	bp.QuantityBefore = 9
+	b.Payload = bp
 	if err := event.CheckIdentityConflict(a, b); !errors.Is(err, event.ErrIdentityConflict) {
 		t.Fatalf("err=%v", err)
 	}
@@ -280,6 +289,148 @@ func TestUnicodeMalformedDoNotCollapse(t *testing.T) {
 		if !errors.Is(err, event.ErrMalformed) {
 			t.Fatalf("case %d: err=%v, want ErrMalformed", i, err)
 		}
+	}
+}
+
+func TestParseValidFamilies(t *testing.T) {
+	cases := []struct {
+		file      string
+		eventType string
+		aggType   string
+		aggID     string
+	}{
+		{"supplier_registered_v1.json", event.EventTypeSupplierRegistered, event.AggregateTypeSupplier, "mill-northstar-001"},
+		{"ingredient_lot_received_v1.json", event.EventTypeIngredientLotReceived, event.AggregateTypeIngredientLot, "lot-flour-2026-001"},
+		{"production_batch_produced_v1.json", event.EventTypeProductionBatchProduced, event.AggregateTypeProductionBatch, "batch-bread-001"},
+		{"shipment_dispatched_v1.json", event.EventTypeShipmentDispatched, event.AggregateTypeShipment, "ship-northstar-001"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.file, func(t *testing.T) {
+			env, err := event.Parse(readTestdata(t, tc.file))
+			if err != nil {
+				t.Fatalf("Parse: %v", err)
+			}
+			if env.EventType != tc.eventType {
+				t.Fatalf("event_type = %q", env.EventType)
+			}
+			if env.AggregateType != tc.aggType || env.AggregateID != tc.aggID {
+				t.Fatalf("aggregate = %s/%s", env.AggregateType, env.AggregateID)
+			}
+			if env.EventSchemaVersion != event.SchemaVersionV1 {
+				t.Fatalf("schema = %d", env.EventSchemaVersion)
+			}
+		})
+	}
+}
+
+func TestFamilyGoldens(t *testing.T) {
+	files := []string{
+		"supplier_registered_v1",
+		"ingredient_lot_received_v1",
+		"production_batch_produced_v1",
+		"shipment_dispatched_v1",
+	}
+	for _, name := range files {
+		t.Run(name, func(t *testing.T) {
+			env, err := event.Parse(readTestdata(t, name+".json"))
+			if err != nil {
+				t.Fatalf("Parse: %v", err)
+			}
+			got, err := event.CanonicalBytes(env)
+			if err != nil {
+				t.Fatal(err)
+			}
+			want := readTestdata(t, name+".jcs")
+			if !bytes.Equal(got, want) {
+				t.Fatalf("canonical bytes mismatch\ngot:  %s\nwant: %s", got, want)
+			}
+			hash, err := event.ContentHash(env)
+			if err != nil {
+				t.Fatal(err)
+			}
+			wantHash := strings.TrimSpace(string(readTestdata(t, name+".sha256")))
+			if hash != wantHash {
+				t.Fatalf("hash = %s, want %s", hash, wantHash)
+			}
+		})
+	}
+}
+
+func TestFamilyCompatibilityRejects(t *testing.T) {
+	supplier := string(readTestdata(t, "supplier_registered_v1.json"))
+	shipment := string(readTestdata(t, "shipment_dispatched_v1.json"))
+	inventory := string(readTestdata(t, "valid_v1.json"))
+	lot := string(readTestdata(t, "ingredient_lot_received_v1.json"))
+	cases := []struct {
+		name    string
+		raw     string
+		wantErr error
+	}{
+		{
+			name:    "unknown_type_inventory_shaped_payload",
+			raw:     strings.Replace(inventory, `"inventory.quantity_decremented"`, `"inventory.quantity_incremented"`, 1),
+			wantErr: event.ErrUnsupported,
+		},
+		{
+			name:    "supplier_schema_v2",
+			raw:     strings.Replace(supplier, `"event_schema_version": 1`, `"event_schema_version": 2`, 1),
+			wantErr: event.ErrUnsupported,
+		},
+		{
+			name:    "supplier_unknown_payload_field",
+			raw:     strings.Replace(supplier, `"supplier_id": "mill-northstar-001"`, `"supplier_id": "mill-northstar-001", "name": "nope"`, 1),
+			wantErr: event.ErrMalformed,
+		},
+		{
+			name: "supplier_missing_payload_field",
+			raw: strings.Replace(supplier, `"payload": {
+    "supplier_id": "mill-northstar-001"
+  }`, `"payload": {}`, 1),
+			wantErr: event.ErrMalformed,
+		},
+		{
+			name:    "supplier_id_mismatch",
+			raw:     strings.Replace(supplier, `"supplier_id": "mill-northstar-001"`, `"supplier_id": "mill-other-001"`, 1),
+			wantErr: event.ErrMalformed,
+		},
+		{
+			name:    "supplier_wrong_aggregate_type",
+			raw:     strings.Replace(supplier, `"aggregate_type": "supplier"`, `"aggregate_type": "inventory_item"`, 1),
+			wantErr: event.ErrMalformed,
+		},
+		{
+			name:    "supplier_uppercase_id",
+			raw:     strings.Replace(supplier, `"aggregate_id": "mill-northstar-001"`, `"aggregate_id": "Mill-northstar-001"`, 1),
+			wantErr: event.ErrMalformed,
+		},
+		{
+			name:    "lot_missing_parent",
+			raw:     strings.Replace(lot, `"supplier_id": "mill-northstar-001",`, ``, 1),
+			wantErr: event.ErrMalformed,
+		},
+		{
+			name: "shipment_inventory_payload",
+			raw: strings.Replace(shipment, `"payload": {
+    "shipment_id": "ship-northstar-001",
+    "batch_id": "batch-bread-001",
+    "order_id": "418f5d78-6e64-4f5f-bd16-8e9f7c4a4120"
+  }`, `"payload": {
+    "order_id": "018f5d78-6e64-4f5f-bd16-8e9f7c4a20a4",
+    "item_id": "item-flour-001",
+    "quantity_decremented": 2,
+    "quantity_before": 10,
+    "quantity_after": 8
+  }`, 1),
+			wantErr: event.ErrMalformed,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := event.Parse([]byte(tc.raw))
+			if !errors.Is(err, tc.wantErr) {
+				t.Fatalf("err=%v, want %v", err, tc.wantErr)
+			}
+		})
 	}
 }
 

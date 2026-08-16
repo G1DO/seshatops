@@ -105,6 +105,15 @@ func mustFixture(t *testing.T) northstar.Fixture {
 	return fx
 }
 
+func mustOrderCommand(t *testing.T, fx northstar.Fixture) erp.OrderCommand {
+	t.Helper()
+	cmd, err := erp.OrderCommandFromFixture(fx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return cmd
+}
+
 func mustCanonical(t *testing.T, env event.Envelope) []byte {
 	t.Helper()
 	b, err := event.CanonicalBytes(env)
@@ -261,10 +270,12 @@ func TestRedriveFailureWithholdsAckAndRetriesOnDuplicate(t *testing.T) {
 	v2 := fx.Event
 	v2.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b2"
 	v2.AggregateVersion = 2
-	v2.Payload.QuantityBefore = 8
-	v2.Payload.QuantityDecremented = 1
-	v2.Payload.QuantityAfter = 7
-	v2.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	v2 = event.WithQuantityDecremented(v2, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	})
 	v2.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b3"
 
 	raw2 := mustCanonical(t, v2)
@@ -329,8 +340,10 @@ func TestConflictingEventIDRejected(t *testing.T) {
 	_ = processNorthstar(t, db, fx)
 
 	conflict := fx.Event
-	conflict.Payload.QuantityAfter = 7
-	conflict.Payload.QuantityDecremented = 3
+	conflict = event.WithQuantityDecremented(conflict, func(p *event.QuantityDecremented) {
+		p.QuantityAfter = 7
+		p.QuantityDecremented = 3
+	})
 	raw := mustCanonical(t, conflict)
 	key := []byte(relay.AggregateKey(conflict.TenantID, conflict.AggregateType, conflict.AggregateID))
 	res, err := ProcessRecord(context.Background(), db, key, raw, SourcePosition{
@@ -357,10 +370,12 @@ func TestAggregateVersionGapAndRedrive(t *testing.T) {
 	v2 := fx.Event
 	v2.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b2"
 	v2.AggregateVersion = 2
-	v2.Payload.QuantityBefore = 8
-	v2.Payload.QuantityDecremented = 1
-	v2.Payload.QuantityAfter = 7
-	v2.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	v2 = event.WithQuantityDecremented(v2, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	})
 	v2.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b3"
 
 	raw2 := mustCanonical(t, v2)
@@ -402,10 +417,12 @@ func TestReorderAggregateVersionIsNotSilentlySkipped(t *testing.T) {
 	v3 := fx.Event
 	v3.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b5"
 	v3.AggregateVersion = 3
-	v3.Payload.QuantityBefore = 7
-	v3.Payload.QuantityDecremented = 1
-	v3.Payload.QuantityAfter = 6
-	v3.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b6"
+	v3 = event.WithQuantityDecremented(v3, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 7
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 6
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b6"
+	})
 	v3.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b7"
 
 	raw3 := mustCanonical(t, v3)
@@ -443,7 +460,9 @@ func TestStaleAggregateVersionQuarantined(t *testing.T) {
 	stale := fx.Event
 	stale.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20c1"
 	stale.AggregateVersion = 1
-	stale.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20c4"
+	stale = event.WithQuantityDecremented(stale, func(p *event.QuantityDecremented) {
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20c4"
+	})
 	raw := mustCanonical(t, stale)
 	key := []byte(relay.AggregateKey(stale.TenantID, stale.AggregateType, stale.AggregateID))
 	res, err := ProcessRecord(context.Background(), db, key, raw, SourcePosition{
@@ -542,6 +561,45 @@ func TestUnsupportedSchemaQuarantined(t *testing.T) {
 	_, _, ok, err := ProjectionState(context.Background(), db, fx.TenantID, fx.ItemID)
 	if err != nil || ok {
 		t.Fatalf("projection must be empty: ok=%v err=%v", ok, err)
+	}
+}
+
+func TestTraceabilityFamilyNotAppliedToInventory(t *testing.T) {
+	db := openTestDB(t)
+	fx := mustFixture(t)
+	lin, err := northstar.GenerateLineage(northstar.LineageSeed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	supplier := lin.Events[0]
+	raw := mustCanonical(t, supplier)
+	key := []byte(relay.AggregateKey(supplier.TenantID, supplier.AggregateType, supplier.AggregateID))
+	res, err := ProcessRecord(context.Background(), db, key, raw, SourcePosition{
+		Topic: relay.Topic, Partition: 0, Offset: 7,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.ShouldAck || res.Disposition != DispositionQuarantinedInvalid {
+		t.Fatalf("expected unsupported quarantine, got %+v", res)
+	}
+	var category, code, eventID, tenantID, eventType string
+	if err := db.QueryRow(`
+		SELECT failure_category, diagnostic_code, event_id, tenant_id, event_type
+		FROM platform.processing_failures
+		WHERE source_offset = 7
+	`).Scan(&category, &code, &eventID, &tenantID, &eventType); err != nil {
+		t.Fatal(err)
+	}
+	if category != "unsupported_contract" || code != "unsupported_contract" {
+		t.Fatalf("category=%q code=%q", category, code)
+	}
+	if eventID != supplier.EventID || tenantID != supplier.TenantID || eventType != event.EventTypeSupplierRegistered {
+		t.Fatalf("identity event_id=%q tenant_id=%q event_type=%q", eventID, tenantID, eventType)
+	}
+	_, _, ok, err := ProjectionState(context.Background(), db, fx.TenantID, fx.ItemID)
+	if err != nil || ok {
+		t.Fatalf("inventory projection must be unchanged/empty: ok=%v err=%v", ok, err)
 	}
 }
 
@@ -694,10 +752,12 @@ func TestInspectProcessingVisibility(t *testing.T) {
 	v2 := fx.Event
 	v2.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e2"
 	v2.AggregateVersion = 2
-	v2.Payload.QuantityBefore = 8
-	v2.Payload.QuantityDecremented = 1
-	v2.Payload.QuantityAfter = 7
-	v2.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e4"
+	v2 = event.WithQuantityDecremented(v2, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e4"
+	})
 	v2.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e3"
 	raw2 := mustCanonical(t, v2)
 	keyA := []byte(relay.AggregateKey(v2.TenantID, v2.AggregateType, v2.AggregateID))
@@ -714,8 +774,10 @@ func TestInspectProcessingVisibility(t *testing.T) {
 	other := fx.Event
 	other.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e1"
 	other.AggregateID = "item-sugar-001"
-	other.Payload.ItemID = "item-sugar-001"
-	other.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e5"
+	other = event.WithQuantityDecremented(other, func(p *event.QuantityDecremented) {
+		p.ItemID = "item-sugar-001"
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e5"
+	})
 	other.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20e6"
 	rawB := mustCanonical(t, other)
 	keyB := []byte(relay.AggregateKey(other.TenantID, other.AggregateType, other.AggregateID))
@@ -761,10 +823,12 @@ func TestUnsafeEventDoesNotBlockUnrelatedAggregate(t *testing.T) {
 	gap := fx.Event
 	gap.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f2"
 	gap.AggregateVersion = 2
-	gap.Payload.QuantityBefore = 8
-	gap.Payload.QuantityDecremented = 1
-	gap.Payload.QuantityAfter = 7
-	gap.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f4"
+	gap = event.WithQuantityDecremented(gap, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f4"
+	})
 	gap.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f3"
 	rawGap := mustCanonical(t, gap)
 	keyA := []byte(relay.AggregateKey(gap.TenantID, gap.AggregateType, gap.AggregateID))
@@ -781,8 +845,10 @@ func TestUnsafeEventDoesNotBlockUnrelatedAggregate(t *testing.T) {
 	other := fx.Event
 	other.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f1"
 	other.AggregateID = "item-sugar-001"
-	other.Payload.ItemID = "item-sugar-001"
-	other.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f5"
+	other = event.WithQuantityDecremented(other, func(p *event.QuantityDecremented) {
+		p.ItemID = "item-sugar-001"
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f5"
+	})
 	other.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20f6"
 	rawB := mustCanonical(t, other)
 	keyB := []byte(relay.AggregateKey(other.TenantID, other.AggregateType, other.AggregateID))
@@ -941,10 +1007,12 @@ func TestAppliedNotifierOnGapRedrive(t *testing.T) {
 	v2 := fx.Event
 	v2.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b2"
 	v2.AggregateVersion = 2
-	v2.Payload.QuantityBefore = 8
-	v2.Payload.QuantityDecremented = 1
-	v2.Payload.QuantityAfter = 7
-	v2.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	v2 = event.WithQuantityDecremented(v2, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b4"
+	})
 	v2.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a20b3"
 
 	raw2 := mustCanonical(t, v2)
@@ -997,10 +1065,12 @@ func TestInspectProcessingForTenantExcludesOtherAndNullTenant(t *testing.T) {
 	v2 := fx.Event
 	v2.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2142"
 	v2.AggregateVersion = 2
-	v2.Payload.QuantityBefore = 8
-	v2.Payload.QuantityDecremented = 1
-	v2.Payload.QuantityAfter = 7
-	v2.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2144"
+	v2 = event.WithQuantityDecremented(v2, func(p *event.QuantityDecremented) {
+		p.QuantityBefore = 8
+		p.QuantityDecremented = 1
+		p.QuantityAfter = 7
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2144"
+	})
 	v2.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2143"
 	raw2 := mustCanonical(t, v2)
 	keyA := []byte(relay.AggregateKey(v2.TenantID, v2.AggregateType, v2.AggregateID))
@@ -1019,8 +1089,10 @@ func TestInspectProcessingForTenantExcludesOtherAndNullTenant(t *testing.T) {
 	other.EventID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2141"
 	other.TenantID = otherTenant
 	other.AggregateID = "item-sugar-001"
-	other.Payload.ItemID = "item-sugar-001"
-	other.Payload.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2145"
+	other = event.WithQuantityDecremented(other, func(p *event.QuantityDecremented) {
+		p.ItemID = "item-sugar-001"
+		p.OrderID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2145"
+	})
 	other.CorrelationID = "018f5d78-6e64-4f5f-bd16-8e9f7c4a2146"
 	rawOther := mustCanonical(t, other)
 	keyB := []byte(relay.AggregateKey(other.TenantID, other.AggregateType, other.AggregateID))

@@ -80,8 +80,16 @@ func ProcessRecord(ctx context.Context, db *sql.DB, key, value []byte, pos Sourc
 		return persistParseFailure(ctx, db, value, pos, err)
 	}
 
+	if env.EventType != event.EventTypeQuantityDecremented {
+		return persistConsumerUnsupported(ctx, db, env, value, pos)
+	}
+	payload, ok := event.AsQuantityDecremented(env)
+	if !ok {
+		return persistParseFailure(ctx, db, value, pos, fmt.Errorf("%w: payload type mismatch", event.ErrMalformed))
+	}
+
 	expectedKey := []byte(relay.AggregateKey(env.TenantID, env.AggregateType, env.AggregateID))
-	if !bytes.Equal(key, expectedKey) || env.Payload.ItemID != env.AggregateID {
+	if !bytes.Equal(key, expectedKey) || payload.ItemID != env.AggregateID {
 		return quarantineInbox(ctx, db, env, value, DispositionQuarantinedMismatch, nil, nil)
 	}
 
@@ -204,10 +212,14 @@ func processValidated(ctx context.Context, db *sql.DB, env event.Envelope, raw [
 		return Result{}, err
 	}
 	if disp == DispositionApplied {
+		payload, ok := event.AsQuantityDecremented(env)
+		if !ok {
+			return Result{}, fmt.Errorf("%w: payload type mismatch", event.ErrMalformed)
+		}
 		notifyApplied(AppliedUpdate{
 			TenantID:         env.TenantID,
 			ItemID:           env.AggregateID,
-			QuantityOnHand:   env.Payload.QuantityAfter,
+			QuantityOnHand:   payload.QuantityAfter,
 			AggregateVersion: env.AggregateVersion,
 			EventID:          env.EventID,
 		})
@@ -220,6 +232,10 @@ func processValidated(ctx context.Context, db *sql.DB, env event.Envelope, raw [
 }
 
 func applyProjection(ctx context.Context, tx *sql.Tx, env event.Envelope, hash string, canonical []byte) (string, error) {
+	payload, ok := event.AsQuantityDecremented(env)
+	if !ok {
+		return "", fmt.Errorf("%w: payload type mismatch", event.ErrMalformed)
+	}
 	var (
 		qty     int64
 		version int64
@@ -250,7 +266,7 @@ func applyProjection(ctx context.Context, tx *sql.Tx, env event.Envelope, hash s
 			}
 			return DispositionQuarantinedGap, nil
 		}
-		if err := insertProjection(ctx, tx, env.TenantID, env.AggregateID, env.Payload.QuantityAfter, 1); err != nil {
+		if err := insertProjection(ctx, tx, env.TenantID, env.AggregateID, payload.QuantityAfter, 1); err != nil {
 			return "", err
 		}
 		if err := upsertInbox(ctx, tx, inboxRow{
@@ -311,7 +327,7 @@ func applyProjection(ctx context.Context, tx *sql.Tx, env event.Envelope, hash s
 	}
 
 	// Contiguous next version.
-	if env.Payload.QuantityBefore != qty {
+	if payload.QuantityBefore != qty {
 		if err := upsertInbox(ctx, tx, inboxRow{
 			EventID:          env.EventID,
 			TenantID:         env.TenantID,
@@ -325,7 +341,7 @@ func applyProjection(ctx context.Context, tx *sql.Tx, env event.Envelope, hash s
 		}
 		return DispositionQuarantinedTransition, nil
 	}
-	if env.Payload.QuantityBefore-env.Payload.QuantityDecremented != env.Payload.QuantityAfter {
+	if payload.QuantityBefore-payload.QuantityDecremented != payload.QuantityAfter {
 		if err := upsertInbox(ctx, tx, inboxRow{
 			EventID:          env.EventID,
 			TenantID:         env.TenantID,
@@ -344,7 +360,7 @@ func applyProjection(ctx context.Context, tx *sql.Tx, env event.Envelope, hash s
 		UPDATE platform.inventory_projection
 		SET quantity_on_hand = $1, aggregate_version = $2
 		WHERE tenant_id = $3 AND item_id = $4
-	`, env.Payload.QuantityAfter, env.AggregateVersion, env.TenantID, env.AggregateID); err != nil {
+	`, payload.QuantityAfter, env.AggregateVersion, env.TenantID, env.AggregateID); err != nil {
 		return "", fmt.Errorf("%w: update projection: %v", ErrTransient, err)
 	}
 	if err := upsertInbox(ctx, tx, inboxRow{
@@ -599,6 +615,61 @@ func persistParseFailure(ctx context.Context, db *sql.DB, value []byte, pos Sour
 	}, nil
 }
 
+// persistConsumerUnsupported quarantines an envelope that parsed as an accepted
+// family this inventory consumer does not apply. Identity fields Parse recovered
+// are recorded so tenant-scoped inspect can see the quarantine.
+func persistConsumerUnsupported(ctx context.Context, db *sql.DB, env event.Envelope, value []byte, pos SourcePosition) (Result, error) {
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return Result{}, fmt.Errorf("%w: begin: %v", ErrTransient, err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	eventID, tenantID, aggType, aggID, aggVer, schemaVer, eventType, hash := failureIdentity(&env)
+	if err := upsertFailure(ctx, tx, failureRow{
+		EventID:            eventID,
+		TenantID:           tenantID,
+		AggregateType:      aggType,
+		AggregateID:        aggID,
+		AggregateVersion:   aggVer,
+		EventSchemaVersion: schemaVer,
+		EventType:          eventType,
+		FailureCategory:    "unsupported_contract",
+		ContentHash:        hash,
+		ReceivedBytesHash:  receivedBytesHash(value),
+		Source:             pos,
+		AttemptCount:       1,
+		DiagnosticCode:     "unsupported_contract",
+		QuarantineStatus:   "quarantined",
+	}); err != nil {
+		return Result{}, err
+	}
+	if err := commitWithHook(ctx, tx); err != nil {
+		return Result{}, err
+	}
+	return Result{
+		Disposition: DispositionQuarantinedInvalid,
+		ShouldAck:   true,
+	}, nil
+}
+
+func failureIdentity(env *event.Envelope) (eventID, tenantID, aggType, aggID *string, aggVer, schemaVer *int64, eventType, hash *string) {
+	if env == nil {
+		return
+	}
+	eventID = &env.EventID
+	tenantID = &env.TenantID
+	aggType = &env.AggregateType
+	aggID = &env.AggregateID
+	aggVer = &env.AggregateVersion
+	schemaVer = &env.EventSchemaVersion
+	eventType = &env.EventType
+	if h, herr := event.ContentHash(*env); herr == nil {
+		hash = &h
+	}
+	return
+}
+
 // bumpPoisonAttempt records an explicit handler-poison attempt. Callers must
 // not use it for retryable begin/commit/SQL failures from processValidated.
 func bumpPoisonAttempt(ctx context.Context, db *sql.DB, env *event.Envelope, value []byte, pos SourcePosition, code string, cause error) (Result, error) {
@@ -608,28 +679,7 @@ func bumpPoisonAttempt(ctx context.Context, db *sql.DB, env *event.Envelope, val
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	var (
-		eventID   *string
-		tenantID  *string
-		aggType   *string
-		aggID     *string
-		aggVer    *int64
-		schemaVer *int64
-		eventType *string
-		hash      *string
-	)
-	if env != nil {
-		eventID = &env.EventID
-		tenantID = &env.TenantID
-		aggType = &env.AggregateType
-		aggID = &env.AggregateID
-		aggVer = &env.AggregateVersion
-		schemaVer = &env.EventSchemaVersion
-		eventType = &env.EventType
-		if h, herr := event.ContentHash(*env); herr == nil {
-			hash = &h
-		}
-	}
+	eventID, tenantID, aggType, aggID, aggVer, schemaVer, eventType, hash := failureIdentity(env)
 
 	attempts, status, err := upsertFailureReturning(ctx, tx, failureRow{
 		EventID:            eventID,

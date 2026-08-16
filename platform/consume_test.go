@@ -63,7 +63,7 @@ func TestRedpandaFirstDeliveryAndDuplicate(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 	pub, err := relay.NewFranzPublisher(seed)
@@ -189,7 +189,7 @@ func TestCrashAfterCommitBeforeAckIsDuplicateNoop(t *testing.T) {
 	if err := erp.SeedNorthstarInventory(ctx, db, fx); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := erp.AcceptOrder(ctx, db, erp.OrderCommandFromFixture(fx)); err != nil {
+	if _, err := erp.AcceptOrder(ctx, db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 	pub, err := relay.NewFranzPublisher(seed)

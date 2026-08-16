@@ -94,6 +94,15 @@ func seedFixture(t *testing.T, db *sql.DB) northstar.Fixture {
 	return fx
 }
 
+func mustOrderCommand(t *testing.T, fx northstar.Fixture) OrderCommand {
+	t.Helper()
+	cmd, err := OrderCommandFromFixture(fx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return cmd
+}
+
 func countRows(t *testing.T, db *sql.DB, query string, args ...any) int {
 	t.Helper()
 	var n int
@@ -121,7 +130,7 @@ func TestAcceptOrderCommitsSourceAndOutboxAtomically(t *testing.T) {
 	fx := seedFixture(t, db)
 	ctx := context.Background()
 
-	res, err := AcceptOrder(ctx, db, OrderCommandFromFixture(fx))
+	res, err := AcceptOrder(ctx, db, mustOrderCommand(t, fx))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -189,7 +198,7 @@ func TestAcceptOrderRollbackLeavesNoPartialState(t *testing.T) {
 	})
 	t.Cleanup(func() { setTestFailBeforeCommitForTest(nil) })
 
-	_, err := AcceptOrder(ctx, db, OrderCommandFromFixture(fx))
+	_, err := AcceptOrder(ctx, db, mustOrderCommand(t, fx))
 	if err == nil {
 		t.Fatal("expected forced failure")
 	}
@@ -210,7 +219,7 @@ func TestAcceptOrderDomainValidation(t *testing.T) {
 	db := openTestDB(t)
 	fx := seedFixture(t, db)
 	ctx := context.Background()
-	base := OrderCommandFromFixture(fx)
+	base := mustOrderCommand(t, fx)
 
 	tests := []struct {
 		name    string
@@ -311,7 +320,7 @@ func TestAcceptOrderConcurrentInventoryIntegrity(t *testing.T) {
 	ch := make(chan outcome, 2)
 
 	mkCmd := func(eventID, orderID string, qty int64) OrderCommand {
-		cmd := OrderCommandFromFixture(fx)
+		cmd := mustOrderCommand(t, fx)
 		cmd.EventID = eventID
 		cmd.OrderID = orderID
 		cmd.Quantity = qty
@@ -367,7 +376,7 @@ func TestAcceptOrderHasNoBrokerDependency(t *testing.T) {
 	db := openTestDB(t)
 	fx := seedFixture(t, db)
 
-	if _, err := AcceptOrder(context.Background(), db, OrderCommandFromFixture(fx)); err != nil {
+	if _, err := AcceptOrder(context.Background(), db, mustOrderCommand(t, fx)); err != nil {
 		t.Fatal(err)
 	}
 	if countRows(t, db, `SELECT COUNT(*) FROM erp.outbox WHERE status = 'pending'`) != 1 {
@@ -404,6 +413,17 @@ func TestValidateRejectsWithoutDB(t *testing.T) {
 	})
 	if !errors.Is(err, ErrInvalidQuantity) {
 		t.Fatalf("err = %v, want ErrInvalidQuantity", err)
+	}
+}
+
+func TestOrderCommandFromFixtureRejectsNonInventory(t *testing.T) {
+	lin, err := northstar.GenerateLineage(northstar.LineageSeed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = OrderCommandFromFixture(northstar.Fixture{Event: lin.Events[0]})
+	if !errors.Is(err, ErrInvalidFixture) {
+		t.Fatalf("err = %v, want ErrInvalidFixture", err)
 	}
 }
 

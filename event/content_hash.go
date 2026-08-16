@@ -74,13 +74,7 @@ func envelopeMap(env Envelope) map[string]any {
 		"correlation_id":       env.CorrelationID,
 		"causation_id":         causation,
 		"trace_id":             env.TraceID,
-		"payload": map[string]any{
-			"order_id":             env.Payload.OrderID,
-			"item_id":              env.Payload.ItemID,
-			"quantity_decremented": env.Payload.QuantityDecremented,
-			"quantity_before":      env.Payload.QuantityBefore,
-			"quantity_after":       env.Payload.QuantityAfter,
-		},
+		"payload":              env.Payload.payloadMap(),
 	}
 }
 
