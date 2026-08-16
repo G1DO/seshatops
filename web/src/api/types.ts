@@ -130,7 +130,8 @@ export interface ControlResult {
   duplicate_noop: number;
   quarantined: number;
   checksum?: string;
-	incomplete_reasons?: string[];
+  lineage_checksum?: string;
+  incomplete_reasons?: string[];
 }
 
 /** One hop in the authorized batch lineage chain. */

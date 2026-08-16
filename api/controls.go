@@ -197,6 +197,7 @@ func (s *Server) writeReplayResult(w http.ResponseWriter, tenantID, control, eve
 		DuplicateNoop:     result.DuplicateNoop,
 		Quarantined:       result.Quarantined,
 		Checksum:          result.Checksum,
+		LineageChecksum:   result.LineageChecksum,
 		IncompleteReasons: result.IncompleteReasons,
 	})
 }

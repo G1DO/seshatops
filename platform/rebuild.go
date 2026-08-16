@@ -66,6 +66,7 @@ type ReproductionMetadata struct {
 type RebuildResult struct {
 	Status            string
 	Checksum          string
+	LineageChecksum   string
 	Applied           int
 	DuplicateNoop     int
 	Quarantined       int
@@ -257,15 +258,25 @@ func RebuildFromHistory(ctx context.Context, db *sql.DB, records []HistoryRecord
 	if tenantID == "" {
 		out.Status = RebuildStatusIncomplete
 		out.IncompleteReasons = append(out.IncompleteReasons, "missing tenant_id for checksum")
-	} else {
-		sum, err := ChecksumTenant(ctx, db, tenantID)
-		if err != nil {
-			return out, err
-		}
-		out.Checksum = sum
-		out.Metadata.Checksum = sum
+	} else if err := assignTenantChecksums(ctx, db, tenantID, &out); err != nil {
+		return out, err
 	}
 
 	out.Metadata.RebuildStatus = out.Status
 	return out, nil
+}
+
+func assignTenantChecksums(ctx context.Context, db *sql.DB, tenantID string, out *RebuildResult) error {
+	sum, err := ChecksumTenant(ctx, db, tenantID)
+	if err != nil {
+		return err
+	}
+	lin, err := ChecksumLineage(ctx, db, tenantID)
+	if err != nil {
+		return err
+	}
+	out.Checksum = sum
+	out.LineageChecksum = lin
+	out.Metadata.Checksum = sum
+	return nil
 }

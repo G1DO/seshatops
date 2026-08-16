@@ -356,7 +356,24 @@ Timestamps, database row order, offsets, inbox IDs, failure records, and mutable
 metadata are excluded. The empty projection hashes the empty byte sequence.
 
 Rebuild uses `platform.ResetDerivedState` and `platform.RebuildFromHistory`.
-The checksum definition itself remains this section.
+The inventory checksum definition itself remains this section.
+
+A second checksum covers one tenant's complete lineage projection. It is never
+mixed into the inventory hash. Each applied hop contributes:
+
+`kind`, `tenant_id`, `hop_id`, `parent_id`, `item_id`, `order_id`,
+`aggregate_version`, `source_event_id`, and `event_schema_version`.
+
+`kind` is the hop aggregate type (`supplier`, `ingredient_lot`,
+`production_batch`, `shipment`). `parent_id` is empty for a supplier.
+`item_id` is populated only for ingredient lots. `order_id` is populated only
+for shipments. Missing optional identifiers are the empty string.
+
+Canonicalization uses the same five steps as inventory, except rows sort
+bytewise by `kind`, then `tenant_id`, then `hop_id`. Inbox, failures,
+timestamps, correlation/causation/trace, and inventory rows are excluded.
+The empty lineage projection hashes the empty byte sequence. Incomplete rebuild
+status means neither checksum is a successful A==B proof.
 
 ## 9. Minimum local toolchain
 
