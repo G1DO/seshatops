@@ -201,6 +201,75 @@ func TestRedpandaBrokerOutagePersistenceAndRecovery(t *testing.T) {
 	}
 }
 
+func TestRedpandaLineageBrokerOutagePersistenceAndRecovery(t *testing.T) {
+	db := openTestDB(t)
+	fx, err := northstar.GenerateLineage(northstar.LineageSeed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	if err := erp.SeedLineageInventory(ctx, db, fx); err != nil {
+		t.Fatal(err)
+	}
+	cmd, err := erp.SupplierCommandFromLineage(fx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	res, err := erp.RegisterSupplier(ctx, db, cmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	badPub, err := NewFranzPublisher("127.0.0.1:1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	out, err := DrainOnce(ctx, db, badPub, "relay-lineage-outage", DefaultLeaseTTL, 1)
+	badPub.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Transient != 1 {
+		t.Fatalf("expected transient publish failure, got %+v", out)
+	}
+	status, _, _, _ := outboxStatus(t, db, res.EventID)
+	if status != StatusPending {
+		t.Fatalf("status = %s want pending", status)
+	}
+	if countRows(t, db, `SELECT COUNT(*) FROM erp.suppliers`) != 1 {
+		t.Fatal("accepted supplier disappeared during broker outage")
+	}
+
+	clearBackoff(t, db, res.EventID)
+
+	seed, stop := startRedpanda(t)
+	t.Cleanup(stop)
+	pub, err := NewFranzPublisher(seed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(pub.Close)
+
+	out, err = DrainOnce(ctx, db, pub, "relay-lineage-recovery", DefaultLeaseTTL, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.Published != 1 {
+		t.Fatalf("recovery drain %+v", out)
+	}
+	recs := consumeAll(t, seed, 1, 30*time.Second)
+	if string(recs[0].Value) != string(res.EventBytes) {
+		t.Fatal("recovery publication rewrote event content")
+	}
+	parsed, err := event.Parse(recs[0].Value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := event.CheckIdentityConflict(parsed, fx.Events[0]); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestRedpandaAmbiguousWindowDuplicate(t *testing.T) {
 	db := openTestDB(t)
 	seed, stop := startRedpanda(t)

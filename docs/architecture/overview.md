@@ -38,12 +38,15 @@ flowchart TB
 | `api/` | Go | HTTP/SSE, default-deny, privileged POSTs | Broker publication |
 | `platform/` | Go | Inbox, inventory projection, rebuild | Outbox publication, authentication |
 | `relay/` | Go | Publish exact outbox bytes to Redpanda | Inbox, authorization |
-| `erp/` | Go | Order accept, inventory, immutable outbox | SeshatOps policy |
+| `erp/` | Go | Lineage hops, order accept, inventory, immutable outbox | SeshatOps policy |
 | `event/`, `northstar/` | Go | JSON/JCS envelope, Northstar fixture | Transport or HTTP |
 
 Go module: `github.com/G1DO/seshatops`. Privileged operator POSTs (quarantine
 release, replay, rebuild) are in [authorization.md](../security/authorization.md).
-There is no Python, object storage, or ERP command API beyond `erp.AcceptOrder`.
+There is no Python, object storage, or HTTP ERP command surface. Package `erp`
+accepts `RegisterSupplier`, `ReceiveIngredientLot`, `ProduceProductionBatch`,
+`DispatchShipment`, and `AcceptOrder`. The TypeScript UI cannot authorize those
+writes.
 
 | Store | Responsibility |
 | --- | --- |

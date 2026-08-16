@@ -1,6 +1,6 @@
 # ADR-0001: Transactional Outbox and At-Least-Once Delivery
 
-- **Status:** Accepted; Event Spine implements this for the first inventory family
+- **Status:** Accepted; Event Spine implements this for inventory and M3 lineage source hops
 - **Date:** 2026-08-06
 
 ## Context

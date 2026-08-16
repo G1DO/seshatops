@@ -25,6 +25,7 @@ type OrderCommand struct {
 	OccurredAt    string
 	RecordedAt    string
 	CorrelationID string
+	CausationID   *string
 	TraceID       string
 }
 
@@ -40,14 +41,6 @@ type AcceptResult struct {
 	ContentHash      string
 	EventBytes       []byte
 	OutboxStatus     string
-}
-
-// testFailBeforeCommit, when set by same-package tests, runs after all writes
-// and before Commit. A non-nil error forces Rollback.
-var testFailBeforeCommit func(ctx context.Context) error
-
-func setTestFailBeforeCommitForTest(fn func(ctx context.Context) error) {
-	testFailBeforeCommit = fn
 }
 
 // AcceptOrder validates and accepts one synthetic order, updating authoritative
@@ -94,6 +87,10 @@ func AcceptOrder(ctx context.Context, db *sql.DB, cmd OrderCommand) (AcceptResul
 		return AcceptResult{}, ErrInvalidTransition
 	}
 
+	if err := requireOrderShipmentCausation(ctx, tx, cmd); err != nil {
+		return AcceptResult{}, err
+	}
+
 	_, err = tx.ExecContext(ctx, `
 		UPDATE erp.inventory_items
 		SET quantity_on_hand = $1, aggregate_version = $2
@@ -136,7 +133,7 @@ func AcceptOrder(ctx context.Context, db *sql.DB, cmd OrderCommand) (AcceptResul
 		RecordedAt:         cmd.RecordedAt,
 		Producer:           event.ProducerSyntheticERP,
 		CorrelationID:      cmd.CorrelationID,
-		CausationID:        nil,
+		CausationID:        cmd.CausationID,
 		TraceID:            cmd.TraceID,
 		Payload: event.QuantityDecremented{
 			OrderID:             cmd.OrderID,
@@ -146,40 +143,13 @@ func AcceptOrder(ctx context.Context, db *sql.DB, cmd OrderCommand) (AcceptResul
 			QuantityAfter:       quantityAfter,
 		},
 	}
-	if err := event.Validate(env); err != nil {
+	eventBytes, contentHash, err := insertPendingOutbox(ctx, tx, env, recordedAt)
+	if err != nil {
 		return AcceptResult{}, err
 	}
-	eventBytes, err := event.CanonicalBytes(env)
-	if err != nil {
-		return AcceptResult{}, fmt.Errorf("erp: canonical bytes: %w", err)
-	}
-	contentHash, err := event.ContentHash(env)
-	if err != nil {
-		return AcceptResult{}, fmt.Errorf("erp: content hash: %w", err)
-	}
 
-	_, err = tx.ExecContext(ctx, `
-		INSERT INTO erp.outbox (
-			event_id, tenant_id, aggregate_type, aggregate_id, aggregate_version,
-			content_hash, event_bytes, status, recorded_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8)
-	`, env.EventID, env.TenantID, env.AggregateType, env.AggregateID, env.AggregateVersion,
-		contentHash, eventBytes, recordedAt)
-	if err != nil {
-		if isUniqueViolation(err) {
-			return AcceptResult{}, ErrDuplicateEvent
-		}
-		return AcceptResult{}, fmt.Errorf("erp: insert outbox: %w", err)
-	}
-
-	if testFailBeforeCommit != nil {
-		if err := testFailBeforeCommit(ctx); err != nil {
-			return AcceptResult{}, err
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return AcceptResult{}, fmt.Errorf("erp: commit: %w", err)
+	if err := commitSource(ctx, tx); err != nil {
+		return AcceptResult{}, err
 	}
 
 	return AcceptResult{
@@ -224,7 +194,41 @@ func validateCommand(cmd OrderCommand) error {
 	if _, err := parseTimeZ(cmd.RecordedAt); err != nil {
 		return ErrTenantMismatch
 	}
+	if err := requireOptionalUUID(cmd.CausationID); err != nil {
+		return ErrTenantMismatch
+	}
 	return nil
+}
+
+func requireOrderShipmentCausation(ctx context.Context, tx *sql.Tx, cmd OrderCommand) error {
+	var shipmentID string
+	err := tx.QueryRowContext(ctx, `
+		SELECT shipment_id
+		FROM erp.shipments
+		WHERE tenant_id = $1 AND order_id = $2
+		FOR UPDATE
+	`, cmd.TenantID, cmd.OrderID).Scan(&shipmentID)
+	if errors.Is(err, sql.ErrNoRows) {
+		if cmd.CausationID != nil {
+			return ErrInvalidTransition
+		}
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("erp: lock shipment: %w", err)
+	}
+	parentID, err := parentOutboxEventID(ctx, tx, cmd.TenantID, event.AggregateTypeShipment, shipmentID)
+	if err != nil {
+		return err
+	}
+	return requireCausation(cmd.CausationID, parentID)
+}
+
+func requireOptionalUUID(v *string) error {
+	if v == nil {
+		return nil
+	}
+	return requireUUID(*v)
 }
 
 func requireUUID(v string) error {
