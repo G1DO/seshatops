@@ -37,7 +37,10 @@ Northstar Event Spine fixtures: `northstar.Generate` with seed
 `northstar-m1-order-line-v1`, and `northstar.GenerateLineage` with seed
 `northstar-m3-lineage-v1`. Goldens under `northstar/testdata/` and
 `event/testdata/`. Reproduce with `go test ./event ./northstar ./erp`.
-Identifiers such as `item-flour-001` and `mill-northstar-001` are fictional.
+Northstar M4 stockout history: `forecast.GenerateHistory` with seed
+`northstar-m4-stockout-v1`. Goldens under `forecast/testdata/`. Reproduce
+with `go test ./forecast`. Identifiers such as `item-flour-001` and
+`mill-northstar-001` are fictional.
 
 ## AI-assisted work
 
