@@ -1,12 +1,14 @@
 # Architecture
 
-Packages below are the as-built Event Spine and Identity HTTP. Tests compose
-`http.Handler` values and call `relay.DrainOnce` / `platform.ConsumeOnce`.
-There is no deployment binary or long-running daemon in this repository.
+Packages below are the as-built Event Spine, Identity HTTP, and M4 stockout
+evaluation library. Tests compose `http.Handler` values and call
+`relay.DrainOnce` / `platform.ConsumeOnce`. There is no deployment binary or
+long-running daemon in this repository.
 
 Event Spine lives in `event/`, `northstar/`, `erp/`, `relay/`, `platform/`,
-`api/`, `web/`. Identity lives in `identity/` plus authorized HTTP. Public
-demo uses **Northstar Foods**. **Ahoy is excluded**
+`api/`, `web/`. Identity lives in `identity/` plus authorized HTTP. Stockout
+evaluation lives in `forecast/` (in-memory protocol and dataset; no HTTP).
+Public demo uses **Northstar Foods**. **Ahoy is excluded**
 ([CLEAN_ROOM.md](../CLEAN_ROOM.md)).
 
 ```mermaid
@@ -40,6 +42,7 @@ flowchart TB
 | `relay/` | Go | Publish exact outbox bytes to Redpanda | Inbox, authorization |
 | `erp/` | Go | Lineage hops, order accept, inventory, immutable outbox | SeshatOps policy |
 | `event/`, `northstar/` | Go | JSON/JCS envelope, Northstar fixture | Transport or HTTP |
+| `forecast/` | Go | Frozen stockout target, temporal dataset, evaluation metrics | Transactional state, HTTP, Python, model training |
 
 Go module: `github.com/G1DO/seshatops`. Privileged operator POSTs (quarantine
 release, replay, rebuild) are in [authorization.md](../security/authorization.md).
@@ -63,5 +66,6 @@ OIDC sessions are process-local (`identity.Store`).
 | Browser → PostgreSQL or Redpanda | Prohibited |
 
 Wire and pins: [event-spine.md](../design/specifications/event-spine.md).
+Stockout evaluation: [stockout-evaluation.md](../design/specifications/stockout-evaluation.md).
 `/v1` HTTP/SSE: [openapi-projection.yaml](../api/openapi-projection.yaml).
 `/auth` and allow-list: [authorization.md](../security/authorization.md).

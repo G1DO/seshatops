@@ -7,7 +7,7 @@ Contribution practice: [CONTRIBUTING.md](../CONTRIBUTING.md).
 | --- | --- |
 | Architecture | [architecture/overview.md](architecture/overview.md) |
 | Decisions | [decisions/](decisions/) |
-| Specifications | [design/specifications/event-spine.md](design/specifications/event-spine.md) |
+| Specifications | [event-spine.md](design/specifications/event-spine.md), [stockout-evaluation.md](design/specifications/stockout-evaluation.md) |
 | API | [api/openapi-projection.yaml](api/openapi-projection.yaml) |
 | Security | [security/authorization.md](security/authorization.md) |
 | Clean-room | [CLEAN_ROOM.md](CLEAN_ROOM.md) |

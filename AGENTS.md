@@ -15,7 +15,8 @@ Durable constraints for AI coding agents. Humans: [CONTRIBUTING.md](CONTRIBUTING
 - Do not reorganize working packages for aesthetics.
 
 Topology: [Architecture](docs/architecture/overview.md). Wire:
-[event-spine.md](docs/design/specifications/event-spine.md).
+[event-spine.md](docs/design/specifications/event-spine.md). Stockout
+evaluation: [stockout-evaluation.md](docs/design/specifications/stockout-evaluation.md).
 
 ## Clean-room and secrets
 

@@ -35,7 +35,8 @@ recorded so tenant-scoped inspect can see it. The Northstar lineage fixture is
 `northstar.GenerateLineage` with seed `northstar-m3-lineage-v1`.
 
 Multi-line orders, commands, approvals, and intelligence remain outside this
-contract. Identity HTTP is
+contract. The frozen M4 stockout evaluation protocol is
+[stockout-evaluation.md](stockout-evaluation.md). Identity HTTP is
 [authorization.md](../../security/authorization.md).
 
 ## 2. Event envelope

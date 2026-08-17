@@ -12,7 +12,7 @@ What the tests measured: [EVIDENCE.md](docs/EVIDENCE.md).
 Browser (Vite/React web/)
         │  REST + SSE + cookies
         ▼
-Go (identity/, api/, platform/, relay/, erp/, event/, northstar/)
+Go (identity/, api/, platform/, relay/, erp/, event/, northstar/, forecast/)
         │
         ├── PostgreSQL   (source, outbox, inbox, projection, audit)
         └── Redpanda     (at-least-once event transport)
