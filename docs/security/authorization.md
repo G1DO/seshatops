@@ -3,7 +3,8 @@
 Default-deny authorization for implemented Identity HTTP. Go evaluates an
 explicit allow-list ([ADR-0005](../decisions/0005-identity-tenant-policy-and-service-delegation.md)).
 Forecast feature reads use the dedicated `RES-FORECAST-FEATURES` resource and
-`ACT-READ` action; they are not implied by platform-operator access.
+prediction reads use `RES-FORECAST-PREDICTIONS`; both require `ACT-READ` and
+are not implied by platform-operator access.
 A session is identity only. The UI cannot authorize. Path `{tenant_id}` is an
 assertion to validate, not authority. Client headers, query, body, and IdP
 claims are not authorization.
@@ -27,7 +28,7 @@ Implemented Identity HTTP only. Not a production threat model.
 | Threat | Control |
 | --- | --- |
 | Cross-tenant read or mutate | Path tenant is an assertion; allow-list match required; other-tenant payloads are not returned |
-| Forecast read outside the assigned tenant or without MX-008 | Dedicated resource/action and same-tenant matrix match; no feature rows, checksums, or source identifiers are returned |
+| Forecast read outside the assigned tenant or without MX-008/MX-009 | Dedicated resource/action and same-tenant matrix match; no feature rows, checksums, or prediction lineage are returned |
 | Cookie or session forgery or expiry | Opaque httpOnly cookie; missing, expired, forged, or revoked → `401` before `/v1` |
 | UI treated as authorization | Go evaluates the allow-list; the browser cannot authorize |
 | Missing, stale, or contradictory context | Deny |
@@ -83,10 +84,11 @@ Roles: `ROLE-OPS-READER` (same-tenant read), `ROLE-PLATFORM-OPERATOR`
 | `MX-006` | `TENANT-NS-001` | `ROLE-PLATFORM-OPERATOR` | `RES-REBUILD` | `ACT-REBUILD` |
 | `MX-007` | `TENANT-NS-001` | `ROLE-PLATFORM-OPERATOR` | `RES-AUDIT` | `ACT-AUDIT-READ` |
 | `MX-008` | `TENANT-NS-001` | `ROLE-OPS-READER` | `RES-FORECAST-FEATURES` | `ACT-READ` |
+| `MX-009` | `TENANT-NS-001` | `ROLE-OPS-READER` | `RES-FORECAST-PREDICTIONS` | `ACT-READ` |
 
 IDs are also constants in `identity/matrix.go`. Deny when the tenant, role,
 resource, or action is missing; when the path tenant is not the assigned
-tenant; when a platform operator requests inventory or forecast-feature read;
+tenant; when a platform operator requests inventory or forecast read;
 when a reader
 requests a privileged action; when a service principal is used as a user
 role. Do not add bypass rows to make a demo easier.
@@ -101,6 +103,7 @@ Assignments are process-local memory, not a PostgreSQL policy schema.
 | `GET` | `/v1/tenants/{tenant_id}/ops` | `MX-002` or `MX-003` |
 | `GET` | `/v1/tenants/{tenant_id}/ops/lineage/batches/{batch_id}` | `MX-002` or `MX-003` |
 | `GET` | `/v1/tenants/{tenant_id}/forecast/features` | `MX-008` |
+| `GET` | `/v1/tenants/{tenant_id}/forecast/predictions/{resource_id}` | `MX-009` |
 | `POST` | `/v1/tenants/{tenant_id}/ops/quarantine/release` | `MX-004` |
 | `POST` | `/v1/tenants/{tenant_id}/ops/replay` | `MX-005` |
 | `POST` | `/v1/tenants/{tenant_id}/ops/rebuild` | `MX-006` |
@@ -109,15 +112,15 @@ Assignments are process-local memory, not a PostgreSQL policy schema.
 After a valid session, Go evaluates `Allow` for the path tenant. Unmatched
 membership, unassigned or service-like principals, nil policy, and
 cross-tenant paths return `403 {"error":"forbidden"}` with no projection, ops,
-lineage, audit, or forecast-feature payload and without starting SSE. After an allow, a missing
+lineage, audit, forecast-feature, or forecast-prediction payload and without starting SSE. After an allow, a missing
 batch or a batch id that only exists under another tenant returns
 `404 {"error":"not_found"}` and does not distinguish those cases. Open inventory SSE re-checks
 session and `MX-001` on heartbeat and before each event.
 
 Routes and SSE reconnect/catch-up: [openapi-projection.yaml](../api/openapi-projection.yaml).
 
-Forecast feature reads reject caller-supplied protocol, horizon, cutoff,
-dataset, and feature-definition query controls with `400`; the fixed server
+Forecast feature and prediction reads reject caller-supplied protocol, horizon, cutoff,
+dataset, resource, and feature-definition query controls with `400`; the fixed server
 contract cannot be changed by headers, query parameters, bodies, or IdP
 claims. `POST`, `PUT`, `PATCH`, and `DELETE` on the route return `405` with
 `Allow: GET`. A nil policy, stale assignment, forged or expired session,

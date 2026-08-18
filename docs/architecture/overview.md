@@ -68,6 +68,9 @@ snapshots and never calls a projection mutator. `platform.ForecastService`
 selects the candidate only from the frozen test outcome, invokes the candidate
 through a bounded typed subprocess boundary, computes the selected baseline in
 Go, and persists validated records in `platform.forecast_predictions`.
+Authorized `GET /v1/tenants/{tenant_id}/forecast/predictions/{resource_id}`
+reads the latest tenant-scoped record and reports whether its feature
+snapshot still matches the current complete Go-owned source snapshot.
 
 | Store | Responsibility |
 | --- | --- |

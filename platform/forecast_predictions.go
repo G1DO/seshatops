@@ -154,6 +154,41 @@ func GetPredictionForTenant(ctx context.Context, db *sql.DB, tenantID, predictio
 	return record, true, nil
 }
 
+// GetLatestPredictionForTenantResource returns the newest immutable prediction
+// for one tenant-owned resource. The tenant predicate is part of the query so
+// a resource identifier cannot cross the tenant boundary.
+func GetLatestPredictionForTenantResource(ctx context.Context, db *sql.DB, tenantID, resourceID string) (PredictionRecord, bool, error) {
+	if db == nil {
+		return PredictionRecord{}, false, fmt.Errorf("platform: prediction: nil db")
+	}
+	tenantID = strings.ToLower(strings.TrimSpace(tenantID))
+	resourceID = strings.ToLower(strings.TrimSpace(resourceID))
+	if tenantID == "" || resourceID == "" {
+		return PredictionRecord{}, false, ErrInvalidPrediction
+	}
+	record, err := scanPrediction(db.QueryRowContext(ctx, `
+		SELECT prediction_id, tenant_id, resource_type, resource_id,
+		       observation_date, forecast_horizon_days, target, status,
+		       stockout_risk, uncertainty_method, uncertainty_lower,
+		       uncertainty_upper, uncertainty_sample_count, abstention_reason,
+		       evaluation_protocol_version, dataset_version,
+		       feature_definition_version, feature_snapshot_id,
+		       feature_snapshot_checksum, source_cutoff_date, predictor,
+		       model_version, code_version, fresh_at, correlation_id, recorded_at
+		FROM platform.forecast_predictions
+		WHERE tenant_id = $1 AND resource_type = 'inventory_item' AND resource_id = $2
+		ORDER BY observation_date DESC, recorded_at DESC, prediction_id DESC
+		LIMIT 1
+	`, tenantID, resourceID))
+	if err == sql.ErrNoRows {
+		return PredictionRecord{}, false, nil
+	}
+	if err != nil {
+		return PredictionRecord{}, false, fmt.Errorf("platform: prediction latest read: %w", err)
+	}
+	return record, true, nil
+}
+
 // ListPredictionsForTenant returns only same-tenant prediction records.
 func ListPredictionsForTenant(ctx context.Context, db *sql.DB, tenantID string) ([]PredictionRecord, error) {
 	if db == nil {

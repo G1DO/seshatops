@@ -4,8 +4,9 @@ info:
   version: "1.0.0"
   description: |
     Go HTTP/SSE for the committed inventory projection, ops visibility,
-    batch lineage, read-only M4 forecast feature snapshots, privileged
-    controls, and privileged-decision audit. A Go-owned session is required
+    batch lineage, read-only M4 forecast feature snapshots and stockout
+    predictions, privileged controls, and privileged-decision audit. A
+    Go-owned session is required
     (`401 unauthenticated`). Allow-list rows are in
     docs/security/authorization.md (`403 forbidden` when unauthorized). SSE
     is at-least-once and may drop for slow clients; REST is the authoritative
@@ -191,6 +192,113 @@ paths:
       summary: Rejected write (read-only)
       parameters:
         - $ref: "#/components/parameters/TenantID"
+      responses:
+        "405":
+          description: Method not allowed; Allow is GET
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /v1/tenants/{tenant_id}/forecast/predictions/{resource_id}:
+    get:
+      operationId: getForecastPrediction
+      summary: Authorized current stockout assessment with prediction lineage
+      description: >
+        Go selects the latest tenant-scoped prediction for the resource. The
+        response includes explicit predicted, abstained, stale, and
+        unavailable freshness state; it contains no raw feature values or
+        model artifacts.
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+        - $ref: "#/components/parameters/ResourceID"
+      responses:
+        "200":
+          description: Current or explicitly non-current stockout assessment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForecastPredictionSnapshot"
+        "400":
+          description: Invalid tenant_id or unsupported query parameter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller is not authorized for this tenant's forecast predictions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "404":
+          description: No prediction exists for the tenant-owned resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "405":
+          description: Method not allowed; Allow is GET
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Prediction or source freshness read failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    post:
+      operationId: postForecastPredictionRejected
+      summary: Rejected write (read-only)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+        - $ref: "#/components/parameters/ResourceID"
+      responses:
+        "405":
+          description: Method not allowed; Allow is GET
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    put:
+      operationId: putForecastPredictionRejected
+      summary: Rejected write (read-only)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+        - $ref: "#/components/parameters/ResourceID"
+      responses:
+        "405":
+          description: Method not allowed; Allow is GET
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    patch:
+      operationId: patchForecastPredictionRejected
+      summary: Rejected write (read-only)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+        - $ref: "#/components/parameters/ResourceID"
+      responses:
+        "405":
+          description: Method not allowed; Allow is GET
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    delete:
+      operationId: deleteForecastPredictionRejected
+      summary: Rejected write (read-only)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+        - $ref: "#/components/parameters/ResourceID"
       responses:
         "405":
           description: Method not allowed; Allow is GET
@@ -476,6 +584,13 @@ components:
       schema:
         type: string
         description: Production batch aggregate id (path assertion; tenant comes from tenant_id)
+    ResourceID:
+      name: resource_id
+      in: path
+      required: true
+      schema:
+        type: string
+        description: Tenant-owned inventory resource identifier (path assertion; tenant comes from tenant_id)
   schemas:
     ForecastFeatureSnapshot:
       type: object
@@ -523,6 +638,134 @@ components:
           type: array
           items:
             type: string
+    ForecastPredictionSnapshot:
+      type: object
+      required:
+        - tenant_id
+        - resource_type
+        - resource_id
+        - prediction_id
+        - observation_date
+        - forecast_horizon_days
+        - target
+        - status
+        - stockout_risk
+        - uncertainty
+        - abstention_reason
+        - freshness
+        - lineage
+        - correlation_id
+        - recorded_at
+        - observed_at
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+        resource_type:
+          type: string
+          enum: [inventory_item]
+        resource_id:
+          type: string
+        prediction_id:
+          type: string
+        observation_date:
+          type: string
+          format: date
+        forecast_horizon_days:
+          type: integer
+          minimum: 1
+        target:
+          type: string
+          enum: [stockout-within-horizon]
+        status:
+          type: string
+          enum: [predicted, abstained]
+        stockout_risk:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+          nullable: true
+        uncertainty:
+          allOf:
+            - $ref: "#/components/schemas/ForecastPredictionUncertainty"
+          nullable: true
+        abstention_reason:
+          type: string
+        freshness:
+          $ref: "#/components/schemas/ForecastPredictionFreshness"
+        lineage:
+          $ref: "#/components/schemas/ForecastPredictionLineage"
+        correlation_id:
+          type: string
+        recorded_at:
+          type: string
+          format: date-time
+        observed_at:
+          type: string
+          format: date-time
+    ForecastPredictionUncertainty:
+      type: object
+      required: [method, lower, upper, sample_count]
+      properties:
+        method:
+          type: string
+        lower:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+        upper:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+        sample_count:
+          type: integer
+          minimum: 0
+    ForecastPredictionFreshness:
+      type: object
+      required: [status, fresh_at]
+      properties:
+        status:
+          type: string
+          enum: [fresh, stale, unavailable]
+        fresh_at:
+          type: string
+          format: date-time
+    ForecastPredictionLineage:
+      type: object
+      required:
+        - evaluation_protocol_version
+        - dataset_version
+        - feature_definition_version
+        - feature_snapshot_id
+        - feature_snapshot_checksum
+        - source_cutoff_date
+        - predictor
+        - model_version
+        - code_version
+      properties:
+        evaluation_protocol_version:
+          type: string
+        dataset_version:
+          type: string
+        feature_definition_version:
+          type: string
+        feature_snapshot_id:
+          type: string
+        feature_snapshot_checksum:
+          type: string
+        source_cutoff_date:
+          type: string
+          format: date
+        predictor:
+          type: string
+          enum: [candidate, baseline]
+        model_version:
+          type: string
+        code_version:
+          type: string
     ForecastSourceHistoryBoundary:
       type: object
       required: [history_checksum, projection_checksum, applied_event_count]
