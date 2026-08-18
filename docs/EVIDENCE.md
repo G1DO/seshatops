@@ -67,3 +67,18 @@ The Go evaluator tests strict artifact lineage, prediction coverage,
 abstention-aware fallback to the deterministic baseline, and JSON contract
 rejection. These are implementation-contract claims only; no learned
 candidate is recorded as promoted or as production forecasting evidence.
+
+## M4 integrated stockout-intelligence exit gate
+
+[Report](evaluation/M4_STOCKOUT_INTELLIGENCE_EXIT_GATE_EXPERIMENT_REPORT.md).
+
+The integrated frozen test rebuilt the declared Northstar dataset and feature
+snapshot, ran the offline Python candidate, evaluated all chronological splits
+in Go, and selected `seasonal_naive` as the deterministic runtime predictor.
+The candidate was not promoted because its test average precision was lower
+than the qualifying baseline. The pure Go, Python, typed-boundary, and web
+checks recorded in the report passed locally. PostgreSQL-backed persistence,
+authorized read, and tenant-negative HTTP cases were explicitly skipped in
+the local Windows environment because Docker was unavailable; no local exit
+gate pass is claimed for those cases. This remains test-environment evidence,
+not production quality, availability, or business-impact evidence.
