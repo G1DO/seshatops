@@ -2,8 +2,8 @@
 
 Frozen target, temporal dataset, and scorecard for Northstar Foods
 stockout-risk evaluation. Executable helpers: package `forecast`, including
-`BaselinePredictions`, `EvaluateBaselines`, and
-`EvaluateCandidateArtifactJSON`.
+`BaselinePredictions`, `EvaluateBaselines`, `EvaluateCandidateArtifactJSON`,
+`SelectRuntimePredictor`, and `BaselineRuntimeResponse`.
 Protocol id: `m4-stockout-eval-v1`.
 
 This contract is evaluation-only. It is not production demand-forecasting
@@ -244,11 +244,36 @@ Evaluate that artifact with the Go-owned contract using:
 
 `go test ./forecast -run TestEvaluateCandidateArtifact -count=1`
 
-## 9. Non-goals
+## 9. Runtime integration
 
-- Production model serving, persisted feature snapshots, online inference, or
+`forecast.SelectRuntimePredictor` derives one runtime choice from the frozen
+test outcome. A promoted candidate is the only outcome that permits the
+learned predictor; every other qualifying outcome selects the reported
+deterministic baseline. A missing qualifying baseline fails closed.
+
+`platform.ForecastService` sends a one-row, label-free
+`forecast.RuntimeRequest` to a configured short-lived Python command over
+stdin/stdout. The command receives tenant/resource identity, the raw feature,
+feature snapshot lineage, and selected model/code versions; it receives no
+database credentials and has no write or authorization path. Go applies a
+deadline, bounds output, rejects unknown or trailing JSON, and validates the
+response against the exact request. Timeout, crash, unavailable Python, or a
+malformed response returns a typed failure without inserting a prediction row,
+so retry does not create an ambiguous current-state effect.
+
+The selected baseline is computed in Go from the same cutoff-safe feature
+snapshot. Both candidate and baseline results are persisted by Go in
+`platform.forecast_predictions`. The deterministic prediction identity is
+tenant, resource, observation date, horizon, dataset/feature versions, and
+feature snapshot identity; reusing it with a different result is a conflict.
+Persisted rows record predictor/model/code lineage, source freshness,
+uncertainty or abstention state, and request correlation.
+
+## 10. Non-goals
+
+- Long-running production model serving, persisted feature snapshots, or
   Python database credentials. The separate Go-owned read-only feature
-  snapshot boundary is specified in
+  snapshot and one-shot runtime boundaries are specified in
   [forecast-feature-snapshots.md](forecast-feature-snapshots.md).
 - New Event Spine replenishment families
 - Making M3 lineage a forecasting dependency

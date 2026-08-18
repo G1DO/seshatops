@@ -4,6 +4,24 @@ import "errors"
 
 // Sentinel outcomes and validation failures for the Event Spine projection consumer.
 var (
+	// ErrPythonUnavailable means the learned forecaster could not be invoked.
+	ErrPythonUnavailable = errors.New("platform: python unavailable")
+
+	// ErrPythonTimeout means the learned forecaster exceeded its deadline.
+	ErrPythonTimeout = errors.New("platform: python timeout")
+
+	// ErrPythonInvalidResponse means the learned forecaster returned a response
+	// that failed the typed contract or output limit.
+	ErrPythonInvalidResponse = errors.New("platform: invalid python response")
+
+	// ErrInvalidPrediction means a prediction request or durable record failed
+	// the Go-owned lineage and state validation.
+	ErrInvalidPrediction = errors.New("platform: invalid prediction")
+
+	// ErrPredictionConflict means an immutable prediction identity was reused
+	// with a different result.
+	ErrPredictionConflict = errors.New("platform: prediction conflict")
+
 	// ErrTransient indicates a retryable processing failure. The caller must
 	// not acknowledge the Redpanda offset.
 	ErrTransient = errors.New("platform: transient processing failure")
