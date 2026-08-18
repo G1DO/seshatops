@@ -12,22 +12,22 @@ const dateLayout = "2006-01-02"
 
 // Example is one labeled chronological evaluation row.
 type Example struct {
-	RowID            string
-	TenantID         string
-	ItemID           string
-	AsOfDate         string
-	Label            int
-	Split            string
-	SourceCutoffDate string
-	HistoryHash      string
-	ProtocolID       string
+	RowID            string `json:"row_id"`
+	TenantID         string `json:"tenant_id"`
+	ItemID           string `json:"item_id"`
+	AsOfDate         string `json:"as_of_date"`
+	Label            int    `json:"label"`
+	Split            string `json:"split"`
+	SourceCutoffDate string `json:"source_cutoff_date"`
+	HistoryHash      string `json:"history_hash"`
+	ProtocolID       string `json:"protocol_id"`
 }
 
 // Dataset is the labeled train/validation/test rows for one tenant.
 type Dataset struct {
-	ProtocolID string
-	TenantID   string
-	Examples   []Example
+	ProtocolID string    `json:"protocol_id"`
+	TenantID   string    `json:"tenant_id"`
+	Examples   []Example `json:"examples"`
 }
 
 type seriesKey struct {
