@@ -79,12 +79,13 @@ explicitly skipped because Docker was unavailable. The web suite also passed:
 10 test files, 52 tests, typecheck, and Vite build. The typed command boundary
 test passed malformed-response, timeout, and unavailable-command cases.
 
-Hosted CI for PR #98 on commit `8b53501` recorded [Go CI success](https://github.com/G1DO/seshatops/actions/runs/32180187026),
-including the Docker-backed API gate, and [Web CI success](https://github.com/G1DO/seshatops/actions/runs/32180187031).
-Documentation CI Markdown, YAML, and secret jobs passed. Its link job [failed](https://github.com/G1DO/seshatops/actions/runs/32180186848/job/95851340432)
+Hosted CI for PR #98 on final commit `bad5073` recorded [Go CI success](https://github.com/G1DO/seshatops/actions/runs/32181303886),
+including the Docker-backed API gate, [Web CI success](https://github.com/G1DO/seshatops/actions/runs/32181304013),
+and success for all Documentation CI jobs, including [link check](https://github.com/G1DO/seshatops/actions/runs/32181303898/job/95854713070).
+An earlier documentation run on implementation commit `8b53501` [failed](https://github.com/G1DO/seshatops/actions/runs/32180186848/job/95851340432)
 only on the pre-existing Redpanda URL in `docs/design/specifications/event-spine.md`,
-which returned HTTP 500; the new report links and the other 87 scanned links
-passed. No unrelated link was changed.
+which returned HTTP 500; the final docs-only rerun passed without changing that
+unrelated link.
 
 ## Limitations and failed cases
 

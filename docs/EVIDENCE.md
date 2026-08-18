@@ -83,10 +83,10 @@ the local Windows environment because Docker was unavailable; no local exit
 gate pass is claimed for those cases. This remains test-environment evidence,
 not production quality, availability, or business-impact evidence.
 
-Hosted PR #98 [Go CI passed](https://github.com/G1DO/seshatops/actions/runs/32180187026)
-on implementation commit `8b53501`, including the Docker-backed API gate;
-[Web CI passed](https://github.com/G1DO/seshatops/actions/runs/32180187031).
-Documentation Markdown, YAML, and secret jobs passed. The documentation link
-job [remains blocked](https://github.com/G1DO/seshatops/actions/runs/32180186848/job/95851340432)
-by the pre-existing Redpanda URL returning HTTP 500; no unrelated link was
-changed.
+Hosted PR #98 [Go CI passed](https://github.com/G1DO/seshatops/actions/runs/32181303886)
+on final commit `bad5073`, including the Docker-backed API gate;
+[Web CI passed](https://github.com/G1DO/seshatops/actions/runs/32181304013),
+and all Documentation CI jobs passed, including [link check](https://github.com/G1DO/seshatops/actions/runs/32181303898/job/95854713070).
+An earlier documentation run on implementation commit `8b53501` failed on the
+pre-existing Redpanda URL returning HTTP 500; the final docs-only rerun passed
+without changing that unrelated link.
