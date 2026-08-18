@@ -37,6 +37,7 @@ Commands run:
 
 ```text
 go test ./forecast -run TestM4ExitGateRebuildsAndEvaluatesTheFrozenCandidate -count=1 -v
+go test ./api -run TestM4ExitGatePersistsSelectedForecastForAuthorizedRead -count=1 -v
 go test ./forecast -count=1 -timeout 15m
 go test ./... -count=1 -timeout 15m
 python -m unittest discover -s forecast_candidate -p 'test_*.py'
@@ -44,10 +45,13 @@ go test ./platform -run TestCommandCandidateInvokerUsesTypedPythonBoundary -coun
 cd web && npm ci && npm run typecheck && npm test && npm run build
 ```
 
-The integrated Go test created a temporary `CandidateInput` JSON document,
+The forecast gate test created a temporary `CandidateInput` JSON document,
 ran `forecast_candidate/stockout_candidate.py`, evaluated its artifact with
-the Go-owned evaluator, and passed the selected outcome through
-`forecast.SelectRuntimePredictor`.
+the Go-owned evaluator, asserted the frozen checksums and metrics, and passed
+the selected outcome through `forecast.SelectRuntimePredictor`. The API gate
+test carries that actual artifact and evaluation through
+`platform.ForecastService`, Go-owned persistence, the authorized forecast GET,
+and a cross-tenant denial check.
 
 ## Results
 
@@ -67,11 +71,10 @@ The runtime selection was `predictor=baseline`,
 by caller input or by post-hoc reinterpretation.
 
 The pure frozen evaluator and the Python candidate suite passed. The full Go
-command passed, but the verbose forecast-read and PostgreSQL-backed service
-tests explicitly skipped because Docker was unavailable. The web suite also
-passed: 10 test files, 52 tests, typecheck, and Vite build. The typed command
-boundary test passed malformed-response, timeout, and unavailable-command
-cases.
+command passed, but the API gate and other PostgreSQL-backed service tests
+explicitly skipped because Docker was unavailable. The web suite also passed:
+10 test files, 52 tests, typecheck, and Vite build. The typed command boundary
+test passed malformed-response, timeout, and unavailable-command cases.
 
 ## Limitations and failed cases
 

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -51,7 +52,7 @@ func TestM4ExitGateRebuildsAndEvaluatesTheFrozenCandidate(t *testing.T) {
 
 	python, err := findPython()
 	if err != nil {
-		t.Skipf("Python runtime not installed: %v", err)
+		t.Fatalf("M4 exit gate requires Python: %v", err)
 	}
 	var stdout, stderr bytes.Buffer
 	commandContext, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -79,6 +80,12 @@ func TestM4ExitGateRebuildsAndEvaluatesTheFrozenCandidate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if forecast.Checksum(dataset) != "b29e795cbacd0a40ee2b7c15c0d52200a867fa24554f50b7f77989302c8e116a" || features.SnapshotID != "2d4121bb6804b9dbe9ee0d3d68989e9271e348a3c3ddf0727df5d53428035fc6" || features.Checksum != "808980035fd123badb12df34224a8b510683d93dffbc1d8fde3df28590be4d78" {
+		t.Fatalf("frozen lineage changed: dataset=%s snapshot_id=%s snapshot_checksum=%s", forecast.Checksum(dataset), features.SnapshotID, features.Checksum)
+	}
+	if len(history.Observations) != 4*forecast.HistoryDayCount || len(dataset.Examples) != 3*forecast.LabeledDayCount || len(features.Rows) != len(dataset.Examples) {
+		t.Fatalf("unexpected rebuilt shapes: history=%d dataset=%d features=%d", len(history.Observations), len(dataset.Examples), len(features.Rows))
+	}
 	if evaluation.PromotionSplit != forecast.SplitTest || evaluation.Outcome == forecast.CandidateOutcomeNoQualifyingBaseline {
 		t.Fatalf("invalid M4 outcome: %+v", evaluation)
 	}
@@ -92,8 +99,24 @@ func TestM4ExitGateRebuildsAndEvaluatesTheFrozenCandidate(t *testing.T) {
 	if testSplit == nil || testSplit.BaselineID != forecast.BaselineSeasonalNaive || testSplit.CandidateBeatsBaseline || evaluation.Outcome != forecast.CandidateOutcomeBaseline || selection.Predictor != forecast.RuntimePredictorBaseline || selection.BaselineID != forecast.BaselineSeasonalNaive {
 		t.Fatalf("unexpected frozen test selection: split=%+v selection=%+v outcome=%s", testSplit, selection, evaluation.Outcome)
 	}
-	if len(dataset.Examples) != 3*forecast.LabeledDayCount || len(features.Rows) != len(dataset.Examples) {
-		t.Fatalf("unexpected rebuilt shapes: dataset=%d features=%d history=%d", len(dataset.Examples), len(features.Rows), len(history.Observations))
+	wantSplits := map[string]struct {
+		baselineID                    string
+		candidateAP, candidateBrier   float64
+		baselineAP, baselineBrier     float64
+		candidateN, baselinePredicted int
+	}{
+		forecast.SplitTrain:      {forecast.BaselineMovingAverage, 0.957489696104, 0.036397378241, 0.962987425654, 0.170493197279, 210, 192},
+		forecast.SplitValidation: {forecast.BaselineSeasonalNaive, 0.963827614379, 0.126833502348, 1, 0, 42, 42},
+		forecast.SplitTest:       {forecast.BaselineSeasonalNaive, 0.953728663154, 0.126833502348, 1, 0, 63, 63},
+	}
+	for _, split := range evaluation.Splits {
+		want, ok := wantSplits[split.Split]
+		if !ok || split.Baseline == nil || split.BaselineID != want.baselineID || split.CandidateBeatsBaseline || split.ComparisonReason != "candidate average precision does not beat baseline" {
+			t.Fatalf("unexpected split outcome: %+v", split)
+		}
+		if split.Candidate.N != want.candidateN || split.Candidate.Predicted != want.candidateN || math.Abs(split.Candidate.Coverage-1) > 1e-12 || split.Baseline.Predicted != want.baselinePredicted || !closeFloat(split.Candidate.AP, want.candidateAP) || !closeFloat(split.Candidate.Brier, want.candidateBrier) || !closeFloat(split.Baseline.AP, want.baselineAP) || !closeFloat(split.Baseline.Brier, want.baselineBrier) {
+			t.Fatalf("unexpected frozen metrics for %s: candidate=%+v baseline=%+v", split.Split, split.Candidate, *split.Baseline)
+		}
 	}
 
 	t.Logf("M4 protocol=%s dataset_checksum=%s feature_snapshot_id=%s feature_snapshot_checksum=%s", forecast.ProtocolID, forecast.Checksum(dataset), features.SnapshotID, features.Checksum)
@@ -128,4 +151,8 @@ func optionalFloat(value *float64) string {
 		return "undefined"
 	}
 	return fmt.Sprintf("%.12f", *value)
+}
+
+func closeFloat(value *float64, want float64) bool {
+	return value != nil && math.Abs(*value-want) <= 1e-12
 }
