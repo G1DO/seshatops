@@ -19,6 +19,29 @@ func TestPolicyAllowsSameTenantInventoryRead(t *testing.T) {
 	}
 }
 
+func TestPolicyAllowsForecastFeaturesOnlyForOpsReader(t *testing.T) {
+	reader := NewPolicy(NewDirectory(Assignment{
+		PrincipalID: "operator-northstar",
+		TenantID:    TenantNS001UUID,
+		RoleID:      RoleOpsReader,
+	}))
+	if err := reader.Allow("operator-northstar", TenantNS001UUID, ResForecastFeatures, ActRead); err != nil {
+		t.Fatalf("MX-008 allow: %v", err)
+	}
+
+	operator := NewPolicy(NewDirectory(Assignment{
+		PrincipalID: "platform-operator",
+		TenantID:    TenantNS001UUID,
+		RoleID:      RolePlatformOperator,
+	}))
+	if err := operator.Allow("platform-operator", TenantNS001UUID, ResForecastFeatures, ActRead); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("platform operator forecast read err=%v", err)
+	}
+	if err := reader.Allow("operator-northstar", TenantNS002UUID, ResForecastFeatures, ActRead); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("cross-tenant forecast read err=%v", err)
+	}
+}
+
 func TestPolicyDeniesCrossTenantInventoryRead(t *testing.T) {
 	p := NewPolicy(NewDirectory(Assignment{
 		PrincipalID: "operator-northstar",

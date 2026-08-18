@@ -1,7 +1,8 @@
 package identity
 
 // Stable MX-* identifiers. Human-readable matrix: docs/security/authorization.md.
-// Query APIs evaluate MX-001 for inventory and MX-002/MX-003 for ops visibility.
+// Query APIs evaluate MX-001 for inventory, MX-002/MX-003 for ops visibility,
+// and MX-008 for forecast feature reads.
 // Privileged HTTP controls evaluate MX-004/MX-005/MX-006. MX-007 is the
 // privileged audit-read row served by GET .../ops/audit.
 const (
@@ -19,6 +20,7 @@ const (
 	ResReplay              = "RES-REPLAY"
 	ResRebuild             = "RES-REBUILD"
 	ResAudit               = "RES-AUDIT"
+	ResForecastFeatures    = "RES-FORECAST-FEATURES"
 
 	ActRead              = "ACT-READ"
 	ActQuarantineRelease = "ACT-QUARANTINE-RELEASE"
@@ -33,6 +35,7 @@ const (
 	MX005 = "MX-005"
 	MX006 = "MX-006"
 	MX007 = "MX-007"
+	MX008 = "MX-008"
 )
 
 type allowRow struct {
@@ -52,6 +55,7 @@ var frozenAllowList = []allowRow{
 	{MX005, TenantNS001UUID, RolePlatformOperator, ResReplay, ActReplay},
 	{MX006, TenantNS001UUID, RolePlatformOperator, ResRebuild, ActRebuild},
 	{MX007, TenantNS001UUID, RolePlatformOperator, ResAudit, ActAuditRead},
+	{MX008, TenantNS001UUID, RoleOpsReader, ResForecastFeatures, ActRead},
 }
 
 func matrixAllows(tenantID, roleID, resource, action string) bool {

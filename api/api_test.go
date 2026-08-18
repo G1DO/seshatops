@@ -473,7 +473,7 @@ func TestReadOnlyRejectsMutatingMethods(t *testing.T) {
 	}
 
 	for _, method := range []string{http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete} {
-		for _, path := range []string{inventoryPath(fx.TenantID), streamPath(fx.TenantID), opsPath(fx.TenantID), lineagePath(fx.TenantID, "batch-bread-001")} {
+		for _, path := range []string{inventoryPath(fx.TenantID), streamPath(fx.TenantID), opsPath(fx.TenantID), forecastFeaturesPath(fx.TenantID), lineagePath(fx.TenantID, "batch-bread-001")} {
 			req, err := http.NewRequest(method, ts.URL+path, bytes.NewReader([]byte(`{}`)))
 			if err != nil {
 				t.Fatal(err)
