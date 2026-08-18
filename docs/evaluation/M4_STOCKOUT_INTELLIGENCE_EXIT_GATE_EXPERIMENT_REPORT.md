@@ -32,6 +32,9 @@ Local operator environment on 2026-08-18:
 - Docker was unavailable. PostgreSQL Testcontainers tests therefore reported
   an explicit skip; no database-backed result below is claimed as locally
   observed.
+- The final implementation commit under test was `8b53501`. An independent
+  review identified and the follow-up commits resolved missing end-to-end read
+  coverage, non-mandatory Python setup, and unasserted evidence values.
 
 Commands run:
 
@@ -75,6 +78,13 @@ command passed, but the API gate and other PostgreSQL-backed service tests
 explicitly skipped because Docker was unavailable. The web suite also passed:
 10 test files, 52 tests, typecheck, and Vite build. The typed command boundary
 test passed malformed-response, timeout, and unavailable-command cases.
+
+Hosted CI for PR #98 on commit `8b53501` recorded [Go CI success](https://github.com/G1DO/seshatops/actions/runs/32180187026),
+including the Docker-backed API gate, and [Web CI success](https://github.com/G1DO/seshatops/actions/runs/32180187031).
+Documentation CI Markdown, YAML, and secret jobs passed. Its link job [failed](https://github.com/G1DO/seshatops/actions/runs/32180186848/job/95851340432)
+only on the pre-existing Redpanda URL in `docs/design/specifications/event-spine.md`,
+which returned HTTP 500; the new report links and the other 87 scanned links
+passed. No unrelated link was changed.
 
 ## Limitations and failed cases
 
