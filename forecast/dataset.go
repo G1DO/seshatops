@@ -50,11 +50,11 @@ func BuildDataset(history History, tenantID string) (Dataset, error) {
 		return Dataset{}, wrapInvalid("no observations for tenant %s", tenantID)
 	}
 
-	labeledDates, err := uniqueLabeledDates(series)
+	labelableDates, err := uniqueLabelableDates(series)
 	if err != nil {
 		return Dataset{}, err
 	}
-	splits := assignSplits(labeledDates)
+	splits := assignSplits(labelableDates)
 
 	var examples []Example
 	for key, days := range series {
@@ -171,7 +171,7 @@ func requireDense(key seriesKey, days map[string]int64) error {
 	return nil
 }
 
-func uniqueLabeledDates(series map[seriesKey]map[string]int64) ([]string, error) {
+func uniqueLabelableDates(series map[seriesKey]map[string]int64) ([]string, error) {
 	seen := make(map[string]struct{})
 	for _, days := range series {
 		for asOf := range days {
