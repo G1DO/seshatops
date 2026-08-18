@@ -193,7 +193,10 @@ promote a candidate.
 ## 9. Non-goals
 
 - Choosing, tuning, or shipping a learned model in this protocol issue
-- Python, HTTP, feature snapshots, or PostgreSQL persistence of this log
+- Model training, feature stores, persisted feature snapshots, production
+  model serving, or Python database credentials. The separate Go-owned
+  read-only feature snapshot boundary is specified in
+  [forecast-feature-snapshots.md](forecast-feature-snapshots.md).
 - New Event Spine replenishment families
 - Making M3 lineage a forecasting dependency
 - Production, SLO, or hosted-campaign claims

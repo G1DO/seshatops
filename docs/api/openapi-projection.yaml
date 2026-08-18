@@ -4,11 +4,12 @@ info:
   version: "1.0.0"
   description: |
     Go HTTP/SSE for the committed inventory projection, ops visibility,
-    batch lineage, privileged controls, and privileged-decision audit. A
-    Go-owned session is required (`401 unauthenticated`). Allow-list rows are
-    in docs/security/authorization.md (`403 forbidden` when unauthorized).
-    SSE is at-least-once and may drop for slow clients; REST is the
-    authoritative reconnect/catch-up path.
+    batch lineage, read-only M4 forecast feature snapshots, privileged
+    controls, and privileged-decision audit. A Go-owned session is required
+    (`401 unauthenticated`). Allow-list rows are in
+    docs/security/authorization.md (`403 forbidden` when unauthorized). SSE
+    is at-least-once and may drop for slow clients; REST is the authoritative
+    reconnect/catch-up path.
 servers:
   - url: /
 paths:
@@ -97,6 +98,102 @@ paths:
                 $ref: "#/components/schemas/ErrorBody"
         "405":
           description: Method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /v1/tenants/{tenant_id}/forecast/features:
+    get:
+      operationId: getForecastFeatureSnapshot
+      summary: Read-only deterministic M4 raw feature snapshot
+      description: >
+        Go-owned tenant-scoped replay of retained inventory history. The
+        server fixes the dataset, feature definition, horizon, and source
+        availability clock. Non-complete source states return 200 with an
+        explicit status, reasons, and an empty rows array.
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "200":
+          description: Complete or explicit stale, incomplete, or insufficient snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForecastFeatureSnapshot"
+        "400":
+          description: Invalid tenant_id or unsupported snapshot-control query parameter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller is not authorized for this tenant's forecast features
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "405":
+          description: Method not allowed; Allow is GET
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Read-only source load failed; no partial snapshot is returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    post:
+      operationId: postForecastFeaturesRejected
+      summary: Rejected write (read-only)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "405":
+          description: Method not allowed; Allow is GET
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    put:
+      operationId: putForecastFeaturesRejected
+      summary: Rejected write (read-only)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "405":
+          description: Method not allowed; Allow is GET
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    patch:
+      operationId: patchForecastFeaturesRejected
+      summary: Rejected write (read-only)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "405":
+          description: Method not allowed; Allow is GET
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+    delete:
+      operationId: deleteForecastFeaturesRejected
+      summary: Rejected write (read-only)
+      parameters:
+        - $ref: "#/components/parameters/TenantID"
+      responses:
+        "405":
+          description: Method not allowed; Allow is GET
           content:
             application/json:
               schema:
@@ -380,6 +477,103 @@ components:
         type: string
         description: Production batch aggregate id (path assertion; tenant comes from tenant_id)
   schemas:
+    ForecastFeatureSnapshot:
+      type: object
+      required:
+        - contract_version
+        - status
+        - tenant_id
+        - dataset_version
+        - feature_definition_version
+        - source_history_boundary
+        - snapshot_id
+        - checksum
+        - rows
+        - status_reasons
+      properties:
+        contract_version:
+          type: integer
+          enum: [1]
+        status:
+          type: string
+          enum: [complete, stale, incomplete, insufficient]
+        tenant_id:
+          type: string
+          format: uuid
+        dataset_version:
+          type: string
+          enum: [m4-stockout-eval-v1]
+        feature_definition_version:
+          type: string
+          enum: [m4-raw-onhand-v1]
+        source_history_boundary:
+          $ref: "#/components/schemas/ForecastSourceHistoryBoundary"
+        snapshot_id:
+          type: string
+          description: Deterministic SHA-256 snapshot identity
+        checksum:
+          type: string
+          description: Deterministic SHA-256 canonical snapshot checksum
+        rows:
+          type: array
+          description: Empty unless status is complete
+          items:
+            $ref: "#/components/schemas/ForecastFeatureRow"
+        status_reasons:
+          type: array
+          items:
+            type: string
+    ForecastSourceHistoryBoundary:
+      type: object
+      required: [history_checksum, projection_checksum, applied_event_count]
+      properties:
+        history_checksum:
+          type: string
+        projection_checksum:
+          type: string
+        max_recorded_at:
+          type: string
+          format: date-time
+        source_cutoff_date:
+          type: string
+          format: date
+        applied_event_count:
+          type: integer
+          minimum: 0
+    ForecastFeatureRow:
+      type: object
+      required:
+        - row_id
+        - tenant_id
+        - item_id
+        - as_of_date
+        - source_cutoff_date
+        - split
+        - quantity_on_hand
+        - history_hash
+      properties:
+        row_id:
+          type: string
+        tenant_id:
+          type: string
+          format: uuid
+        item_id:
+          type: string
+        as_of_date:
+          type: string
+          format: date
+        source_cutoff_date:
+          type: string
+          format: date
+        split:
+          type: string
+          enum: [train, validation, test]
+        quantity_on_hand:
+          type: integer
+          format: int64
+          minimum: 0
+        history_hash:
+          type: string
     InventoryItem:
       type: object
       required: [item_id, quantity_on_hand, aggregate_version]
