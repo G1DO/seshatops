@@ -1,10 +1,18 @@
 import { describe, expect, it, vi } from "vitest";
-import { fetchBatchTrace, fetchOps, fetchSnapshot, postQuarantineRelease } from "./client";
+import {
+  fetchBatchTrace,
+  fetchForecastPrediction,
+  fetchOps,
+  fetchSnapshot,
+  postQuarantineRelease,
+} from "./client";
 import { ApiError, FORBIDDEN, UNAUTHENTICATED } from "./types";
 import {
   NORTHSTAR_BATCH_ID,
   NORTHSTAR_TENANT_ID,
+  NORTHSTAR_ITEM_ID,
   sampleBatchTrace,
+  sampleForecastPrediction,
   sampleOpsSnapshot,
   sampleSnapshotBefore,
 } from "../fixtures/northstar";
@@ -88,6 +96,51 @@ describe("fetchSnapshot", () => {
 
     await expect(
       fetchSnapshot("http://example.test", NORTHSTAR_TENANT_ID, fetchImpl),
+    ).rejects.toMatchObject({ code: "malformed_response" });
+  });
+});
+
+describe("fetchForecastPrediction", () => {
+  it("returns a validated prediction and encodes the resource path", async () => {
+    const prediction = sampleForecastPrediction();
+    const fetchImpl = vi.fn<typeof fetch>(async () =>
+      new Response(JSON.stringify(prediction), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await expect(
+      fetchForecastPrediction(
+        "http://example.test",
+        NORTHSTAR_TENANT_ID,
+        NORTHSTAR_ITEM_ID,
+        fetchImpl,
+      ),
+    ).resolves.toEqual(prediction);
+    expect(fetchImpl).toHaveBeenCalledWith(
+      `http://example.test/v1/tenants/${NORTHSTAR_TENANT_ID}/forecast/predictions/${NORTHSTAR_ITEM_ID}`,
+      expect.objectContaining({
+        method: "GET",
+        credentials: "include",
+      }),
+    );
+  });
+
+  it("rejects malformed prediction bodies", async () => {
+    const fetchImpl: typeof fetch = async () =>
+      new Response(JSON.stringify({ tenant_id: NORTHSTAR_TENANT_ID }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+
+    await expect(
+      fetchForecastPrediction(
+        "http://example.test",
+        NORTHSTAR_TENANT_ID,
+        NORTHSTAR_ITEM_ID,
+        fetchImpl,
+      ),
     ).rejects.toMatchObject({ code: "malformed_response" });
   });
 });

@@ -3,6 +3,7 @@ import {
   type BatchTraceSnapshot,
   type ControlResult,
   type ErrorBody,
+  type ForecastPredictionSnapshot,
   type InventoryItem,
   type InventorySnapshot,
   type LineageHop,
@@ -94,6 +95,110 @@ export function streamUrl(baseUrl: string, tenantId: string): string {
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
+}
+
+function isForecastPredictionUncertainty(value: unknown): boolean {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+  const body = value as Record<string, unknown>;
+  return (
+    typeof body.method === "string" &&
+    isFiniteNumber(body.lower) &&
+    isFiniteNumber(body.upper) &&
+    isFiniteNumber(body.sample_count) &&
+    body.sample_count >= 0 &&
+    body.lower >= 0 &&
+    body.upper <= 1 &&
+    body.lower <= body.upper
+  );
+}
+
+function isForecastPrediction(value: unknown): value is ForecastPredictionSnapshot {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+  const body = value as Record<string, unknown>;
+  if (
+    typeof body.tenant_id !== "string" ||
+    typeof body.resource_type !== "string" ||
+    typeof body.resource_id !== "string" ||
+    typeof body.prediction_id !== "string" ||
+    typeof body.observation_date !== "string" ||
+    !isFiniteNumber(body.forecast_horizon_days) ||
+    typeof body.target !== "string" ||
+    (body.status !== "predicted" && body.status !== "abstained") ||
+    (body.stockout_risk !== null && !isFiniteNumber(body.stockout_risk)) ||
+    (body.uncertainty !== null && !isForecastPredictionUncertainty(body.uncertainty)) ||
+    typeof body.abstention_reason !== "string" ||
+    typeof body.correlation_id !== "string" ||
+    typeof body.recorded_at !== "string" ||
+    typeof body.observed_at !== "string" ||
+    body.freshness === null ||
+    typeof body.freshness !== "object" ||
+    body.lineage === null ||
+    typeof body.lineage !== "object"
+  ) {
+    return false;
+  }
+  const freshness = body.freshness as Record<string, unknown>;
+  const lineage = body.lineage as Record<string, unknown>;
+  return (
+    freshness.status === "fresh" ||
+    freshness.status === "stale" ||
+    freshness.status === "unavailable"
+  ) &&
+    typeof freshness.fresh_at === "string" &&
+    typeof lineage.evaluation_protocol_version === "string" &&
+    typeof lineage.dataset_version === "string" &&
+    typeof lineage.feature_definition_version === "string" &&
+    typeof lineage.feature_snapshot_id === "string" &&
+    typeof lineage.feature_snapshot_checksum === "string" &&
+    typeof lineage.source_cutoff_date === "string" &&
+    typeof lineage.predictor === "string" &&
+    typeof lineage.model_version === "string" &&
+    typeof lineage.code_version === "string";
+}
+
+/** Authorized current stockout prediction. Go authorizes and computes freshness. */
+export async function fetchForecastPrediction(
+  baseUrl: string,
+  tenantId: string,
+  resourceId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<ForecastPredictionSnapshot> {
+  const root = baseUrl.replace(/\/$/, "");
+  const url = `${root}/v1/tenants/${encodeURIComponent(tenantId)}/forecast/predictions/${encodeURIComponent(resourceId)}`;
+  let response: Response;
+  try {
+    response = await fetchImpl(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      credentials: "include",
+    });
+  } catch {
+    throw new ApiError(0, "network_error");
+  }
+
+  let body: unknown;
+  try {
+    body = await response.json();
+  } catch {
+    throw new ApiError(response.status, "malformed_response");
+  }
+
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      errorCodeFromBody(body) ?? "request_failed",
+    );
+  }
+
+  if (!isForecastPrediction(body)) {
+    throw new ApiError(response.status, "malformed_response");
+  }
+
+  return body;
 }
 
 function isOpsSnapshot(value: unknown): value is OpsSnapshot {

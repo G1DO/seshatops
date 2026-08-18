@@ -26,6 +26,50 @@ export interface ErrorBody {
   error: string;
 }
 
+export interface ForecastPredictionUncertainty {
+  method: string;
+  lower: number;
+  upper: number;
+  sample_count: number;
+}
+
+export interface ForecastPredictionFreshness {
+  status: "fresh" | "stale" | "unavailable";
+  fresh_at: string;
+}
+
+export interface ForecastPredictionLineage {
+  evaluation_protocol_version: string;
+  dataset_version: string;
+  feature_definition_version: string;
+  feature_snapshot_id: string;
+  feature_snapshot_checksum: string;
+  source_cutoff_date: string;
+  predictor: string;
+  model_version: string;
+  code_version: string;
+}
+
+/** Authorized current stockout assessment for one inventory resource. */
+export interface ForecastPredictionSnapshot {
+  tenant_id: string;
+  resource_type: string;
+  resource_id: string;
+  prediction_id: string;
+  observation_date: string;
+  forecast_horizon_days: number;
+  target: string;
+  status: "predicted" | "abstained";
+  stockout_risk: number | null;
+  uncertainty: ForecastPredictionUncertainty | null;
+  abstention_reason: string;
+  freshness: ForecastPredictionFreshness;
+  lineage: ForecastPredictionLineage;
+  correlation_id: string;
+  recorded_at: string;
+  observed_at: string;
+}
+
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;

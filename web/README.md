@@ -28,6 +28,7 @@ npm ci
 | --- | --- | --- |
 | `VITE_API_BASE_URL` | empty (same origin) | Go API origin; empty uses the Vite `/auth` and `/v1` proxy |
 | `VITE_TENANT_ID` | Northstar fixture tenant | Demo tenant context only (not authorization) |
+| `VITE_ITEM_ID` | Northstar flour item | Inventory resource whose stockout assessment is displayed; not authorization |
 
 Local UI: leave `VITE_API_BASE_URL` unset so the browser talks to the Vite
 origin. Vite proxies `/auth` and `/v1` → `http://127.0.0.1:8080`, avoiding
@@ -44,7 +45,9 @@ include `quantity_on_hand`, checksum, `observed_at`, and `aggregate_version`.
 `last_applied_event_id` arrives on SSE `inventory_projection.updated` frames
 only. Connection states: `loading`, `live`, `stale`, `disconnected`, `error`.
 On SSE loss the UI re-GETs the snapshot, replaces local state, then reopens
-the stream.
+the stream. The stockout panel presents Go-owned prediction risk, uncertainty,
+abstention, source freshness, and prediction lineage; stale or unavailable
+freshness is never presented as a current confident forecast.
 
 ## Scripts
 
