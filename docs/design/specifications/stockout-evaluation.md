@@ -1,7 +1,8 @@
 # M4 Stockout Evaluation Protocol
 
 Frozen target, temporal dataset, and scorecard for Northstar Foods
-stockout-risk evaluation. Executable helpers: package `forecast`.
+stockout-risk evaluation. Executable helpers: package `forecast`, including
+`BaselinePredictions` and `EvaluateBaselines`.
 Protocol id: `m4-stockout-eval-v1`.
 
 This contract is evaluation-only. It is not production demand-forecasting
@@ -161,8 +162,7 @@ A result qualifies when coverage is at least `0.80` and both average
 precision and Brier are defined. Coverage uses integer comparison
 `|P| * 100 >= |S| * 80`.
 
-Declared deterministic baseline ids (predictors are implemented in a later
-issue; this protocol freezes their semantics):
+Declared deterministic baseline ids and their implemented predictors:
 
 | Id | Prediction at `as_of_date` `T` | Abstain when |
 | --- | --- | --- |
@@ -171,6 +171,28 @@ issue; this protocol freezes their semantics):
 
 Both baselines use only observations at or before `T`. The realized label at
 `T - 7` uses window `(T - 7, T]`, which does not require data after `T`.
+
+`forecast.EvaluateBaselines` evaluates both predictors on `train`, `validation`,
+and `test` independently. It requires a complete feature snapshot whose rows
+match the declared dataset exactly. Stale, incomplete, or insufficient feature
+snapshots fail closed; missing per-row lookback inputs become explicit nil-score
+abstentions and are accounted for by `forecast.Evaluate`.
+
+The deterministic evaluation output records:
+
+- `evaluation_protocol_version`: `m4-stockout-eval-v1`;
+- `dataset_version` and the canonical dataset checksum;
+- `feature_definition_version`: `m4-raw-onhand-v1`;
+- the feature snapshot ID and checksum;
+- `code_version`: `m4-deterministic-baselines-v1`;
+- canonical predictions and abstention-aware metrics for each baseline and
+  frozen split; and
+- the qualifying baseline, or an explicit no-qualifying-baseline outcome, for
+  each split.
+
+Baseline selection is per split. A learned candidate must use the qualifying
+baseline from the same split when applying the existing promotion rule; no
+baseline or candidate is selected by tuning on another split.
 
 Tie-break among qualifying baselines, in order:
 
@@ -189,6 +211,10 @@ A learned candidate is promoted only if all of the following hold:
 Otherwise the qualifying baseline ships and that outcome is reported. Equal
 average precision does not promote. A missing qualifying baseline does not
 promote a candidate.
+
+Reproduce the official deterministic baseline evaluation with:
+
+`go test ./forecast -run TestEvaluateBaselinesIsDeterministicAndSelectsPerSplit -count=1`
 
 ## 9. Non-goals
 
