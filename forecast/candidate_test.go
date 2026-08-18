@@ -3,7 +3,7 @@ package forecast_test
 import (
 	"encoding/json"
 	"errors"
-	"math"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -66,6 +66,12 @@ func TestEvaluateCandidateArtifactRejectsInvalidPredictionContracts(t *testing.T
 		t.Run(tt.name, func(t *testing.T) {
 			artifact := valid
 			artifact.Predictions = append([]forecast.CandidatePrediction(nil), valid.Predictions...)
+			for i := range artifact.Predictions {
+				if uncertainty := valid.Predictions[i].Uncertainty; uncertainty != nil {
+					copy := *uncertainty
+					artifact.Predictions[i].Uncertainty = &copy
+				}
+			}
 			tt.mutate(&artifact)
 			_, err := forecast.EvaluateCandidateArtifact(ds, features, artifact)
 			if !errors.Is(err, forecast.ErrInvalidInput) || !strings.Contains(err.Error(), tt.want) {
@@ -82,6 +88,24 @@ func TestEvaluateCandidateArtifactRejectsInvalidPredictionContracts(t *testing.T
 	)
 	if _, err := forecast.EvaluateCandidateArtifact(ds, stale, valid); !errors.Is(err, forecast.ErrInvalidInput) {
 		t.Fatalf("stale feature snapshot err=%v", err)
+	}
+}
+
+func TestEvaluateCandidateArtifactIsDeterministic(t *testing.T) {
+	ds, features := officialCandidateInputs(t)
+	artifact := candidateArtifact(ds, features, func(e forecast.Example) *float64 {
+		return forecastFloat(float64(e.Label))
+	})
+	first, err := forecast.EvaluateCandidateArtifact(ds, features, artifact)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := forecast.EvaluateCandidateArtifact(ds, features, artifact)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(first, second) {
+		t.Fatal("candidate evaluation changed across identical runs")
 	}
 }
 
@@ -213,8 +237,5 @@ func splitCandidateResult(results []forecast.CandidateSplitEvaluation, split str
 }
 
 func forecastFloat(value float64) *float64 {
-	if math.IsNaN(value) {
-		return nil
-	}
 	return &value
 }
