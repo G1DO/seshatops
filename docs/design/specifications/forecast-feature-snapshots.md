@@ -4,7 +4,9 @@ The Go-owned forecast feature boundary is an on-demand, tenant-scoped,
 read-only projection of retained Event Spine inventory history. It produces
 raw cutoff-safe feature rows for the frozen `m4-stockout-eval-v1` protocol.
 It does not train a model, persist a feature table, provide labels, or give a
-Python process database credentials.
+Python process database credentials. A selected learned candidate may receive
+one row through the Go-owned typed runtime boundary; the resulting prediction
+is validated and persisted by Go.
 
 Versions are fixed by the server:
 
@@ -23,7 +25,7 @@ flowchart LR
   READ[Read-only\nrepeatable-read loader]
   REPLAY[Pure in-memory\nversioned replay]
   BUILD[Pure feature\nsnapshot builder]
-  PY[Offline Python\ncandidate artifact producer]
+  PY[One-shot Python\ncandidate adapter]
   DB --> READ --> REPLAY --> BUILD --> PY
   AUTH --> READ
   PY -. no credentials / no writes .-> DB
@@ -156,4 +158,5 @@ the existing deterministic synthetic fixture to prove ordering, checksums,
 temporal cutoff behavior, and feature-only serialization. The offline
 candidate artifact producer consumes this boundary but adds no replenishment
 family, feature store, database schema, credentials, or production
-forecasting-quality claim.
+forecasting-quality claim. Runtime prediction records are persisted only by Go
+in `platform.forecast_predictions`.
