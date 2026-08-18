@@ -57,3 +57,13 @@ the dense M4 restock fixture, so a live request may correctly return
 `insufficient` or `incomplete`; this is an explicit limitation rather than a
 forecast-quality result. These are repository/test claims, not production
 isolation or forecasting-quality claims.
+
+## M4 learned stockout candidate
+
+The offline candidate producer has focused tests for deterministic train-only
+fitting, typed risk and Wilson uncertainty output, insufficient-support
+abstention, stale/malformed input rejection, and artifact-only CLI behavior.
+The Go evaluator tests strict artifact lineage, prediction coverage,
+abstention-aware fallback to the deterministic baseline, and JSON contract
+rejection. These are implementation-contract claims only; no learned
+candidate is recorded as promoted or as production forecasting evidence.

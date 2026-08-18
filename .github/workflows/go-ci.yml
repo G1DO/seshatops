@@ -31,3 +31,5 @@ jobs:
           cache: true
       - name: Test
         run: go test ./... -count=1 -timeout 15m
+      - name: Test offline Python candidate
+        run: python3 -m unittest discover -s forecast_candidate -p 'test_*.py' -v

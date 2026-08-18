@@ -23,7 +23,7 @@ flowchart LR
   READ[Read-only\nrepeatable-read loader]
   REPLAY[Pure in-memory\nversioned replay]
   BUILD[Pure feature\nsnapshot builder]
-  PY[Authorized Python\nread consumer]
+  PY[Offline Python\ncandidate artifact producer]
   DB --> READ --> REPLAY --> BUILD --> PY
   AUTH --> READ
   PY -. no credentials / no writes .-> DB
@@ -153,6 +153,7 @@ It cannot reproduce the official `forecast.GenerateHistory` fixture through
 live PostgreSQL replay. The endpoint therefore correctly returns
 `insufficient` or `incomplete` for that live shape. The pure builder tests use
 the existing deterministic synthetic fixture to prove ordering, checksums,
-temporal cutoff behavior, and feature-only serialization. This issue adds no
-replenishment family, feature store, database schema, Python package, or
-production forecasting-quality claim.
+temporal cutoff behavior, and feature-only serialization. The offline
+candidate artifact producer consumes this boundary but adds no replenishment
+family, feature store, database schema, credentials, or production
+forecasting-quality claim.

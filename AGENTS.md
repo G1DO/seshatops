@@ -64,6 +64,9 @@ checkpoint fails, stop. Do not invent evidence.
 ## Change discipline
 
 - Touch only files required by the issue. Match existing style.
+- Do not use `agent/` or `codex/` branch prefixes. Use
+  `feature/<issue-number>-<short-slug>` for features and
+  `fix/<issue-number>-<short-slug>` for fixes.
 - Never run destructive Git commands (`reset --hard`, broad checkout, force
   push to `main`) without explicit authorization.
 - Do not commit, push, merge, open a pull request, or change GitHub/Notion

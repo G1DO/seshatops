@@ -2,7 +2,8 @@
 
 Frozen target, temporal dataset, and scorecard for Northstar Foods
 stockout-risk evaluation. Executable helpers: package `forecast`, including
-`BaselinePredictions` and `EvaluateBaselines`.
+`BaselinePredictions`, `EvaluateBaselines`, and
+`EvaluateCandidateArtifactJSON`.
 Protocol id: `m4-stockout-eval-v1`.
 
 This contract is evaluation-only. It is not production demand-forecasting
@@ -194,6 +195,25 @@ Baseline selection is per split. A learned candidate must use the qualifying
 baseline from the same split when applying the existing promotion rule; no
 baseline or candidate is selected by tuning on another split.
 
+The bounded learned candidate is an offline Python artifact producer at
+`forecast_candidate/stockout_candidate.py`. It consumes serialized
+`forecast.CandidateInput` data and has no database credentials, HTTP path, or
+workflow authority. It pools the current on-hand quantity into fixed buckets
+(`zero`, `low` for 1–2, `medium` for 3–7, and `high` for 8+) and learns a
+Laplace-smoothed stockout rate from `train` only. A bucket needs at least five
+training rows; otherwise its predictions abstain with
+`insufficient_training_support`. Predicted rows include a 95% Wilson interval,
+sample count, target, horizon, and source cutoff. No hyperparameter or
+threshold tuning is performed, and validation/test labels cannot affect the
+emitted predictions.
+
+Each candidate artifact records its artifact, model, code, protocol, dataset,
+feature-definition, feature-snapshot, target, horizon, and train/validation
+lineage. Go strictly validates the artifact, evaluates all frozen splits, and
+applies promotion only to the test comparison. Invalid lineage, stale or
+incomplete features, malformed predictions, unsupported scores, and missing
+rows fail closed.
+
 Tie-break among qualifying baselines, in order:
 
 1. Higher average precision
@@ -212,16 +232,23 @@ Otherwise the qualifying baseline ships and that outcome is reported. Equal
 average precision does not promote. A missing qualifying baseline does not
 promote a candidate.
 
-Reproduce the official deterministic baseline evaluation with:
+Reproduce the deterministic baseline evaluation with:
 
 `go test ./forecast -run TestEvaluateBaselinesIsDeterministicAndSelectsPerSplit -count=1`
 
+Produce a candidate artifact from a documented `CandidateInput` JSON file with:
+
+`python3 forecast_candidate/stockout_candidate.py --input candidate-input.json --output candidate-artifact.json`
+
+Evaluate that artifact with the Go-owned contract using:
+
+`go test ./forecast -run TestEvaluateCandidateArtifact -count=1`
+
 ## 9. Non-goals
 
-- Choosing, tuning, or shipping a learned model in this protocol issue
-- Model training, feature stores, persisted feature snapshots, production
-  model serving, or Python database credentials. The separate Go-owned
-  read-only feature snapshot boundary is specified in
+- Production model serving, persisted feature snapshots, online inference, or
+  Python database credentials. The separate Go-owned read-only feature
+  snapshot boundary is specified in
   [forecast-feature-snapshots.md](forecast-feature-snapshots.md).
 - New Event Spine replenishment families
 - Making M3 lineage a forecasting dependency
