@@ -3,6 +3,7 @@
 // Northstar daily on-hand history, chronological labeled dataset construction,
 // dataset checksums, and abstention-aware metrics/promotion rules.
 //
-// It does not train models, extract production features, speak HTTP, or
-// mutate ERP/platform/identity state.
+// It does not read transactional state, train models, speak HTTP, or mutate
+// ERP/platform/identity state. Its raw feature snapshot builder is pure and
+// exposes no evaluation labels.
 package forecast

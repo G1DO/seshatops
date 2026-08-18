@@ -35,3 +35,25 @@ incompatible traceability event is quarantined while unrelated valid work
 applies; unchanged history rebuilds to the same inventory and lineage
 checksums. Tenant-negative trace HTTP is fail-closed. Not production, not
 backup/restore.
+
+## M4 forecast feature snapshots
+
+[Specification](design/specifications/forecast-feature-snapshots.md).
+
+The pure `forecast` builder has focused coverage for order-independent
+deterministic rows, snapshot identity/checksum rebuilds, source-boundary
+identity, cutoff-safe earlier rows, invalid quantities, label-free
+serialization, and insufficient short history. The Go API and platform tests
+also cover the intended tenant, method, authorization, replay, and explicit
+non-complete response paths; database-backed integration cases require the
+repository's Docker/Testcontainers environment.
+
+The feature route is read-only by construction: one PostgreSQL
+`READ ONLY`/`REPEATABLE READ` transaction reads retained outbox bytes, inbox
+dispositions, and the inventory projection, then replays in memory. It has no
+feature table, snapshot write, Python credential, label, raw event-byte, or
+model-output path. The current sparse Event Spine history does not reproduce
+the dense M4 restock fixture, so a live request may correctly return
+`insufficient` or `incomplete`; this is an explicit limitation rather than a
+forecast-quality result. These are repository/test claims, not production
+isolation or forecasting-quality claims.

@@ -59,8 +59,9 @@ func (s *Server) SetSSEHeartbeatForTest(d time.Duration) {
 // Handler returns the HTTP handler for the Event Spine projection routes.
 // Every /v1 path requires a fresh Go-owned session (Issue #45). Inventory
 // reads also require MX-001 for the path tenant (Issue #46). Ops visibility
-// and batch lineage reads require MX-002 or MX-003 (Issue #47 / #74). Privileged POSTs require MX-004,
-// MX-005, or MX-006 (Issue #48). Audit read requires MX-007 (Issue #49).
+// and batch lineage reads require MX-002 or MX-003 (Issue #47 / #74). Forecast
+// feature reads require MX-008. Privileged POSTs require MX-004, MX-005, or
+// MX-006 (Issue #48). Audit read requires MX-007 (Issue #49).
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/tenants/", s.serveTenant)
@@ -119,6 +120,24 @@ func (s *Server) serveTenant(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			s.handleOps(w, r, tenantID)
+		case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
+			w.Header().Set("Allow", http.MethodGet)
+			writeJSON(w, http.StatusMethodNotAllowed, ErrorBody{Error: "method_not_allowed"})
+		default:
+			w.Header().Set("Allow", http.MethodGet)
+			writeJSON(w, http.StatusMethodNotAllowed, ErrorBody{Error: "method_not_allowed"})
+		}
+	case "forecast/features":
+		switch r.Method {
+		case http.MethodGet:
+			if !s.authorizeForecastRead(w, r, tenantID) {
+				return
+			}
+			if len(r.URL.Query()) != 0 {
+				writeJSON(w, http.StatusBadRequest, ErrorBody{Error: "unsupported_forecast_query"})
+				return
+			}
+			s.handleForecastFeatures(w, r, tenantID)
 		case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 			w.Header().Set("Allow", http.MethodGet)
 			writeJSON(w, http.StatusMethodNotAllowed, ErrorBody{Error: "method_not_allowed"})
@@ -389,6 +408,19 @@ func (s *Server) authorizeOpsRead(w http.ResponseWriter, r *http.Request, tenant
 		return false
 	}
 	if s.policy == nil || s.policy.Allow(sess.PrincipalID, tenantID, identity.ResOpsVisibility, identity.ActRead) != nil {
+		writeJSON(w, http.StatusForbidden, ErrorBody{Error: "forbidden"})
+		return false
+	}
+	return true
+}
+
+func (s *Server) authorizeForecastRead(w http.ResponseWriter, r *http.Request, tenantID string) bool {
+	sess, ok := identity.FromContext(r.Context())
+	if !ok || sess == nil {
+		writeJSON(w, http.StatusUnauthorized, ErrorBody{Error: "unauthenticated"})
+		return false
+	}
+	if s.policy == nil || s.policy.Allow(sess.PrincipalID, tenantID, identity.ResForecastFeatures, identity.ActRead) != nil {
 		writeJSON(w, http.StatusForbidden, ErrorBody{Error: "forbidden"})
 		return false
 	}
