@@ -64,6 +64,14 @@ func (c *Consumer) Close() {
 	}
 }
 
+// Ping checks broker reachability without consuming or acknowledging records.
+func (c *Consumer) Ping(ctx context.Context) error {
+	if c == nil || c.client == nil {
+		return errors.New("platform: nil consumer")
+	}
+	return c.client.Ping(ctx)
+}
+
 // ConsumeOnce polls available records, processes each, and commits offsets only
 // for durable ShouldAck decisions. Transient failures leave offsets uncommitted.
 func (c *Consumer) ConsumeOnce(ctx context.Context) (ConsumeResult, error) {
