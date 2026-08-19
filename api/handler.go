@@ -60,8 +60,9 @@ func (s *Server) SetSSEHeartbeatForTest(d time.Duration) {
 // Every /v1 path requires a fresh Go-owned session (Issue #45). Inventory
 // reads also require MX-001 for the path tenant (Issue #46). Ops visibility
 // and batch lineage reads require MX-002 or MX-003 (Issue #47 / #74). Forecast
-// feature reads require MX-008. Privileged POSTs require MX-004, MX-005, or
-// MX-006 (Issue #48). Audit read requires MX-007 (Issue #49).
+// feature reads require MX-008 and prediction reads require MX-009. Privileged
+// POSTs require MX-004, MX-005, or MX-006 (Issue #48). Audit read requires
+// MX-007 (Issue #49).
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/tenants/", s.serveTenant)
@@ -81,6 +82,10 @@ func (s *Server) serveTenant(w http.ResponseWriter, r *http.Request) {
 
 	if batchID, ok := lineageBatchID(rest); ok {
 		s.serveBatchLineage(w, r, tenantID, batchID)
+		return
+	}
+	if resourceID, ok := forecastPredictionResourceID(rest); ok {
+		s.serveForecastPrediction(w, r, tenantID, resourceID)
 		return
 	}
 
@@ -421,6 +426,19 @@ func (s *Server) authorizeForecastRead(w http.ResponseWriter, r *http.Request, t
 		return false
 	}
 	if s.policy == nil || s.policy.Allow(sess.PrincipalID, tenantID, identity.ResForecastFeatures, identity.ActRead) != nil {
+		writeJSON(w, http.StatusForbidden, ErrorBody{Error: "forbidden"})
+		return false
+	}
+	return true
+}
+
+func (s *Server) authorizeForecastPredictionRead(w http.ResponseWriter, r *http.Request, tenantID string) bool {
+	sess, ok := identity.FromContext(r.Context())
+	if !ok || sess == nil {
+		writeJSON(w, http.StatusUnauthorized, ErrorBody{Error: "unauthenticated"})
+		return false
+	}
+	if s.policy == nil || s.policy.Allow(sess.PrincipalID, tenantID, identity.ResForecastPredictions, identity.ActRead) != nil {
 		writeJSON(w, http.StatusForbidden, ErrorBody{Error: "forbidden"})
 		return false
 	}

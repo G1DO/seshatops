@@ -145,13 +145,14 @@ func TestMigrateCreatesPlatformSchema(t *testing.T) {
 		  AND table_name IN (
 			'inbox', 'inventory_projection', 'processing_failures',
 			'lineage_suppliers', 'lineage_ingredient_lots',
-			'lineage_production_batches', 'lineage_shipments'
+			'lineage_production_batches', 'lineage_shipments',
+			'forecast_predictions'
 		  )
 	`).Scan(&n); err != nil {
 		t.Fatal(err)
 	}
-	if n != 7 {
-		t.Fatalf("expected 7 platform tables, got %d", n)
+	if n != 8 {
+		t.Fatalf("expected 8 platform tables, got %d", n)
 	}
 }
 

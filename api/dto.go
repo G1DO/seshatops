@@ -30,6 +30,59 @@ type ErrorBody struct {
 	Error string `json:"error"`
 }
 
+// ForecastPredictionSnapshot is the authorized current advisory assessment
+// for one tenant-owned inventory resource. It contains prediction output and
+// traceable lineage, but no raw feature values or model artifacts.
+type ForecastPredictionSnapshot struct {
+	TenantID            string                         `json:"tenant_id"`
+	ResourceType        string                         `json:"resource_type"`
+	ResourceID          string                         `json:"resource_id"`
+	PredictionID        string                         `json:"prediction_id"`
+	ObservationDate     string                         `json:"observation_date"`
+	ForecastHorizonDays int                            `json:"forecast_horizon_days"`
+	Target              string                         `json:"target"`
+	Status              string                         `json:"status"`
+	StockoutRisk        *float64                       `json:"stockout_risk"`
+	Uncertainty         *ForecastPredictionUncertainty `json:"uncertainty"`
+	AbstentionReason    string                         `json:"abstention_reason"`
+	Freshness           ForecastPredictionFreshness    `json:"freshness"`
+	Lineage             ForecastPredictionLineage      `json:"lineage"`
+	CorrelationID       string                         `json:"correlation_id"`
+	RecordedAt          string                         `json:"recorded_at"`
+	ObservedAt          string                         `json:"observed_at"`
+}
+
+// ForecastPredictionUncertainty is the validated interval and support behind
+// a predicted risk score.
+type ForecastPredictionUncertainty struct {
+	Method      string  `json:"method"`
+	Lower       float64 `json:"lower"`
+	Upper       float64 `json:"upper"`
+	SampleCount int     `json:"sample_count"`
+}
+
+// ForecastPredictionFreshness makes source freshness explicit to clients.
+// unavailable means Go could not establish a current complete source
+// snapshot; clients must not present the stored result as current.
+type ForecastPredictionFreshness struct {
+	Status  string `json:"status"`
+	FreshAt string `json:"fresh_at"`
+}
+
+// ForecastPredictionLineage identifies the immutable data, predictor, model,
+// and code versions used for the result.
+type ForecastPredictionLineage struct {
+	EvaluationProtocolVersion string `json:"evaluation_protocol_version"`
+	DatasetVersion            string `json:"dataset_version"`
+	FeatureDefinitionVersion  string `json:"feature_definition_version"`
+	FeatureSnapshotID         string `json:"feature_snapshot_id"`
+	FeatureSnapshotChecksum   string `json:"feature_snapshot_checksum"`
+	SourceCutoffDate          string `json:"source_cutoff_date"`
+	Predictor                 string `json:"predictor"`
+	ModelVersion              string `json:"model_version"`
+	CodeVersion               string `json:"code_version"`
+}
+
 // OpsSnapshot is the authorized lag/poison/freshness view for one tenant.
 type OpsSnapshot struct {
 	TenantID   string        `json:"tenant_id"`

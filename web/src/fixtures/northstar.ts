@@ -155,3 +155,42 @@ export function sampleBatchTrace() {
     },
   };
 }
+
+export function sampleForecastPrediction() {
+  return {
+    tenant_id: NORTHSTAR_TENANT_ID,
+    resource_type: "inventory_item",
+    resource_id: NORTHSTAR_ITEM_ID,
+    prediction_id: "prediction-northstar-001",
+    observation_date: "2026-08-16",
+    forecast_horizon_days: 7,
+    target: "stockout-within-horizon",
+    status: "predicted" as const,
+    stockout_risk: 0.25,
+    uncertainty: {
+      method: "wilson-95",
+      lower: 0.1,
+      upper: 0.4,
+      sample_count: 10,
+    },
+    abstention_reason: "",
+    freshness: {
+      status: "fresh" as const,
+      fresh_at: "2026-08-16T07:00:00.000Z",
+    },
+    lineage: {
+      evaluation_protocol_version: "m4-stockout-eval-v1",
+      dataset_version: "m4-stockout-eval-v1",
+      feature_definition_version: "m4-raw-onhand-v1",
+      feature_snapshot_id: "snapshot-northstar-001",
+      feature_snapshot_checksum: "checksum-northstar-001",
+      source_cutoff_date: "2026-08-16",
+      predictor: "baseline",
+      model_version: "moving-average-v1",
+      code_version: "go-baseline-v1",
+    },
+    correlation_id: "correlation-northstar-001",
+    recorded_at: "2026-08-16T07:01:00.000Z",
+    observed_at: "2026-08-16T07:02:00.000Z",
+  };
+}

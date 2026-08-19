@@ -1,5 +1,6 @@
 import { OperationsView } from "./ui/OperationsView";
 import { useBatchTrace } from "./state/useBatchTrace";
+import { useForecastPrediction } from "./state/useForecastPrediction";
 import { useInventoryProjection } from "./state/useInventoryProjection";
 import { useOpsVisibility } from "./state/useOpsVisibility";
 import { useOpsControls } from "./state/useOpsControls";
@@ -7,7 +8,11 @@ import { useSession } from "./state/useSession";
 import { emptyProjectionView } from "./state/projectionStore";
 import { loginUrl } from "./api/session";
 import { UNAUTHENTICATED, type SessionView } from "./api/types";
-import { NORTHSTAR_BATCH_ID, NORTHSTAR_TENANT_ID } from "./fixtures/northstar";
+import {
+  NORTHSTAR_BATCH_ID,
+  NORTHSTAR_ITEM_ID,
+  NORTHSTAR_TENANT_ID,
+} from "./fixtures/northstar";
 
 // Empty default uses the Vite /v1 and /auth proxy (same origin). Set an
 // absolute URL only when the Go API advertises CORS for that origin.
@@ -18,6 +23,8 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(
 
 const TENANT_ID =
   import.meta.env.VITE_TENANT_ID || NORTHSTAR_TENANT_ID;
+
+const ITEM_ID = import.meta.env.VITE_ITEM_ID || NORTHSTAR_ITEM_ID;
 
 const BATCH_ID = import.meta.env.VITE_BATCH_ID || NORTHSTAR_BATCH_ID;
 
@@ -76,6 +83,11 @@ function AuthenticatedView(props: {
     tenantId: TENANT_ID,
     batchId: BATCH_ID,
   });
+  const forecast = useForecastPrediction({
+    baseUrl: API_BASE_URL,
+    tenantId: TENANT_ID,
+    resourceId: ITEM_ID,
+  });
   const controls = useOpsControls({
     baseUrl: API_BASE_URL,
     tenantId: TENANT_ID,
@@ -107,6 +119,8 @@ function AuthenticatedView(props: {
       lineage={lineage.snapshot}
       lineageError={lineage.errorMessage}
       lineageBatchId={BATCH_ID}
+      forecast={forecast.snapshot}
+      forecastError={forecast.errorMessage}
       onRelease={(eventId) => void controls.release(eventId)}
       onReplay={(eventId) => void controls.replay(eventId)}
       onRebuild={() => void controls.rebuild()}

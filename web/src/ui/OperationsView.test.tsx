@@ -1,7 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { OperationsView } from "./OperationsView";
-import { NORTHSTAR_ITEM_ID, NORTHSTAR_TENANT_ID, sampleBatchTrace } from "../fixtures/northstar";
+import {
+  NORTHSTAR_ITEM_ID,
+  NORTHSTAR_TENANT_ID,
+  sampleBatchTrace,
+  sampleForecastPrediction,
+} from "../fixtures/northstar";
 
 describe("OperationsView", () => {
   it("renders loading without claiming live currency", () => {
@@ -225,6 +230,129 @@ describe("OperationsView", () => {
     );
     expect(screen.getByTestId("lineage-empty")).toBeTruthy();
     expect(screen.queryByTestId("lineage-supplier")).toBeNull();
+  });
+
+  it("renders forecast risk, uncertainty, and lineage", () => {
+    const prediction = sampleForecastPrediction();
+    render(
+      <OperationsView
+        connection="live"
+        projection={{
+          items: [],
+          checksum: "abc",
+          observed_at: "2026-08-12T07:00:00Z",
+          last_applied_event_id: null,
+        }}
+        errorMessage={null}
+        tenantId={NORTHSTAR_TENANT_ID}
+        forecast={prediction}
+        forecastError={null}
+      />,
+    );
+    expect(screen.getByTestId("forecast-risk")).toHaveTextContent("0.25");
+    expect(screen.getByTestId("forecast-uncertainty")).toHaveTextContent(
+      "0.1–0.4",
+    );
+    expect(screen.getByTestId("forecast-freshness")).toHaveTextContent("fresh");
+    expect(screen.getByTestId("forecast-feature-snapshot")).toHaveTextContent(
+      prediction.lineage.feature_snapshot_id,
+    );
+    expect(screen.getByTestId("forecast-predictor")).toHaveTextContent(
+      prediction.lineage.predictor,
+    );
+    expect(screen.getByTestId("forecast-correlation-id")).toHaveTextContent(
+      prediction.correlation_id,
+    );
+  });
+
+  it("does not present stale or abstained results as fresh confident forecasts", () => {
+    const stale = {
+      ...sampleForecastPrediction(),
+      freshness: { status: "stale" as const, fresh_at: "2026-08-01T07:00:00Z" },
+    };
+    const { rerender } = render(
+      <OperationsView
+        connection="live"
+        projection={{
+          items: [],
+          checksum: "abc",
+          observed_at: "2026-08-12T07:00:00Z",
+          last_applied_event_id: null,
+        }}
+        errorMessage={null}
+        tenantId={NORTHSTAR_TENANT_ID}
+        forecast={stale}
+        forecastError={null}
+      />,
+    );
+    expect(screen.getByTestId("forecast-freshness")).toHaveTextContent("stale");
+    expect(screen.getByText("Stored stockout risk")).toBeTruthy();
+    expect(screen.queryByText("Stockout risk")).toBeNull();
+
+    rerender(
+      <OperationsView
+        connection="live"
+        projection={{
+          items: [],
+          checksum: "abc",
+          observed_at: "2026-08-12T07:00:00Z",
+          last_applied_event_id: null,
+        }}
+        errorMessage={null}
+        tenantId={NORTHSTAR_TENANT_ID}
+        forecast={{
+          ...sampleForecastPrediction(),
+          status: "abstained",
+          stockout_risk: null,
+          uncertainty: null,
+          abstention_reason: "insufficient_training_support",
+        }}
+        forecastError={null}
+      />,
+    );
+    expect(screen.getByTestId("forecast-status")).toHaveTextContent("abstained");
+    expect(screen.getByTestId("forecast-abstention-reason")).toHaveTextContent(
+      "insufficient_training_support",
+    );
+    expect(screen.queryByTestId("forecast-risk")).toBeNull();
+  });
+
+  it("renders forecast unavailable and error states explicitly", () => {
+    const { rerender } = render(
+      <OperationsView
+        connection="live"
+        projection={{
+          items: [],
+          checksum: "abc",
+          observed_at: "2026-08-12T07:00:00Z",
+          last_applied_event_id: null,
+        }}
+        errorMessage={null}
+        tenantId={NORTHSTAR_TENANT_ID}
+        forecast={null}
+        forecastError="unavailable"
+      />,
+    );
+    expect(screen.getByTestId("forecast-unavailable")).toHaveTextContent(
+      /no current stockout assessment/i,
+    );
+
+    rerender(
+      <OperationsView
+        connection="live"
+        projection={{
+          items: [],
+          checksum: "abc",
+          observed_at: "2026-08-12T07:00:00Z",
+          last_applied_event_id: null,
+        }}
+        errorMessage={null}
+        tenantId={NORTHSTAR_TENANT_ID}
+        forecast={null}
+        forecastError="forbidden"
+      />,
+    );
+    expect(screen.getByTestId("forecast-error")).toHaveTextContent("forbidden");
   });
 
   it("shows control 403 as a request error, not a grant", () => {

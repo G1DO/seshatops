@@ -7,7 +7,8 @@
 // server-side. A fresh Go-owned session is required on /v1 routes
 // (401). MX-001 covers inventory reads; MX-002 or MX-003 cover GET .../ops
 // and GET .../ops/lineage/batches/{batch_id}; MX-008 covers
-// GET .../forecast/features; MX-004/MX-005/MX-006 cover privileged POSTs;
+// GET .../forecast/features; MX-009 covers
+// GET .../forecast/predictions/{resource_id}; MX-004/MX-005/MX-006 cover privileged POSTs;
 // MX-007 covers GET .../ops/audit and privileged allow/deny rows persist
 // before mutation. Unauthorized callers receive 403. SSE
 // notifications are at-least-once and may be dropped for slow clients; REST is

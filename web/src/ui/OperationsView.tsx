@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { connectionLabel, type ConnectionState } from "../state/connection";
 import type { ProjectionViewState } from "../state/projectionStore";
-import type { BatchTraceSnapshot, LineageHop, OpsSnapshot, SessionView } from "../api/types";
+import type {
+  BatchTraceSnapshot,
+  ForecastPredictionSnapshot,
+  LineageHop,
+  OpsSnapshot,
+  SessionView,
+} from "../api/types";
 
 export interface OperationsViewProps {
   connection: ConnectionState;
@@ -17,6 +23,8 @@ export interface OperationsViewProps {
   lineage?: BatchTraceSnapshot | null;
   lineageError?: string | null;
   lineageBatchId?: string;
+  forecast?: ForecastPredictionSnapshot | null;
+  forecastError?: string | null;
   onRelease?: (eventId: string) => void;
   onReplay?: (eventId?: string) => void;
   onRebuild?: () => void;
@@ -40,6 +48,8 @@ export function OperationsView(props: OperationsViewProps) {
     lineage,
     lineageError,
     lineageBatchId,
+    forecast,
+    forecastError,
     onRelease,
     onReplay,
     onRebuild,
@@ -50,6 +60,7 @@ export function OperationsView(props: OperationsViewProps) {
   const live = !unauthenticated && connection === "live";
   const showOps = ops !== undefined || opsError !== undefined;
   const showLineage = lineage !== undefined || lineageError !== undefined;
+  const showForecast = forecast !== undefined || forecastError !== undefined;
   const showControls = Boolean(onRelease || onReplay || onRebuild);
   const [eventId, setEventId] = useState("");
 
@@ -295,6 +306,140 @@ export function OperationsView(props: OperationsViewProps) {
                 </dl>
               ) : (
                 <p data-testid="lineage-empty">No batch lineage loaded.</p>
+              )}
+            </section>
+          ) : null}
+
+          {showForecast ? (
+            <section className="ops__visibility" data-testid="stockout-forecast">
+              <h2>Stockout forecast</h2>
+              <p className="ops__visibility-note">
+                Go authorizes and evaluates freshness; this screen only
+                presents the stored advisory result.
+              </p>
+              {forecastError === "unavailable" ? (
+                <p data-testid="forecast-unavailable">
+                  No current stockout assessment is available.
+                </p>
+              ) : forecastError ? (
+                <p data-testid="forecast-error" role="alert">
+                  Forecast API error: {forecastError}
+                </p>
+              ) : forecast ? (
+                <>
+                  <dl>
+                    <div>
+                      <dt>Resource</dt>
+                      <dd data-testid="forecast-resource">{forecast.resource_id}</dd>
+                    </div>
+                    <div>
+                      <dt>Prediction state</dt>
+                      <dd data-testid="forecast-status">{forecast.status}</dd>
+                    </div>
+                    <div>
+                      <dt>Forecast horizon</dt>
+                      <dd data-testid="forecast-horizon">
+                        {forecast.forecast_horizon_days} days
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Freshness</dt>
+                      <dd data-testid="forecast-freshness">
+                        {forecast.freshness.status}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Source fresh at</dt>
+                      <dd data-testid="forecast-fresh-at">
+                        {forecast.freshness.fresh_at || "—"}
+                      </dd>
+                    </div>
+                    {forecast.status === "predicted" &&
+                    forecast.stockout_risk !== null ? (
+                      <div>
+                        <dt>
+                          {forecast.freshness.status === "fresh"
+                            ? "Stockout risk"
+                            : "Stored stockout risk"}
+                        </dt>
+                        <dd data-testid="forecast-risk">
+                          {forecast.stockout_risk}
+                        </dd>
+                      </div>
+                    ) : null}
+                    {forecast.uncertainty ? (
+                      <div>
+                        <dt>Uncertainty</dt>
+                        <dd data-testid="forecast-uncertainty">
+                          {forecast.uncertainty.lower}–{forecast.uncertainty.upper} ({forecast.uncertainty.method}; n={forecast.uncertainty.sample_count})
+                        </dd>
+                      </div>
+                    ) : null}
+                    {forecast.status === "abstained" ? (
+                      <div>
+                        <dt>Abstention reason</dt>
+                        <dd data-testid="forecast-abstention-reason">
+                          {forecast.abstention_reason || "—"}
+                        </dd>
+                      </div>
+                    ) : null}
+                    <div>
+                      <dt>Observation date</dt>
+                      <dd data-testid="forecast-observation-date">
+                        {forecast.observation_date}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Prediction recorded</dt>
+                      <dd data-testid="forecast-recorded-at">
+                        {forecast.recorded_at}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div data-testid="forecast-lineage">
+                    <h3>Prediction lineage</h3>
+                    <dl>
+                      <div>
+                        <dt>Feature snapshot</dt>
+                        <dd data-testid="forecast-feature-snapshot">
+                          {forecast.lineage.feature_snapshot_id}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Feature snapshot checksum</dt>
+                        <dd data-testid="forecast-feature-checksum">
+                          {forecast.lineage.feature_snapshot_checksum}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Predictor</dt>
+                        <dd data-testid="forecast-predictor">
+                          {forecast.lineage.predictor}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Model version</dt>
+                        <dd data-testid="forecast-model-version">
+                          {forecast.lineage.model_version}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Code version</dt>
+                        <dd data-testid="forecast-code-version">
+                          {forecast.lineage.code_version}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Correlation</dt>
+                        <dd data-testid="forecast-correlation-id">
+                          {forecast.correlation_id}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                </>
+              ) : (
+                <p data-testid="forecast-loading">Loading stockout assessment.</p>
               )}
             </section>
           ) : null}
