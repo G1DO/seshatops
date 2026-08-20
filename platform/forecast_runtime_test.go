@@ -3,6 +3,7 @@ package platform
 import (
 	"context"
 	"errors"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
@@ -45,6 +46,41 @@ func TestCommandCandidateInvokerUsesTypedPythonBoundary(t *testing.T) {
 	_, err = (CommandCandidateInvoker{Command: "command-that-does-not-exist-seshatops"}).Invoke(context.Background(), request)
 	if !errors.Is(err, ErrPythonUnavailable) {
 		t.Fatalf("unavailable err=%v", err)
+	}
+}
+
+func TestCommandCandidateArtifactProducerClassifiesProcessFailures(t *testing.T) {
+	python, err := exec.LookPath("python")
+	if err != nil {
+		python, err = exec.LookPath("python3")
+	}
+	if err != nil {
+		t.Skipf("Python runtime not installed: %v", err)
+	}
+	writeScript := func(t *testing.T, body string) string {
+		t.Helper()
+		path := filepath.Join(t.TempDir(), "candidate.py")
+		if err := os.WriteFile(path, []byte(body), 0o700); err != nil {
+			t.Fatal(err)
+		}
+		return path
+	}
+
+	_, err = (CommandCandidateArtifactProducer{Command: "command-that-does-not-exist-seshatops", Script: "candidate.py"}).Produce(context.Background(), forecast.CandidateInput{})
+	if !errors.Is(err, ErrPythonUnavailable) {
+		t.Fatalf("unavailable err=%v", err)
+	}
+
+	timeoutScript := writeScript(t, "import time; time.sleep(1)\n")
+	_, err = (CommandCandidateArtifactProducer{Command: python, Script: timeoutScript, Timeout: 10 * time.Millisecond}).Produce(context.Background(), forecast.CandidateInput{})
+	if !errors.Is(err, ErrPythonTimeout) {
+		t.Fatalf("timeout err=%v", err)
+	}
+
+	malformedScript := writeScript(t, "print('{')\n")
+	raw, err := (CommandCandidateArtifactProducer{Command: python, Script: malformedScript}).Produce(context.Background(), forecast.CandidateInput{})
+	if err != nil || string(raw) != "{\n" {
+		t.Fatalf("malformed raw=%q err=%v", raw, err)
 	}
 }
 
