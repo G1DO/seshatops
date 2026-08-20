@@ -75,6 +75,48 @@ func TestConfigRejectsBlankAudienceOverride(t *testing.T) {
 	}
 }
 
+func TestBootstrapCommandConfigUsesOnlyDatabaseAndBroker(t *testing.T) {
+	env := map[string]string{
+		envDatabaseURL:               "postgres://seshatops@localhost/seshatops",
+		envBrokerSeeds:               "localhost:9092",
+		envNorthstarBootstrapTimeout: "3s",
+	}
+	cfg, err := bootstrapCommandConfigFromEnv(mapLookup(env))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Timeout != 3*time.Second || len(cfg.BrokerSeeds) != 1 {
+		t.Fatalf("bootstrap config = %+v", cfg)
+	}
+}
+
+func TestBootstrapCommandConfigRejectsNonPositiveTimeout(t *testing.T) {
+	env := map[string]string{
+		envDatabaseURL:               "postgres://seshatops@localhost/seshatops",
+		envBrokerSeeds:               "localhost:9092",
+		envNorthstarBootstrapTimeout: "0s",
+	}
+	_, err := bootstrapCommandConfigFromEnv(mapLookup(env))
+	if err == nil || !strings.Contains(err.Error(), envNorthstarBootstrapTimeout) {
+		t.Fatalf("error = %v", err)
+	}
+}
+
+func TestDisposableNorthstarResetTargetIsNarrowlyGated(t *testing.T) {
+	valid := "postgres://seshatops@localhost/seshatops_northstar_disposable"
+	if err := validateDisposableNorthstarURL(valid); err != nil {
+		t.Fatal(err)
+	}
+	for _, raw := range []string{
+		"postgres://seshatops@localhost/seshatops",
+		"postgres://seshatops@example.com/seshatops_northstar_disposable",
+	} {
+		if err := validateDisposableNorthstarURL(raw); err == nil {
+			t.Fatalf("accepted unsafe reset target %q", raw)
+		}
+	}
+}
+
 func validEnv() map[string]string {
 	return map[string]string{
 		envListenAddr:      "127.0.0.1:8080",

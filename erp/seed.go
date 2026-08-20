@@ -9,6 +9,41 @@ import (
 	"github.com/G1DO/seshatops/northstar"
 )
 
+// ResetSourceForTenant deletes synthetic ERP source and outbox state for one
+// tenant. Callers must provide their own explicit disposable-environment
+// safety gate; this helper never runs automatically.
+func ResetSourceForTenant(ctx context.Context, db *sql.DB, tenantID string) error {
+	if db == nil {
+		return fmt.Errorf("erp: reset source: nil db")
+	}
+	if tenantID == "" {
+		return fmt.Errorf("erp: reset source: tenant_id required")
+	}
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("erp: begin source reset: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	for _, query := range []string{
+		`DELETE FROM erp.outbox WHERE tenant_id = $1`,
+		`DELETE FROM erp.shipments WHERE tenant_id = $1`,
+		`DELETE FROM erp.production_batches WHERE tenant_id = $1`,
+		`DELETE FROM erp.ingredient_lots WHERE tenant_id = $1`,
+		`DELETE FROM erp.orders WHERE tenant_id = $1`,
+		`DELETE FROM erp.suppliers WHERE tenant_id = $1`,
+		`DELETE FROM erp.inventory_items WHERE tenant_id = $1`,
+	} {
+		if _, err := tx.ExecContext(ctx, query, tenantID); err != nil {
+			return fmt.Errorf("erp: reset source: %w", err)
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("erp: commit source reset: %w", err)
+	}
+	return nil
+}
+
 // SeedNorthstarInventory inserts the authoritative inventory row for the
 // declared Northstar Event Spine fixture. Aggregate version starts at 0 so the first
 // accepted order emits aggregate_version 1.
