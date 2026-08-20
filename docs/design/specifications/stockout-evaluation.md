@@ -269,6 +269,13 @@ feature snapshot identity; reusing it with a different result is a conflict.
 Persisted rows record predictor/model/code lineage, source freshness,
 uncertainty or abstention state, and request correlation.
 
+The explicit `go run ./cmd/seshatops forecast` entrypoint rebuilds the declared
+Northstar M4 history, dataset, and feature snapshot, invokes the existing
+artifact producer through a bounded typed command boundary, and evaluates the
+artifact in Go before calling `platform.ForecastService`. It asserts the
+recorded M4 checksums, split metrics, and non-promotion outcome so a changed
+protocol result fails visibly until the evidence is intentionally reviewed.
+
 ## 10. Non-goals
 
 - Long-running production model serving, persisted feature snapshots, or

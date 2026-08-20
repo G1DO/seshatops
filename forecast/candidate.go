@@ -120,20 +120,31 @@ type CandidateEvaluation struct {
 // EvaluateCandidateArtifactJSON decodes one strict artifact and evaluates it
 // against the frozen Go-owned protocol and deterministic baselines.
 func EvaluateCandidateArtifactJSON(ds Dataset, features FeatureSnapshot, raw []byte) (CandidateEvaluation, error) {
+	artifact, err := DecodeCandidateArtifactJSON(raw)
+	if err != nil {
+		return CandidateEvaluation{}, err
+	}
+	return EvaluateCandidateArtifact(ds, features, artifact)
+}
+
+// DecodeCandidateArtifactJSON decodes one strict artifact emitted by the
+// offline candidate producer. Unknown and trailing JSON are rejected before
+// the artifact can enter evaluation or runtime persistence.
+func DecodeCandidateArtifactJSON(raw []byte) (CandidateArtifact, error) {
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
 	var artifact CandidateArtifact
 	if err := decoder.Decode(&artifact); err != nil {
-		return CandidateEvaluation{}, wrapInvalid("candidate artifact: %v", err)
+		return CandidateArtifact{}, wrapInvalid("candidate artifact: %v", err)
 	}
 	var extra any
 	if err := decoder.Decode(&extra); err != io.EOF {
 		if err == nil {
-			return CandidateEvaluation{}, wrapInvalid("candidate artifact has trailing JSON")
+			return CandidateArtifact{}, wrapInvalid("candidate artifact has trailing JSON")
 		}
-		return CandidateEvaluation{}, wrapInvalid("candidate artifact trailing data: %v", err)
+		return CandidateArtifact{}, wrapInvalid("candidate artifact trailing data: %v", err)
 	}
-	return EvaluateCandidateArtifact(ds, features, artifact)
+	return artifact, nil
 }
 
 // EvaluateCandidateArtifact validates and evaluates one offline candidate

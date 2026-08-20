@@ -33,6 +33,32 @@ re-run to continue from the last committed ERP transaction. Override the
 bounded wait with `SESHATOPS_NORTHSTAR_BOOTSTRAP_TIMEOUT=3m` when diagnosing a
 slow disposable environment.
 
+## Frozen forecast
+
+After the platform schema is available, run the one-shot frozen M4 forecast
+runner from the repository root:
+
+```bash
+export SESHATOPS_DATABASE_URL='postgres://seshatops:REPLACE_ME@localhost:5432/seshatops_northstar_disposable'
+export SESHATOPS_FORECAST_PYTHON='python3'
+export SESHATOPS_FORECAST_CONFIRM='I_UNDERSTAND_FROZEN_M4_FORECAST_WRITE'
+go run ./cmd/seshatops forecast
+```
+
+The command rebuilds `northstar-m4-stockout-v1` under protocol
+`m4-stockout-eval-v1`, invokes `forecast_candidate/stockout_candidate.py`,
+evaluates the artifact in Go, and persists the selected advisory result. The
+declared frozen outcome selects `seasonal_naive`; the command prints one
+bounded JSON result containing lineage, split metrics, selection, prediction
+identity/status, and limitations. A second invocation returns the same
+immutable prediction identity. Set `SESHATOPS_FORECAST_CANDIDATE` when running
+from a different working directory.
+
+Python failures are bounded and fail before prediction persistence. The frozen
+M4 source is intentionally separate from the sparse live Event Spine history;
+authorized forecast reads therefore report stale, unavailable, or incomplete
+freshness when the live source does not match the frozen snapshot.
+
 For the HTTP runtime, configure the same database/broker plus the required
 OIDC, cookie, and listen-address variables. The deterministic local operator
 assignments are:

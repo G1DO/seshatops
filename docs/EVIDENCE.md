@@ -90,3 +90,18 @@ and all Documentation CI jobs passed, including [link check](https://github.com/
 An earlier documentation run on implementation commit `8b53501` failed on the
 pre-existing Redpanda URL returning HTTP 500; the final docs-only rerun passed
 without changing that unrelated link.
+
+## M5 one-shot forecast runner
+
+The explicit `cmd/seshatops forecast` command now rebuilds the declared M4
+Northstar fixture, runs the offline Python artifact producer through a bounded
+typed process boundary, evaluates the artifact and frozen checksums/metrics in
+Go, selects `seasonal_naive`, and persists through
+`platform.ForecastService`. Its result is bounded to protocol/lineage,
+split-metric, selection, prediction identity/status, and limitation fields; it
+does not emit feature rows or model internals. Focused tests cover successful
+selection, immutable rerun identity, Python unavailable/timeout/malformed
+responses, no-persist failure ordering, tenant-scoped persistence, and live
+freshness mismatch behavior. The frozen source remains separate from the live
+Event Spine source, so a successful command is not a claim that the persisted
+result is currently fresh.

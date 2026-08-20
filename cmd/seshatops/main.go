@@ -12,6 +12,17 @@ import (
 func main() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
+		case "forecast":
+			cfg, err := loadForecastCommandConfig()
+			if err != nil {
+				log.Fatal(err)
+			}
+			ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+			defer stop()
+			if err := runForecastCommand(ctx, cfg, os.Stdout); err != nil {
+				log.Fatal(err)
+			}
+			return
 		case "bootstrap":
 			cfg, err := loadBootstrapCommandConfig()
 			if err != nil {
@@ -35,7 +46,7 @@ func main() {
 			}
 			return
 		default:
-			log.Fatalf("unknown command %q; use bootstrap or reset-northstar", os.Args[1])
+			log.Fatalf("unknown command %q; use forecast, bootstrap, or reset-northstar", os.Args[1])
 		}
 	}
 

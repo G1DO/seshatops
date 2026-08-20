@@ -7,6 +7,11 @@ applies all three PostgreSQL migrations before serving, and owns the HTTP,
 outbox-relay, and Redpanda-consumer lifecycles. Its explicit `bootstrap`
 subcommand uses the same ERP, outbox, relay, and consumer boundaries to create
 the versioned Northstar M0–M3 scenario and waits for its projection checkpoint.
+Its explicit `forecast` subcommand rebuilds the frozen M4 Northstar history,
+dataset, and raw feature snapshot, invokes the bounded offline Python artifact
+producer, evaluates and selects in Go, and persists one Go-owned advisory
+prediction through `platform.ForecastService`. It does not make the live
+Event Spine history look like the frozen M4 fixture.
 The separate `reset-northstar` subcommand is restricted to a confirmed local
 database named `seshatops_northstar_disposable`. Tests compose `http.Handler`
 values and call `relay.DrainOnce` / `platform.ConsumeOnce`.
@@ -28,6 +33,8 @@ flowchart TB
   API[GoAPI]
   PL[GoPlatform]
   FS[GoForecastFeatureAndRuntimeBoundary]
+  FR[cmd/seshatops forecast]
+  FE[GoFrozenM4Runner]
   REL[GoRelay]
   ERP[SyntheticERP]
   BUS[Redpanda]
@@ -37,6 +44,9 @@ flowchart TB
   RT --> API
   RT --> REL
   RT --> PL
+  FR --> FE
+  FE -->|typed CandidateInput| PY
+  FE --> FS
   PP[GoPredictionPersistence]
   UI <-->|"REST SSE cookies"| API
   UI <-->|"OIDC session"| ID
@@ -76,7 +86,7 @@ assignment list leaves the policy default-deny.
 | Component | Language | Owns | Must not own |
 | --- | --- | --- | --- |
 | `web/` | TypeScript | Presentation, REST/SSE clients | Authorization, datastore, broker |
-| `cmd/seshatops` | Go | Process startup, migrations, health, HTTP, worker lifecycle, explicit Northstar bootstrap/reset entrypoints | Domain rules, authorization decisions, event transformation |
+| `cmd/seshatops` | Go | Process startup, migrations, health, HTTP, worker lifecycle, explicit Northstar bootstrap, forecast, and reset entrypoints | Domain rules, authorization decisions, event transformation |
 | `identity/` | Go | OIDC Auth Code + PKCE, session, allow-list, audit | UI, IdP vendor as a runtime claim |
 | `api/` | Go | HTTP/SSE, default-deny, privileged POSTs | Broker publication |
 | `platform/` | Go | Inbox, inventory and lineage projection, read-only forecast source replay, runtime predictor selection/invocation, validated prediction persistence, rebuild | Outbox publication, authentication, feature-table ownership |
@@ -95,9 +105,13 @@ writes. `GET /v1/tenants/{tenant_id}/forecast/features` is a read-only Go
 boundary over retained `erp.outbox`, `platform.inbox`, and
 `platform.inventory_projection` rows; it never stores feature rows or
 snapshots and never calls a projection mutator. `platform.ForecastService`
-selects the candidate only from the frozen test outcome, invokes the candidate
-through a bounded typed subprocess boundary, computes the selected baseline in
-Go, and persists validated records in `platform.forecast_predictions`.
+selects the runtime predictor only from the frozen test outcome, invokes a
+promoted candidate through a bounded typed subprocess boundary, computes the
+selected baseline in Go, and persists validated records in
+`platform.forecast_predictions`. The `forecast` command separately invokes
+the existing offline artifact producer through the same bounded process
+discipline and evaluates its complete artifact in Go before calling that
+service.
 Authorized `GET /v1/tenants/{tenant_id}/forecast/predictions/{resource_id}`
 reads the latest tenant-scoped record and reports whether its feature
 snapshot still matches the current complete Go-owned source snapshot.
@@ -116,7 +130,7 @@ OIDC sessions and configured authorization assignments are process-local
 | ERP → PostgreSQL | Source and outbox in one transaction |
 | Relay → Redpanda | Exact stored outbox bytes after commit |
 | Browser → PostgreSQL or Redpanda | Prohibited |
-| Go → Python | One-shot typed stdin/stdout request with a deadline; no browser or Python write path |
+| Go → Python | One-shot typed request/artifact boundary with a deadline; no browser or Python write path |
 
 Wire and pins: [event-spine.md](../design/specifications/event-spine.md).
 Stockout evaluation: [stockout-evaluation.md](../design/specifications/stockout-evaluation.md).
