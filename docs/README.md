@@ -6,6 +6,7 @@ Contribution practice: [CONTRIBUTING.md](../CONTRIBUTING.md).
 | Career area | Document |
 | --- | --- |
 | Architecture | [architecture/overview.md](architecture/overview.md) |
+| Getting started | [getting-started.md](getting-started.md) |
 | Decisions | [decisions/](decisions/) |
 | Specifications | [event-spine.md](design/specifications/event-spine.md), [stockout-evaluation.md](design/specifications/stockout-evaluation.md), [forecast-feature-snapshots.md](design/specifications/forecast-feature-snapshots.md) |
 | API | [api/openapi-projection.yaml](api/openapi-projection.yaml) |

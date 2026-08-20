@@ -36,7 +36,12 @@ it. If provenance is uncertain, exclude it. Do not sanitize and keep.
 Northstar Event Spine fixtures: `northstar.Generate` with seed
 `northstar-m1-order-line-v1`, and `northstar.GenerateLineage` with seed
 `northstar-m3-lineage-v1`. Goldens under `northstar/testdata/` and
-`event/testdata/`. Reproduce with `go test ./event ./northstar ./erp`.
+`event/testdata/`. The runnable M0–M3 scenario uses the independently authored
+`northstar-m3-lineage-v1` seed through `go run ./cmd/seshatops bootstrap`; it
+does not insert finished inbox, projection, forecast, or audit rows. Reproduce
+the fixture and source helpers with `go test ./event ./northstar ./erp`, and
+reproduce end-to-end bootstrap evidence with the commands in
+[getting-started.md](getting-started.md).
 Northstar M4 stockout history: `forecast.GenerateHistory` with seed
 `northstar-m4-stockout-v1`. Goldens under `forecast/testdata/`. Reproduce
 with `go test ./forecast`. Identifiers such as `item-flour-001` and

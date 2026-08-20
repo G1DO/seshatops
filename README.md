@@ -29,6 +29,21 @@ relay and projection consumer with `/livez` and `/readyz` health checks. See
 [the as-built process topology](docs/architecture/overview.md) for the full
 configuration names and lifecycle behavior.
 
+For a reproducible public scenario, use the explicit Northstar bootstrap
+command after PostgreSQL and Redpanda are available:
+
+```bash
+SESHATOPS_DATABASE_URL=postgres://seshatops:REPLACE_ME@localhost:5432/seshatops_northstar_disposable \
+SESHATOPS_BROKER_SEEDS=localhost:9092 \
+go run ./cmd/seshatops bootstrap
+```
+
+The command prints one JSON completion summary after the five source events
+have passed through the real outbox relay and projection consumer. It is
+idempotent for matching immutable fixture state. The separate
+`reset-northstar` command is deliberately gated; see
+[Getting started](docs/getting-started.md).
+
 ## Develop
 
 Toolchain pins (immutable image digests in

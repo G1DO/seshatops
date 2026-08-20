@@ -36,15 +36,26 @@ func setTestSkipOffsetCommitForTest(fn func() error) {
 
 // NewConsumer dials seed brokers for consume-only use with manual commits.
 func NewConsumer(db *sql.DB, seeds ...string) (*Consumer, error) {
+	return NewConsumerWithGroup(db, ConsumerGroup, seeds...)
+}
+
+// NewConsumerWithGroup constructs a real Redpanda consumer with an explicit
+// group. One-shot local tools use a fresh group so retained public fixture
+// history remains replayable after an explicit disposable reset; normal
+// runtime callers should use NewConsumer and ConsumerGroup.
+func NewConsumerWithGroup(db *sql.DB, group string, seeds ...string) (*Consumer, error) {
 	if db == nil {
 		return nil, errors.New("platform: nil db")
+	}
+	if group == "" {
+		return nil, errors.New("platform: consumer group required")
 	}
 	if len(seeds) == 0 {
 		return nil, errors.New("platform: at least one broker seed required")
 	}
 	cl, err := kgo.NewClient(
 		kgo.SeedBrokers(seeds...),
-		kgo.ConsumerGroup(ConsumerGroup),
+		kgo.ConsumerGroup(group),
 		kgo.ConsumeTopics(relay.Topic),
 		kgo.DisableAutoCommit(),
 		kgo.ConsumeResetOffset(kgo.NewOffset().AtStart()),

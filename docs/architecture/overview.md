@@ -4,7 +4,11 @@ Packages below are the as-built Event Spine, Identity HTTP, M4 stockout
 evaluation library, Go-owned forecast feature/runtime boundary, and one-shot
 candidate artifact adapter. The `cmd/seshatops` process composes the packages,
 applies all three PostgreSQL migrations before serving, and owns the HTTP,
-outbox-relay, and Redpanda-consumer lifecycles. Tests compose `http.Handler`
+outbox-relay, and Redpanda-consumer lifecycles. Its explicit `bootstrap`
+subcommand uses the same ERP, outbox, relay, and consumer boundaries to create
+the versioned Northstar M0–M3 scenario and waits for its projection checkpoint.
+The separate `reset-northstar` subcommand is restricted to a confirmed local
+database named `seshatops_northstar_disposable`. Tests compose `http.Handler`
 values and call `relay.DrainOnce` / `platform.ConsumeOnce`.
 
 Event Spine lives in `event/`, `northstar/`, `erp/`, `relay/`, `platform/`,
@@ -72,7 +76,7 @@ assignment list leaves the policy default-deny.
 | Component | Language | Owns | Must not own |
 | --- | --- | --- | --- |
 | `web/` | TypeScript | Presentation, REST/SSE clients | Authorization, datastore, broker |
-| `cmd/seshatops` | Go | Process startup, migrations, health, HTTP and worker lifecycle | Domain rules, authorization decisions, event transformation |
+| `cmd/seshatops` | Go | Process startup, migrations, health, HTTP, worker lifecycle, explicit Northstar bootstrap/reset entrypoints | Domain rules, authorization decisions, event transformation |
 | `identity/` | Go | OIDC Auth Code + PKCE, session, allow-list, audit | UI, IdP vendor as a runtime claim |
 | `api/` | Go | HTTP/SSE, default-deny, privileged POSTs | Broker publication |
 | `platform/` | Go | Inbox, inventory and lineage projection, read-only forecast source replay, runtime predictor selection/invocation, validated prediction persistence, rebuild | Outbox publication, authentication, feature-table ownership |
