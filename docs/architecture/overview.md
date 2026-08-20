@@ -2,9 +2,10 @@
 
 Packages below are the as-built Event Spine, Identity HTTP, M4 stockout
 evaluation library, Go-owned forecast feature/runtime boundary, and one-shot
-candidate artifact adapter. Tests compose `http.Handler` values and call
-`relay.DrainOnce` / `platform.ConsumeOnce`. There is no deployment binary or
-long-running daemon in this repository.
+candidate artifact adapter. The `cmd/seshatops` process composes the packages,
+applies all three PostgreSQL migrations before serving, and owns the HTTP,
+outbox-relay, and Redpanda-consumer lifecycles. Tests compose `http.Handler`
+values and call `relay.DrainOnce` / `platform.ConsumeOnce`.
 
 Event Spine lives in `event/`, `northstar/`, `erp/`, `relay/`, `platform/`,
 `api/`, `web/`. Identity lives in `identity/` plus authorized HTTP. Stockout
@@ -17,6 +18,7 @@ and one-shot runtime adapter, not a deployed service or database principal. Publ
 
 ```mermaid
 flowchart TB
+  RT[cmd/seshatops runtime]
   UI[TypeScriptOperationsView]
   ID[GoIdentity]
   API[GoAPI]
@@ -27,6 +29,10 @@ flowchart TB
   BUS[Redpanda]
   PG[PostgreSQL]
   PY[PythonCandidateArtifactProducer]
+  RT --> ID
+  RT --> API
+  RT --> REL
+  RT --> PL
   PP[GoPredictionPersistence]
   UI <-->|"REST SSE cookies"| API
   UI <-->|"OIDC session"| ID
@@ -44,9 +50,29 @@ flowchart TB
   API --> PG
 ```
 
+`cmd/seshatops` validates the database URL, broker seeds, OIDC endpoints,
+cookie transport, and listen address before opening clients. It exposes
+`GET /livez` and `GET /readyz`; readiness stays unavailable until migrations,
+broker probes, and both worker loops are healthy. The process handles
+`SIGINT`/`SIGTERM` by stopping HTTP acceptance, cancelling the relay and
+consumer loops, closing their broker clients, clearing the post-commit
+projection notifier, and closing PostgreSQL. Worker failures use bounded
+process retry backoff in addition to the existing outbox and broker semantics.
+
+The executable reads `SESHATOPS_LISTEN_ADDR`, `SESHATOPS_DATABASE_URL`,
+`SESHATOPS_BROKER_SEEDS`, `SESHATOPS_OIDC_ISSUER`,
+`SESHATOPS_OIDC_CLIENT_ID`, `SESHATOPS_OIDC_REDIRECT_URL`,
+`SESHATOPS_COOKIE_NAME`, and `SESHATOPS_COOKIE_SECURE`. The OIDC client secret,
+audience, session TTL, and optional process-local assignments are configured by
+`SESHATOPS_OIDC_CLIENT_SECRET`, `SESHATOPS_OIDC_AUDIENCE`,
+`SESHATOPS_SESSION_TTL`, and `SESHATOPS_AUTH_ASSIGNMENTS` respectively.
+Assignments use comma-separated `principal|tenant|role` rows; an omitted
+assignment list leaves the policy default-deny.
+
 | Component | Language | Owns | Must not own |
 | --- | --- | --- | --- |
 | `web/` | TypeScript | Presentation, REST/SSE clients | Authorization, datastore, broker |
+| `cmd/seshatops` | Go | Process startup, migrations, health, HTTP and worker lifecycle | Domain rules, authorization decisions, event transformation |
 | `identity/` | Go | OIDC Auth Code + PKCE, session, allow-list, audit | UI, IdP vendor as a runtime claim |
 | `api/` | Go | HTTP/SSE, default-deny, privileged POSTs | Broker publication |
 | `platform/` | Go | Inbox, inventory and lineage projection, read-only forecast source replay, runtime predictor selection/invocation, validated prediction persistence, rebuild | Outbox publication, authentication, feature-table ownership |
@@ -77,7 +103,8 @@ snapshot still matches the current complete Go-owned source snapshot.
 | PostgreSQL | ERP source/outbox, platform inbox/projection, identity audit |
 | Redpanda | At-least-once transport. Not the system of record |
 
-OIDC sessions are process-local (`identity.Store`).
+OIDC sessions and configured authorization assignments are process-local
+(`identity.Store` and `identity.Directory`).
 
 | Path | Rule |
 | --- | --- |

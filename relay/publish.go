@@ -51,6 +51,14 @@ func (p *FranzPublisher) Close() {
 	}
 }
 
+// Ping checks broker reachability without publishing an event.
+func (p *FranzPublisher) Ping(ctx context.Context) error {
+	if p == nil || p.client == nil {
+		return errors.New("relay: nil franz publisher")
+	}
+	return p.client.Ping(ctx)
+}
+
 // Publish produces one record and waits for broker acknowledgement.
 func (p *FranzPublisher) Publish(ctx context.Context, topic string, key, value []byte) error {
 	if p == nil || p.client == nil {

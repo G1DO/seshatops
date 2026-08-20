@@ -5,7 +5,8 @@ M3 supplier-to-order lineage hops through a transactional outbox and Redpanda.
 Operators see the inventory projection over REST/SSE after a Go-owned OIDC
 session. **Ahoy is excluded** ([CLEAN_ROOM.md](docs/CLEAN_ROOM.md)).
 
-Libraries plus tests. There is no deployment binary or production environment.
+The repository includes a runnable Go process under `cmd/seshatops`; it is a
+public-safe local/runtime entrypoint, not a claim of production deployment.
 What the tests measured: [EVIDENCE.md](docs/EVIDENCE.md).
 
 ```text
@@ -20,6 +21,13 @@ Go (identity/, api/, platform/, relay/, erp/, event/, northstar/, forecast/)
 
 OIDC sessions are process-local memory. PostgreSQL stores authorization-decision
 audit, not sessions.
+
+The process requires database, broker, OIDC, cookie, and listen-address
+configuration through `SESHATOPS_*` environment variables. It applies the ERP,
+platform, and identity migrations, serves `/auth/*` and `/v1/*`, and runs the
+relay and projection consumer with `/livez` and `/readyz` health checks. See
+[the as-built process topology](docs/architecture/overview.md) for the full
+configuration names and lifecycle behavior.
 
 ## Develop
 
