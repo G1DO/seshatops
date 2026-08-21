@@ -3,7 +3,7 @@
 Implemented technical truth. Product intent and roadmap live in Notion.
 Contribution practice: [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-| Career area | Document |
+| Area | Document |
 | --- | --- |
 | Architecture | [architecture/overview.md](architecture/overview.md) |
 | Getting started | [getting-started.md](getting-started.md) |
