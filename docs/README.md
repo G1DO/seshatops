@@ -24,6 +24,3 @@ M4 stockout-intelligence exit gate:
 [evaluation/M4_STOCKOUT_INTELLIGENCE_EXIT_GATE_EXPERIMENT_REPORT.md](evaluation/M4_STOCKOUT_INTELLIGENCE_EXIT_GATE_EXPERIMENT_REPORT.md).
 
 UI setup: [web/README.md](../web/README.md). Agents: [AGENTS.md](../AGENTS.md).
-
-Omitted Career folders (`getting-started/`, `development/`, `operations/`,
-`reference/`, `design/rfcs/`) have no implemented content yet.
