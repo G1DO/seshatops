@@ -5,8 +5,8 @@ M3 supplier-to-order lineage hops through a transactional outbox and Redpanda.
 Operators see the inventory projection over REST/SSE after a Go-owned OIDC
 session. **Ahoy is excluded** ([CLEAN_ROOM.md](docs/CLEAN_ROOM.md)).
 
-The repository includes a runnable Go process under `cmd/seshatops`; it is a
-public-safe local/runtime entrypoint, not a claim of production deployment.
+The repository includes a runnable Go process under `cmd/seshatops` and a
+public-safe, disposable local stack, not a claim of production deployment.
 What the tests measured: [EVIDENCE.md](docs/EVIDENCE.md).
 
 ```text
@@ -29,20 +29,22 @@ relay and projection consumer with `/livez` and `/readyz` health checks. See
 [the as-built process topology](docs/architecture/overview.md) for the full
 configuration names and lifecycle behavior.
 
-For a reproducible public scenario, use the explicit Northstar bootstrap
-command after PostgreSQL and Redpanda are available:
+## Local quickstart
+
+With Docker Engine and Docker Compose v2 available, start the complete
+public-safe Northstar stack with one command:
 
 ```bash
-SESHATOPS_DATABASE_URL=postgres://seshatops:REPLACE_ME@localhost:5432/seshatops_northstar_disposable \
-SESHATOPS_BROKER_SEEDS=localhost:9092 \
-go run ./cmd/seshatops bootstrap
+./scripts/local-stack.sh quickstart
 ```
 
-The command prints one JSON completion summary after the five source events
-have passed through the real outbox relay and projection consumer. It is
-idempotent for matching immutable fixture state. The separate
-`reset-northstar` command is deliberately gated; see
-[Getting started](docs/getting-started.md).
+The command builds the pinned Go and TypeScript images, starts PostgreSQL,
+Redpanda, and mock OIDC, applies migrations, creates the event topic, runs the
+deterministic Northstar bootstrap and frozen forecast, and prints the browser
+URL. The browser uses real Authorization Code + PKCE login and sends
+application traffic only through the Go `/auth/*` and `/v1/*` paths. See
+[Getting started](docs/getting-started.md) for status, logs, shutdown, reset,
+and headless smoke commands.
 
 ## Develop
 

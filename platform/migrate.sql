@@ -5,7 +5,7 @@
 
 CREATE SCHEMA IF NOT EXISTS platform;
 
-CREATE TABLE platform.inbox (
+CREATE TABLE IF NOT EXISTS platform.inbox (
     consumer_name TEXT NOT NULL,
     event_id TEXT NOT NULL,
     tenant_id TEXT NOT NULL,
@@ -31,11 +31,11 @@ CREATE TABLE platform.inbox (
     PRIMARY KEY (consumer_name, event_id)
 );
 
-CREATE INDEX platform_inbox_gap_idx
+CREATE INDEX IF NOT EXISTS platform_inbox_gap_idx
     ON platform.inbox (consumer_name, tenant_id, aggregate_type, aggregate_id, aggregate_version)
     WHERE disposition = 'quarantined_gap';
 
-CREATE TABLE platform.inventory_projection (
+CREATE TABLE IF NOT EXISTS platform.inventory_projection (
     tenant_id TEXT NOT NULL,
     item_id TEXT NOT NULL,
     quantity_on_hand BIGINT NOT NULL CHECK (quantity_on_hand >= 0),
@@ -47,7 +47,7 @@ CREATE TABLE platform.inventory_projection (
 -- No graph store. No cross-table FKs: broker ordering is per aggregate only,
 -- so a child hop may arrive before its parent. Traversal always filters by
 -- envelope tenant_id; parent ids are never used to infer tenant.
-CREATE TABLE platform.lineage_suppliers (
+CREATE TABLE IF NOT EXISTS platform.lineage_suppliers (
     tenant_id TEXT NOT NULL,
     supplier_id TEXT NOT NULL,
     aggregate_version BIGINT NOT NULL CHECK (aggregate_version >= 1),
@@ -61,7 +61,7 @@ CREATE TABLE platform.lineage_suppliers (
     PRIMARY KEY (tenant_id, supplier_id)
 );
 
-CREATE TABLE platform.lineage_ingredient_lots (
+CREATE TABLE IF NOT EXISTS platform.lineage_ingredient_lots (
     tenant_id TEXT NOT NULL,
     lot_id TEXT NOT NULL,
     supplier_id TEXT NOT NULL,
@@ -78,7 +78,7 @@ CREATE TABLE platform.lineage_ingredient_lots (
     UNIQUE (tenant_id, supplier_id)
 );
 
-CREATE TABLE platform.lineage_production_batches (
+CREATE TABLE IF NOT EXISTS platform.lineage_production_batches (
     tenant_id TEXT NOT NULL,
     batch_id TEXT NOT NULL,
     lot_id TEXT NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE platform.lineage_production_batches (
     UNIQUE (tenant_id, lot_id)
 );
 
-CREATE TABLE platform.lineage_shipments (
+CREATE TABLE IF NOT EXISTS platform.lineage_shipments (
     tenant_id TEXT NOT NULL,
     shipment_id TEXT NOT NULL,
     batch_id TEXT NOT NULL,
@@ -112,7 +112,7 @@ CREATE TABLE platform.lineage_shipments (
     UNIQUE (tenant_id, order_id)
 );
 
-CREATE TABLE platform.processing_failures (
+CREATE TABLE IF NOT EXISTS platform.processing_failures (
     failure_id TEXT PRIMARY KEY,
     consumer_name TEXT NOT NULL,
     event_id TEXT,
@@ -137,7 +137,7 @@ CREATE TABLE platform.processing_failures (
 );
 
 -- Go-owned advisory forecast results. Python never writes this table.
-CREATE TABLE platform.forecast_predictions (
+CREATE TABLE IF NOT EXISTS platform.forecast_predictions (
     prediction_id TEXT PRIMARY KEY,
     tenant_id TEXT NOT NULL,
     resource_type TEXT NOT NULL,
@@ -170,5 +170,5 @@ CREATE TABLE platform.forecast_predictions (
     )
 );
 
-CREATE INDEX platform_forecast_predictions_tenant_idx
+CREATE INDEX IF NOT EXISTS platform_forecast_predictions_tenant_idx
     ON platform.forecast_predictions (tenant_id, recorded_at, prediction_id);

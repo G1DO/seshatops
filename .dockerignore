@@ -1,0 +1,13 @@
+.git
+.github
+.lychee-cache
+coverage
+dist
+build
+tmp
+temp
+web/node_modules
+web/dist
+*.test
+*.out
+*.log

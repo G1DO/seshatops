@@ -16,6 +16,14 @@ The separate `reset-northstar` subcommand is restricted to a confirmed local
 database named `seshatops_northstar_disposable`. Tests compose `http.Handler`
 values and call `relay.DrainOnce` / `platform.ConsumeOnce`.
 
+`compose.yaml` packages this topology for a disposable local run. It starts
+PostgreSQL, Redpanda, the Go runtime, Vite, and a public-safe mock OIDC
+provider behind readiness gates. The browser reaches the Vite entrypoint, but
+Vite proxies only same-origin `/auth/*` and `/v1/*` requests to Go; PostgreSQL,
+Redpanda, and Go have no host-published ports. The local OIDC flow is a real
+Authorization Code + PKCE exchange, not a test-session or trusted-tenant
+header shortcut.
+
 Event Spine lives in `event/`, `northstar/`, `erp/`, `relay/`, `platform/`,
 `api/`, `web/`. Identity lives in `identity/` plus authorized HTTP. Stockout
 evaluation and the pure raw feature builder live in `forecast/`; the
@@ -28,7 +36,10 @@ and one-shot runtime adapter, not a deployed service or database principal. Publ
 ```mermaid
 flowchart TB
   RT[cmd/seshatops runtime]
-  UI[TypeScriptOperationsView]
+  UI[Browser]
+  WEB[Vite web entrypoint]
+  UIAPP[TypeScriptOperationsView]
+  OIDC[Local OIDC provider]
   ID[GoIdentity]
   API[GoAPI]
   PL[GoPlatform]
@@ -48,8 +59,11 @@ flowchart TB
   FE -->|typed CandidateInput| PY
   FE --> FS
   PP[GoPredictionPersistence]
-  UI <-->|"REST SSE cookies"| API
-  UI <-->|"OIDC session"| ID
+  UI --> WEB --> UIAPP
+  UIAPP <-->|"same-origin /auth /v1"| WEB
+  WEB <-->|"REST SSE cookies"| API
+  UI <-->|"Authorization Code + PKCE"| OIDC
+  ID <-->|"discovery + code exchange"| OIDC
   API --> ID
   API --> PL
   API --> FS
@@ -82,6 +96,10 @@ audience, session TTL, and optional process-local assignments are configured by
 `SESHATOPS_SESSION_TTL`, and `SESHATOPS_AUTH_ASSIGNMENTS` respectively.
 Assignments use comma-separated `principal|tenant|role` rows; an omitted
 assignment list leaves the policy default-deny.
+
+The Compose-only `SESHATOPS_LOCAL_STACK=true` opt-in permits the forecast
+subcommand to use the exact internal `postgres` service name. It does not
+broaden the normal localhost-only guard used by `reset-northstar`.
 
 | Component | Language | Owns | Must not own |
 | --- | --- | --- | --- |

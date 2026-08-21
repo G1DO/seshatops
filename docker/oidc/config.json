@@ -1,0 +1,28 @@
+{
+  "interactiveLogin": true,
+  "tokenCallbacks": [
+    {
+      "issuerId": "default",
+      "requestMappings": [
+        {
+          "requestParam": "subject",
+          "match": "northstar-demo-operator",
+          "claims": {
+            "sub": "northstar-demo-operator",
+            "preferred_username": "${subject}",
+            "aud": ["seshatops-local"]
+          }
+        },
+        {
+          "requestParam": "subject",
+          "match": ".*",
+          "claims": {
+            "sub": "${subject}",
+            "preferred_username": "${subject}",
+            "aud": ["seshatops-local"]
+          }
+        }
+      ]
+    }
+  ]
+}
