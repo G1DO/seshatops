@@ -118,7 +118,7 @@ func (b *limitedBuffer) Write(p []byte) (int, error) {
 var errOutputLimit = errors.New("forecast output limit exceeded")
 
 func minimalPythonEnvironment() []string {
-	allowed := []string{"PATH", "PYTHONIOENCODING", "PYTHONUTF8", "SYSTEMDRIVE", "SYSTEMROOT", "WINDIR", "PATHEXT", "TEMP", "TMP"}
+	allowed := []string{"PATH", "PYTHONIOENCODING", "PYTHONUTF8", "SYSTEMDRIVE", "SYSTEMROOT", "WINDIR", "PATHEXT", "TEMP", "TMP", "TMPDIR"}
 	env := make([]string, 0, len(allowed))
 	for _, name := range allowed {
 		if value, ok := os.LookupEnv(name); ok {

@@ -313,11 +313,41 @@ func validateFrozenM4Outcome(history forecast.History, dataset forecast.Dataset,
 	if features.SourceBoundary != wantBoundary || features.SnapshotID != frozenM4FeatureSnapshotID || features.Checksum != frozenM4FeatureSnapshotChecksum || len(features.Rows) != len(dataset.Examples) {
 		return fmt.Errorf("frozen M4 feature snapshot changed: id=%s checksum=%s rows=%d", features.SnapshotID, features.Checksum, len(features.Rows))
 	}
-	if evaluation.ArtifactVersion != forecast.CandidateArtifactVersion || evaluation.ModelVersion != forecast.CandidateModelVersion || evaluation.CodeVersion != forecast.CandidateCodeVersion || evaluation.EvaluationProtocolVersion != forecast.ProtocolID || evaluation.DatasetVersion != forecast.ProtocolID || evaluation.DatasetChecksum != frozenM4DatasetChecksum || evaluation.FeatureDefinitionVersion != forecast.FeatureDefinitionVersion || evaluation.FeatureSnapshotID != frozenM4FeatureSnapshotID || evaluation.FeatureSnapshotChecksum != frozenM4FeatureSnapshotChecksum || evaluation.BaselineEvaluation.CodeVersion != forecast.EvaluationCodeVersion || evaluation.PromotionSplit != forecast.SplitTest || evaluation.Outcome != forecast.CandidateOutcomeBaseline || evaluation.PromotionEligible || evaluation.Reason != "candidate average precision does not beat baseline" {
+	if evaluation.ArtifactVersion != forecast.CandidateArtifactVersion {
+		return fmt.Errorf("frozen M4 evaluation changed: artifact_version=%d", evaluation.ArtifactVersion)
+	}
+	if evaluation.ModelVersion != forecast.CandidateModelVersion {
+		return fmt.Errorf("frozen M4 evaluation changed: model_version=%s", evaluation.ModelVersion)
+	}
+	if evaluation.CodeVersion != forecast.CandidateCodeVersion {
+		return fmt.Errorf("frozen M4 evaluation changed: code_version=%s", evaluation.CodeVersion)
+	}
+	if evaluation.EvaluationProtocolVersion != forecast.ProtocolID {
+		return fmt.Errorf("frozen M4 evaluation changed: protocol=%s", evaluation.EvaluationProtocolVersion)
+	}
+	if evaluation.DatasetVersion != forecast.ProtocolID || evaluation.DatasetChecksum != frozenM4DatasetChecksum {
+		return fmt.Errorf("frozen M4 evaluation changed: dataset=%s checksum=%s", evaluation.DatasetVersion, evaluation.DatasetChecksum)
+	}
+	if evaluation.FeatureDefinitionVersion != forecast.FeatureDefinitionVersion || evaluation.FeatureSnapshotID != frozenM4FeatureSnapshotID || evaluation.FeatureSnapshotChecksum != frozenM4FeatureSnapshotChecksum {
+		return fmt.Errorf("frozen M4 evaluation changed: feature=%s id=%s checksum=%s", evaluation.FeatureDefinitionVersion, evaluation.FeatureSnapshotID, evaluation.FeatureSnapshotChecksum)
+	}
+	if evaluation.BaselineEvaluation.CodeVersion != forecast.EvaluationCodeVersion {
+		return fmt.Errorf("frozen M4 evaluation changed: baseline_code_version=%s", evaluation.BaselineEvaluation.CodeVersion)
+	}
+	if evaluation.PromotionSplit != forecast.SplitTest {
+		return fmt.Errorf("frozen M4 evaluation changed: promotion_split=%s", evaluation.PromotionSplit)
+	}
+	if evaluation.Outcome != forecast.CandidateOutcomeBaseline || evaluation.PromotionEligible || evaluation.Reason != "candidate average precision does not beat baseline" {
 		return fmt.Errorf("frozen M4 evaluation changed: outcome=%s promotion_eligible=%t reason=%q", evaluation.Outcome, evaluation.PromotionEligible, evaluation.Reason)
 	}
-	if selection.Predictor != forecast.RuntimePredictorBaseline || selection.BaselineID != forecast.BaselineSeasonalNaive || selection.ModelVersion != forecast.BaselineSeasonalNaive || selection.CodeVersion != forecast.EvaluationCodeVersion {
-		return fmt.Errorf("frozen M4 runtime selection changed: %+v", selection)
+	if selection.Predictor != forecast.RuntimePredictorBaseline {
+		return fmt.Errorf("frozen M4 runtime selection changed: predictor=%s", selection.Predictor)
+	}
+	if selection.BaselineID != forecast.BaselineSeasonalNaive || selection.ModelVersion != forecast.BaselineSeasonalNaive {
+		return fmt.Errorf("frozen M4 runtime selection changed: baseline=%s model=%s", selection.BaselineID, selection.ModelVersion)
+	}
+	if selection.CodeVersion != forecast.EvaluationCodeVersion {
+		return fmt.Errorf("frozen M4 runtime selection changed: code_version=%s", selection.CodeVersion)
 	}
 	want := map[string]struct {
 		baselineID                                             string
@@ -330,8 +360,41 @@ func validateFrozenM4Outcome(history forecast.History, dataset forecast.Dataset,
 	}
 	for _, split := range evaluation.Splits {
 		wantSplit, ok := want[split.Split]
-		if !ok || split.Baseline == nil || split.BaselineID != wantSplit.baselineID || split.CandidateBeatsBaseline || split.ComparisonReason != "candidate average precision does not beat baseline" || split.Candidate.N != wantSplit.candidateN || split.Candidate.Predicted != wantSplit.candidatePredicted || split.Candidate.Abstained != 0 || split.Candidate.Coverage != 1 || !closeFrozenMetric(split.Candidate.AP, wantSplit.candidateAP) || !closeFrozenMetric(split.Candidate.Brier, wantSplit.candidateBrier) || split.Baseline.Predicted != wantSplit.baselinePredicted || !closeFrozenMetric(split.Baseline.AP, wantSplit.baselineAP) || !closeFrozenMetric(split.Baseline.Brier, wantSplit.baselineBrier) {
-			return fmt.Errorf("frozen M4 split changed: %+v", split)
+		if !ok {
+			return fmt.Errorf("frozen M4 split changed: unexpected split %q", split.Split)
+		}
+		if split.Baseline == nil {
+			return fmt.Errorf("frozen M4 split changed: %s baseline is nil", split.Split)
+		}
+		if split.BaselineID != wantSplit.baselineID {
+			return fmt.Errorf("frozen M4 split changed: %s baseline_id=%s want %s", split.Split, split.BaselineID, wantSplit.baselineID)
+		}
+		if split.CandidateBeatsBaseline {
+			return fmt.Errorf("frozen M4 split changed: %s candidate_beats_baseline", split.Split)
+		}
+		if split.ComparisonReason != "candidate average precision does not beat baseline" {
+			return fmt.Errorf("frozen M4 split changed: %s reason=%q", split.Split, split.ComparisonReason)
+		}
+		if split.Candidate.N != wantSplit.candidateN || split.Candidate.Predicted != wantSplit.candidatePredicted {
+			return fmt.Errorf("frozen M4 split changed: %s candidate n=%d predicted=%d", split.Split, split.Candidate.N, split.Candidate.Predicted)
+		}
+		if split.Candidate.Abstained != 0 || split.Candidate.Coverage != 1 {
+			return fmt.Errorf("frozen M4 split changed: %s candidate abstained=%d coverage=%v", split.Split, split.Candidate.Abstained, split.Candidate.Coverage)
+		}
+		if !closeFrozenMetric(split.Candidate.AP, wantSplit.candidateAP) {
+			return fmt.Errorf("frozen M4 split changed: %s candidate AP %v want %v", split.Split, split.Candidate.AP, wantSplit.candidateAP)
+		}
+		if !closeFrozenMetric(split.Candidate.Brier, wantSplit.candidateBrier) {
+			return fmt.Errorf("frozen M4 split changed: %s candidate Brier %v want %v", split.Split, split.Candidate.Brier, wantSplit.candidateBrier)
+		}
+		if split.Baseline.Predicted != wantSplit.baselinePredicted {
+			return fmt.Errorf("frozen M4 split changed: %s baseline predicted=%d want %d", split.Split, split.Baseline.Predicted, wantSplit.baselinePredicted)
+		}
+		if !closeFrozenMetric(split.Baseline.AP, wantSplit.baselineAP) {
+			return fmt.Errorf("frozen M4 split changed: %s baseline AP %v want %v", split.Split, split.Baseline.AP, wantSplit.baselineAP)
+		}
+		if !closeFrozenMetric(split.Baseline.Brier, wantSplit.baselineBrier) {
+			return fmt.Errorf("frozen M4 split changed: %s baseline Brier %v want %v", split.Split, split.Baseline.Brier, wantSplit.baselineBrier)
 		}
 	}
 	if len(evaluation.Splits) != len(want) {
