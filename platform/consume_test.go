@@ -92,6 +92,9 @@ func TestRedpandaFirstDeliveryAndDuplicate(t *testing.T) {
 			t.Fatal(err)
 		}
 		if cres.Acked > 0 {
+			if !cres.LagKnown || cres.ObservedLag < 1 {
+				t.Fatalf("consume lag signal = %+v", cres)
+			}
 			applied = true
 		}
 	}
@@ -222,6 +225,9 @@ func TestCrashAfterCommitBeforeAckIsDuplicateNoop(t *testing.T) {
 			t.Fatal(err)
 		}
 		if cres.Processed > 0 && cres.Acked == 0 {
+			if cres.AckWithheld == 0 {
+				t.Fatalf("consume ack signal = %+v", cres)
+			}
 			sawSkip = true
 		}
 	}

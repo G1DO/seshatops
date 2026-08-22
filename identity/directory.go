@@ -2,8 +2,9 @@ package identity
 
 import "sync"
 
-// Assignment is a platform-owned principal-to-tenant role binding.
-// TenantID is the tenant UUID, not an IdP or client-supplied field.
+// Assignment is a platform-owned principal-to-scope role binding. TenantID
+// is normally a tenant UUID; ScopeRuntime is the sole global release-metrics
+// scope. Neither is an IdP or client-supplied field.
 type Assignment struct {
 	PrincipalID string
 	TenantID    string

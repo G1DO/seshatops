@@ -56,6 +56,8 @@ def main():
     require(status == 401 and json.loads(body)["error"] == "unauthenticated", "auth route is not Go-owned")
     status, _, body = request(opener, BASE_URL + f"/v1/tenants/{TENANT_ID}/inventory")
     require(status == 401 and json.loads(body)["error"] == "unauthenticated", "API route is not Go-owned")
+    status, _, body = request(opener, BASE_URL + "/metrics")
+    require(status == 401 and b"seshatops_" not in body, "metrics leaked without a session")
 
     status, headers, _ = request(opener, BASE_URL + "/auth/login")
     authorize_url = header(headers, "Location")
@@ -91,7 +93,14 @@ def main():
     status, _, _ = request(opener, BASE_URL + f"/v1/tenants/{NEGATIVE_TENANT_ID}/inventory")
     require(status == 403, "cross-tenant read was not denied")
 
-    print("local stack smoke passed: web routing, PKCE callback, session, tenant isolation")
+    status, headers, body = request(opener, BASE_URL + "/metrics")
+    require(status == 200, "release observer metrics read failed")
+    require(header(headers, "Content-Type").startswith("text/plain; version=0.0.4"), "metrics content type is wrong")
+    require(header(headers, "X-Correlation-ID") is not None, "metrics response has no correlation ID")
+    require(b"seshatops_runtime_ready 1" in body and b"seshatops_outbox_backlog_records_pending" in body, "metrics surface is incomplete")
+    require(TENANT_ID.encode() not in body and NEGATIVE_TENANT_ID.encode() not in body, "metrics leaked tenant identity")
+
+    print("local stack smoke passed: web routing, PKCE callback, session, tenant isolation, metrics access")
 
 
 if __name__ == "__main__":

@@ -17,6 +17,7 @@ import (
 	"github.com/G1DO/seshatops/event"
 	"github.com/G1DO/seshatops/identity"
 	"github.com/G1DO/seshatops/northstar"
+	"github.com/G1DO/seshatops/observability"
 	"github.com/G1DO/seshatops/platform"
 	"github.com/G1DO/seshatops/relay"
 )
@@ -159,6 +160,36 @@ func TestReaderCannotReleaseQuarantine(t *testing.T) {
 	}
 	if len(*decisions) != 1 || (*decisions)[0].Outcome != "deny" {
 		t.Fatalf("decisions=%+v", *decisions)
+	}
+}
+
+func TestControlTelemetryRecordsReleaseAndDenialWithoutTargetIdentity(t *testing.T) {
+	db := openTestDB(t)
+	fx := seedQuarantinedOutbox(t, db)
+
+	allowed, srv, sess, _ := controlServer(t, db, "platform-operator", northstarOperatorPolicy("platform-operator"))
+	metrics := observability.NewRegistry()
+	srv.SetMetricsRegistry(metrics)
+	resp := postWithSession(t, allowed.URL+releasePath(fx.TenantID), sess, api.ControlRequest{EventID: fx.Event.EventID}, nil)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("release status=%d", resp.StatusCode)
+	}
+	text := metrics.RenderPrometheus()
+	if !strings.Contains(text, `seshatops_control_operations_total{operation="quarantine_release",outcome="released"} 1`) {
+		t.Fatalf("missing release metric:\n%s", text)
+	}
+	if strings.Contains(text, fx.Event.EventID) || strings.Contains(text, fx.TenantID) {
+		t.Fatalf("control metric leaked target identity:\n%s", text)
+	}
+
+	denied, deniedSrv, deniedSession, _ := controlServer(t, db, "operator-northstar", northstarReaderPolicy("operator-northstar"))
+	deniedMetrics := observability.NewRegistry()
+	deniedSrv.SetMetricsRegistry(deniedMetrics)
+	resp = postWithSession(t, denied.URL+releasePath(fx.TenantID), deniedSession, api.ControlRequest{EventID: fx.Event.EventID}, nil)
+	assertForbiddenControl(t, resp)
+	if !strings.Contains(deniedMetrics.RenderPrometheus(), `seshatops_control_operations_total{operation="quarantine_release",outcome="denied"} 1`) {
+		t.Fatalf("missing denied metric:\n%s", deniedMetrics.RenderPrometheus())
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/G1DO/seshatops/identity"
+	"github.com/G1DO/seshatops/observability"
 	"github.com/G1DO/seshatops/platform"
 )
 
@@ -29,9 +30,10 @@ func (s *Server) handleControlMethod(w http.ResponseWriter, r *http.Request, ten
 	fn(w, r, tenantID)
 }
 
-func (s *Server) authorizeControl(w http.ResponseWriter, r *http.Request, tenantID, resource, action, targetID string) bool {
+func (s *Server) authorizeControl(w http.ResponseWriter, r *http.Request, tenantID, resource, action, targetID string, started time.Time) bool {
 	sess, ok := identity.FromContext(r.Context())
 	if !ok || sess == nil {
+		s.recordControlObservation(r.Context(), action, observability.ControlDenied, time.Since(started), "", "")
 		writeJSON(w, http.StatusUnauthorized, ErrorBody{Error: "unauthenticated"})
 		return false
 	}
@@ -49,10 +51,12 @@ func (s *Server) authorizeControl(w http.ResponseWriter, r *http.Request, tenant
 		decision.Reason = "matrix_allow"
 	}
 	if err := s.recordDecision(r.Context(), decision); err != nil {
+		s.recordControlObservation(r.Context(), action, observability.ControlFailed, time.Since(started), "", "")
 		writeJSON(w, http.StatusInternalServerError, ErrorBody{Error: "audit_failed"})
 		return false
 	}
 	if decision.Outcome != decisionAllow {
+		s.recordControlObservation(r.Context(), action, observability.ControlDenied, time.Since(started), "", "")
 		writeJSON(w, http.StatusForbidden, ErrorBody{Error: "forbidden"})
 		return false
 	}
@@ -103,26 +107,31 @@ func controlDecisionFromRecord(rec identity.DecisionRecord) ControlDecision {
 }
 
 func (s *Server) handleQuarantineRelease(w http.ResponseWriter, r *http.Request, tenantID string) {
+	started := time.Now()
 	req, ok := decodeControlRequest(w, r, true)
 	if !ok {
 		return
 	}
-	if !s.authorizeControl(w, r, tenantID, identity.ResQuarantine, identity.ActQuarantineRelease, req.EventID) {
+	if !s.authorizeControl(w, r, tenantID, identity.ResQuarantine, identity.ActQuarantineRelease, req.EventID, started) {
 		return
 	}
 	err := platform.ReleaseTenantQuarantine(r.Context(), s.db, tenantID, req.EventID)
 	if errors.Is(err, platform.ErrNotReleasable) {
+		s.recordControlObservation(r.Context(), identity.ActQuarantineRelease, observability.ControlNotReleasable, time.Since(started), "", "")
 		writeJSON(w, http.StatusConflict, ErrorBody{Error: "not_releasable"})
 		return
 	}
 	if errors.Is(err, platform.ErrControlNotFound) || errors.Is(err, platform.ErrTenantMismatch) {
+		s.recordControlObservation(r.Context(), identity.ActQuarantineRelease, observability.ControlNotFound, time.Since(started), "", "")
 		writeJSON(w, http.StatusNotFound, ErrorBody{Error: "not_found"})
 		return
 	}
 	if err != nil {
+		s.recordControlObservation(r.Context(), identity.ActQuarantineRelease, observability.ControlFailed, time.Since(started), "", "")
 		writeJSON(w, http.StatusInternalServerError, ErrorBody{Error: "control_failed"})
 		return
 	}
+	s.recordControlObservation(r.Context(), identity.ActQuarantineRelease, observability.ControlReleased, time.Since(started), "", "")
 	writeJSON(w, http.StatusOK, ControlResult{
 		TenantID: tenantID,
 		Control:  controlQuarantineRelease,
@@ -132,31 +141,33 @@ func (s *Server) handleQuarantineRelease(w http.ResponseWriter, r *http.Request,
 }
 
 func (s *Server) handleReplay(w http.ResponseWriter, r *http.Request, tenantID string) {
+	started := time.Now()
 	req, ok := decodeControlRequest(w, r, false)
 	if !ok {
 		return
 	}
-	if !s.authorizeControl(w, r, tenantID, identity.ResReplay, identity.ActReplay, req.EventID) {
+	if !s.authorizeControl(w, r, tenantID, identity.ResReplay, identity.ActReplay, req.EventID, started) {
 		return
 	}
 	result, err := platform.ReplayTenantHistory(r.Context(), s.db, tenantID, req.EventID)
-	s.writeReplayResult(w, tenantID, controlReplay, req.EventID, result, err)
+	s.writeReplayResult(w, r.Context(), tenantID, controlReplay, req.EventID, result, err, time.Since(started))
 }
 
 func (s *Server) handleRebuild(w http.ResponseWriter, r *http.Request, tenantID string) {
+	started := time.Now()
 	req, ok := decodeControlRequest(w, r, false)
 	if !ok {
 		return
 	}
-	if !s.authorizeControl(w, r, tenantID, identity.ResRebuild, identity.ActRebuild, req.EventID) {
+	if !s.authorizeControl(w, r, tenantID, identity.ResRebuild, identity.ActRebuild, req.EventID, started) {
 		return
 	}
 	result, err := platform.RebuildTenantFromHistory(r.Context(), s.db, tenantID)
-	s.writeReplayResult(w, tenantID, controlRebuild, "", result, err)
+	s.writeReplayResult(w, r.Context(), tenantID, controlRebuild, "", result, err, time.Since(started))
 }
 
 func (s *Server) handleAuditRead(w http.ResponseWriter, r *http.Request, tenantID string) {
-	if !s.authorizeControl(w, r, tenantID, identity.ResAudit, identity.ActAuditRead, "") {
+	if !s.authorizeControl(w, r, tenantID, identity.ResAudit, identity.ActAuditRead, "", time.Now()) {
 		return
 	}
 	rows, err := identity.ListDecisionsForTenant(r.Context(), s.db, tenantID)
@@ -175,12 +186,14 @@ func (s *Server) handleAuditRead(w http.ResponseWriter, r *http.Request, tenantI
 	})
 }
 
-func (s *Server) writeReplayResult(w http.ResponseWriter, tenantID, control, eventID string, result platform.RebuildResult, err error) {
+func (s *Server) writeReplayResult(w http.ResponseWriter, ctx context.Context, tenantID, control, eventID string, result platform.RebuildResult, err error, duration time.Duration) {
 	if errors.Is(err, platform.ErrControlNotFound) || errors.Is(err, platform.ErrTenantMismatch) {
+		s.recordControlObservation(ctx, controlAction(control), observability.ControlNotFound, duration, "", "")
 		writeJSON(w, http.StatusNotFound, ErrorBody{Error: "not_found"})
 		return
 	}
 	if err != nil {
+		s.recordControlObservation(ctx, controlAction(control), observability.ControlFailed, duration, "", "")
 		writeJSON(w, http.StatusInternalServerError, ErrorBody{Error: "control_failed"})
 		return
 	}
@@ -188,6 +201,11 @@ func (s *Server) writeReplayResult(w http.ResponseWriter, tenantID, control, eve
 	if status == "" {
 		status = platform.RebuildStatusIncomplete
 	}
+	outcome := observability.ControlIncomplete
+	if status == platform.RebuildStatusComplete {
+		outcome = observability.ControlComplete
+	}
+	s.recordControlObservation(ctx, controlAction(control), outcome, duration, result.Checksum, result.LineageChecksum)
 	writeJSON(w, http.StatusOK, ControlResult{
 		TenantID:          tenantID,
 		Control:           control,
@@ -200,6 +218,37 @@ func (s *Server) writeReplayResult(w http.ResponseWriter, tenantID, control, eve
 		LineageChecksum:   result.LineageChecksum,
 		IncompleteReasons: result.IncompleteReasons,
 	})
+}
+
+func controlAction(control string) string {
+	switch control {
+	case controlQuarantineRelease:
+		return identity.ActQuarantineRelease
+	case controlReplay:
+		return identity.ActReplay
+	case controlRebuild:
+		return identity.ActRebuild
+	default:
+		return ""
+	}
+}
+
+func (s *Server) recordControlObservation(ctx context.Context, action string, outcome observability.ControlOutcome, duration time.Duration, checksum, lineageChecksum string) {
+	operation := observability.ControlOperation("")
+	switch action {
+	case identity.ActQuarantineRelease:
+		operation = observability.ControlQuarantineRelease
+	case identity.ActReplay:
+		operation = observability.ControlReplay
+	case identity.ActRebuild:
+		operation = observability.ControlRebuild
+	default:
+		return
+	}
+	if s.metrics != nil {
+		s.metrics.RecordControl(operation, outcome, duration)
+	}
+	observability.Log(ctx, nil, observability.EventControlCompleted, observability.Fields{Operation: operation, Outcome: string(outcome), Duration: duration, Checksum: checksum, LineageChecksum: lineageChecksum})
 }
 
 func decodeControlRequest(w http.ResponseWriter, r *http.Request, eventIDRequired bool) (ControlRequest, bool) {

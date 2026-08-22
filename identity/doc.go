@@ -8,8 +8,9 @@
 // never implies authorization. Platform assignments plus the
 // frozen permission matrix decide inventory projection reads (MX-001),
 // ops-visibility reads (MX-002 / MX-003), privileged controls
-// (MX-004 / MX-005 / MX-006), and audit read (MX-007); missing or unmatched
-// membership is deny. Audit actor is the Go-owned session principal.
+// (MX-004 / MX-005 / MX-006), audit read (MX-007), and aggregate release
+// metrics (MX-010); missing or unmatched membership is deny. Audit actor is
+// the Go-owned session principal.
 //
 // TypeScript may present session state and start login; it cannot authorize.
 package identity

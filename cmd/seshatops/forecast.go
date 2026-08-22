@@ -4,14 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/url"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/G1DO/seshatops/forecast"
+	"github.com/G1DO/seshatops/observability"
 	"github.com/G1DO/seshatops/platform"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -116,8 +119,15 @@ type forecastPersister interface {
 // Go, derives the runtime choice from the frozen outcome, and persists one
 // tenant-scoped advisory prediction.
 func runForecastCommand(ctx context.Context, cfg forecastCommandConfig, out io.Writer) error {
+	ctx, correlationID, err := observability.EnsureCorrelationID(ctx)
+	if err != nil {
+		return fmt.Errorf("create forecast correlation: %w", err)
+	}
+	metrics := observability.NewRegistry()
+	started := time.Now()
 	db, err := sql.Open("pgx", cfg.DatabaseURL)
 	if err != nil {
+		observability.Log(ctx, slog.Default(), observability.EventForecastFailed, observability.Fields{Duration: time.Since(started)})
 		return fmt.Errorf("open database failed; check %s", envDatabaseURL)
 	}
 	defer db.Close()
@@ -125,9 +135,11 @@ func runForecastCommand(ctx context.Context, cfg forecastCommandConfig, out io.W
 	commandCtx, cancel := context.WithTimeout(ctx, cfg.Timeout)
 	defer cancel()
 	if err := db.PingContext(commandCtx); err != nil {
+		observability.Log(ctx, slog.Default(), observability.EventForecastFailed, observability.Fields{Duration: time.Since(started)})
 		return fmt.Errorf("database ping failed; check %s", envDatabaseURL)
 	}
 	if err := platform.MigrateForecast(commandCtx, db); err != nil {
+		observability.Log(ctx, slog.Default(), observability.EventForecastFailed, observability.Fields{Duration: time.Since(started)})
 		return fmt.Errorf("platform migration failed")
 	}
 
@@ -139,9 +151,42 @@ func runForecastCommand(ctx context.Context, cfg forecastCommandConfig, out io.W
 	service := platform.NewForecastService(db, nil)
 	result, err := runFrozenForecast(commandCtx, producer, service)
 	if err != nil {
+		outcome := pythonTelemetryOutcome(err)
+		if outcome != "" {
+			metrics.RecordPythonInvocation(outcome)
+			metrics.SetPythonAvailability(observability.PythonAvailabilityUnavailable)
+		}
+		observability.Log(ctx, slog.Default(), observability.EventForecastFailed, observability.Fields{Outcome: string(outcome), Duration: time.Since(started)})
 		return err
 	}
+	metrics.RecordPythonInvocation(observability.PythonAvailable)
+	metrics.SetPythonAvailability(observability.PythonAvailabilityAvailable)
+	predictor := observability.Predictor(result.SelectedPredictor)
+	status := observability.PredictionOutcome(result.PredictionStatus)
+	metrics.RecordPrediction(predictor, status)
+	result.Observability = &forecastTelemetrySummary{
+		CorrelationID:            correlationID,
+		PythonInvocationOutcome:  observability.PythonAvailable,
+		PythonCandidateAvailable: true,
+		SelectedPredictor:        predictor,
+		PredictionOutcome:        status,
+		Lifecycle:                "process_local_invocation",
+	}
+	observability.Log(ctx, slog.Default(), observability.EventForecastCompleted, observability.Fields{Outcome: string(status), Predictor: predictor, Duration: time.Since(started)})
 	return json.NewEncoder(out).Encode(result)
+}
+
+func pythonTelemetryOutcome(err error) observability.PythonOutcome {
+	switch {
+	case errors.Is(err, platform.ErrPythonUnavailable):
+		return observability.PythonUnavailable
+	case errors.Is(err, platform.ErrPythonTimeout):
+		return observability.PythonTimeout
+	case errors.Is(err, platform.ErrPythonInvalidResponse):
+		return observability.PythonInvalidResponse
+	default:
+		return ""
+	}
 }
 
 func runFrozenForecast(ctx context.Context, producer platform.CandidateArtifactProducer, persister forecastPersister) (forecastCommandResult, error) {
@@ -208,26 +253,38 @@ func runFrozenForecast(ctx context.Context, producer platform.CandidateArtifactP
 }
 
 type forecastCommandResult struct {
-	HistorySeed               string                  `json:"history_seed"`
-	EvaluationProtocolVersion string                  `json:"evaluation_protocol_version"`
-	DatasetVersion            string                  `json:"dataset_version"`
-	DatasetChecksum           string                  `json:"dataset_checksum"`
-	FeatureDefinitionVersion  string                  `json:"feature_definition_version"`
-	FeatureSnapshotID         string                  `json:"feature_snapshot_id"`
-	FeatureSnapshotChecksum   string                  `json:"feature_snapshot_checksum"`
-	SourceBoundary            forecast.SourceBoundary `json:"source_boundary"`
-	EvaluationOutcome         string                  `json:"evaluation_outcome"`
-	PromotionEligible         bool                    `json:"promotion_eligible"`
-	SelectedPredictor         string                  `json:"selected_predictor"`
-	SelectedModelVersion      string                  `json:"selected_model_version"`
-	SelectedCodeVersion       string                  `json:"selected_code_version"`
-	Splits                    []forecastSplitResult   `json:"splits"`
-	TenantID                  string                  `json:"tenant_id"`
-	ResourceID                string                  `json:"resource_id"`
-	ObservationDate           string                  `json:"observation_date"`
-	PredictionID              string                  `json:"prediction_id"`
-	PredictionStatus          string                  `json:"prediction_status"`
-	Limitations               []string                `json:"limitations"`
+	HistorySeed               string                    `json:"history_seed"`
+	EvaluationProtocolVersion string                    `json:"evaluation_protocol_version"`
+	DatasetVersion            string                    `json:"dataset_version"`
+	DatasetChecksum           string                    `json:"dataset_checksum"`
+	FeatureDefinitionVersion  string                    `json:"feature_definition_version"`
+	FeatureSnapshotID         string                    `json:"feature_snapshot_id"`
+	FeatureSnapshotChecksum   string                    `json:"feature_snapshot_checksum"`
+	SourceBoundary            forecast.SourceBoundary   `json:"source_boundary"`
+	EvaluationOutcome         string                    `json:"evaluation_outcome"`
+	PromotionEligible         bool                      `json:"promotion_eligible"`
+	SelectedPredictor         string                    `json:"selected_predictor"`
+	SelectedModelVersion      string                    `json:"selected_model_version"`
+	SelectedCodeVersion       string                    `json:"selected_code_version"`
+	Splits                    []forecastSplitResult     `json:"splits"`
+	TenantID                  string                    `json:"tenant_id"`
+	ResourceID                string                    `json:"resource_id"`
+	ObservationDate           string                    `json:"observation_date"`
+	PredictionID              string                    `json:"prediction_id"`
+	PredictionStatus          string                    `json:"prediction_status"`
+	Limitations               []string                  `json:"limitations"`
+	Observability             *forecastTelemetrySummary `json:"observability,omitempty"`
+}
+
+// forecastTelemetrySummary is intentionally per command invocation. It is
+// bounded release evidence, not durable history or a runtime metrics scrape.
+type forecastTelemetrySummary struct {
+	CorrelationID            string                          `json:"correlation_id"`
+	PythonInvocationOutcome  observability.PythonOutcome     `json:"python_invocation_outcome"`
+	PythonCandidateAvailable bool                            `json:"python_candidate_available"`
+	SelectedPredictor        observability.Predictor         `json:"selected_predictor"`
+	PredictionOutcome        observability.PredictionOutcome `json:"prediction_outcome"`
+	Lifecycle                string                          `json:"lifecycle"`
 }
 
 type forecastSplitResult struct {

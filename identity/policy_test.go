@@ -51,6 +51,29 @@ func TestPolicyAllowsForecastReadsOnlyForOpsReader(t *testing.T) {
 	}
 }
 
+func TestPolicyAllowsOnlyExplicitReleaseObserverMetricsRead(t *testing.T) {
+	observer := NewPolicy(NewDirectory(Assignment{
+		PrincipalID: "release-observer",
+		TenantID:    ScopeRuntime,
+		RoleID:      RoleReleaseObserver,
+	}))
+	if err := observer.Allow("release-observer", ScopeRuntime, ResReleaseMetrics, ActRead); err != nil {
+		t.Fatalf("MX-010 allow: %v", err)
+	}
+	if err := observer.Allow("release-observer", TenantNS001UUID, ResReleaseMetrics, ActRead); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("tenant metrics scope err=%v", err)
+	}
+
+	reader := NewPolicy(NewDirectory(Assignment{
+		PrincipalID: "reader",
+		TenantID:    TenantNS001UUID,
+		RoleID:      RoleOpsReader,
+	}))
+	if err := reader.Allow("reader", ScopeRuntime, ResReleaseMetrics, ActRead); !errors.Is(err, ErrForbidden) {
+		t.Fatalf("reader metrics scope err=%v", err)
+	}
+}
+
 func TestPolicyDeniesCrossTenantInventoryRead(t *testing.T) {
 	p := NewPolicy(NewDirectory(Assignment{
 		PrincipalID: "operator-northstar",

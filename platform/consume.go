@@ -20,10 +20,17 @@ type Consumer struct {
 
 // ConsumeResult summarizes one ConsumeOnce cycle.
 type ConsumeResult struct {
-	Fetched   int
-	Processed int
-	Acked     int
-	Skipped   int
+	Fetched       int
+	Processed     int
+	Acked         int
+	Skipped       int
+	AckWithheld   int
+	AckCommitFail bool
+	// ObservedLag is the sum, across partitions that returned records in this
+	// poll, of broker high watermark minus the first returned offset. It is an
+	// observed fetch snapshot, not a continuous consumer-group lag reading.
+	ObservedLag int64
+	LagKnown    bool
 }
 
 // testSkipOffsetCommit, when set by same-package tests, runs after a successful
@@ -100,6 +107,17 @@ func (c *Consumer) ConsumeOnce(ctx context.Context) (ConsumeResult, error) {
 	}
 
 	var out ConsumeResult
+	fetches.EachPartition(func(partition kgo.FetchTopicPartition) {
+		if len(partition.Records) == 0 || partition.HighWatermark < 0 {
+			return
+		}
+		lag := partition.HighWatermark - partition.Records[0].Offset
+		if lag < 0 {
+			lag = 0
+		}
+		out.ObservedLag += lag
+		out.LagKnown = true
+	})
 	var toCommit []*kgo.Record
 	var firstErr error
 	fetches.EachRecord(func(r *kgo.Record) {
@@ -114,17 +132,20 @@ func (c *Consumer) ConsumeOnce(ctx context.Context) (ConsumeResult, error) {
 		})
 		if err != nil && !res.ShouldAck {
 			out.Skipped++
+			out.AckWithheld++
 			firstErr = err
 			return
 		}
 		out.Processed++
 		if !res.ShouldAck {
 			out.Skipped++
+			out.AckWithheld++
 			return
 		}
 		if testSkipOffsetCommit != nil {
 			if skipErr := testSkipOffsetCommit(); skipErr != nil {
 				out.Skipped++
+				out.AckWithheld++
 				return
 			}
 		}
@@ -133,6 +154,7 @@ func (c *Consumer) ConsumeOnce(ctx context.Context) (ConsumeResult, error) {
 
 	if len(toCommit) > 0 {
 		if err := c.client.CommitRecords(ctx, toCommit...); err != nil {
+			out.AckCommitFail = true
 			return out, fmt.Errorf("platform: commit offsets: %w", err)
 		}
 		out.Acked = len(toCommit)
