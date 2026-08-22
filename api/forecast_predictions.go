@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/G1DO/seshatops/forecast"
+	"github.com/G1DO/seshatops/observability"
 	"github.com/G1DO/seshatops/platform"
 )
 
@@ -63,6 +64,7 @@ func (s *Server) handleForecastPrediction(w http.ResponseWriter, r *http.Request
 		writeJSON(w, http.StatusInternalServerError, ErrorBody{Error: "forecast_prediction_failed"})
 		return
 	}
+	s.recordForecastObservation(r, record.Predictor, record.Status, freshness.Status)
 
 	writeJSON(w, http.StatusOK, ForecastPredictionSnapshot{
 		TenantID:            record.TenantID,
@@ -91,6 +93,24 @@ func (s *Server) handleForecastPrediction(w http.ResponseWriter, r *http.Request
 		CorrelationID: record.CorrelationID,
 		RecordedAt:    record.RecordedAt.UTC().Format(time.RFC3339Nano),
 		ObservedAt:    s.now().Format(time.RFC3339Nano),
+	})
+}
+
+func (s *Server) recordForecastObservation(r *http.Request, predictor, status, freshness string) {
+	if s == nil || r == nil {
+		return
+	}
+	observedPredictor := observability.Predictor(predictor)
+	observedStatus := observability.PredictionOutcome(status)
+	observedFreshness := observability.Freshness(freshness)
+	if s.metrics != nil {
+		s.metrics.RecordPrediction(observedPredictor, observedStatus)
+		s.metrics.SetForecastFreshness(observedFreshness)
+	}
+	observability.Log(r.Context(), nil, observability.EventForecastCompleted, observability.Fields{
+		Outcome:   string(observedStatus),
+		Predictor: observedPredictor,
+		Freshness: observedFreshness,
 	})
 }
 

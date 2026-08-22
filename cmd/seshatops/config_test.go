@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/G1DO/seshatops/identity"
 )
 
 func TestConfigFromEnvValidatesRuntimeSettings(t *testing.T) {
@@ -32,6 +34,16 @@ func TestConfigFromEnvValidatesRuntimeSettings(t *testing.T) {
 	}
 	if cfg.Assignments[0].PrincipalID != "operator" {
 		t.Fatalf("assignment = %+v", cfg.Assignments[0])
+	}
+}
+
+func TestConfigParsesGoSelectedReleaseScopeAssignment(t *testing.T) {
+	assignments, err := parseAssignments("operator|SCOPE-RUNTIME|ROLE-RELEASE-OBSERVER")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(assignments) != 1 || assignments[0].TenantID != identity.ScopeRuntime || assignments[0].RoleID != identity.RoleReleaseObserver {
+		t.Fatalf("assignments=%+v", assignments)
 	}
 }
 

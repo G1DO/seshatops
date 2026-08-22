@@ -19,6 +19,10 @@ export default defineConfig({
         target: apiTarget,
         changeOrigin: true,
       },
+      "/metrics": {
+        target: apiTarget,
+        changeOrigin: true,
+      },
     },
   },
   test: {

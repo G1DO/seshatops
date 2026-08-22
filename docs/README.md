@@ -11,6 +11,7 @@ Contribution practice: [CONTRIBUTING.md](../CONTRIBUTING.md).
 | Specifications | [event-spine.md](design/specifications/event-spine.md), [stockout-evaluation.md](design/specifications/stockout-evaluation.md), [forecast-feature-snapshots.md](design/specifications/forecast-feature-snapshots.md) |
 | API | [api/openapi-projection.yaml](api/openapi-projection.yaml) |
 | Security | [security/authorization.md](security/authorization.md) |
+| Operations | [operations/observability.md](operations/observability.md) |
 | Clean-room | [CLEAN_ROOM.md](CLEAN_ROOM.md) |
 | Evidence | [EVIDENCE.md](EVIDENCE.md) |
 

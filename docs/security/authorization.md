@@ -72,7 +72,8 @@ Demo tenants:
 | `TENANT-NS-002` | `22222222-2222-4222-8222-222222222222` | Cross-tenant negative tests; no allow-list rows |
 
 Roles: `ROLE-OPS-READER` (same-tenant read), `ROLE-PLATFORM-OPERATOR`
-(same-tenant privileged ops; does not imply inventory read).
+(same-tenant privileged ops; does not imply inventory read), and
+`ROLE-RELEASE-OBSERVER` (aggregate release metrics only).
 
 | ID | Tenant | Role | Resource | Action |
 | --- | --- | --- | --- | --- |
@@ -85,6 +86,7 @@ Roles: `ROLE-OPS-READER` (same-tenant read), `ROLE-PLATFORM-OPERATOR`
 | `MX-007` | `TENANT-NS-001` | `ROLE-PLATFORM-OPERATOR` | `RES-AUDIT` | `ACT-AUDIT-READ` |
 | `MX-008` | `TENANT-NS-001` | `ROLE-OPS-READER` | `RES-FORECAST-FEATURES` | `ACT-READ` |
 | `MX-009` | `TENANT-NS-001` | `ROLE-OPS-READER` | `RES-FORECAST-PREDICTIONS` | `ACT-READ` |
+| `MX-010` | `SCOPE-RUNTIME` | `ROLE-RELEASE-OBSERVER` | `RES-RELEASE-METRICS` | `ACT-READ` |
 
 IDs are also constants in `identity/matrix.go`. Deny when the tenant, role,
 resource, or action is missing; when the path tenant is not the assigned
@@ -108,11 +110,14 @@ Assignments are process-local memory, not a PostgreSQL policy schema.
 | `POST` | `/v1/tenants/{tenant_id}/ops/replay` | `MX-005` |
 | `POST` | `/v1/tenants/{tenant_id}/ops/rebuild` | `MX-006` |
 | `GET` | `/v1/tenants/{tenant_id}/ops/audit` | `MX-007` |
+| `GET` | `/metrics` | `MX-010`; Go-selected aggregate runtime scope, never a path tenant |
 
-After a valid session, Go evaluates `Allow` for the path tenant. Unmatched
-membership, unassigned or service-like principals, nil policy, and
-cross-tenant paths return `403 {"error":"forbidden"}` with no projection, ops,
-lineage, audit, forecast-feature, or forecast-prediction payload and without starting SSE. After an allow, a missing
+After a valid session, Go evaluates `Allow` for the path tenant on product
+routes. `/metrics` is the sole exception: Go selects `SCOPE-RUNTIME`, with no
+caller-selected scope. Unmatched membership, unassigned or service-like
+principals, nil policy, and cross-tenant paths return `403 {"error":"forbidden"}`
+with no projection, ops, lineage, audit, forecast-feature, or
+forecast-prediction payload and without starting SSE. After an allow, a missing
 batch or a batch id that only exists under another tenant returns
 `404 {"error":"not_found"}` and does not distinguish those cases. Open inventory SSE re-checks
 session and `MX-001` on heartbeat and before each event.

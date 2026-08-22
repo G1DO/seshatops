@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"time"
+
+	"github.com/G1DO/seshatops/observability"
 )
 
 func runWorker(
@@ -25,6 +27,10 @@ func runWorker(
 		retryMax = retryBase
 	}
 	backoff := retryBase
+	obsCtx := ctx
+	if generated, _, err := observability.EnsureCorrelationID(ctx); err == nil {
+		obsCtx = generated
+	}
 	for {
 		err := cycle(ctx)
 		if ctx.Err() != nil {
@@ -32,7 +38,7 @@ func runWorker(
 		}
 		if err != nil {
 			setHealthy(false)
-			log.Printf("seshatops %s worker unavailable; retrying", name)
+			observability.Log(obsCtx, slog.Default(), observability.EventWorkerRetrying, observability.Fields{Worker: observability.Worker(name)})
 			if !waitFor(ctx, backoff) {
 				return
 			}

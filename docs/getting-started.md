@@ -40,6 +40,12 @@ volumes, and requires the exact confirmation token shown above. `smoke` starts
 the stack from a clean disposable state, verifies the browser login and tenant
 authorization flow, restarts the Go runtime, and verifies the bootstrap again.
 
+After authenticating in the browser, `GET /metrics` is available through the
+same-origin Vite proxy to the explicitly authorized local release observer.
+It exposes bounded aggregate release signals only; see
+[Release observability](operations/observability.md) for access, metric
+lifecycles, redaction rules, and practical queries.
+
 ## Individual commands
 
 ### Bootstrap

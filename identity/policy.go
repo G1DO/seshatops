@@ -1,9 +1,9 @@
 package identity
 
-// Authorizer evaluates tenant-scoped allow-list decisions. Callers must treat
-// a nil Authorizer as deny.
+// Authorizer evaluates allow-list decisions for a Go-selected tenant or
+// release scope. Callers must treat a nil Authorizer as deny.
 type Authorizer interface {
-	Allow(principalID, tenantID, resource, action string) error
+	Allow(principalID, scopeID, resource, action string) error
 }
 
 // Policy binds platform assignments to the frozen permission matrix.
@@ -17,14 +17,16 @@ func NewPolicy(dir *Directory) *Policy {
 	return &Policy{dir: dir}
 }
 
-// Allow reports whether principalID may perform action on resource in tenantID.
-// tenantID is the path assertion (tenant UUID). Missing, incomplete, or
-// unmatched membership is deny.
-func (p *Policy) Allow(principalID, tenantID, resource, action string) error {
+// Allow reports whether principalID may perform action on resource in scopeID.
+// For product APIs scopeID is the path tenant UUID. The aggregate release
+// metrics handler selects ScopeRuntime itself; no caller-controlled request
+// field can select that scope. Missing, incomplete, or unmatched membership is
+// deny.
+func (p *Policy) Allow(principalID, scopeID, resource, action string) error {
 	if p == nil || p.dir == nil {
 		return ErrForbidden
 	}
-	if principalID == "" || tenantID == "" || resource == "" || action == "" {
+	if principalID == "" || scopeID == "" || resource == "" || action == "" {
 		return ErrForbidden
 	}
 
@@ -34,7 +36,7 @@ func (p *Policy) Allow(principalID, tenantID, resource, action string) error {
 	}
 
 	var roles []string
-	matchedTenant := false
+	matchedScope := false
 	for _, row := range rows {
 		if row.PrincipalID != principalID {
 			return ErrForbidden
@@ -42,20 +44,20 @@ func (p *Policy) Allow(principalID, tenantID, resource, action string) error {
 		if row.TenantID == "" {
 			return ErrForbidden
 		}
-		if row.TenantID != tenantID {
+		if row.TenantID != scopeID {
 			continue
 		}
 		if row.RoleID == "" {
 			return ErrForbidden
 		}
-		matchedTenant = true
+		matchedScope = true
 		roles = append(roles, row.RoleID)
 	}
-	if !matchedTenant {
+	if !matchedScope {
 		return ErrForbidden
 	}
 	for _, role := range roles {
-		if matrixAllows(tenantID, role, resource, action) {
+		if matrixAllows(scopeID, role, resource, action) {
 			return nil
 		}
 	}

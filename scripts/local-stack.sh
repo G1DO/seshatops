@@ -102,7 +102,7 @@ smoke() {
   bootstrap_output=$(run_bootstrap)
   assert_json_field "$bootstrap_output" "value['status'] == 'complete' and value['event_counts']['source'] == 5"
   forecast_output=$(run_forecast)
-  assert_json_field "$forecast_output" "value['prediction_status'] == 'predicted'"
+  assert_json_field "$forecast_output" "value['prediction_status'] == 'predicted' and value['observability']['python_invocation_outcome'] == 'available' and value['observability']['lifecycle'] == 'process_local_invocation'"
 
   compose exec -T runtime python3 /app/scripts/local-smoke.py
 

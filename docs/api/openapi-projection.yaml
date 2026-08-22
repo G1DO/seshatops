@@ -14,6 +14,59 @@ info:
 servers:
   - url: /
 paths:
+  /metrics:
+    get:
+      operationId: getReleaseMetrics
+      summary: Authenticated aggregate release-health metrics
+      description: >
+        Prometheus text exposition for bounded aggregate release signals.
+        Requires the Go-selected SCOPE-RUNTIME MX-010 release-observer row;
+        it exposes no tenant, user, resource, event, or correlation labels.
+        Process-local counters reset on restart; durable outbox and processing
+        gauges are refreshed from PostgreSQL on each authorized scrape.
+      responses:
+        "200":
+          description: Bounded local metrics in Prometheus text format
+          headers:
+            X-Correlation-ID:
+              description: Generated runtime correlation ID for this request
+              schema:
+                type: string
+                format: uuid
+          content:
+            text/plain:
+              schema:
+                type: string
+        "400":
+          description: Query parameters are not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "401":
+          description: Missing, expired, forged, or revoked Go-owned session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "403":
+          description: Authenticated caller lacks the explicit release-observer permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "405":
+          description: Method not allowed; Allow is GET
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+        "500":
+          description: Aggregate durable metrics snapshot could not be read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
   /v1/tenants/{tenant_id}/inventory:
     get:
       operationId: getInventorySnapshot

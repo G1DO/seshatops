@@ -86,6 +86,11 @@ broker probes, and both worker loops are healthy. The process handles
 consumer loops, closing their broker clients, clearing the post-commit
 projection notifier, and closing PostgreSQL. Worker failures use bounded
 process retry backoff in addition to the existing outbox and broker semantics.
+It also emits JSON structured logs and an authenticated aggregate `/metrics`
+release surface; the surface is process-local where documented, excludes
+tenant and business labels, and never makes optional forecast/Python
+availability part of core readiness. See [release
+observability](../operations/observability.md).
 
 The executable reads `SESHATOPS_LISTEN_ADDR`, `SESHATOPS_DATABASE_URL`,
 `SESHATOPS_BROKER_SEEDS`, `SESHATOPS_OIDC_ISSUER`,

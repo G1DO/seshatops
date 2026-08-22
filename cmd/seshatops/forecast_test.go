@@ -145,6 +145,22 @@ func TestRunFrozenForecastFailuresDoNotPersist(t *testing.T) {
 	}
 }
 
+func TestPythonTelemetryOutcomeIsBounded(t *testing.T) {
+	for _, tt := range []struct {
+		err  error
+		want string
+	}{
+		{platform.ErrPythonUnavailable, "unavailable"},
+		{platform.ErrPythonTimeout, "timeout"},
+		{platform.ErrPythonInvalidResponse, "invalid_response"},
+		{errors.New("other"), ""},
+	} {
+		if got := string(pythonTelemetryOutcome(tt.err)); got != tt.want {
+			t.Fatalf("outcome(%v)=%q want %q", tt.err, got, tt.want)
+		}
+	}
+}
+
 func TestValidateFrozenM4OutcomeRejectsChangedMetric(t *testing.T) {
 	python := testPython(t)
 	producer := platform.CommandCandidateArtifactProducer{

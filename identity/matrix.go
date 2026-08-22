@@ -10,9 +10,13 @@ const (
 	TenantNS001UUID = "11111111-1111-4111-8111-111111111111"
 	TenantNS002     = "TENANT-NS-002"
 	TenantNS002UUID = "22222222-2222-4222-8222-222222222222"
+	// ScopeRuntime authorizes the aggregate release-observability endpoint.
+	// It is selected only by Go; it is never derived from an HTTP request.
+	ScopeRuntime = "SCOPE-RUNTIME"
 
 	RoleOpsReader        = "ROLE-OPS-READER"
 	RolePlatformOperator = "ROLE-PLATFORM-OPERATOR"
+	RoleReleaseObserver  = "ROLE-RELEASE-OBSERVER"
 
 	ResInventoryProjection = "RES-INVENTORY-PROJECTION"
 	ResOpsVisibility       = "RES-OPS-VISIBILITY"
@@ -22,6 +26,7 @@ const (
 	ResAudit               = "RES-AUDIT"
 	ResForecastFeatures    = "RES-FORECAST-FEATURES"
 	ResForecastPredictions = "RES-FORECAST-PREDICTIONS"
+	ResReleaseMetrics      = "RES-RELEASE-METRICS"
 
 	ActRead              = "ACT-READ"
 	ActQuarantineRelease = "ACT-QUARANTINE-RELEASE"
@@ -38,6 +43,7 @@ const (
 	MX007 = "MX-007"
 	MX008 = "MX-008"
 	MX009 = "MX-009"
+	MX010 = "MX-010"
 )
 
 type allowRow struct {
@@ -59,6 +65,7 @@ var frozenAllowList = []allowRow{
 	{MX007, TenantNS001UUID, RolePlatformOperator, ResAudit, ActAuditRead},
 	{MX008, TenantNS001UUID, RoleOpsReader, ResForecastFeatures, ActRead},
 	{MX009, TenantNS001UUID, RoleOpsReader, ResForecastPredictions, ActRead},
+	{MX010, ScopeRuntime, RoleReleaseObserver, ResReleaseMetrics, ActRead},
 }
 
 func matrixAllows(tenantID, roleID, resource, action string) bool {

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/G1DO/seshatops/identity"
+	"github.com/G1DO/seshatops/observability"
 	"github.com/G1DO/seshatops/platform"
 	"github.com/G1DO/seshatops/relay"
 )
@@ -26,7 +27,16 @@ type Server struct {
 	policy       identity.Authorizer
 	now          func() time.Time
 	sseHeartbeat time.Duration
+	metrics      *observability.Registry
 	OnDecision   func(ControlDecision)
+}
+
+// SetMetricsRegistry attaches the process-local release metrics registry. It
+// is optional for library callers that do not serve the /metrics endpoint.
+func (s *Server) SetMetricsRegistry(registry *observability.Registry) {
+	if s != nil {
+		s.metrics = registry
+	}
 }
 
 // NewServer constructs the API server. hub may be nil only when SSE is
