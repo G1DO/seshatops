@@ -103,11 +103,22 @@ func (s *Server) forecastPredictionFreshness(r *http.Request, record platform.Pr
 	if err != nil {
 		return ForecastPredictionFreshness{}, err
 	}
+	if source.Status == forecast.SnapshotStatusStale {
+		freshness.Status = forecastFreshnessStale
+		return freshness, nil
+	}
 	if source.Status != forecast.SnapshotStatusComplete {
 		return freshness, nil
 	}
 	snapshot, err := forecast.BuildFeatureSnapshot(source.History, record.TenantID, source.Boundary)
-	if err != nil || snapshot.Status != forecast.SnapshotStatusComplete {
+	if err != nil {
+		return freshness, nil
+	}
+	if snapshot.Status == forecast.SnapshotStatusStale {
+		freshness.Status = forecastFreshnessStale
+		return freshness, nil
+	}
+	if snapshot.Status != forecast.SnapshotStatusComplete {
 		return freshness, nil
 	}
 	if record.FeatureSnapshotID == snapshot.SnapshotID && record.FeatureSnapshotChecksum == snapshot.Checksum && snapshotContainsPrediction(snapshot, record) {
