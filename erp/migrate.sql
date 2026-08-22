@@ -3,7 +3,7 @@
 
 CREATE SCHEMA IF NOT EXISTS erp;
 
-CREATE TABLE erp.inventory_items (
+CREATE TABLE IF NOT EXISTS erp.inventory_items (
     tenant_id TEXT NOT NULL,
     item_id TEXT NOT NULL,
     quantity_on_hand BIGINT NOT NULL CHECK (quantity_on_hand >= 0),
@@ -11,7 +11,7 @@ CREATE TABLE erp.inventory_items (
     PRIMARY KEY (tenant_id, item_id)
 );
 
-CREATE TABLE erp.orders (
+CREATE TABLE IF NOT EXISTS erp.orders (
     order_id TEXT PRIMARY KEY,
     tenant_id TEXT NOT NULL,
     item_id TEXT NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE erp.orders (
     accepted_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE erp.suppliers (
+CREATE TABLE IF NOT EXISTS erp.suppliers (
     tenant_id TEXT NOT NULL,
     supplier_id TEXT NOT NULL,
     aggregate_version BIGINT NOT NULL CHECK (aggregate_version >= 1),
@@ -32,7 +32,7 @@ CREATE TABLE erp.suppliers (
     PRIMARY KEY (tenant_id, supplier_id)
 );
 
-CREATE TABLE erp.ingredient_lots (
+CREATE TABLE IF NOT EXISTS erp.ingredient_lots (
     tenant_id TEXT NOT NULL,
     lot_id TEXT NOT NULL,
     supplier_id TEXT NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE erp.ingredient_lots (
     FOREIGN KEY (tenant_id, item_id) REFERENCES erp.inventory_items (tenant_id, item_id)
 );
 
-CREATE TABLE erp.production_batches (
+CREATE TABLE IF NOT EXISTS erp.production_batches (
     tenant_id TEXT NOT NULL,
     batch_id TEXT NOT NULL,
     lot_id TEXT NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE erp.production_batches (
     FOREIGN KEY (tenant_id, lot_id) REFERENCES erp.ingredient_lots (tenant_id, lot_id)
 );
 
-CREATE TABLE erp.shipments (
+CREATE TABLE IF NOT EXISTS erp.shipments (
     tenant_id TEXT NOT NULL,
     shipment_id TEXT NOT NULL,
     batch_id TEXT NOT NULL,
@@ -75,7 +75,7 @@ CREATE TABLE erp.shipments (
     FOREIGN KEY (tenant_id, batch_id) REFERENCES erp.production_batches (tenant_id, batch_id)
 );
 
-CREATE TABLE erp.outbox (
+CREATE TABLE IF NOT EXISTS erp.outbox (
     event_id TEXT PRIMARY KEY,
     tenant_id TEXT NOT NULL,
     aggregate_type TEXT NOT NULL,
@@ -94,6 +94,6 @@ CREATE TABLE erp.outbox (
     UNIQUE (tenant_id, aggregate_type, aggregate_id, aggregate_version)
 );
 
-CREATE INDEX erp_outbox_pending_idx
+CREATE INDEX IF NOT EXISTS erp_outbox_pending_idx
     ON erp.outbox (status, created_at)
     WHERE status IN ('pending', 'publishing');

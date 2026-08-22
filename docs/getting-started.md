@@ -5,7 +5,44 @@ scenario. It uses only the synthetic fixture committed under `northstar/`; it
 does not import production data and it does not make a production deployment
 claim.
 
-## Bootstrap
+## One-command local stack
+
+Prerequisites are Docker Engine and Docker Compose v2. The committed Compose
+file uses pinned PostgreSQL, Redpanda, and mock OIDC images plus local-only
+credentials. Those values are disposable test configuration, not secrets.
+
+From the repository root:
+
+```bash
+./scripts/local-stack.sh quickstart
+```
+
+Open `http://web.seshatops.localhost:5173` and sign in as
+`northstar-demo-operator`; the mock OIDC page accepts any password. The flow
+uses Authorization Code + PKCE, and the browser sends application requests
+only to the Go `/auth/*` and `/v1/*` paths. No session injection or trusted
+tenant header is used.
+
+The lifecycle commands are:
+
+```bash
+./scripts/local-stack.sh status
+./scripts/local-stack.sh logs [service]
+./scripts/local-stack.sh down
+SESHATOPS_LOCAL_RESET_CONFIRM='I_UNDERSTAND_DISPOSABLE_LOCAL_RESET' \
+  ./scripts/local-stack.sh reset
+./scripts/local-stack.sh smoke
+```
+
+`down` stops the Compose project and preserves its named PostgreSQL and
+Redpanda volumes. `reset` removes only that project, its network, and its
+volumes, and requires the exact confirmation token shown above. `smoke` starts
+the stack from a clean disposable state, verifies the browser login and tenant
+authorization flow, restarts the Go runtime, and verifies the bootstrap again.
+
+## Individual commands
+
+### Bootstrap
 
 Start PostgreSQL and Redpanda using the repository's pinned images/configuration,
 then set a disposable database URL and broker seed. The bootstrap command only
@@ -33,7 +70,7 @@ re-run to continue from the last committed ERP transaction. Override the
 bounded wait with `SESHATOPS_NORTHSTAR_BOOTSTRAP_TIMEOUT=3m` when diagnosing a
 slow disposable environment.
 
-## Frozen forecast
+### Frozen forecast
 
 After the platform schema is available, run the one-shot frozen M4 forecast
 runner from the repository root:
@@ -72,7 +109,7 @@ Set them as the comma-separated `SESHATOPS_AUTH_ASSIGNMENTS` value. There is
 intentionally no assignment for `TENANT-NS-002`; the identity matrix also has
 no permissive fallback for that tenant.
 
-## Reset
+## Scoped Northstar reset
 
 Reset is a separate explicit command and is never run by bootstrap. It deletes
 only the `TENANT-NS-001` ERP source/outbox rows and derived platform rows. It

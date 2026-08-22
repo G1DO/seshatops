@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -20,6 +21,7 @@ const (
 	envForecastCandidate     = "SESHATOPS_FORECAST_CANDIDATE"
 	envForecastTimeout       = "SESHATOPS_FORECAST_TIMEOUT"
 	envForecastConfirm       = "SESHATOPS_FORECAST_CONFIRM"
+	envLocalStack            = "SESHATOPS_LOCAL_STACK"
 	defaultForecastPython    = "python3"
 	defaultForecastCandidate = "forecast_candidate/stockout_candidate.py"
 	defaultForecastTimeout   = 30 * time.Second
@@ -54,7 +56,7 @@ func forecastCommandConfigFromEnv(lookup func(string) (string, bool)) (forecastC
 	if err := validateDatabaseURL(databaseURL); err != nil {
 		return forecastCommandConfig{}, fmt.Errorf("%s: %w", envDatabaseURL, err)
 	}
-	if err := validateDisposableNorthstarURL(databaseURL); err != nil {
+	if err := validateDisposableNorthstarURL(databaseURL); err != nil && !localStackDatabaseAllowed(databaseURL, lookup) {
 		return forecastCommandConfig{}, fmt.Errorf("%s: forecast writes require the disposable Northstar database: %w", envDatabaseURL, err)
 	}
 	confirmation, ok := lookup(envForecastConfirm)
@@ -88,6 +90,22 @@ func forecastCommandConfigFromEnv(lookup func(string) (string, bool)) (forecastC
 		CandidateScript: candidateScript,
 		Timeout:         timeout,
 	}, nil
+}
+
+func localStackDatabaseAllowed(raw string, lookup func(string) (string, bool)) bool {
+	// The Compose-only opt-in permits its exact internal service name while the
+	// normal forecast and reset paths remain localhost-only.
+	if value, ok := lookup(envLocalStack); !ok || strings.TrimSpace(value) != "true" {
+		return false
+	}
+	if err := validateDatabaseURL(raw); err != nil {
+		return false
+	}
+	u, err := url.Parse(raw)
+	if err != nil || strings.ToLower(u.Hostname()) != "postgres" {
+		return false
+	}
+	return strings.TrimPrefix(u.Path, "/") == northstarDisposableDatabase
 }
 
 type forecastPersister interface {

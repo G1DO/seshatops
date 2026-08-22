@@ -61,6 +61,21 @@ func TestForecastCommandConfigUsesBoundedDefaultsAndOverrides(t *testing.T) {
 	}
 }
 
+func TestForecastCommandConfigAllowsOnlyTheExplicitLocalStackDatabase(t *testing.T) {
+	env := map[string]string{
+		envDatabaseURL:     "postgres://seshatops@postgres/seshatops_northstar_disposable",
+		envForecastConfirm: forecastConfirmation,
+		envLocalStack:      "true",
+	}
+	if _, err := forecastCommandConfigFromEnv(mapLookup(env)); err != nil {
+		t.Fatal(err)
+	}
+	delete(env, envLocalStack)
+	if _, err := forecastCommandConfigFromEnv(mapLookup(env)); err == nil || !strings.Contains(err.Error(), "disposable Northstar database") {
+		t.Fatalf("err=%v", err)
+	}
+}
+
 func TestForecastCommandConfigRejectsNonPositiveTimeout(t *testing.T) {
 	env := map[string]string{
 		envDatabaseURL:     "postgres://seshatops@localhost/seshatops_northstar_disposable",

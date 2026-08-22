@@ -9,11 +9,10 @@ session state and sends cookies.
 
 - Node.js `24.14.0` and npm `11.9.0` (see [event-spine.md](../docs/design/specifications/event-spine.md) §9)
 
-There is no `cmd/` binary. `identity.Service.Handler()` serves `/auth/*` and
-`api.NewServer(...).Handler()` serves `/v1/*`; they are separate `http.Handler`
-values. Tests compose them (`api/*_test.go`, `identity/*_test.go`). A process
-that mounts both on `:8080` is not in this repository. Vite still proxies
-`/auth` and `/v1` to `http://127.0.0.1:8080` when `VITE_API_BASE_URL` is empty.
+The Go runtime under `cmd/seshatops` mounts `identity.Service.Handler()` and
+`api.NewServer(...).Handler()` on `:8080`. The local stack builds that runtime
+alongside this web image; tests also compose the handlers directly
+(`api/*_test.go`, `identity/*_test.go`).
 
 ## Setup
 
@@ -27,14 +26,16 @@ npm ci
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `VITE_API_BASE_URL` | empty (same origin) | Go API origin; empty uses the Vite `/auth` and `/v1` proxy |
+| `VITE_API_PROXY_TARGET` | `http://127.0.0.1:8080` | Vite proxy target; the Compose web container sets `http://runtime:8080` |
+| `VITE_CACHE_DIR` | `node_modules/.vite` | Vite cache directory; the Compose web container sets `/tmp/seshatops-vite` |
 | `VITE_TENANT_ID` | Northstar fixture tenant | Demo tenant context only (not authorization) |
 | `VITE_ITEM_ID` | Northstar flour item | Inventory resource whose stockout assessment is displayed; not authorization |
 
 Local UI: leave `VITE_API_BASE_URL` unset so the browser talks to the Vite
-origin. Vite proxies `/auth` and `/v1` → `http://127.0.0.1:8080`, avoiding
-CORS (the Go packages do not advertise CORS headers). The UI is exercised by
-Vitest; `npm run dev` needs a combined Go process that this repo does not
-ship.
+origin. Vite proxies `/auth` and `/v1` to the configured
+`VITE_API_PROXY_TARGET`, avoiding CORS (the Go packages do not advertise CORS
+headers). Use `./scripts/local-stack.sh quickstart` for the combined Go and
+web runtime.
 
 Only set an absolute `VITE_API_BASE_URL` when the API origin allows that browser
 origin via CORS.
