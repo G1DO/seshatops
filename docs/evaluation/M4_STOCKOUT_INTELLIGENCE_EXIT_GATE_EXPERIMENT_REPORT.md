@@ -79,13 +79,19 @@ explicitly skipped because Docker was unavailable. The web suite also passed:
 10 test files, 52 tests, typecheck, and Vite build. The typed command boundary
 test passed malformed-response, timeout, and unavailable-command cases.
 
-Hosted CI for PR #98 on final commit `bad5073` recorded [Go CI success](https://github.com/G1DO/seshatops/actions/runs/32181303886),
-including the Docker-backed API gate, [Web CI success](https://github.com/G1DO/seshatops/actions/runs/32181304013),
-and success for all Documentation CI jobs, including [link check](https://github.com/G1DO/seshatops/actions/runs/32181303898/job/95854713070).
-An earlier documentation run on implementation commit `8b53501` [failed](https://github.com/G1DO/seshatops/actions/runs/32180186848/job/95851340432)
-only on the pre-existing Redpanda URL in `docs/design/specifications/event-spine.md`,
-which returned HTTP 500; the final docs-only rerun passed without changing that
-unrelated link.
+Hosted CI for PR #98 — implementation commit `bad5073` recorded
+[Go CI success](https://github.com/G1DO/seshatops/actions/runs/32181303886)
+(including the Docker-backed API gate), [Web CI success](https://github.com/G1DO/seshatops/actions/runs/32181304013),
+and success for all Documentation CI jobs, including
+[link check](https://github.com/G1DO/seshatops/actions/runs/32181303898/job/95854713070).
+The merged PR head was the later docs-only commit `39911bc`; it carries the same
+implementation as `bad5073` with no code change. An earlier Documentation run on
+implementation commit `8b53501` had
+[failed](https://github.com/G1DO/seshatops/actions/runs/32180186848/job/95851340432)
+only on the pre-existing Redpanda URL in `docs/design/specifications/event-spine.md`
+returning HTTP 500; the docs-only follow-ups (`bad5073` → `39911bc`) passed without
+changing that unrelated link. This preserves the distinction between implementation
+evidence and documentation-only follow-up.
 
 ## Limitations and failed cases
 

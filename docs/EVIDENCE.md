@@ -83,13 +83,18 @@ the local Windows environment because Docker was unavailable; no local exit
 gate pass is claimed for those cases. This remains test-environment evidence,
 not production quality, availability, or business-impact evidence.
 
-Hosted PR #98 [Go CI passed](https://github.com/G1DO/seshatops/actions/runs/32181303886)
-on final commit `bad5073`, including the Docker-backed API gate;
-[Web CI passed](https://github.com/G1DO/seshatops/actions/runs/32181304013),
-and all Documentation CI jobs passed, including [link check](https://github.com/G1DO/seshatops/actions/runs/32181303898/job/95854713070).
-An earlier documentation run on implementation commit `8b53501` failed on the
-pre-existing Redpanda URL returning HTTP 500; the final docs-only rerun passed
-without changing that unrelated link.
+Hosted PR #98 implementation evidence: [Go CI passed](https://github.com/G1DO/seshatops/actions/runs/32181303886)
+on implementation commit `bad5073` (including the Docker-backed API gate) and
+[Web CI passed](https://github.com/G1DO/seshatops/actions/runs/32181304013);
+all Documentation CI jobs passed on that implementation commit, including
+[link check](https://github.com/G1DO/seshatops/actions/runs/32181303898/job/95854713070).
+The merged PR head was the later docs-only commit `39911bc` (no code change
+beyond documentation). An earlier Documentation run on implementation commit
+`8b53501` had [failed](https://github.com/G1DO/seshatops/actions/runs/32180186848/job/95851340432)
+only on the pre-existing Redpanda URL in `docs/design/specifications/event-spine.md`
+returning HTTP 500; the docs-only follow-ups (`bad5073` → `39911bc`) passed
+without changing that unrelated link. This preserves the distinction between
+implementation evidence and documentation-only follow-up.
 
 ## M5 one-shot forecast runner
 

@@ -5,11 +5,46 @@ scenario. It uses only the synthetic fixture committed under `northstar/`; it
 does not import production data and it does not make a production deployment
 claim.
 
+See also: [Architecture/topology](architecture/overview.md) for the as-built
+process and Compose services, [Configuration](#configuration) below,
+[Compatibility](COMPATIBILITY.md) for pinned toolchain, [Operations](operations/README.md)
+and [Observability](operations/observability.md), [Troubleshooting](TROUBLESHOOTING.md),
+and [Known limitations](KNOWN_LIMITATIONS.md).
+
+## Prerequisites
+
+- **Required:** Docker Engine, Docker Compose v2, Git, a clean checkout of this
+  repository. Docker is also required for Testcontainers-backed `go test` cases;
+  to reuse an existing Postgres set `SESHATOPS_TEST_DATABASE_URL`.
+- **For demos/CI validation:** host Python `3.10` or newer (harness guards this).
+- **Resources:** single-host disposable; no cloud, Kubernetes, or external
+  broker. See [Compatibility](COMPATIBILITY.md) for pinned images and versions.
+
+## Configuration
+
+All `SESHATOPS_*` names are the contract. Required for `cmd/seshatops`:
+
+- `SESHATOPS_LISTEN_ADDR`, `SESHATOPS_DATABASE_URL`, `SESHATOPS_BROKER_SEEDS`,
+  `SESHATOPS_OIDC_ISSUER`, `SESHATOPS_OIDC_CLIENT_ID`,
+  `SESHATOPS_OIDC_REDIRECT_URL`, `SESHATOPS_COOKIE_NAME`, `SESHATOPS_COOKIE_SECURE`.
+- Optional: `SESHATOPS_OIDC_CLIENT_SECRET`, `SESHATOPS_OIDC_AUDIENCE`,
+  `SESHATOPS_SESSION_TTL`, `SESHATOPS_AUTH_ASSIGNMENTS` (comma-separated
+  `principal|tenant|role` rows). Compose sets the deterministic local
+  assignments for `northstar-demo-operator` (see [Individual commands](#bootstrap) below).
+- Local-only guard: `SESHATOPS_LOCAL_STACK=true` (Compose only) permits the
+  `postgres` service name inside the forecast command; it does not relax the
+  localhost guard on `reset-northstar`.
+
+The quickstart uses only committed, pinned images and synthetic local-only
+credentials (`seshatops-local-only`) — not secrets. No host ports are published
+for PostgreSQL, Redpanda, or Go; the browser reaches Vite on `127.0.0.1:5173`
+and same-origin `/auth/*` + `/v1/*` (+ `MX-010` `/metrics`). See
+[architecture/overview.md](architecture/overview.md) and
+[COMPATIBILITY.md](COMPATIBILITY.md).
+
 ## One-command local stack
 
-Prerequisites are Docker Engine and Docker Compose v2. Release-demonstration
-commands additionally require host Python 3.10 or newer, Git, and a Git
-checkout of this repository. The committed Compose file uses pinned
+The committed Compose file uses pinned
 PostgreSQL, Redpanda, and mock OIDC images plus local-only credentials. Those
 values are disposable test configuration, not secrets.
 
@@ -160,10 +195,10 @@ outcome.
 
 If a local run shows degraded readiness, quarantine, or forecast staleness, follow the release runbooks that use only implemented commands:
 
-* [Broker interruption and outbox backlog recovery](operations/runbooks/broker-interruption.md)
-* [Poison and incompatible event isolation](operations/runbooks/poison-isolation.md)
-* [Tenant-scoped projection rebuild](operations/runbooks/rebuild-checksum.md)
-* [Forecast degradation](operations/runbooks/forecast-degradation.md)
+- [Broker interruption and outbox backlog recovery](operations/runbooks/broker-interruption.md)
+- [Poison and incompatible event isolation](operations/runbooks/poison-isolation.md)
+- [Tenant-scoped projection rebuild](operations/runbooks/rebuild-checksum.md)
+- [Forecast degradation](operations/runbooks/forecast-degradation.md)
 
 These distinguish retryable transport failure, quarantined poison, immutable conflict, authorization denial, and forecast-only degradation, and they never prescribe replay/release when the state is not safely releasable. See the [operations index](operations/README.md) and [release observability](operations/observability.md) for signals and lifecycles.
 
@@ -252,3 +287,40 @@ go run ./cmd/seshatops reset-northstar
 Redpanda history is retained. The next bootstrap uses a fresh one-shot
 consumer group and therefore replays retained events through the normal
 duplicate-safe consumer path.
+
+## Troubleshooting
+
+Common disposable-environment failures and the documented fix. No production
+SLO or capacity claim.
+
+- **Docker unavailable / Testcontainers skip** — `go test ./...` reports explicit
+  skip for PostgreSQL cases; no DB-backed result is claimed. Fix: install
+  Docker Engine, then re-run `go test ./... -count=1 -timeout 15m`. Hosted CI
+  covers the API gate.
+- **Bootstrap hangs near 2 min** — slow disposable environment. Override
+  `SESHATOPS_NORTHSTAR_BOOTSTRAP_TIMEOUT=3m` (see [Bootstrap](#bootstrap)) and
+  retry; or `docker compose --project-name seshatops-local --file compose.yaml logs postgres`.
+- **`/readyz` is `503` after broker interruption** — see runbook
+  [broker-interruption.md](operations/runbooks/broker-interruption.md) (transient relay,
+  `seshatops_outbox_backlog_records_pending`, `seshatops_runtime_ready 0`); the
+  demo scenario `broker-recovery` is the guarded local reproduction.
+- **`/metrics` is `401`/`403`** — caller lacks `MX-010` `SCOPE-RUNTIME`
+  `ROLE-RELEASE-OBSERVER`. Re-login as `northstar-demo-operator` at
+  `http://web.seshatops.localhost:5173` and fetch same-origin as documented in
+  [operations/observability.md](operations/observability.md).
+- **Forecast `forecast_unavailable` / `forecast_timeout` / `invalid_response`** —
+  one-shot `go run ./cmd/seshatops forecast` failed before persistence; no row
+  was written. Check `SESHATOPS_FORECAST_PYTHON`, `SESHATOPS_FORECAST_TIMEOUT`,
+  `SESHATOPS_FORECAST_CANDIDATE`; see [forecast-degradation.md](operations/runbooks/forecast-degradation.md).
+- **`SESHATOPS_LOCAL_RESET_CONFIRM` / `SESHATOPS_DEMO_CONFIRM` mismatch** — harness
+  refuses destructive cleanup when guards are wrong; it prints the required token.
+  See [Local-only fault boundary](#local-only-fault-boundary) and
+  [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for full guard matrix.
+- **Link check / Redpanda URL 500** — the spec link to `docs/design/specifications/event-spine.md`
+  historically returned 500 when the upstream is down; the 2026-08-18 reconciliation
+  documents the failed/successful hosted runs. Do not change the spec URL.
+
+Full guard checks, port/binding matrix, and log tail guidance: [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+Residual risks and unsupported conclusions: [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
+Release audit and evidence reconciliation: [evaluation/RELEASE_AUDIT_REPORT.md](evaluation/RELEASE_AUDIT_REPORT.md),
+[EVIDENCE.md](EVIDENCE.md).
