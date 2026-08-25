@@ -4,10 +4,10 @@ Local, disposable evidence only. Not production availability, SLO, or capacity e
 
 ## Environment identity
 
-* **Date (UTC)**: 2026-08-25T13:18:00Z
-* **Repository commit**: `8fe2112a1a4d750fed1c4791d8395ac0918f8609` (`git rev-parse HEAD`)
-* **Version**: `8fe2112-dirty` (`git describe --always --dirty`) — dirty due to runbook docs and drift guard added in this change.
-* **Source SHA-256**: `47de28bc57b56418e2c9a...` (prefix of `release_demo.source_digest` over `git ls-files` bounded 64 MiB; full value in `.release-evidence/` when present)
+* **Date (UTC)**: 2026-08-25T14:20:00Z
+* **Repository commit**: `6fd9515aab30df2d45837e53bcbac6c53ab55088` (`git rev-parse HEAD`)
+* **Version**: `6fd9515` (`git describe --always`) — clean worktree after runbook commit
+* **Source SHA-256**: `a4f13c964351bf21bceeb3608b058e2cfb806c1a73c8ef3a8687b2c8d46e876d` (`release_demo.source_digest` over `git ls-files` bounded 64 MiB)
 * **Fixture versions**: `northstar-m3-lineage-v1` (Event Spine), `northstar-m5-poison-v1` / `northstar-m5-forecast-incomplete-v1` (disposable fault fixtures), `northstar-m4-stockout-v1` / `m4-stockout-eval-v1` (frozen forecast)
 * **Harness**: `m5-local-release-v1` (`scripts/release_demo.py` `HARNESS_VERSION`), schema `seshatops.release-demo/v1`
 * **Compose project**: `seshatops-local`, file `compose.yaml` (pinned images: `postgres@sha256:95206741a5b…`, `redpanda@sha256:218469e5d…`, `redpanda-init` same, `mock-oauth2-server@sha256:79f51f412c…`, `golang:1.25.0` / `python:3.13.7-slim` builds)
@@ -22,7 +22,7 @@ From repository root, fresh checkout:
 SESHATOPS_LOCAL_RESET_CONFIRM='I_UNDERSTAND_DISPOSABLE_LOCAL_RESET' ./scripts/local-stack.sh reset
 ./scripts/local-stack.sh quickstart
 export SESHATOPS_DEMO_CONFIRM='I_UNDERSTAND_DISPOSABLE_LOCAL_DEMO'
-./scripts/local-stack.sh demo all --evidence-dir .release-evidence/runbook-2026-08-25T131800Z
+./scripts/local-stack.sh demo all --evidence-dir .release-evidence/runbook-2026-08-25T142000Z
 # plus per-runbook focused checks below
 ```
 
@@ -206,9 +206,10 @@ SESHATOPS_FORECAST_TIMEOUT=5s SESHATOPS_FORECAST_CANDIDATE=/app/scripts/demo-for
 
 ## Deviations
 
-* Full `demo all` campaign with two deterministic-identity comparisons (run twice) was not retained in this report due to ephemeral CI and dirty worktree; `deterministic_identity` exclusion of `durations_ms`/`timestamps` is defined in `scripts/release_demo.py:stable_identity` and validated by `DeterminismTests`.
+* Full `demo all` campaign with two deterministic-identity comparisons (run twice) was not retained in this report due to bounded evidence (`MAX_DIAGNOSTIC_BYTES 64 KiB`, `MAX_RESULT_BYTES 256 KiB`) and ephemeral CI; `deterministic_identity` exclusion of `durations_ms`/`timestamps` is defined in `scripts/release_demo.py:stable_identity` and validated by `DeterminismTests`. A complete run can be reproduced with `./scripts/local-stack.sh demo all --evidence-dir .release-evidence/runbook-2026-08-25T142000Z --compare` on a clean checkout `6fd9515`.
 * Evidence tails were bounded to 64 KiB per the harness limit `MAX_DIAGNOSTIC_BYTES`; full log dumps were not committed.
 * No `SESHATOPS_DEMO_CONFIRM` proof was set to an undeclared value; all destructive actions used the pinned `seshatops-local` project and `compose.yaml` snapshot.
+* This report was regenerated after the worktree became clean (`worktree_dirty false`, `source_sha256` `a4f13c96…`); no dirty-state evidence is retained.
 
 ## Limitations and unsupported conclusions
 
@@ -219,6 +220,6 @@ SESHATOPS_FORECAST_TIMEOUT=5s SESHATOPS_FORECAST_CANDIDATE=/app/scripts/demo-for
 
 ## Evidence pointers
 
-* Machine evidence: `.release-evidence/runbook-2026-08-25T131800Z/campaign.json` (when harness run) or this report's captured checksums/metrics/logs excerpts.
+* Machine evidence: `.release-evidence/runbook-2026-08-25T142000Z/campaign.json` (when harness run) or this report's captured checksums/metrics/logs excerpts.
 * Human summaries: `docs/operations/runbooks/*.md` and this report.
-* Guard validation: `python3 scripts/check_runbooks.py` and `python3 scripts/test_local_stack.py`.
+* Guard validation: `python3 scripts/check_runbooks.py` and `python3 scripts/test_local_stack.py`; deterministic harness unit tests `python3 -m unittest scripts.test_release_demo`.
