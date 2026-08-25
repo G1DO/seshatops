@@ -20,7 +20,6 @@ jobs:
     # Least-privilege: only tag jobs get publish permissions, gated by environment protection
     permissions:
       contents: write
-      id-token: write
     environment: release
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
@@ -76,6 +75,49 @@ jobs:
           npm --prefix web ci
           npm --prefix web run typecheck
           npm --prefix web run build
+
+      - name: Dependency vulnerability scan (Go)
+        run: |
+          set -euo pipefail
+          go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
+          govulncheck ./... 2>&1 | tee govulncheck.txt
+          cat govulncheck.txt
+          if grep -qi "vulnerability" govulncheck.txt; then
+            grep -qi "No vulnerabilities found" govulncheck.txt || exit 1
+          fi
+
+      - name: Dependency audit (npm)
+        run: |
+          set -euo pipefail
+          npm --prefix web audit --json > npm-audit.json || true
+          python3 <<'PY' 2>/dev/null
+          import json
+          d=json.load(open('npm-audit.json'))
+          m=d.get('metadata',{}).get('vulnerabilities',{})
+          v=m.get('high',0)+m.get('critical',0)
+          print(f"high+critical={v}")
+          assert v==0, f"npm audit high+critical={v}"
+          PY
+
+      - name: License inventory (Go + npm)
+        run: |
+          set -euo pipefail
+          go list -m all > go-deps.txt
+          if grep -iq "gpl\|agpl" go-deps.txt; then
+            echo "GPL/AGPL found — see NOTICE" >&2; exit 1
+          fi
+          if grep -qi '"license": *"GPL' web/package-lock.json; then
+            echo "GPL in web/package-lock.json" >&2; exit 1
+          fi
+
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e  # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSION: '8.24.3'
+          GITLEAKS_ENABLE_COMMENTS: 'false'
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: 'false'
+          GITLEAKS_ENABLE_SUMMARY: 'false'
 
       - name: Build stamped executables and assets
         run: |
