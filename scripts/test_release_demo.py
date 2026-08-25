@@ -429,6 +429,55 @@ class CommandPropagationTests(unittest.TestCase):
                 'outcome="complete"',
             )
 
+    def test_poll_metrics_waits_for_counter_advance(self) -> None:
+        class SequencedClient:
+            def __init__(self):
+                self.samples = [5, 6]
+
+            def request(self, path, *, accept):
+                self.assert_request(path, accept)
+                value = self.samples.pop(0)
+                return (
+                    200,
+                    {},
+                    (
+                        'seshatops_consumer_processing_outcomes_total'
+                        f'{{outcome="processed"}} {value}\n'
+                    ).encode(),
+                )
+
+            @staticmethod
+            def assert_request(path, accept):
+                if path != "/metrics" or accept != "text/plain":
+                    raise AssertionError((path, accept))
+
+        builder = release_demo.ResultBuilder("duplicate-delivery", RELEASE)
+        driver = release_demo.DemoDriver(
+            release_demo.CommandRunner(),
+            builder,
+            Path("unused-evidence"),
+        )
+        with mock.patch.object(release_demo.time, "sleep", return_value=None):
+            observed = driver.poll_metrics(
+                SequencedClient(),
+                lambda text: release_demo.metric_value(
+                    text,
+                    "seshatops_consumer_processing_outcomes_total",
+                    'outcome="processed"',
+                )
+                > 5,
+                timeout=1,
+                description="wait for duplicate consumer telemetry",
+            )
+
+        self.assertIn('outcome="processed"} 6', observed)
+        self.assertEqual(
+            builder.observations["counts"][
+                "wait_for_duplicate_consumer_telemetry_poll_attempts"
+            ],
+            2,
+        )
+
     def test_http_client_disables_ambient_proxy_routing(self) -> None:
         with mock.patch.dict(
             release_demo.os.environ,

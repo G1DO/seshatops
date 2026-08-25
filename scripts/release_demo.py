@@ -1926,7 +1926,17 @@ def scenario_duplicate(driver: DemoDriver) -> None:
         timeout=60,
         description="wait for duplicate_noop disposition",
     )
-    telemetry_after = driver.metrics(client)
+    telemetry_after = driver.poll_metrics(
+        client,
+        lambda text: metric_value(
+            text,
+            "seshatops_consumer_processing_outcomes_total",
+            'outcome="processed"',
+        )
+        > processed_before,
+        timeout=30,
+        description="wait for duplicate consumer telemetry",
+    )
     processed_after = metric_value(
         telemetry_after,
         "seshatops_consumer_processing_outcomes_total",
