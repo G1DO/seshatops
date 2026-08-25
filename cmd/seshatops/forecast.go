@@ -274,6 +274,9 @@ type forecastCommandResult struct {
 	PredictionStatus          string                    `json:"prediction_status"`
 	Limitations               []string                  `json:"limitations"`
 	Observability             *forecastTelemetrySummary `json:"observability,omitempty"`
+	RuntimeVersion            string                    `json:"runtime_version"`
+	RuntimeCommit             string                    `json:"runtime_commit"`
+	RuntimeBuildTime          string                    `json:"runtime_build_time"`
 }
 
 // forecastTelemetrySummary is intentionally per command invocation. It is
@@ -351,6 +354,9 @@ func buildForecastCommandResult(history forecast.History, features forecast.Feat
 			"the persisted result uses the frozen M4 synthetic source boundary",
 			"the authorized read surface must report stale or unavailable freshness when live Event Spine history differs",
 		},
+		RuntimeVersion:   Version,
+		RuntimeCommit:    Commit,
+		RuntimeBuildTime: BuildTime,
 	}
 }
 

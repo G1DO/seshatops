@@ -1,0 +1,179 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    name: Build and publish immutable v0.1.0 artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # Least-privilege: only tag jobs get publish permissions, gated by environment protection
+    permissions:
+      contents: write
+      id-token: write
+    environment: release
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Check out tagged commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify tag matches committed release identity
+        run: |
+          set -euo pipefail
+          TAG=${GITHUB_REF#refs/tags/}
+          COMMIT=$(git rev-parse HEAD)
+          echo "tag=$TAG commit=$COMMIT"
+          if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "tag $TAG is not semantic vX.Y.Z" >&2
+            exit 1
+          fi
+          git describe --tags --exact-match HEAD 2>&1 | grep -q "$TAG" || (echo "HEAD is not exactly $TAG" >&2; exit 1)
+          if [ -n "$(git status --porcelain=v1)" ]; then
+            echo "worktree dirty at tag — refusing to publish" >&2; exit 1
+          fi
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          echo "COMMIT=$COMMIT" >> "$GITHUB_ENV"
+
+      - name: Set up Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5  # v5.5.0
+        with:
+          go-version: '1.25.0'
+          cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4.4.0
+        with:
+          node-version: "24.14.0"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69ea43a8ab7a6fb423a7a9ffae5e06a  # v5.6.0
+        with:
+          python-version: '3.12'
+
+      - name: Run verification (Go/Python/Web/Docs)
+        run: |
+          set -euo pipefail
+          go test ./... -count=1 -timeout 15m
+          python3 -m unittest discover -s forecast_candidate -p 'test_*.py' -v
+          python3 -m unittest scripts/test_release_demo.py -v
+          python3 scripts/test_local_stack.py
+          python3 scripts/check_runbooks.py
+          npm --prefix web ci
+          npm --prefix web run typecheck
+          npm --prefix web run build
+
+      - name: Build stamped executables and assets
+        run: |
+          set -euo pipefail
+          TAG=${TAG:-$(git describe --tags --exact-match HEAD)}
+          COMMIT=${COMMIT:-$(git rev-parse HEAD)}
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "build $TAG $COMMIT $BUILD_TIME"
+          mkdir -p dist
+          echo "$BUILD_TIME" > dist/BUILD_TIME
+          echo "$TAG $COMMIT $BUILD_TIME" > dist/VERSION
+          CGO_ENABLED=0 go build -trimpath \
+            -ldflags="-s -w -X main.Version=$TAG -X main.Commit=$COMMIT -X main.BuildTime=$BUILD_TIME" \
+            -o dist/seshatops ./cmd/seshatops
+          ./dist/seshatops version | python3 -m json.tool
+          ls -lh dist/seshatops
+
+      - name: Generate SBOM and dependency inventory
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          go list -m all > dist/go-deps.txt
+          go list -m -json all > dist/go-sbom.json 2>&1 || true
+          npm --prefix web sbom --sbom-format cyclonedx --omit dev \
+            > dist/web-sbom.cyclonedx.json 2>&1 || \
+            npm --prefix web sbom --omit dev > dist/web-sbom.json 2>&1 || \
+            cp web/package-lock.json dist/web-sbom.json
+          ls -lh dist/
+
+      - name: Generate checksums and source archive
+        run: |
+          set -euo pipefail
+          TAG=${TAG:-$(git describe --tags --exact-match HEAD)}
+          # Reproducible source archive from tagged commit
+          git archive --format=tar.gz --prefix="seshatops-${TAG}/" -o "dist/seshatops-${TAG}-source.tar.gz" HEAD
+          sha256sum "dist/seshatops-${TAG}-source.tar.gz" > dist/SHA256SUMS
+          sha256sum dist/seshatops >> dist/SHA256SUMS
+          sha256sum go.sum web/package-lock.json >> dist/SHA256SUMS 2>/dev/null || true
+          if [ -d web/dist ]; then
+            find web/dist -type f -exec sha256sum {} \; | sort >> dist/SHA256SUMS
+          fi
+          # Fixture/testdata checksums are already in forecast/testdata/*.sha256; include them
+          sha256sum forecast/testdata/*.sha256 2>/dev/null >> dist/SHA256SUMS || true
+          cat dist/SHA256SUMS
+          # Verify no secrets in dist
+          if grep -q "seshatops-local-only" dist/SHA256SUMS; then
+            echo "SHA256SUMS unexpectedly contains credential string" >&2; exit 1
+          fi
+
+      - name: Build pinned local images (for digest reference)
+        run: |
+          set -euo pipefail
+          docker compose version
+          docker compose --project-name seshatops-local --file compose.yaml build
+          grep -E 'image:.*@sha256' compose.yaml > dist/pinned-images.txt
+          cat dist/pinned-images.txt
+          cat compose.yaml | grep -E 'image:.*@sha256' || true
+
+      - name: Verify no artifact contains secrets or private material
+        run: |
+          set -euo pipefail
+          echo "scanning dist/ for secrets (bounded 1MiB per file)"
+          find dist -type f -size -1M -exec grep -l "ghp_\|AKIA\|seshatops.*password\|Bearer " {} \; && echo "secret pattern found in dist" >&2 && exit 1 || echo "no secret pattern in dist"
+          echo "checking for private Ahoy strings"
+          if grep -R -i "ahoy" dist/ 2>/dev/null; then echo "Ahoy string in dist" >&2; exit 1; fi
+          echo "dist clean"
+
+      - name: Create GitHub Release with immutable assets
+        uses: softprops/action-gh-release@c062e08bd532815e208ea67e973a009d3ea39499b  # v2.3.2
+        with:
+          files: |
+            dist/seshatops
+            dist/seshatops-*-source.tar.gz
+            dist/SHA256SUMS
+            dist/VERSION
+            dist/BUILD_TIME
+            dist/go-sbom.json
+            dist/web-sbom.cyclonedx.json
+            dist/go-deps.txt
+            dist/pinned-images.txt
+          generate_release_notes: false
+          body_path: CHANGELOG.md
+          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release diagnostics
+        if: always()
+        uses: actions/upload-artifact@834a144ee995460fba709138aca8af6838883db  # v4.6.2
+        with:
+          name: release-artifacts-${{ env.TAG }}
+          path: |
+            dist/SHA256SUMS
+            dist/VERSION
+            dist/BUILD_TIME
+            dist/*.json
+            dist/*.txt
+            dist/*.tar.gz
+          if-no-files-found: warn
+          retention-days: 30

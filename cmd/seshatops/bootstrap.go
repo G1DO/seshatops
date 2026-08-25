@@ -123,7 +123,18 @@ func runBootstrapCommand(ctx context.Context, cfg bootstrapCommandConfig, out io
 	if err != nil {
 		return err
 	}
-	return json.NewEncoder(out).Encode(summary)
+	versioned := struct {
+		bootstrap.Summary
+		RuntimeVersion   string `json:"runtime_version"`
+		RuntimeCommit    string `json:"runtime_commit"`
+		RuntimeBuildTime string `json:"runtime_build_time"`
+	}{
+		Summary:          summary,
+		RuntimeVersion:   Version,
+		RuntimeCommit:    Commit,
+		RuntimeBuildTime: BuildTime,
+	}
+	return json.NewEncoder(out).Encode(versioned)
 }
 
 func newBootstrapConsumerGroup() (string, error) {

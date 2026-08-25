@@ -80,7 +80,7 @@ flowchart TB
 
 `cmd/seshatops` validates the database URL, broker seeds, OIDC endpoints,
 cookie transport, and listen address before opening clients. It exposes
-`GET /livez` and `GET /readyz`; readiness stays unavailable until migrations,
+`GET /livez`, `GET /readyz`, and public `GET /version` (`version/commit/build_time/go_version/fixture/protocol/checksum`, also `seshatops version` and `seshatops_build_info{version,commit}` in `/metrics`); readiness stays unavailable until migrations,
 broker probes, and both worker loops are healthy. The process handles
 `SIGINT`/`SIGTERM` by stopping HTTP acceptance, cancelling the relay and
 consumer loops, closing their broker clients, clearing the post-commit
@@ -90,7 +90,7 @@ It also emits JSON structured logs and an authenticated aggregate `/metrics`
 release surface; the surface is process-local where documented, excludes
 tenant and business labels, and never makes optional forecast/Python
 availability part of core readiness. See [release
-observability](../operations/observability.md).
+observability](../operations/observability.md) and [reproducibility](../REPRODUCIBILITY.md).
 
 The executable reads `SESHATOPS_LISTEN_ADDR`, `SESHATOPS_DATABASE_URL`,
 `SESHATOPS_BROKER_SEEDS`, `SESHATOPS_OIDC_ISSUER`,

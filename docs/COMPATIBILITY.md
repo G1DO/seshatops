@@ -2,6 +2,7 @@
 
 Pinned toolchain for the bounded `v0.1.0` local release. No production platform is claimed.
 Prerequisites and lifecycle: [getting-started.md](getting-started.md).
+Release reproduction and artifact identities: [REPRODUCIBILITY.md](REPRODUCIBILITY.md).
 
 ## Host prerequisites
 
@@ -43,9 +44,15 @@ git rev-parse HEAD && git status --porcelain=v1 # want clean
 cat compose.yaml | grep -E 'image:.*@sha256'
 python3 scripts/test_local_stack.py
 python3 -m unittest scripts.test_release_demo -v
+./dist/seshatops version 2>/dev/null | python3 -m json.tool | head -n 20 || go run ./cmd/seshatops version 2>&1 | head -n 5
+curl -fsS http://127.0.0.1:8080/version 2>/dev/null | python3 -m json.tool | head -n 20 || echo "start stack first: ./scripts/local-stack.sh quickstart"
 ```
 
-The demo harness records `version`, `commit`, `worktree_dirty`, and `source_sha256` (bounded `64 MiB` over `git ls-files` excluding `RUNBOOK_EXERCISE_REPORT.md`) in every `*.json` result; two clean runs on the same commit compare equal under `stable_identity` (durations excluded).
+The demo harness records `version`, `commit`, `worktree_dirty`, and `source_sha256` (bounded `64 MiB` over `git ls-files` excluding `RUNBOOK_EXERCISE_REPORT.md`) in every `*.json` result; two clean runs on the same commit compare equal under `stable_identity` (durations excluded). The runtime itself is stamped via `seshatops version` and `GET /version` plus `seshatops_build_info{version,commit}` (`observability.go:GaugeBuildInfo`) — see [REPRODUCIBILITY.md](REPRODUCIBILITY.md) for the full artifact set, SBOM generation, and `SHA256SUMS` comparisons.
+
+## Release artifacts
+
+The immutable `v0.1.0` artifact set is defined in [REPRODUCIBILITY.md](REPRODUCIBILITY.md#artifact-set-v010): reproducible source archive, stamped `seshatops` binary, `web/dist` assets, `SHA256SUMS`, `go-sbom.json` / `web-sbom.cyclonedx.json`, `go-deps.txt`, `pinned-images.txt`, and the bounded `campaign.json` evidence index. Tag builds via `.github/workflows/release.yml` (`environment: release`, `contents: write` only on `refs/tags/v*`) publish those files to the GitHub Release for that tag — no mutable `latest` sole identity. PR code never receives publish permission.
 
 ## Compatibility boundaries
 
