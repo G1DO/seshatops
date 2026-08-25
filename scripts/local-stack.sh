@@ -22,6 +22,7 @@ Commands:
   down        Stop the stack and preserve the disposable database volume
   reset       Destructively remove only this stack and its disposable volumes
   smoke       Run the CI-compatible startup, restart, routing, and OIDC smoke path
+  demo        Run all release demonstrations or one named scenario
 EOF
 }
 
@@ -114,11 +115,23 @@ smoke() {
   printf 'local stack smoke passed: startup, bootstrap, forecast, restart, and shutdown\n'
 }
 
+demo() {
+  local scenario=${1:-all}
+  if [[ $# -gt 0 ]]; then
+    shift
+  fi
+  if ! python3 -c 'import sys; raise SystemExit(sys.version_info < (3, 10))'; then
+    printf 'Release demonstrations require host Python 3.10 or newer.\n' >&2
+    return 2
+  fi
+  python3 "$ROOT_DIR/scripts/release_demo.py" "$scenario" "$@"
+}
+
 if [[ $# -eq 0 ]]; then
   usage >&2
   exit 2
 fi
-if [[ $# -gt 1 && "${1:-}" != "logs" ]]; then
+if [[ $# -gt 1 && "${1:-}" != "logs" && "${1:-}" != "demo" ]]; then
   usage >&2
   exit 2
 fi
@@ -132,5 +145,6 @@ case "$command" in
   down) down "$@" ;;
   reset) reset "$@" ;;
   smoke) smoke "$@" ;;
+  demo) demo "$@" ;;
   *) usage >&2; exit 2 ;;
 esac

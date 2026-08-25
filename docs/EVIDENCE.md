@@ -105,3 +105,32 @@ responses, no-persist failure ordering, tenant-scoped persistence, and live
 freshness mismatch behavior. The frozen source remains separate from the live
 Event Spine source, so a successful command is not a claim that the persisted
 result is currently fresh.
+
+## M5 packaged release demonstrations
+
+The guarded `./scripts/local-stack.sh demo` harness can run eight named
+scenarios or the complete campaign against the disposable packaged Compose
+environment. It drives the real Go process, OIDC/public HTTP routes,
+PostgreSQL, and at-least-once Redpanda boundary; local-only fixture, broker, and
+Python-process faults are not public API controls. See
+[Getting started](getting-started.md#release-demonstration-campaign) for the
+commands, scenario scope, evidence schema, cleanup, and deterministic
+comparison procedure.
+
+A passing scenario file is evidence about that single disposable, single-host
+local run at its recorded commit and fixture version. The machine result and
+human summary record the source fingerprint, observed statuses, counts,
+diagnostic durations, checksums, telemetry, deterministic identity, cleanup,
+and limitations. Timing is retained for diagnosis but excluded from repeat-run
+identity comparison.
+The harness also makes failures and failed cleanup non-zero rather than
+converting them into successful evidence.
+
+These artifacts do not establish production availability, an SLO or recovery
+objective, capacity or sustained-load behavior, multi-host failover, disaster
+recovery, backup/restore correctness, forecasting quality, or business impact.
+They do not change the honest at-least-once transport claim. Repository-local
+evidence belongs under the ignored `.release-evidence/` directory; explicitly
+selected paths outside the checkout are also supported. Evidence must not
+include secrets, private data, or unbounded logs. No specific campaign result
+is recorded in this document.

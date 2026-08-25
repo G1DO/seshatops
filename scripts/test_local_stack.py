@@ -7,6 +7,8 @@ import json
 import subprocess
 from pathlib import Path
 
+import release_demo
+
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPOSE = ["docker", "compose", "--project-name", "seshatops-local", "--file", str(ROOT / "compose.yaml")]
@@ -25,6 +27,12 @@ def main():
         text=True,
     )
     config = json.loads(rendered.stdout)
+    release_demo.validate_compose_target(
+        config,
+        project_name=release_demo.PROJECT_NAME,
+        compose_file=ROOT / "compose.yaml",
+        confirmation=release_demo.DEMO_CONFIRMATION,
+    )
     services = config["services"]
     expected = {"postgres", "redpanda", "redpanda-init", "oidc", "runtime", "web"}
     if set(services) != expected:
@@ -82,6 +90,27 @@ def main():
         fail("reset uses a broad Docker prune")
     if "down --volumes --remove-orphans" not in stack_script:
         fail("reset does not remove only the Compose environment")
+    if 'demo) demo "$@"' not in stack_script or "scripts/release_demo.py" not in stack_script:
+        fail("release demonstration command is not wired through the local stack")
+    if "sys.version_info < (3, 10)" not in stack_script:
+        fail("release demonstration host Python version guard is missing")
+
+    demo_script = (ROOT / "scripts/release_demo.py").read_text()
+    for marker in (
+        "seshatops-local",
+        "I_UNDERSTAND_DISPOSABLE_LOCAL_DEMO",
+        "seshatops_northstar_disposable",
+        "redpanda:9092",
+        "down\", \"--volumes\", \"--remove-orphans",
+    ):
+        if marker not in demo_script:
+            fail(f"release demonstration guard marker is missing: {marker}")
+    if "shell=True" in demo_script:
+        fail("release demonstration commands may not use a shell")
+
+    dockerfile = (ROOT / "docker/go.Dockerfile").read_text()
+    if "scripts/demo-forecast-timeout.py" not in dockerfile:
+        fail("packaged Python timeout fixture is missing")
 
     print("local stack configuration tests passed")
 
