@@ -62,6 +62,22 @@ jobs:
           config_file: .yamllint.yml
           strict: true
 
+  runbooks:
+    name: Runbook drift guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6.1.0
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@a26af69ea43a8ab7a6fb423a7a9ffae5e06a  # v5.6.0
+        with:
+          python-version: '3.12'
+      - name: Check runbook command drift
+        run: python3 scripts/check_runbooks.py
+
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest
