@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"os"
@@ -13,6 +14,10 @@ func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, nil)))
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
+		case "version", "--version", "-v":
+			payload := buildVersionPayload()
+			_ = json.NewEncoder(os.Stdout).Encode(payload)
+			return
 		case "demo-fixture":
 			cfg, err := loadDemoFixtureCommandConfig(os.Args[2:])
 			if err != nil {

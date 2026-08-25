@@ -147,6 +147,7 @@ const (
 	GaugeProcessingQuarantinedGap      Gauge = "seshatops_processing_quarantined_gap"
 	GaugeProcessingOldestFailureAge    Gauge = "seshatops_processing_oldest_failure_age_seconds"
 	GaugeProcessingOldestGapAge        Gauge = "seshatops_processing_oldest_gap_age_seconds"
+	GaugeBuildInfo                     Gauge = "seshatops_build_info"
 )
 
 var gauges = []Gauge{
@@ -162,6 +163,7 @@ var gauges = []Gauge{
 	GaugeProcessingQuarantinedGap,
 	GaugeProcessingOldestFailureAge,
 	GaugeProcessingOldestGapAge,
+	GaugeBuildInfo,
 }
 
 // Registry owns the process-local metric counters. All state is in memory and
@@ -180,6 +182,12 @@ type Registry struct {
 	python     map[PythonOutcome]uint64
 	available  PythonAvailability
 	gauges     map[Gauge]int64
+	buildInfo  *buildInfo
+}
+
+type buildInfo struct {
+	Version string
+	Commit  string
 }
 
 type controlValue struct {
@@ -200,6 +208,21 @@ func NewRegistry() *Registry {
 		python:     make(map[PythonOutcome]uint64),
 		gauges:     make(map[Gauge]int64, len(gauges)),
 	}
+}
+
+// SetBuildInfo stores version/commit for the build_info metric. Values are
+// bounded: only version string "v0.1.0" and commit hex/short are expected;
+// they are validated to prevent unbounded cardinality.
+func (r *Registry) SetBuildInfo(version, commit string) {
+	if r == nil {
+		return
+	}
+	if !validBuildLabel(version) || !validBuildLabel(commit) {
+		return
+	}
+	r.mu.Lock()
+	r.buildInfo = &buildInfo{Version: version, Commit: commit}
+	r.mu.Unlock()
 }
 
 func (r *Registry) AddRelayPublish(outcome RelayPublishOutcome, count uint64) {
@@ -343,10 +366,36 @@ func (r *Registry) RenderPrometheus() string {
 	writePrediction(&b, r.prediction)
 	writeFreshness(&b, r.freshness)
 	writePython(&b, r.python, r.available)
+	writeBuildInfo(&b, r.buildInfo)
 	for _, gauge := range gauges {
+		if gauge == GaugeBuildInfo {
+			continue
+		}
 		fmt.Fprintf(&b, "# TYPE %s gauge\n%s %d\n", gauge, gauge, r.gauges[gauge])
 	}
 	return b.String()
+}
+
+func writeBuildInfo(b *strings.Builder, info *buildInfo) {
+	const name = "seshatops_build_info"
+	fmt.Fprintf(b, "# HELP %s Build identity for this process.\n# TYPE %s gauge\n", name, name)
+	if info == nil || info.Version == "" || info.Commit == "" {
+		fmt.Fprintf(b, "%s{version=\"unknown\",commit=\"unknown\"} 0\n", name)
+		return
+	}
+	fmt.Fprintf(b, "%s{version=%q,commit=%q} 1\n", name, info.Version, info.Commit)
+}
+
+func validBuildLabel(value string) bool {
+	if value == "" || len(value) > 64 {
+		return false
+	}
+	for _, c := range value {
+		if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '.' || c == '-' || c == '_' ) {
+			return false
+		}
+	}
+	return true
 }
 
 type metricRow struct {

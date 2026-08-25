@@ -98,6 +98,7 @@ func composeObservedHandler(authHandler, apiHandler, metricsHandler http.Handler
 		writeHealthJSON(w, http.StatusOK, "alive")
 	})
 	mux.HandleFunc("/readyz", state.serveHTTP)
+	mux.HandleFunc("/version", versionHandler)
 	if authHandler != nil {
 		mux.Handle("/auth/", authHandler)
 	}
@@ -179,6 +180,7 @@ func newRuntime(ctx context.Context, cfg Config) (*runtime, error) {
 	hub := api.NewHub()
 	apiServer := api.NewServer(db, hub, identityService, identity.NewPolicy(identity.NewDirectory(cfg.Assignments...)))
 	metrics := observability.NewRegistry()
+	metrics.SetBuildInfo(Version, Commit)
 	apiServer.SetMetricsRegistry(metrics)
 	publisher, err := relay.NewFranzPublisher(cfg.BrokerSeeds...)
 	if err != nil {
@@ -483,7 +485,7 @@ func classifyRoute(path string) observability.Route {
 		return observability.RouteAuth
 	case path == "/metrics":
 		return observability.RouteMetrics
-	case path == "/livez" || path == "/readyz":
+	case path == "/livez" || path == "/readyz" || path == "/version":
 		return observability.RouteHealth
 	case strings.HasPrefix(path, "/v1/tenants/") && strings.Contains(path, "/forecast/"):
 		return observability.RouteForecast

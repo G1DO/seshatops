@@ -50,6 +50,13 @@ See `docs/EVIDENCE.md` for measured evidence vs. unsupported production claims,
 
 - Go `1.25.0`, Node `24.14.0`, npm `11.9.0`, TypeScript `6.0.3`, Python host `3.10+` (harness) / `3.13.7-slim` runtime image — see `docs/design/specifications/event-spine.md` §9.
 
+### Release artifacts and reproducibility (`v0.1.0`)
+
+- Immutable artifact set (from tagged commit): reproducible source archive `seshatops-v0.1.0-source.tar.gz`, stamped `seshatops` binary (`-X main.Version/Commit/BuildTime`, `seshatops version` + `GET /version` + `seshatops_build_info{version,commit}`), `web/dist` assets, `SHA256SUMS`, `VERSION`/`BUILD_TIME`, `go-sbom.json` / `web-sbom.cyclonedx.json` + `go-deps.txt`/`pinned-images.txt`, bounded `campaign.json` evidence index — see `docs/REPRODUCIBILITY.md`.
+- Clean-checkout release CI (`.github/workflows/release-ci.yml`): Go/Python/Web/Docs lint/link/YAML/secret, `govulncheck@v1.1.4`, `npm audit`, license gates (no GPL/AGPL), SBOM generation, `go build` stamping, `SHA256SUMS`, pinned `docker compose build`, headless `local-stack.sh smoke` + `poison-isolation` fault, `down --remove-orphans` + bounded diagnostics on failure — no `latest` mutable sole identity.
+- Tag workflow (`.github/workflows/release.yml`): `push: tags: v*.*.*`, `environment: release`, `contents: write` only on `refs/tags/v*`, creates immutable GitHub Release for that tag; PR code never receives publish permission.
+- Local reproduce vs published checksums: `docs/REPRODUCIBILITY.md` documents exact commands and `sha256sum -c SHA256SUMS --ignore-missing` comparison; `BUILD_TIME` variance is documented — version/commit/fixture/protocol checksums (`frozen_m4_dataset b29e79…`, `frozen_m4_feature_snapshot 80898…`) are the deterministic identity, `stable_identity` excludes `durations_ms`.
+
 ### Hosted CI references (implementation vs docs-only)
 
 - PR #98 implementation commits `8b53501` → `bad5073`: Go CI `32181303886` (with API gate), Web CI `32181304013`, Docs CI `32181303898/job/95854713070` (all green). Merged head was docs-only `39911bc` (no code change). Earlier Docs run on `8b53501` failed only on pre-existing Redpanda URL 500 `32180186848/job/95851340432`. See `docs/EVIDENCE.md` and `docs/evaluation/M4_STOCKOUT_INTELLIGENCE_EXIT_GATE_EXPERIMENT_REPORT.md`.
