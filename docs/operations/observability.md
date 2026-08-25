@@ -121,8 +121,27 @@ outcome fails before prediction persistence and is logged without the input,
 artifact, or error text. Forecast degradation never changes `/readyz` or the
 core runtime-ready gauge.
 
-For broker interruption, poison/release, replay, rebuild, cross-tenant denial,
-and full recovery demonstrations, use only the packaged commands and controls
-in the subsequent demonstration and runbook issues. This document defines the
-signals those procedures observe; it does not add a fault-injection API or
-prescribe database surgery.
+## Release campaign evidence
+
+Run the guarded packaged campaign, or one of its eight named scenarios, with:
+
+```bash
+export SESHATOPS_DEMO_CONFIRM='I_UNDERSTAND_DISPOSABLE_LOCAL_DEMO'
+./scripts/local-stack.sh demo all
+./scripts/local-stack.sh demo broker-recovery
+```
+
+The procedures and evidence layout are documented in
+[Getting started](../getting-started.md#release-demonstration-campaign). The
+harness observes the aggregate readiness, relay/consumer, outbox backlog,
+authorization-denial, and forecast failure signals defined here alongside
+public responses and durable database state. It retains measured durations as
+diagnostic observations, not SLOs or recovery objectives.
+
+Use only this guarded path for broker interruption, incompatible fixture
+events, rebuild, cross-tenant denial, forecast-source faults, and Python
+degradation demonstrations. The target check fixes the Compose project,
+services, disposable PostgreSQL database, broker, local marker, protected
+ports, and confirmation before destructive or fault actions. Fault tooling is
+packaged and local-only; this observability contract does not add a public
+fault-injection endpoint or prescribe direct projection edits.

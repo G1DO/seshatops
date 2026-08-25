@@ -13,6 +13,17 @@ func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, nil)))
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
+		case "demo-fixture":
+			cfg, err := loadDemoFixtureCommandConfig(os.Args[2:])
+			if err != nil {
+				processFailure("demo_fixture.configuration_failed")
+			}
+			ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+			defer stop()
+			if err := runDemoFixtureCommand(ctx, cfg, os.Stdout); err != nil {
+				processFailure("demo_fixture.command_failed")
+			}
+			return
 		case "forecast":
 			cfg, err := loadForecastCommandConfig()
 			if err != nil {

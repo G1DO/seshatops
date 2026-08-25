@@ -21,6 +21,7 @@ temp/
 # Local tooling output
 .cache/
 .lychee-cache/
+.release-evidence/
 coverage/
 dist/
 build/
@@ -40,4 +41,3 @@ __pycache__/
 node_modules/
 web/dist/
 *.tsbuildinfo
-

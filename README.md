@@ -44,7 +44,9 @@ deterministic Northstar bootstrap and frozen forecast, and prints the browser
 URL. The browser uses real Authorization Code + PKCE login and sends
 application traffic only through the Go `/auth/*` and `/v1/*` paths. See
 [Getting started](docs/getting-started.md) for status, logs, shutdown, reset,
-and headless smoke commands.
+headless smoke, and guarded release-demonstration commands. The release
+campaign is destructive only to the declared disposable local Compose project
+and requires a separate explicit confirmation.
 
 ## Develop
 

@@ -25,7 +25,9 @@ jobs:
         with:
           persist-credentials: false
       - name: Validate Compose package
-        run: python3 scripts/test_local_stack.py
+        run: |
+          python3 -m unittest scripts/test_release_demo.py -v
+          python3 scripts/test_local_stack.py
       - name: Run headless local stack smoke
         run: bash scripts/local-stack.sh smoke
       - name: Remove disposable local state

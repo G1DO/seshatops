@@ -28,6 +28,13 @@ func TestRunIsDeterministicAndIdempotent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	inspected, complete, err := InspectFixtureCheckpoint(context.Background(), db, northstar.LineageSeed)
+	if err != nil || !complete {
+		t.Fatalf("read-only checkpoint complete=%v error=%v", complete, err)
+	}
+	if inspected.ProjectionChecksum != first.ProjectionChecksum || inspected.LineageChecksum != first.LineageChecksum {
+		t.Fatalf("read-only checkpoint=%+v first=%+v", inspected, first)
+	}
 	second, err := Run(context.Background(), db, pub, consumer, cfg)
 	if err != nil {
 		t.Fatal(err)
@@ -96,6 +103,38 @@ func TestRunRecoversFromPartialSourceBootstrap(t *testing.T) {
 	}
 	if sourceCount != len(fx.Events) {
 		t.Fatalf("source event count = %d, want %d", sourceCount, len(fx.Events))
+	}
+}
+
+func TestAcceptSourceFixtureStopsAtOutboxAndIsIdempotent(t *testing.T) {
+	db := openTestDB(t)
+	ctx := context.Background()
+	first, err := AcceptSourceFixture(ctx, db, northstar.LineageSeed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := AcceptSourceFixture(ctx, db, northstar.LineageSeed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.SourceCount != 5 || second.SourceCount != 5 || first.OutboxState["pending"] != 5 || second.OutboxState["pending"] != 5 {
+		t.Fatalf("first=%+v second=%+v", first, second)
+	}
+	if len(first.EventIDs) != 5 || len(second.EventIDs) != 5 {
+		t.Fatalf("first=%+v second=%+v", first.EventIDs, second.EventIDs)
+	}
+	var inbox, inventoryProjection, lineageProjection int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM platform.inbox WHERE tenant_id = $1`, first.TenantID).Scan(&inbox); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.QueryRow(`SELECT COUNT(*) FROM platform.inventory_projection WHERE tenant_id = $1`, first.TenantID).Scan(&inventoryProjection); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.QueryRow(`SELECT COUNT(*) FROM platform.lineage_suppliers WHERE tenant_id = $1`, first.TenantID).Scan(&lineageProjection); err != nil {
+		t.Fatal(err)
+	}
+	if inbox != 0 || inventoryProjection != 0 || lineageProjection != 0 {
+		t.Fatalf("source-only fixture mutated projection: inbox=%d inventory=%d lineage=%d", inbox, inventoryProjection, lineageProjection)
 	}
 }
 

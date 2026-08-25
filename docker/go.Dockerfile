@@ -14,5 +14,6 @@ WORKDIR /app
 COPY --from=build /out/seshatops /app/seshatops
 COPY forecast_candidate /app/forecast_candidate
 COPY scripts/local-smoke.py /app/scripts/local-smoke.py
+COPY scripts/demo-forecast-timeout.py /app/scripts/demo-forecast-timeout.py
 USER 10001:10001
 ENTRYPOINT ["/app/seshatops"]
