@@ -2,4 +2,5 @@ timeout = 20
 max_retries = 2
 retry_wait_time = 2
 # Career Workflow and other workspace pages require login.
-exclude = ['^https://app\\.notion\\.com/']
+# v0.1.0 tag not yet published until release gate — ignore until tag exists.
+exclude = ['^https://app\\.notion\\.com/', '^https://github\\.com/G1DO/seshatops/releases/tag/v0\\.1\\.0']

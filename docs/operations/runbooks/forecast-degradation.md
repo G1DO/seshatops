@@ -215,4 +215,3 @@ curl -X POST http://web.seshatops.localhost:5173/v1/tenants/11111111-1111-4111-8
 * The frozen M4 fixture (`northstar-m4-stockout-v1`) and the live Northstar fixture (`northstar-m3-lineage-v1`) are separate datasets by design; a successful `forecast` command does not make live history `fresh`.
 * Durations and `observed_at` are diagnostic; no SLO, availability, or business-impact claim is supported.
 * Python is a one-shot artifact producer with a bounded deadline, not a service. `seshatops_python_candidate_available` is a single-process gauge, not readiness.
-

@@ -161,3 +161,7 @@ Forecast feature snapshots: [forecast-feature-snapshots.md](../design/specificat
 `/v1` HTTP/SSE: [openapi-projection.yaml](../api/openapi-projection.yaml).
 `/auth` and allow-list: [authorization.md](../security/authorization.md).
 Operations and recovery: [operations/README.md](../operations/README.md), [observability](../operations/observability.md), [runbooks](../operations/runbooks/broker-interruption.md).
+Compatibility and toolchain: [COMPATIBILITY.md](../COMPATIBILITY.md).
+Troubleshooting: [TROUBLESHOOTING.md](../TROUBLESHOOTING.md).
+Known limitations and deferred/rejected: [KNOWN_LIMITATIONS.md](../KNOWN_LIMITATIONS.md).
+Security scope: [../../SECURITY.md](../../SECURITY.md). Release notes: [../../CHANGELOG.md](../../CHANGELOG.md). Release audit: [../evaluation/RELEASE_AUDIT_REPORT.md](../evaluation/RELEASE_AUDIT_REPORT.md).

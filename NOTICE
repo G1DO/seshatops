@@ -1,0 +1,63 @@
+NOTICE — SeshatOps v0.1.0
+
+Copyright 2026 SeshatOps Contributors. Licensed under Apache License 2.0,
+see LICENSE for full terms.
+
+This product includes or depends on the following third-party components
+when run via the pinned disposable stack or built from source. Their
+upstream licenses remain with their owners; this notice does not change
+the Apache-2.0 license of SeshatOps source and docs.
+
+Runtime images (disposable local release only, not vendored source):
+
+- PostgreSQL 16.14 — PostgreSQL License (permissive). Source:
+  https://www.postgresql.org/docs/16/release-16-14.html
+  Pinned as postgres@sha256:95206741a5b214807675e14165369d05b93a9cf692223b616d07cca227e74b0b
+  (erp.PostgresImage, compose.yaml).
+
+- Redpanda v25.2.1 — community components under Apache-2.0/BSL; licensed
+  by Redpanda Data Inc. Source: https://docs.redpanda.com/
+  Pinned as docker.redpanda.com/redpandadata/redpanda@sha256:218469e5d088757bb2c3ff4c5e272f7eebdc4e94c933e6e15aff10b845cbcd07
+  (relay.RedpandaImage, compose.yaml).
+
+- mock-oauth2-server 4.0.0 — Apache-2.0?/MIT (Navikt). Source:
+  https://github.com/navikt/mock-oauth2-server
+  Pinned as ghcr.io/navikt/mock-oauth2-server@sha256:79f51f412caddb1e2120a5ae10d1f203e134f6e8328f1bc63c444acba33c9086
+  (compose.yaml).
+
+- golang:1.25.0-bookworm — governed by Go and Debian base licenses
+  (Go BSD-3-Clause, Debian components under various permissive licenses).
+  Pinned as golang:1.25.0-bookworm@sha256:81dc45d05a7444ead8c92a389621fafabc8e40f8fd1a19d7e5df14e61e98bc1a
+  (docker/go.Dockerfile).
+
+- python:3.13.7-slim-bookworm — PSF License, Debian base licenses.
+  Pinned as python:3.13.7-slim-bookworm@sha256:adafcc17694d715c905b4c7bebd96907a1fd5cf183395f0ebc4d3428bd22d92d
+  (docker/go.Dockerfile).
+
+- node:24.14.0-bookworm-slim — Node.js MIT License, Debian base licenses.
+  Pinned as node:24.14.0-bookworm-slim@sha256:d8e448a56fc63242f70026718378bd4b00f8c82e78d20eefb199224a4d8e33d8
+  (docker/web.Dockerfile).
+
+Go module (go.mod / go.sum pins):
+
+- github.com/coreos/go-oidc/v3 (Apache-2.0), github.com/jackc/pgx/v5 (MIT),
+  github.com/testcontainers/testcontainers-go (MIT),
+  github.com/twmb/franz-go (Apache-2.0), golang.org/x/oauth2 (BSD-3),
+  github.com/google/uuid (BSD-3), and transitive deps listed by
+  `go list -m all` (all permissive: MIT, BSD-2/3, Apache-2.0 — no GPL/AGPL
+  in top-level or transitive production path at audit date 2026-08-25).
+
+JavaScript / TypeScript (web/package-lock.json):
+
+- react, react-dom (MIT), vite (MIT), typescript (Apache-2.0),
+  @testing-library/* (MIT), jsdom (MIT), etc. — 211 deps total,
+  licenses MIT/ISC/BSD/Apache-2.0/CC-BY-4.0 at audit date, no GPL/AGPL.
+  `npm audit` at 2026-08-25 returned 0 vulnerabilities.
+
+Python offline producer (forecast_candidate/):
+
+- No external `requirements.txt`; uses Python stdlib only at v0.1.0.
+
+The pinned digests and lockfiles (`go.sum`, `web/package-lock.json`) are the
+source of truth for reproducing v0.1.0. Container bases are not redistributed
+as source tarballs with SeshatOps; their notices are referenced above.
