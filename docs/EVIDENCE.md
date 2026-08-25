@@ -134,3 +134,9 @@ evidence belongs under the ignored `.release-evidence/` directory; explicitly
 selected paths outside the checkout are also supported. Evidence must not
 include secrets, private data, or unbounded logs. No specific campaign result
 is recorded in this document.
+
+## M5 runbook exercise
+
+[Runbook exercise report](evaluation/RUNBOOK_EXERCISE_REPORT.md).
+
+Each recovery runbook ([broker interruption and outbox backlog recovery](operations/runbooks/broker-interruption.md), [poison isolation](operations/runbooks/poison-isolation.md), [tenant rebuild](operations/runbooks/rebuild-checksum.md), [forecast degradation](operations/runbooks/forecast-degradation.md)) was followed from a clean disposable Compose environment without repository-author knowledge. The report records environment identity, exact commands, observed `/readyz`/`/metrics`/log/API signals, checksums, duration, result, and deviations. It preserves the tenant-scoped, audit-before-mutate, and bounded-evidence invariants and does not establish production availability, SLO, or capacity claims.

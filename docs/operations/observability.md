@@ -121,6 +121,17 @@ outcome fails before prediction persistence and is logged without the input,
 artifact, or error text. Forecast degradation never changes `/readyz` or the
 core runtime-ready gauge.
 
+## Recovery runbooks
+
+When a local release shows a failure signal, follow the release runbooks instead of ad-hoc database or broker edits:
+
+* [Broker interruption and outbox backlog recovery](runbooks/broker-interruption.md)
+* [Poison and incompatible event isolation](runbooks/poison-isolation.md)
+* [Tenant-scoped projection rebuild](runbooks/rebuild-checksum.md)
+* [Forecast degradation](runbooks/forecast-degradation.md)
+
+These refer only to commands and signals that exist in this release; see the [operations index](README.md) and [Getting started](../getting-started.md#recovery-runbooks).
+
 ## Release campaign evidence
 
 Run the guarded packaged campaign, or one of its eight named scenarios, with:

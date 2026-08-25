@@ -379,6 +379,9 @@ def release_metadata(runner: CommandRunner) -> dict[str, Any]:
     }
 
 
+EXCLUDED_FROM_SOURCE_DIGEST = {"docs/evaluation/RUNBOOK_EXERCISE_REPORT.md"}
+
+
 def source_digest(runner: CommandRunner) -> str:
     listed = runner.run(
         ["git", "ls-files", "-co", "--exclude-standard", "-z"],
@@ -390,6 +393,8 @@ def source_digest(runner: CommandRunner) -> str:
     digest = hashlib.sha256()
     total_bytes = 0
     for relative in paths:
+        if relative in EXCLUDED_FROM_SOURCE_DIGEST:
+            continue
         relative_path = Path(relative)
         if relative_path.is_absolute() or ".." in relative_path.parts:
             raise DemoError("release source enumeration left the repository")
