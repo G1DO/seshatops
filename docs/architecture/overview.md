@@ -160,3 +160,4 @@ Stockout evaluation: [stockout-evaluation.md](../design/specifications/stockout-
 Forecast feature snapshots: [forecast-feature-snapshots.md](../design/specifications/forecast-feature-snapshots.md).
 `/v1` HTTP/SSE: [openapi-projection.yaml](../api/openapi-projection.yaml).
 `/auth` and allow-list: [authorization.md](../security/authorization.md).
+Operations and recovery: [operations/README.md](../operations/README.md), [observability](../operations/observability.md), [runbooks](../operations/runbooks/broker-interruption.md).

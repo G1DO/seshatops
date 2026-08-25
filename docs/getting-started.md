@@ -156,6 +156,17 @@ None of these controls is reachable from the normal public API, and the
 harness does not directly edit a completed projection to manufacture an
 outcome.
 
+## Recovery runbooks
+
+If a local run shows degraded readiness, quarantine, or forecast staleness, follow the release runbooks that use only implemented commands:
+
+* [Broker interruption and outbox backlog recovery](operations/runbooks/broker-interruption.md)
+* [Poison and incompatible event isolation](operations/runbooks/poison-isolation.md)
+* [Tenant-scoped projection rebuild](operations/runbooks/rebuild-checksum.md)
+* [Forecast degradation](operations/runbooks/forecast-degradation.md)
+
+These distinguish retryable transport failure, quarantined poison, immutable conflict, authorization denial, and forecast-only degradation, and they never prescribe replay/release when the state is not safely releasable. See the [operations index](operations/README.md) and [release observability](operations/observability.md) for signals and lifecycles.
+
 ## Individual commands
 
 ### Bootstrap
