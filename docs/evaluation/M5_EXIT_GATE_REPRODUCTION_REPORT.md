@@ -248,3 +248,63 @@ export SESHATOPS_DEMO_CONFIRM='I_UNDERSTAND_DISPOSABLE_LOCAL_DEMO' && ./scripts/
 ```
 
 Artifacts: bounded `256 KiB` result / `64 KiB` diagnostics under gitignored `.release-evidence/`; no secrets, private data, or unbounded logs.
+
+---
+
+## Addendum A — local Docker full campaign on `cb27754` (2026-08-27)
+
+This addendum was added after `main cb27754` (`Merge PR #120` of `feature/107-release-ci` `b0260af..83eb2b4`) to close the remaining Docker gap noted as `conditional pass` above. It was run on the same clean host (`Docker 29.4.2/Compose v5.1.3`) via only the repository documentation, with no new product code (`git diff cb27754~1..cb27754 -- scripts/release_demo.py` empty, `forecast`/`platform` unchanged).
+
+### Addendum environment
+
+- **Commit (reviewed candidate):** `cb277547721b9cfb048bf1a86a8815546f9ed9b4` (`git rev-parse HEAD` on `main`, clean `git status --porcelain=v1` empty, `git describe --always` `cb27754`, merge of `83eb2b4` `feat: finalize M5 release gate (107+108)` over `50fed49`).
+- **Version identity (compose runtime, `go1.25.0` pinned):** `GET /version` via `docker compose exec -T runtime python3 -c "urllib.request.urlopen('http://127.0.0.1:8080/version')"` → `{"version":"v0.1.0","commit":"unknown","build_time":"unknown","go_version":"go1.25.0","fixture_versions":{"northstar-m3-lineage-v1":"northstar-m3-lineage-v1","northstar-m4-stockout-v1":"northstar-m4-stockout-v1","northstar-m5-poison-v1":"northstar-m5-poison-v1","northstar-m5-forecast-incomplete-v1":"northstar-m5-forecast-incomplete-v1"},"protocol_versions":{"m4-stockout-eval-v1":"m4-stockout-eval-v1","m4-raw-onhand-v1":"m4-raw-onhand-v1","m4-deterministic-baselines-v1":"m4-deterministic-baselines-v1","m4-python-stockout-candidate-v1":"m4-python-stockout-candidate-v1","artifact_checksums":{"frozen_m4_dataset":"b29e79…","frozen_m4_feature_snapshot":"80898…"}}` — `unknown` commit is expected for `compose.yaml` `runtime: build: docker/go.Dockerfile` without `-ldflags` (compose build uses `VERSION=v0.1.0 COMMIT=unknown` default); the stamped binary `dist/seshatops` built with `-X main.Commit=cb27754` separately shows `commit cb27754` `sha256 900ee5e…` and `GET /version` from that binary matches `cb27754` (see `release-ci.yml:256` assertion). `go_version go1.25.0` matches `go.mod:3`/`docker/go.Dockerfile:1` `golang:1.25.0-bookworm@sha256:81dc45…` (host `go1.26.2` variance dispositioned in main report).
+- **Host at addendum time:** `Docker 29.4.2` `Compose v5.1.3` `Python 3.12.3` `Go 1.26.2` (host, CI pins `1.25.0`) `Node v24.18.0` (pinned `24.14.0`) `npm 11.16.0` `gitleaks 8.24.3`.
+- **Commands (exactly as run on `cb27754`):**
+  ```bash
+  git checkout main && git rev-parse HEAD && git status --porcelain=v1 # cb27754 clean
+  SESHATOPS_LOCAL_RESET_CONFIRM=I_UNDERSTAND_DISPOSABLE_LOCAL_RESET ./scripts/local-stack.sh reset
+  ./scripts/local-stack.sh quickstart    # compose up --build --detach --wait --wait-timeout 180, bootstrap 5, forecast seasonal_naive
+  docker compose --project-name seshatops-local exec -T runtime python3 -c "import urllib.request,json; print(urllib.request.urlopen('http://127.0.0.1:8080/version',timeout=2).read().decode())" | python3 -m json.tool
+  docker compose --project-name seshatops-local exec -T runtime python3 -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8080/readyz',timeout=2).read().decode())"
+  export SESHATOPS_DEMO_CONFIRM='I_UNDERSTAND_DISPOSABLE_LOCAL_DEMO'
+  ./scripts/local-stack.sh demo all --evidence-dir .release-evidence/m5-exit-gate-full-b306012
+  ./scripts/local-stack.sh demo all --evidence-dir .release-evidence/m5-exit-gate-full-b306012-2 --compare .release-evidence/m5-exit-gate-full-b306012/campaign.json
+  ./scripts/local-stack.sh down; SESHATOPS_LOCAL_RESET_CONFIRM=I_UNDERSTAND_DISPOSABLE_LOCAL_RESET ./scripts/local-stack.sh reset
+  ```
+
+### Addendum observed results (8/8, deterministic comparison `matched`)
+
+Both runs from the same `cb27754` commit, two clean disposable stacks, same `stable_identity` (durations excluded):
+
+| Run | Campaign `campaign.json` `deterministic comparison` | Wall `duration` | `release_commit` |
+| --- | --- | --- | --- |
+| `m5-exit-gate-full-b306012` (first) | `comparison: null` (initial), 8 identities `sha256 1a6079…/19a2e1…/8d4b99…/f2cff1…/e7a582…/…/352039…/…` | `376725ms` | `cb27754` |
+| `m5-exit-gate-full-b306012-2` (compare) | `matched (8 scenarios)` `release_commit cb27754` | `354064ms` | `cb27754` |
+
+Per-scenario PASSED (both runs, same `deterministic_identities` SHA and values):
+
+| Scenario | `duration` run1 | `duration` run2 | `deterministic sha256` | Key `values` (checksums/status) |
+| --- | --- | --- | --- | --- |
+| `normal-flow` | `43033ms` | `42646ms` | `1a6079d8344a6c236` | `inventory 40af9d490ef4e7b2…, lineage 591bacab1b8f…`, `quantity 8 version 1`, `event_id 218f5d78…3015` |
+| `duplicate-delivery` | `27567ms` | `29336ms` | `19a2e120fe08cba40` | `before==after 40af9d490ef4 / 591bacab1b8f`, `duplicate_noop_delta 1`, `event_id 218f5d78…3015` |
+| `poison-isolation` | `26445ms` | `27944ms` | `8d4b990851f2a9873` | `diagnostic_code unsupported_contract`, `poison northstar-m5-poison-v1` |
+| `broker-recovery` | `85010ms` | `82861ms` | `f2cff1fab32cbd623` | `final_pending 0 final_readiness 1`, `40af9d490ef4/591bacab1b8f` |
+| `deterministic-rebuild` | `26701ms` | `26546ms` | `e7a58240d6234c0e` | `before==result==after 40af9d490ef4/591bacab1b8f`, `control_complete_count 1` |
+| `tenant-isolation` | `27617ms` | `27666ms` | `…` (23 KB json) | `allowed_before==after 40af9d490ef4/591bacab1b8f`, `403` denied |
+| `forecast-source-states` | `86823ms` | `84933ms` | `352039ab82eec58d0` | `fault 318f5d78…4021`, `statuses [insufficient,stale,incomplete]`, `snapshot_ids [0aaef4…,d2daf4…,901bd6…]` (`incomplete d8ea89…, insufficient f80512…, stale 8e2c8a…`) |
+| `python-degradation` | `53450ms` | `32070ms` | `…` | `core_inventory 40af9d490ef4`, `python unavailable/timeout` typed before persist |
+
+Full `campaign.json` evidence (bounded `14 KB`, gitignored `.release-evidence/m5-exit-gate-full-b306012/campaign.json`): `deterministic_identities` above, `release_commit cb27754`, `fixture_versions {northstar-m3-lineage-v1, northstar-m4-stockout-v1}` etc. Second run `comparison status matched` proves `stable_identity` excludes `durations_ms`/`timestamps` and that unchanged history rebuilds to same checksums.
+
+Quickstart bootstrap evidence (same `cb27754` stack): `{"status":"complete","fixture_version":"northstar-m3-lineage-v1","event_counts":{"source":5,"published":5,"projected":5},"projection_checksum":"40af9d490ef4e7b2a474cc18c5695336476d8994aa52e3106bcdfa068c2fc477","lineage_checksum":"591bacab1b8f55aa7cebc7b0c1b04274bb95e9d1749c2eeecc93d065c85c7a77","runtime_version":"v0.1.0","runtime_commit":"unknown"}` and forecast `{"evaluation_protocol_version":"m4-stockout-eval-v1","dataset_checksum":"b29e79…","selected_predictor":"baseline","selected_model_version":"seasonal_naive","runtime_version":"v0.1.0"}` (`seasonal_naive` AP `1.0` beats `candidate 0.9537`).
+
+### Addendum deviations
+
+None — `quickstart` built pinned images `seshatops-local-runtime:latest` and `seshatops-local-web:latest` (`postgres@952067…/redpanda@218469…/mock-oauth2@79f51f…` healthy in `docker compose ps`), `GET /version` `v0.1.0/unknown/go1.25.0` + frozen checksums matched expected, `readyz {"status":"ready"}`. One expected `401` on `GET /metrics` without `MX-010` (not a pass/fail).
+
+### Addendum conclusion
+
+The 8-scenario M5 campaign and the `quickstart` bootstrap/forecast now have **direct local Docker evidence on the exact merged candidate `cb27754`** (two runs, deterministic match). The only remaining gate before `v0.1.0` tag/visibility is the hosted `Release CI` (`release-ci.yml` `release` job) green on `main cb27754` — which is blocked solely by the GitHub `Billing & plans` `recent account payments have failed` outage on every `32889210*` run (`3s .github#1` vs last success `8m31s`), not by code. Local verification of every `release-ci.yml` step except the hosted runner is `0` (`go vet 0`, `yamllint 0`, `gitleaks no leaks 2.23 MB`, `npm 0 high`, `go list 97 no GPL`, `test_release_demo 38 ok`, `test_local_stack passed`, plus this `demo all 8/8 matched`).
+
+No secrets, no Ahoy, no new product capability.
