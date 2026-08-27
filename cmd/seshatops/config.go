@@ -91,6 +91,8 @@ func configFromEnv(lookup func(string) (string, bool)) (Config, error) {
 	if cfg.OIDCClientID, err = requiredEnv(lookup, envOIDCClientID); err != nil {
 		return Config{}, err
 	}
+	// OIDC client secret is optional to support PKCE public clients; confidential
+	// clients fail later on token exchange, which is intentional.
 	cfg.OIDCClientSecret, _ = lookup(envOIDCClientSecret)
 	if rawAudience, ok := lookup(envOIDCAudience); ok {
 		cfg.OIDCAudience = strings.TrimSpace(rawAudience)

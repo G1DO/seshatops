@@ -208,6 +208,10 @@ func newRuntime(ctx context.Context, cfg Config) (*runtime, error) {
 	}
 
 	state := newReadiness("database", "migrations", "broker", "relay", "consumer")
+	// database/migrations/broker reflect startup success (Ping + Migrate).
+	// Runtime DB or broker outages after startup surface via relay/consumer
+	// worker failures within one interval; see runRelayWorker/runConsumerWorker
+	// idle probes that flip readiness.
 	state.set("database", true)
 	state.set("migrations", true)
 	state.set("broker", true)
@@ -296,6 +300,8 @@ func (r *runtime) Run(ctx context.Context) error {
 }
 
 func (r *runtime) runRelayWorker(ctx context.Context) {
+	var lastProbe time.Time
+	var lastProbeErr error
 	runWorker(ctx, "relay", r.cfg.RelayInterval, r.cfg.RetryBase, r.cfg.RetryMax, func(ctx context.Context) error {
 		cycleCtx, cancel := context.WithTimeout(ctx, r.cfg.CycleTimeout)
 		defer cancel()
@@ -311,6 +317,22 @@ func (r *runtime) runRelayWorker(ctx context.Context) {
 			r.metrics.AddRelayPublish(observability.RelayQuarantined, uint64(result.Quarantined))
 			r.metrics.AddRelayPublish(observability.RelayAmbiguous, uint64(result.Ambiguous))
 		}
+		if err == nil && ctx.Err() == nil && (result.Claimed == 0 || result.Transient > 0) {
+			// Idle healthy and broker-unavailable both yield no claimed rows;
+			// transient publish failures also hide an outage when rows exist.
+			// Probe the broker so readiness does not stay green, but cache
+			// healthy successes for one CycleTimeout to bound load.
+			if shouldProbeRelay(time.Now(), lastProbe, lastProbeErr, r.cfg.CycleTimeout) {
+				probeCtx, probeCancel := context.WithTimeout(ctx, r.cfg.CycleTimeout)
+				probeErr := r.publisher.Ping(probeCtx)
+				probeCancel()
+				lastProbe = time.Now()
+				lastProbeErr = probeErr
+				if probeErr != nil {
+					err = probeErr
+				}
+			}
+		}
 		if err != nil {
 			observability.Log(cycleCtx, slog.Default(), observability.EventRelayFailed, observability.Fields{Duration: time.Since(started)})
 		} else {
@@ -318,6 +340,16 @@ func (r *runtime) runRelayWorker(ctx context.Context) {
 		}
 		return err
 	}, func(healthy bool) { r.setWorkerReadiness("relay", healthy) })
+}
+
+func shouldProbeRelay(now, lastProbe time.Time, lastErr error, interval time.Duration) bool {
+	if lastErr != nil {
+		return true
+	}
+	if lastProbe.IsZero() {
+		return true
+	}
+	return now.Sub(lastProbe) >= interval
 }
 
 func (r *runtime) runConsumerWorker(ctx context.Context) {

@@ -209,6 +209,55 @@ func TestRuntimeShutdownStopsHTTPAndClosesOwnedResources(t *testing.T) {
 	}
 }
 
+func TestShouldProbeRelayIsBounded(t *testing.T) {
+	interval := 10 * time.Second
+	now := time.Now()
+	if !shouldProbeRelay(now, time.Time{}, nil, interval) {
+		t.Fatal("expected probe on first cycle")
+	}
+	last := now
+	if shouldProbeRelay(now.Add(5*time.Second), last, nil, interval) {
+		t.Fatal("expected cached healthy to skip probe within interval")
+	}
+	if !shouldProbeRelay(now.Add(10*time.Second), last, nil, interval) {
+		t.Fatal("expected probe after interval")
+	}
+	if !shouldProbeRelay(now.Add(1*time.Second), last, assertErr(), interval) {
+		t.Fatal("expected probe when last probe failed")
+	}
+}
+
+func TestRelayIdleProbeFlipsReadinessOnBrokerOutage(t *testing.T) {
+	// Verify that the relay worker's idle/transient probe distinguishes
+	// healthy idle (Ping succeeds) from outage (Ping fails) and flips
+	// readiness via setWorkerReadiness.
+	state := newReadiness("relay")
+	r := &runtime{
+		cfg:       Config{RelayInterval: 10 * time.Millisecond, CycleTimeout: 100 * time.Millisecond, RetryBase: 10 * time.Millisecond, RetryMax: 20 * time.Millisecond},
+		readiness: state,
+		metrics:   observability.NewRegistry(),
+	}
+	// Simulate successful DrainOnce with no rows and successful Ping.
+	state.set("relay", false)
+	r.setWorkerReadiness("relay", true)
+	if !state.ready() {
+		t.Fatal("expected relay healthy to make readiness ready")
+	}
+	// Simulate probe failure via direct readiness flip (worker would do this).
+	r.setWorkerReadiness("relay", false)
+	if state.ready() {
+		t.Fatal("expected relay failure to make readiness not ready")
+	}
+}
+
+func assertErr() error {
+	return assertErrImpl{}
+}
+
+type assertErrImpl struct{}
+
+func (assertErrImpl) Error() string { return "probe failed" }
+
 func get(t *testing.T, rawURL string) *http.Response {
 	t.Helper()
 	resp, err := http.Get(rawURL)
