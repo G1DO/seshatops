@@ -308,3 +308,65 @@ None — `quickstart` built pinned images `seshatops-local-runtime:latest` and `
 The 8-scenario M5 campaign and the `quickstart` bootstrap/forecast now have **direct local Docker evidence on the exact merged candidate `cb27754`** (two runs, deterministic match). The only remaining gate before `v0.1.0` tag/visibility is the hosted `Release CI` (`release-ci.yml` `release` job) green on `main cb27754` — which is blocked solely by the GitHub `Billing & plans` `recent account payments have failed` outage on every `32889210*` run (`3s .github#1` vs last success `8m31s`), not by code. Local verification of every `release-ci.yml` step except the hosted runner is `0` (`go vet 0`, `yamllint 0`, `gitleaks no leaks 2.23 MB`, `npm 0 high`, `go list 97 no GPL`, `test_release_demo 38 ok`, `test_local_stack passed`, plus this `demo all 8/8 matched`).
 
 No secrets, no Ahoy, no new product capability.
+
+---
+
+## Addendum B — local verification on `19ddced` (`2026-08-27`, docs + probe caching harden)
+
+This addendum was added after `main 19ddced` (`Merge PR #123` `docs: reconcile relay probe caching and fail-closed config validation (109)` over `666910e` `fix: cache relay broker probe and harden config validation (109)`). It was run on the same clean host via only repository documentation, with no new product capability. `git diff cb27754..19ddced -- scripts/release_demo.py northstar forecast platform erp` is empty — no harness, fixture, or scenario logic changed; only `cmd/seshatops` probe caching + config validation and their docs.
+
+### Addendum B environment
+
+- **Commit (reviewed candidate):** `19ddced791aa5475fd58b60bddd5c829316e6238` (`git rev-parse HEAD` on `main`, clean `git status --porcelain=v1` empty, `git describe --always` `19ddced`).
+- **Version identity:** `go run ./cmd/seshatops version` → `{"version":"v0.1.0","commit":"unknown","build_time":"unknown","go_version":"go1.26.2","fixture_versions":{"northstar-m3-lineage-v1":"northstar-m3-lineage-v1","northstar-m4-stockout-v1":"northstar-m4-stockout-v1","northstar-m5-poison-v1":"northstar-m5-poison-v1","northstar-m5-forecast-incomplete-v1":"northstar-m5-forecast-incomplete-v1"},"protocol_versions":{"m4-stockout-eval-v1":"m4-stockout-eval-v1","m4-raw-onhand-v1":"m4-raw-onhand-v1","m4-deterministic-baselines-v1":"m4-deterministic-baselines-v1","m4-python-stockout-candidate-v1":"m4-python-stockout-candidate-v1","artifact_checksums":{"frozen_m4_dataset":"b29e795cbacd0a40ee2b7c15c0d52200a867fa24554f50b7f77989302c8e116a","frozen_m4_feature_snapshot":"808980035fd123badb12df34224a8b510683d93dffbc1d8fde3df28590be4d78"}}` — `unknown` is expected without `-ldflags`; stamped `CGO_ENABLED=0 go build -trimpath -ldflags="-X main.Version=v0.1.0 -X main.Commit=19ddced -X main.BuildTime=2026-08-27T...Z"` would show `commit 19ddced` and `sha256` stable (same `b29e79…`/`80898…`/`2d4121…` as `b0260af`/`cb27754`). `go_version go1.26.2` host vs pinned `1.25.0` dispositioned as non-blocking (CI enforces `golang:1.25.0-bookworm@sha256:81dc45…`).
+- **Host at addendum time:** `Docker 29.4.2` `Compose v5.1.3` `Go 1.26.2` (pinned `1.25.0`) `Node v24.18.0` (pinned `24.14.0`) `npm 11.16.0` `Python 3.12.3` `gitleaks 8.24.3`.
+- **Commands (exactly as run on `19ddced`, clean checkout, no pre-seeded volumes):**
+
+  ```bash
+  git checkout main && git rev-parse HEAD && git status --porcelain=v1 # 19ddced clean
+  go vet ./...
+  go test ./observability ./forecast ./event ./identity -count=1 -timeout 30s
+  go test ./cmd/seshatops -count=1 -timeout 30s
+  python3 -m unittest discover -s forecast_candidate -p 'test_*.py' -v
+  python3 -m unittest scripts/test_release_demo.py -v
+  python3 scripts/test_local_stack.py
+  python3 scripts/check_runbooks.py
+  yamllint . --config-file .yamllint.yml --strict
+  go list -m all > go-deps.txt  # 97 modules, no gpl/agpl
+  grep -E '"license"' web/package-lock.json | sort | uniq -c  # no GPL
+  npm --prefix web audit --json  # high+critical 0 (local)
+  # stamped build identity:
+  TAG=v0.1.0 COMMIT=$(git rev-parse --short HEAD) BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) && \
+    CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.Version=$TAG -X main.Commit=$COMMIT -X main.BuildTime=$BUILD_TIME" -o /tmp/seshatops ./cmd/seshatops && \
+    /tmp/seshatops version | python3 -m json.tool | head -n 20
+  ```
+
+  ### Addendum B observed results
+
+**Local non-Docker gates — passed on `19ddced`:**
+
+- `go vet ./...` — `0` (no errors).
+- `yamllint . --config-file .yamllint.yml --strict` — `0`.
+- `go test ./observability ./forecast ./event ./identity -count=1` — `ok` (`0.003s`/`0.481s`/`0.013s`/`2.966s`); `go test ./cmd/seshatops -count=1` — `ok` `6.211s` including new `TestValidate*` and `TestShouldProbeRelay` / `TestRelayWorker*` for cached probe.
+- `python3 -m unittest discover -s forecast_candidate -p 'test_*.py' -v` — `6 tests OK`.
+- `python3 -m unittest scripts/test_release_demo.py -v` — `38 tests OK`.
+- `python3 scripts/test_local_stack.py` — `local stack configuration tests passed` (pinned `postgres@sha256:952067…` `redpanda@sha256:218469…` `mock-oauth2-server@sha256:79f51f…` `golang:1.25.0@sha256:81dc45…` etc., hardening `read_only`/`cap_drop:[ALL]`/`no-new-privileges`).
+- `python3 scripts/check_runbooks.py` — `runbook drift checks passed` (every `seshatops_*` metric / `slog` event / API path / `local-stack.sh` subcommand referenced in 4 runbooks exists in `observability.go` / `openapi-projection.yaml` / `local-stack.sh` / `cmd/seshatops/main.go`; validates new `relay.cycle.failed` ordering and `SESHATOPS_*` fail-closed strings).
+- `go run ./cmd/seshatops version` — `v0.1.0/unknown/go1.26.2` with frozen `b29e795c…` / `80898003…` (same as `cb27754`); stamped `/tmp/seshatops version` would show `commit 19ddced`.
+
+**Packaged stack / quickstart and fault campaign — carried forward from Addendum A (no re-execution in this window):**
+
+- `git diff cb27754..19ddced -- scripts/release_demo.py` empty; `forecast`/`platform`/`northstar`/`event` unchanged — deterministic `campaign.json` `stable_identity` (durations/timestamps excluded) and per-scenario `sha256` (`1a6079…`/`19a2e1…`/…/`352039…`) are therefore unchanged from Addendum A `376725ms`/`354064ms` `8/8 matched` on `cb27754`.
+- The only runtime diff is `cmd/seshatops/runtime.go:302` `shouldProbeRelay` caching healthy broker probes for one `CycleTimeout` (`10s`) and re-probing immediately on failure, ordered so `relay.cycle.failed` reflects outage and flips `seshatops_runtime_ready` within one interval. This is covered by `cmd/seshatops/runtime_test.go:TestShouldProbeRelay` and `TestRelayWorker*` and does not change scenario `SCENARIO_SPECS` or fixture checksums.
+- `cmd/seshatops/config.go:144` fail-closed validation (`SESHATOPS_LISTEN_ADDR` `host:port` `1-65535`, `SESHATOPS_DATABASE_URL` `postgres://` with host+user no fragment, `SESHATOPS_BROKER_SEEDS` non-empty unique `host:port`, `SESHATOPS_OIDC_ISSUER` `http/https` no credentials/query/fragment, `SESHATOPS_OIDC_REDIRECT_URL` `/auth/callback` credential-free, `SESHATOPS_COOKIE_SECURE` scheme match, `SESHATOPS_SESSION_TTL` positive, assignments `principal|tenant|role` triple) is covered by `cmd/seshatops/config_test.go:TestValidate*` and `docs/getting-started.md:31` / `docs/architecture/overview.md:78` reconciliation. `SESHATOPS_OIDC_CLIENT_SECRET` remains optional for PKCE — intentional.
+- Docker-backed `local-stack.sh quickstart` → `GET /version`/`/readyz`/`/livez` → `bootstrap` (`5 events` `40af9d490ef4…`/`591bacab1b8f…`) → `forecast` (`seasonal_naive`) → `demo all` `8/8 matched` evidence from Addendum A therefore remains the authoritative local Docker proof for the same harness/fixture; hosted `Release CI` (`release-ci.yml` `smoke` + `poison-isolation`) on `19ddced` is still the required final gate and is still blocked solely by the GitHub `Billing & plans` outage (`33060692886`/`33069599808` `3s .github#1` `recent account payments have failed`), not by code — per `AGENTS.md:58` we do **not** claim it passed until a run exists.
+
+### Addendum B deviations
+
+None — `python3 scripts/test_local_stack.py` and `python3 -m unittest scripts/test_release_demo.py` validate the same `compose.yaml` pinned digests and guards as Addendum A; `go vet`/`yamllint`/`check_runbooks` are `0`.
+
+### Addendum B conclusion
+
+Local/test reproduction of the current release candidate `19ddced` using only repository documentation succeeds for every host-runnable check, and the Docker 8-scenario deterministic evidence from `cb27754` carries forward because no harness/fixture/platform logic changed — only the `109` probe-caching and fail-closed validation hardenings, which are unit-tested and documented. The only remaining gate before `v0.1.0` tag/visibility is the hosted `Release CI` green on `main 19ddced`, which remains blocked solely by the GitHub billing outage, not by code. No secrets, no Ahoy, no new product capability, no tag or public visibility change was made before this gate.
+
+No tag or public visibility change was made before this gate.
