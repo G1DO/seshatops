@@ -78,14 +78,31 @@ flowchart TB
   API --> PG
 ```
 
-`cmd/seshatops` validates the database URL, broker seeds, OIDC endpoints,
-cookie transport, and listen address before opening clients. It exposes
-`GET /livez`, `GET /readyz`, and public `GET /version` (`version/commit/build_time/go_version/fixture/protocol/checksum`, also `seshatops version` and `seshatops_build_info{version,commit}` in `/metrics`); readiness stays unavailable until migrations,
-broker probes, and both worker loops are healthy. The process handles
-`SIGINT`/`SIGTERM` by stopping HTTP acceptance, cancelling the relay and
-consumer loops, closing their broker clients, clearing the post-commit
-projection notifier, and closing PostgreSQL. Worker failures use bounded
-process retry backoff in addition to the existing outbox and broker semantics.
+`cmd/seshatops` fail-closes on `SESHATOPS_*` before opening clients:
+`SESHATOPS_LISTEN_ADDR` must be `host:port` with port `1-65535`;
+`SESHATOPS_DATABASE_URL` must be `postgres://`/`postgresql://` with host and user and no fragment;
+`SESHATOPS_BROKER_SEEDS` must be comma-separated `host:port` with no empty or duplicate entries;
+`SESHATOPS_OIDC_ISSUER` must be `http`/`https` with no credentials/query/fragment;
+`SESHATOPS_OIDC_REDIRECT_URL` must be absolute `http`/`https` with path `/auth/callback` and no credentials/query/fragment;
+`SESHATOPS_COOKIE_SECURE` must match the redirect scheme;
+`SESHATOPS_SESSION_TTL` must be a positive duration;
+`SESHATOPS_AUTH_ASSIGNMENTS` must be `principal|tenant|role` rows with three non-empty trimmed fields
+and no extra separators; and worker intervals (`RelayInterval` `500ms`, `PollTimeout` `1s`,
+`CycleTimeout` `10s`, `Shutdown` `10s`) must be positive with `RetryMax >= RetryBase`.
+`SESHATOPS_OIDC_CLIENT_SECRET` remains optional to support PKCE public clients — confidential clients
+fail later on token exchange, which is intentional.
+It exposes `GET /livez`, `GET /readyz`, and public `GET /version`
+(`version/commit/build_time/go_version/fixture/protocol/checksum`, also `seshatops version`
+and `seshatops_build_info{version,commit}` in `/metrics`);
+`database`/`migrations`/`broker` readiness reflect startup `Ping` + `Migrate` success, while runtime
+DB or broker outages after startup surface within one interval via the relay and consumer worker loops
+that flip readiness. The relay worker probes the broker only when idle (`claimed == 0`) or on transient
+publish failures and caches healthy successes for one `CycleTimeout` (default `10s`) to bound load while
+re-probing immediately on failure; logging is ordered after the probe so `relay.cycle.failed` reflects
+the outage and flips `seshatops_runtime_ready` correctly.
+The process handles `SIGINT`/`SIGTERM` by stopping HTTP acceptance, cancelling the relay and consumer
+loops, closing their broker clients, clearing the post-commit projection notifier, and closing PostgreSQL.
+Worker failures use bounded process retry backoff in addition to the existing outbox and broker semantics.
 It also emits JSON structured logs and an authenticated aggregate `/metrics`
 release surface; the surface is process-local where documented, excludes
 tenant and business labels, and never makes optional forecast/Python
@@ -101,6 +118,8 @@ audience, session TTL, and optional process-local assignments are configured by
 `SESHATOPS_SESSION_TTL`, and `SESHATOPS_AUTH_ASSIGNMENTS` respectively.
 Assignments use comma-separated `principal|tenant|role` rows; an omitted
 assignment list leaves the policy default-deny.
+
+The OIDC client secret is intentionally optional: PKCE public clients omit it and confidential clients fail later on token exchange. Assignments are fail-closed — blank, extra-field, or empty-field rows are rejected before startup.
 
 The Compose-only `SESHATOPS_LOCAL_STACK=true` opt-in permits the forecast
 subcommand to use the exact internal `postgres` service name. It does not

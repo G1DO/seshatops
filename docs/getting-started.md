@@ -27,10 +27,8 @@ All `SESHATOPS_*` names are the contract. Required for `cmd/seshatops`:
 - `SESHATOPS_LISTEN_ADDR`, `SESHATOPS_DATABASE_URL`, `SESHATOPS_BROKER_SEEDS`,
   `SESHATOPS_OIDC_ISSUER`, `SESHATOPS_OIDC_CLIENT_ID`,
   `SESHATOPS_OIDC_REDIRECT_URL`, `SESHATOPS_COOKIE_NAME`, `SESHATOPS_COOKIE_SECURE`.
-- Optional: `SESHATOPS_OIDC_CLIENT_SECRET`, `SESHATOPS_OIDC_AUDIENCE`,
-  `SESHATOPS_SESSION_TTL`, `SESHATOPS_AUTH_ASSIGNMENTS` (comma-separated
-  `principal|tenant|role` rows). Compose sets the deterministic local
-  assignments for `northstar-demo-operator` (see [Individual commands](#bootstrap) below).
+- Optional: `SESHATOPS_OIDC_CLIENT_SECRET` (optional to support PKCE public clients; confidential clients fail later on token exchange, which is intentional), `SESHATOPS_OIDC_AUDIENCE`, `SESHATOPS_SESSION_TTL`, `SESHATOPS_AUTH_ASSIGNMENTS` (comma-separated `principal|tenant|role` rows). Compose sets the deterministic local assignments for `northstar-demo-operator` (see [Individual commands](#bootstrap) below).
+- Fail-closed validation (see [architecture/overview.md](architecture/overview.md)): `SESHATOPS_LISTEN_ADDR` must be `host:port` `1-65535`; `SESHATOPS_DATABASE_URL` must be `postgres://`/`postgresql://` with host+user and no fragment; `SESHATOPS_BROKER_SEEDS` must be non-empty comma-separated `host:port` with no empty or duplicate entries; `SESHATOPS_OIDC_ISSUER` must be `http`/`https` with no credentials/query/fragment; `SESHATOPS_OIDC_REDIRECT_URL` must be absolute `http`/`https` with path `/auth/callback` and no credentials/query/fragment; `SESHATOPS_COOKIE_SECURE` must match the redirect scheme; `SESHATOPS_SESSION_TTL` must be a positive duration; assignments must be exactly three non-empty `|`-separated fields; and worker intervals must be positive with `RetryMax >= RetryBase`. Invalid values are rejected before any listener or dependency client is opened.
 - Local-only guard: `SESHATOPS_LOCAL_STACK=true` (Compose only) permits the
   `postgres` service name inside the forecast command; it does not relax the
   localhost guard on `reset-northstar`.

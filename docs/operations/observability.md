@@ -71,7 +71,7 @@ They are not durable metrics.
 | --- | --- | --- |
 | `seshatops_consumer_observed_lag_records` | records | Sum of `high_watermark - first_returned_offset` for partitions that returned records in the most recent poll. It is an observed fetched-batch snapshot, not continuous consumer-group lag. |
 | `seshatops_consumer_observed_lag_known` | one/zero | One only when the latest poll returned at least one partition with records and a high watermark. |
-| `seshatops_runtime_ready` | one/zero | One when database, migrations, broker, relay, and consumer readiness are all healthy. It intentionally excludes forecast/Python availability. |
+| `seshatops_runtime_ready` | one/zero | One when database, migrations, broker, relay, and consumer readiness are all healthy. `database`/`migrations`/`broker` reflect startup `Ping` + `Migrate` success; runtime broker or DB outages after startup surface within one interval via relay/consumer worker failures (relay probes the broker only when idle `claimed == 0` or `transient > 0`, caching healthy successes for one `CycleTimeout` default `10s` and re-probing immediately on failure, ordered so `relay.cycle.failed` flips readiness). It intentionally excludes forecast/Python availability. |
 | `seshatops_build_info` | one | `seshatops_build_info{version="v0.1.0",commit="<short SHA>"} 1` — immutable build identity for this process (also `GET /version` and `seshatops version`). Bounded fixed labels only; `0` with `unknown` when not stamped. |
 
 No metric label is derived from an event ID, correlation ID, tenant, user,
@@ -85,7 +85,7 @@ The executable configures `slog` JSON logs on stderr. Stable event names are
 `http.request.completed`, `authorization.denied`, `relay.cycle.completed`,
 `relay.cycle.failed`, `consumer.cycle.completed`, `consumer.cycle.failed`,
 `ops.control.completed`, `forecast.command.completed`,
-`forecast.command.failed`, and `worker.retrying`.
+`forecast.command.failed`, and `worker.retrying`. `relay.cycle.failed` is logged after the idle/transient broker probe so the event reflects the outage and readiness flip.
 
 HTTP receives a generated UUIDv4-style `X-Correlation-ID`; caller-provided
 correlation headers are ignored. The ID is propagated through the HTTP
